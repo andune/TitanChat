@@ -1,0 +1,3 @@
+== TitanChat
+
+A chat manager for Bukkit.
