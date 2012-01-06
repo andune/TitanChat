@@ -1,0 +1,16 @@
+channels:
+    Default:
+        channel-prefix: '[D]'
+        channel-colour: WHITE
+        free-to-join: true
+        allow-colours: false
+    Example:
+        channel-prefix: '[E]'
+        channel-colour: GREEN
+        free-to-join: true
+        allow-colours: false
+    Staff:
+        channel-prefix: '[S]'
+        channel-colour: RED
+        free-to-join: false
+        allow-colours: true
