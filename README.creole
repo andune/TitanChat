@@ -31,12 +31,13 @@ TitanChat, a chat management plugin for Bukkit.
 === Changelog
 
 * 06.01.12 - Project Start
+* 07.01.12 - Wild NPEs appeared
 
 -----------------------------------------------------------------------------------------------------------------------
 
 === Todo
 
-* Finish coding basics of plugin
+* Fix everything that isn't fixed
 
 -----------------------------------------------------------------------------------------------------------------------
 

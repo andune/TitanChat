@@ -1,0 +1,13 @@
+channels:
+    TitanKingdoms:
+        admins:
+        - gwinans
+        - Sgeour
+        members:
+        - NodinChan
+        - MrBiscuity
+    BehemothIndustries:
+        admins:
+        - Xelephant
+        black-list:
+        - Mixxit

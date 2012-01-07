@@ -1,0 +1,14 @@
+name: TitanChat
+version: 0.1
+author: NodinChan
+main: com.titankingdoms.nodinchan.titanchat.TitanChat
+commands:
+    titanchat:
+        description: TitanChat Commands
+        usage: /<command> [action] [argument]
+permissions:
+    TitanChat.admin:
+        description: Access to everything
+        default: op
+        children:
+            TitanChat.create: true

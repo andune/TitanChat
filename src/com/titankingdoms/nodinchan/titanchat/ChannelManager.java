@@ -1,9 +1,6 @@
 package com.titankingdoms.nodinchan.titanchat;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import org.bukkit.entity.Player;
 
 public class ChannelManager {
 	
@@ -13,45 +10,86 @@ public class ChannelManager {
 		this.plugin = plugin;
 	}
 	
-	public void assignAdmins(List<Player> players, String channelName) {
-		for (Player player : players) {
-			String name = player.getName();
-			List<String> admins = plugin.getChannelConfig().getStringList("channels." + channelName + ".admins");
-			admins.add(name);
-			plugin.getChannelConfig().set("channels." + channelName + ".admins", admins);
+	// Adds an Admin to the list of Admins in channels.yml
+	
+	public void assignAdmin(String name, String channelName) {
+		List<String> admins = plugin.getChannelConfig().getStringList("channels." + channelName + ".admins");
+		admins.add(name);
+		plugin.getChannelConfig().set("channels." + channelName + ".admins", admins);
+	}
+	
+	// Removes the player from the list of members or adds them to the blacklist
+	
+	public void ban(String name, String channelName) {
+		if (plugin.isPublic(channelName)) {
+			List<String> blacklist = plugin.getChannelConfig().getStringList("channels." + channelName + ".black-list");
+			blacklist.add(name);
+			plugin.getChannelConfig().set("channels." + channelName + ".black-list", blacklist);
+			
+		} else {
+			List<String> members = plugin.getChannelConfig().getStringList("channels." + channelName + ".members");
+			members.remove(name);
+			plugin.getChannelConfig().set("channels." + channelName + ".members", members);
 		}
 	}
 	
-	public void banMember(Player player, String channelName) {
-		String name = player.getName();
+	// Creates a default channel config to be modified
+	
+	public void createChannel(String name, String channelName) {
+		assignAdmin(name, channelName);
+		setAllowColours(channelName, false);
+		setColour(channelName, "WHITE");
+		setPrefix(channelName, "");
+		setPublic(channelName, true);
+	}
+	
+	// Demotes a player by changing the config
+	
+	public void demote(String name, String channelName) {
+		List<String> admins = plugin.getChannelConfig().getStringList("channels." + channelName + ".admins");
+		admins.remove(name);
+		plugin.getChannelConfig().set("channels." + channelName + ".admins", admins);
+		whitelistMember(name, channelName);
+	}
+	
+	// Promotes a player by changing the config
+	
+	public void promote(String name, String channelName) {
 		List<String> members = plugin.getChannelConfig().getStringList("channels." + channelName + ".members");
 		members.remove(name);
 		plugin.getChannelConfig().set("channels." + channelName + ".members", members);
+		assignAdmin(name, channelName);
 	}
 	
-	public void createChannel(Player player, String channelName) {
-		List<Player> admins = new ArrayList<Player>();
-		admins.add(player);
-		plugin.getChannelConfig().set("channels." + channelName + ".admins", admins);
-		plugin.getConfig().set("channels." + channelName + ".channel-prefix", "");
-		plugin.getConfig().set("channels." + channelName + ".channel-colour", "WHITE");
-		plugin.getConfig().set("channels." + channelName + ".allow-colours", false);
+	// Sets whether colour codes are allowed on the channel
+	
+	public void setAllowColours(String channelName, boolean allow) {
+		plugin.getConfig().set("channels." + channelName + ".allow-colours", allow);
 	}
+	
+	// Sets the default chat colour of the channel
 	
 	public void setColour(String channelName, String colour) {
 		plugin.getConfig().set("channels." + channelName + ".channel-colour", colour);
 	}
 	
+	// Sets the prefix of the channel
+	
 	public void setPrefix(String channelName, String prefix) {
 		plugin.getConfig().set("channels." + channelName + ".channel-prefix", prefix);
 	}
 	
-	public void whitelistMembers(List<Player> players, String channelName) {
-		for (Player player : players) {
-			String name = player.getName();
-			List<String> members = plugin.getChannelConfig().getStringList("channels." + channelName + ".members");
-			members.add(name);
-			plugin.getChannelConfig().set("channels." + channelName + ".members", members);
-		}
+	// Sets whether players need to be whitelisted to join the channel
+	
+	public void setPublic(String channelName, boolean whitelist) {
+		plugin.getConfig().set("channels." + channelName + ".public", whitelist);
+	}
+	
+	// Adds a Member to the list of Members in channels.yml
+	
+	public void whitelistMember(String name, String channelName) {
+		List<String> members = plugin.getChannelConfig().getStringList("channels." + channelName + ".members");
+		members.add(name);
+		plugin.getChannelConfig().set("channels." + channelName + ".members", members);
 	}
 }

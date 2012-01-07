@@ -1,0 +1,24 @@
+channels:
+    Default:
+        channel-prefix: '[D]'
+        channel-colour: WHITE
+        default: true
+        allow-colours: false
+    TitanKingdoms:
+        channel-prefix: '[TK]'
+        channel-colour: GOLD
+        public: false
+        allow-colours: true
+    BehemothIndustries:
+        channel-prefix: '[BI]'
+        channel-colour: 
+    Donators:
+        channel-prefix: '[D]'
+        channel-colour: GREEN
+        public: false
+        allow-colours: true
+    Staff:
+        channel-prefix: '[S]'
+        channel-colour: RED
+        staff: true
+        allow-colours: true

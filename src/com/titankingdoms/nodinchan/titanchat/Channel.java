@@ -1,7 +1,6 @@
 package com.titankingdoms.nodinchan.titanchat;
 
-import java.util.List;
-
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 public class Channel {
@@ -12,13 +11,19 @@ public class Channel {
 		this.plugin = plugin;
 	}
 	
-	public boolean allowColours(String channelName) {
-		return plugin.getConfig().getBoolean("channels." + channelName + ".allow-colours");
+	// Checks if colour codes are allowed on the channel
+	
+	public boolean allowColours(Player player) {
+		return plugin.getConfig().getBoolean("channels." + plugin.getChannel(player) + ".allow-colours");
 	}
+	
+	// Colourizes the message
 	
 	public String colourize(String message) {
 		return message.replaceAll("(&([a-f0-9A-F]))", "\u00A7$2");
 	}
+	
+	// Decolourizes the message
 	
 	public String decolourize(String message) {
 		String decolourized = "";
@@ -41,26 +46,30 @@ public class Channel {
 		return decolourized;
 	}
 	
-	public String format(Player player, String channeltag, String msg, boolean colourize) {
+	// Formats the message
+	
+	public String format(Player player, ChatColor colour, String channeltag, String msg, boolean colourize) {
 		String message = "";
 		
 		if (colourize) {
-			message = channeltag + " " + player.getDisplayName() + ": " + colourize(msg);
+			message = colour + channeltag + " " + player.getDisplayName() + ": " + colourize(msg);
 			
 		} else {
-			message = channeltag + " " + player.getDisplayName() + ": " + decolourize(msg);
+			message = colour + channeltag + " " + player.getDisplayName() + ": " + decolourize(msg);
 		}
 		
 		return message;
 	}
 	
-	public String getChannelTag(Player player) {
-		return plugin.getConfig().getString("channels." + plugin.getChannel(player) + ".channel-prefix");
+	// Gets the default colour of the chat
+	
+	public ChatColor getChannelColour(Player player) {
+		return ChatColor.valueOf(plugin.getConfig().getString("channels." + plugin.getChannel(player) + ".channel-colour"));
 	}
 	
-	public void relayMessage(String message, List<Player> participants) {
-		for (Player player : participants) {
-			player.sendMessage(format(player, message, getChannelTag(player), allowColours(plugin.getChannel(player))));
-		}
+	// Gets the channel tag of the chat
+	
+	public String getChannelTag(Player player) {
+		return plugin.getConfig().getString("channels." + plugin.getChannel(player) + ".channel-prefix");
 	}
 }
