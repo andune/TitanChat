@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import org.bukkit.ChatColor;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -17,6 +19,8 @@ import org.bukkit.event.Event.Priority;
 import org.bukkit.event.Event.Type;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import com.titankingdoms.nodinchan.titanchat.TitanChatCommands.Commands;
 
 public class TitanChat extends JavaPlugin {
 	
@@ -327,6 +331,56 @@ public class TitanChat extends JavaPlugin {
 	}
 	
 	@Override
+	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+		Player player = (Player) sender;
+		
+		// TitanChat Commands
+		
+		if (label.equalsIgnoreCase("titanchat") || label.equalsIgnoreCase("tc")) {
+			if (args.length == 1) {
+				
+				// /titanchat list
+				// Lists out the channels you have access to
+				
+				if (args[0].equalsIgnoreCase("list")) {
+					List<String> channels = new ArrayList<String>();
+					
+					for (String channelName : getConfig().getConfigurationSection("channels").getKeys(false)) {
+						if (player.hasPermission("TitanChat.admin")) {
+							channels.add(channelName);
+							
+						} else {
+							if (isAdmin(player, channelName) || isMember(player, channelName)) {
+								channels.add(channelName);
+							}
+						}
+					}
+					
+					sendInfo(player, "Channel List: " + createList(channels));
+					return true;
+					
+				} else {
+					sendWarning(player, "Invalid Command");
+				}
+				
+			} else if (args.length == 2) {
+				for (Commands command : Commands.values()) {
+					if (command.toString().equalsIgnoreCase(args[0])) {
+						new TitanChatCommands(this).onCommand(player, args[0], args[1]);
+						return true;
+					}
+				}
+				
+				sendWarning(player, "Invalid Command");
+			}
+			
+			sendWarning(player, "Invalid Argument Length");
+		}
+		
+		return false;
+	}
+	
+	@Override
 	public void onDisable() {
 		infoLog("is now disabled");
 	}
@@ -356,8 +410,6 @@ public class TitanChat extends JavaPlugin {
 		pm.registerEvent(Type.PLAYER_CHAT, new TitanChatPlayerListener(this), Priority.Highest, this);
 		pm.registerEvent(Type.PLAYER_JOIN, new TitanChatPlayerListener(this), Priority.Highest, this);
 		pm.registerEvent(Type.PLAYER_QUIT, new TitanChatPlayerListener(this), Priority.Highest, this);
-		
-		getCommand("titanchat").setExecutor(new TitanChatCommands(this));
 		
 		infoLog("is now enabled");
 	}
