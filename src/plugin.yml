@@ -1,5 +1,5 @@
 name: TitanChat
-version: 0.1
+version: 1.0
 author: NodinChan
 main: com.titankingdoms.nodinchan.titanchat.TitanChat
 commands:

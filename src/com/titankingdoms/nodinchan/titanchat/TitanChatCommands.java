@@ -133,8 +133,13 @@ public class TitanChatCommands {
 			
 		case DELETE:
 			if (player.hasPermission("TitanChat.admin")) {
-				plugin.deleteChannel(player, arg);
-				chManager.deleteChannel(arg);
+				if (plugin.channelExist(arg)) {
+					plugin.deleteChannel(player, arg);
+					chManager.deleteChannel(arg);
+					
+				} else {
+					plugin.sendWarning(player, "Channel does not exists");
+				}
 				
 			} else {
 				plugin.sendWarning(player, "You do not have permission to delete channels");
