@@ -16,6 +16,7 @@ public class ChannelManager {
 		List<String> admins = plugin.getChannelConfig().getStringList("channels." + channelName + ".admins");
 		admins.add(name);
 		plugin.getChannelConfig().set("channels." + channelName + ".admins", admins);
+		plugin.saveChannelConfig();
 	}
 	
 	// Removes the player from the list of members or adds them to the blacklist
@@ -31,6 +32,7 @@ public class ChannelManager {
 			members.remove(name);
 			plugin.getChannelConfig().set("channels." + channelName + ".members", members);
 		}
+		plugin.saveChannelConfig();
 	}
 	
 	// Creates a default channel config to be modified
@@ -41,6 +43,7 @@ public class ChannelManager {
 		setColour(channelName, "WHITE");
 		setPrefix(channelName, "");
 		setPublic(channelName, true);
+		plugin.saveConfig();
 	}
 	
 	// Demotes a player by changing the config
@@ -50,6 +53,7 @@ public class ChannelManager {
 		admins.remove(name);
 		plugin.getChannelConfig().set("channels." + channelName + ".admins", admins);
 		whitelistMember(name, channelName);
+		plugin.saveChannelConfig();
 	}
 	
 	// Promotes a player by changing the config
@@ -59,30 +63,35 @@ public class ChannelManager {
 		members.remove(name);
 		plugin.getChannelConfig().set("channels." + channelName + ".members", members);
 		assignAdmin(name, channelName);
+		plugin.saveChannelConfig();
 	}
 	
 	// Sets whether colour codes are allowed on the channel
 	
 	public void setAllowColours(String channelName, boolean allow) {
 		plugin.getConfig().set("channels." + channelName + ".allow-colours", allow);
+		plugin.saveConfig();
 	}
 	
 	// Sets the default chat colour of the channel
 	
 	public void setColour(String channelName, String colour) {
 		plugin.getConfig().set("channels." + channelName + ".channel-colour", colour);
+		plugin.saveConfig();
 	}
 	
 	// Sets the prefix of the channel
 	
 	public void setPrefix(String channelName, String prefix) {
 		plugin.getConfig().set("channels." + channelName + ".channel-prefix", prefix);
+		plugin.saveConfig();
 	}
 	
 	// Sets whether players need to be whitelisted to join the channel
 	
 	public void setPublic(String channelName, boolean whitelist) {
 		plugin.getConfig().set("channels." + channelName + ".public", whitelist);
+		plugin.saveConfig();
 	}
 	
 	// Adds a Member to the list of Members in channels.yml
@@ -91,5 +100,6 @@ public class ChannelManager {
 		List<String> members = plugin.getChannelConfig().getStringList("channels." + channelName + ".members");
 		members.add(name);
 		plugin.getChannelConfig().set("channels." + channelName + ".members", members);
+		plugin.saveChannelConfig();
 	}
 }

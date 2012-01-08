@@ -25,11 +25,11 @@ public class TitanChatPlayerListener extends PlayerListener {
 		
 		String msg = event.getMessage();
 		
-		event.setMessage(null);
-		
 		for (Player receiver : plugin.getParticipants(plugin.getChannel(player))) {
 			receiver.sendMessage(ch.format(player, ch.getChannelColour(player), ch.getChannelTag(player), msg, ch.allowColours(player)));
 		}
+		
+		event.setCancelled(true);
 	}
 	
 	@Override
@@ -40,15 +40,14 @@ public class TitanChatPlayerListener extends PlayerListener {
 			for (String channel : plugin.getConfig().getConfigurationSection("channels").getKeys(false)) {
 				if (plugin.getConfig().get("channels." + channel + ".staff") != null) {
 					channelName = channel;
+					
+				} else {
+					channelName = plugin.getDefaultChannel();
 				}
 			}
 			
 		} else {
-			for (String channel : plugin.getConfig().getConfigurationSection("channels").getKeys(false)) {
-				if (plugin.getConfig().get("channels." + channel + ".default") != null) {
-					channelName = channel;
-				}
-			}
+			channelName = plugin.getDefaultChannel();
 		}
 		
 		plugin.enterChannel(event.getPlayer(), channelName);

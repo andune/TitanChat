@@ -22,16 +22,11 @@ public class TitanChatCommands implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		Player player = (Player) sender;
-		String channel = plugin.getChannel(player);
 		
 		// TitanChat Commands
 		
 		if (label.equalsIgnoreCase("titanchat") || label.equalsIgnoreCase("tc")) {
 			if (args.length == 1) {
-				
-				// /titanchat list
-				// Lists all channels you have access to
-				
 				if (args[0].equalsIgnoreCase("list")) {
 					List<String> channels = new ArrayList<String>();
 					
@@ -48,243 +43,224 @@ public class TitanChatCommands implements CommandExecutor {
 					
 					plugin.sendInfo(player, "Channel List: " + plugin.createList(channels));
 					return true;
+					
+				} else {
+					plugin.sendWarning(player, "Invalid Command");
 				}
 				
 			} else if (args.length == 2) {
-				
-				// /titanchat accept [channel]
-				// Accepts invitation to join the chat
-				
-				if (args[0].equalsIgnoreCase("accept")) {
-					if (plugin.isInvited(player, args[1])) {
-						plugin.accept(player, args[1]);
-						return true;
-						
-					} else {
-						plugin.sendWarning(player, "You did not receive any invitations from this channel");
+				for (Commands command : Commands.values()) {
+					if (command.toString().equalsIgnoreCase(args[0])) {
+						onCommand(player, args[0], args[1]);
 						return true;
 					}
 				}
 				
-				// /titanchat allowcolours [true/false]
-				// Sets whether the channel
+				plugin.sendWarning(player, "Invalid Command");
 				
-				if (args[0].equalsIgnoreCase("allowcolors") || args[0].equalsIgnoreCase("allowcolours")) {
-					if (player.hasPermission("TitanChat.admin")) {
-						if (args[1].equalsIgnoreCase("true")) {
-							chManager.setAllowColours(plugin.getChannel(player), true);
-							return true;
-							
-						} else if (args[1].equalsIgnoreCase("false")) {
-							chManager.setAllowColours(plugin.getChannel(player), false);
-							return true;
-							
-						} else {
-							plugin.sendWarning(player, "True or False?");
-							return true;
-						}
-						
-					} else {
-						plugin.sendWarning(player, "You do not have permission to change the state of this channel");
-						return true;
-					}
-				}
+			}
+			
+			plugin.sendWarning(player, "Invalid Argument Length");
+			
+		}
+		return false;
+	}
+	
+	public void onCommand(Player player, String action, String arg) {
+		String channel = plugin.getChannel(player);
+		
+		switch (Commands.valueOf(action.toUpperCase())) {
+		
+		case ACCEPT:
+			if (plugin.isInvited(player, arg)) {
+				plugin.accept(player, arg);
 				
-				// /titanchat ban [player]
-				// Bans the player from the channel
-				
-				if (args[0].equalsIgnoreCase("ban")) {
-					if (plugin.isAdmin(player)) {
-						plugin.ban(plugin.getServer().getPlayer(args[1]), plugin.getChannel(player));
-						chManager.ban(args[1], plugin.getChannel(player));
-						return true;
-						
-					} else {
-						plugin.sendWarning(player, "You do not have permission to ban on this channel");
-						return true;
-					}
-				}
-				
-				// /titanchat colour [colour]
-				// Sets the chat colour of the channel
-				
-				if (args[0].equalsIgnoreCase("colour") || args[0].equalsIgnoreCase("color")) {
-					if (plugin.isAdmin(player)) {
-						if (ChatColor.valueOf(args[1]) != null) {
-							chManager.setColour(plugin.getChannel(player), args[1].toUpperCase());
-							return true;
-							
-						} else {
-							plugin.sendWarning(player, "Invalid Colour");
-							return true;
-						}
-						
-					} else {
-						plugin.sendWarning(player, "You do not have permission to change the channel colour");
-						return true;
-					}
-				}
-				
-				// /titanchat create [channel]
-				// Creates a new channel
-				
-				if (args[0].equalsIgnoreCase("create")) {
-					if (!player.hasPermission("TitanChat.create")) {
-						plugin.sendWarning(player, "You do not have permission to create channels");
-						return true;
+			} else {
+				plugin.sendWarning(player, "You did not receive any invitations from this channel");
+			}
+			break;
+			
+		case ADD:
+			if (plugin.isAdmin(player)) {
+				if (arg.contains(",")) {
+					for (String newMember : arg.split(",")) {
+						plugin.whitelistMember(plugin.getPlayer(newMember.replace(" ", "")), channel);
+						chManager.whitelistMember(newMember.replace(" ", ""), channel);
 					}
 					
-					if (plugin.channelExist(args[1])) {
-						plugin.sendWarning(player, "Channel already exists");
-						return true;
-					}
+				} else {
+					plugin.whitelistMember(plugin.getPlayer(arg), channel);
+					chManager.whitelistMember(arg, channel);
+				}
+			}
+			break;
+			
+		case ALLOWCOLORS:
+		case ALLOWCOLOURS:
+			if (player.hasPermission("TitanChat.admin")) {
+				if (arg.equalsIgnoreCase("true")) {
+					chManager.setAllowColours(channel, true);
 					
-					plugin.createChannel(player, args[1]);
-					chManager.createChannel(player.getName(), args[1]);
-					return true;
-				}
-				
-				// /titanchat decline [channel]
-				// Declines invitation to join the chat
-				
-				if (args[0].equalsIgnoreCase("decline")) {
-					if (plugin.isInvited(player, args[1])) {
-						plugin.decline(player, args[1]);
-						return true;
-						
-					} else {
-						plugin.sendWarning(player, "You did not receive any invitations from this channel");
-						return true;
-					}
-				}
-				
-				// /titanchat demote [player]
-				// Demotes the player on the channel
-				
-				if (args[0].equalsIgnoreCase("demote")) {
-					if (plugin.isAdmin(player)) {
-						plugin.demote(plugin.getPlayer(args[1]), plugin.getChannel(player));
-						chManager.demote(args[1], plugin.getChannel(player));
-						return true;
-						
-					} else {
-						plugin.sendWarning(player, "You do not have permission to demote players on this channel");
-						return true;
-					}
-				}
-				
-				// /titanchat invite [player]
-				// Invites the player to chat on the channel
-				
-				if (args[0].equalsIgnoreCase("invite")) {
-					if (plugin.isAdmin(player)) {
-						plugin.invite(plugin.getServer().getPlayer(args[1]), plugin.getChannel(player));
-						return true;
-						
-					} else {
-						plugin.sendWarning(player, "You do not have permission to invite players");
-						return true;
-					}
-				}
-				
-				// /titanchat join [channel]
-				// Joins the channel
-				
-				if (args[0].equalsIgnoreCase("join")) {
-					if (plugin.isPublic(args[1])) {
-						if (plugin.channelExist(args[1])) {
-							plugin.channelSwitch(player, plugin.getChannel(player), args[1]);
-							return true;
-							
-						} else {
-							plugin.sendWarning(player, "No such channel");
-							return true;
-						}
-						
-					} else {
-						if (plugin.isAdmin(player) || plugin.isMember(player)) {
-							plugin.channelSwitch(player, plugin.getChannel(player), args[1]);
-							return true;
-							
-						} else {
-							plugin.sendWarning(player, "You do not have permission to join this channel");
-							return true;
-						}
-					}
-				}
-				
-				// /titanchat kick [player]
-				// Kicks the player from the channel
-				
-				if (args[0].equalsIgnoreCase("kick")) {
-					if (plugin.isAdmin(player)) {
-						plugin.kick(plugin.getServer().getPlayer(args[1]), plugin.getChannel(player));
-						return true;
-						
-					} else {
-						plugin.sendWarning(player, "You do not have permission to kick on this channel");
-						return true;
-					}
-				}
-				
-				// /titanchat prefix [prefix]
-				// Sets the channel tag
-				
-				if (args[0].equalsIgnoreCase("prefix")) {
-					if (plugin.isAdmin(player)) {
-						chManager.setPrefix(plugin.getChannel(player), args[1]);
-						return true;
-						
-					} else {
-						plugin.sendWarning(player, "You do not have permission to change channel tags on this channel");
-						return true;
-					}
-				}
-				
-				// /titanchat promote [player]
-				// Promotes the player on the channel
-				
-				if (args[0].equalsIgnoreCase("promote")) {
-					if (plugin.isAdmin(player)) {
-						plugin.promote(plugin.getPlayer(args[1]), plugin.getChannel(player));
-						chManager.promote(args[1], plugin.getChannel(player));
-						return true;
-						
-					} else {
-						plugin.sendWarning(player, "You do not have permission to promote players on this channel");
-						return true;
-					}
-				}
-				
-				// /titanchat public [true/false]
-				// Sets the state of the channel
-				
-				if (args[0].equalsIgnoreCase("public")) {
-					if (plugin.isAdmin(player)) {
-						if (args[1].equalsIgnoreCase("true")) {
-							chManager.setPublic(channel, true);
-							return true;
-							
-						} else if (args[1].equalsIgnoreCase("false")) {
-							chManager.setPublic(channel, false);
-							return true;
-							
-						} else {
-							plugin.sendWarning(player, "True or False?");
-							return true;
-						}
-						
-					} else {
-						plugin.sendWarning(player, "You do not have permission to change the state of this channel");
-						return true;
-					}
+				} else if (arg.equalsIgnoreCase("false")) {
+					chManager.setAllowColours(channel, false);
+					
+				} else {
+					plugin.sendWarning(player, "True or False?");
 				}
 				
 			} else {
-				plugin.sendWarning(player, "Invalid Argument Length");
-				return false;
+				plugin.sendWarning(player, "You do not have permission to change the state of this channel");
 			}
+			break;
+			
+		case BAN:
+			if (plugin.isAdmin(player)) {
+				plugin.ban(plugin.getServer().getPlayer(arg), channel);
+				chManager.ban(arg, channel);
+				
+			} else {
+				plugin.sendWarning(player, "You do not have permission to ban on this channel");
+			}
+			break;
+			
+		case COLOR:
+		case COLOUR:
+			if (plugin.isAdmin(player)) {
+				if (ChatColor.valueOf(arg) != null) {
+					chManager.setColour(channel, arg.toUpperCase());
+					
+				} else {
+					plugin.sendWarning(player, "Invalid Colour");
+				}
+				
+			} else {
+				plugin.sendWarning(player, "You do not have permission to change the channel colour");
+			}
+			break;
+			
+		case CREATE:
+			if (!player.hasPermission("TitanChat.create")) {
+				plugin.sendWarning(player, "You do not have permission to create channels");
+			}
+			
+			if (plugin.channelExist(arg)) {
+				plugin.sendWarning(player, "Channel already exists");
+			}
+			
+			plugin.createChannel(player, arg);
+			chManager.createChannel(player.getName(), arg);
+			break;
+			
+		case DECLINE:
+			if (plugin.isInvited(player, arg)) {
+				plugin.decline(player, arg);
+				
+			} else {
+				plugin.sendWarning(player, "You did not receive any invitations from this channel");
+			}
+			break;
+			
+		case DEMOTE:
+			if (plugin.isAdmin(player)) {
+				plugin.demote(plugin.getPlayer(arg), channel);
+				chManager.demote(plugin.getPlayer(arg).getName(), channel);
+				
+			} else {
+				plugin.sendWarning(player, "You do not have permission to demote players on this channel");
+			}
+			break;
+			
+		case INVITE:
+			if (plugin.isAdmin(player)) {
+				plugin.invite(plugin.getServer().getPlayer(arg), channel);
+				
+			} else {
+				plugin.sendWarning(player, "You do not have permission to invite players");
+			}
+			break;
+			
+		case JOIN:
+			if (plugin.isPublic(arg)) {
+				if (plugin.channelExist(arg)) {
+					plugin.channelSwitch(player, channel, arg);
+					
+				} else {
+					plugin.sendWarning(player, "No such channel");
+				}
+				
+			} else {
+				if (plugin.isAdmin(player, arg) || plugin.isMember(player, arg)) {
+					plugin.channelSwitch(player, channel, arg);
+					
+				} else {
+					plugin.sendWarning(player, "You do not have permission to join this channel");
+				}
+			}
+			break;
+			
+		case KICK:
+			if (plugin.isAdmin(player)) {
+				plugin.kick(plugin.getPlayer(arg), channel);
+				
+			} else {
+				plugin.sendWarning(player, "You do not have permission to kick on this channel");
+			}
+			break;
+			
+		case PREFIX:
+			if (plugin.isAdmin(player)) {
+				chManager.setPrefix(channel, arg);
+				
+			} else {
+				plugin.sendWarning(player, "You do not have permission to change channel tags on this channel");
+			}
+			break;
+			
+		case PROMOTE:
+			if (plugin.isAdmin(player)) {
+				plugin.promote(plugin.getPlayer(arg), channel);
+				chManager.promote(plugin.getPlayer(arg).getName(), channel);
+				
+			} else {
+				plugin.sendWarning(player, "You do not have permission to promote players on this channel");
+			}
+			break;
+			
+		case PUBLIC:
+			if (plugin.isAdmin(player)) {
+				if (arg.equalsIgnoreCase("true")) {
+					chManager.setPublic(channel, true);
+					
+				} else if (arg.equalsIgnoreCase("false")) {
+					chManager.setPublic(channel, false);
+					
+				} else {
+					plugin.sendWarning(player, "True or False?");
+				}
+				
+			} else {
+				plugin.sendWarning(player, "You do not have permission to change the state of this channel");
+			}
+			break;
 		}
-		return false;
+	}
+	
+	public enum Commands {
+		ACCEPT,
+		ADD,
+		ALLOWCOLORS,
+		ALLOWCOLOURS,
+		BAN,
+		COLOR,
+		COLOUR,
+		CREATE,
+		DECLINE,
+		DEMOTE,
+		INVITE,
+		JOIN,
+		KICK,
+		PREFIX,
+		PROMOTE,
+		PUBLIC
 	}
 }

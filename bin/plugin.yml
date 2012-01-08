@@ -5,6 +5,7 @@ main: com.titankingdoms.nodinchan.titanchat.TitanChat
 commands:
     titanchat:
         description: TitanChat Commands
+        aliases: tc
         usage: /<command> [action] [argument]
 permissions:
     TitanChat.admin:
