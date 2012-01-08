@@ -34,7 +34,7 @@ public class TitanChatCommands {
 		// Adds a player to the whitelist
 			
 		case ADD:
-			if (plugin.isAdmin(player)) {
+			if (plugin.canWhitelist(player, channel)) {
 				if (arg.contains(",")) {
 					for (String newMember : arg.split(",")) {
 						plugin.whitelistMember(plugin.getPlayer(newMember.replace(" ", "")), channel);
@@ -73,7 +73,7 @@ public class TitanChatCommands {
 		// Bans the player from the channel
 			
 		case BAN:
-			if (plugin.isAdmin(player)) {
+			if (plugin.canBan(player, channel)) {
 				plugin.ban(plugin.getPlayer(arg), channel);
 				chManager.ban(plugin.getPlayer(arg).getName(), channel);
 				
@@ -128,13 +128,31 @@ public class TitanChatCommands {
 			}
 			break;
 			
+		// /titanchat delete [channel]
+		// Deletes a channel
+			
+		case DELETE:
+			if (player.hasPermission("TitanChat.admin")) {
+				plugin.deleteChannel(player, arg);
+				chManager.deleteChannel(arg);
+				
+			} else {
+				plugin.sendWarning(player, "You do not have permission to delete channels");
+			}
+			break;
+			
 		// /titanchat demote [player]
 		// Demotes the player on the channel
 			
 		case DEMOTE:
-			if (plugin.isAdmin(player)) {
-				plugin.demote(plugin.getPlayer(arg), channel);
-				chManager.demote(plugin.getPlayer(arg).getName(), channel);
+			if (plugin.canDemote(player, channel)) {
+				if (plugin.isAdmin(plugin.getPlayer(arg))) {
+					plugin.demote(plugin.getPlayer(arg), channel);
+					chManager.demote(plugin.getPlayer(arg).getName(), channel);
+					
+				} else {
+					plugin.sendWarning(player, plugin.getPlayer(arg).getName() + " is not an Admin");
+				}
 				
 			} else {
 				plugin.sendWarning(player, "You do not have permission to demote players on this channel");
@@ -145,7 +163,7 @@ public class TitanChatCommands {
 		// Invites the player to chat on the channel
 			
 		case INVITE:
-			if (plugin.isAdmin(player)) {
+			if (plugin.canInvite(player, channel)) {
 				plugin.invite(plugin.getServer().getPlayer(arg), channel);
 				
 			} else {
@@ -166,7 +184,7 @@ public class TitanChatCommands {
 				}
 				
 			} else {
-				if (plugin.isAdmin(player, arg) || plugin.isMember(player, arg)) {
+				if (plugin.canAccess(player, arg)) {
 					if (plugin.channelExist(arg)) {
 						plugin.channelSwitch(player, channel, arg);
 					}
@@ -181,7 +199,7 @@ public class TitanChatCommands {
 		// Kicks the player from the channel
 			
 		case KICK:
-			if (plugin.isAdmin(player)) {
+			if (plugin.canKick(player, channel)) {
 				plugin.kick(plugin.getPlayer(arg), channel);
 				
 			} else {
@@ -205,9 +223,14 @@ public class TitanChatCommands {
 		// Promotes the player on the channel
 			
 		case PROMOTE:
-			if (plugin.isAdmin(player)) {
-				plugin.promote(plugin.getPlayer(arg), channel);
-				chManager.promote(plugin.getPlayer(arg).getName(), channel);
+			if (plugin.canPromote(player, channel)) {
+				if (plugin.isAdmin(plugin.getPlayer(arg))) {
+					plugin.sendWarning(player, plugin.getPlayer(arg).getName() + " is already an Admin");
+					
+				} else {
+					plugin.promote(plugin.getPlayer(arg), channel);
+					chManager.promote(plugin.getPlayer(arg).getName(), channel);
+				}
 				
 			} else {
 				plugin.sendWarning(player, "You do not have permission to promote players on this channel");
@@ -246,6 +269,7 @@ public class TitanChatCommands {
 		COLOUR,
 		CREATE,
 		DECLINE,
+		DELETE,
 		DEMOTE,
 		INVITE,
 		JOIN,

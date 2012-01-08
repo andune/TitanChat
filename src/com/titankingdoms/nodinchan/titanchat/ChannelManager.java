@@ -1,5 +1,6 @@
 package com.titankingdoms.nodinchan.titanchat;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ChannelManager {
@@ -13,9 +14,17 @@ public class ChannelManager {
 	// Adds an Admin to the list of Admins in channels.yml
 	
 	public void assignAdmin(String name, String channelName) {
-		List<String> admins = plugin.getChannelConfig().getStringList("channels." + channelName + ".admins");
-		admins.add(name);
-		plugin.getChannelConfig().set("channels." + channelName + ".admins", admins);
+		if (plugin.getChannelConfig().getStringList("channels." + channelName + ".admins") != null) {
+			List<String> admins = plugin.getChannelConfig().getStringList("channels." + channelName + ".admins");
+			admins.add(name);
+			plugin.getChannelConfig().set("channels." + channelName + ".admins", admins);
+			
+		} else {
+			List<String> admins = new ArrayList<String>();
+			admins.add(name);
+			plugin.getChannelConfig().set("channels." + channelName + ".admins", admins);
+		}
+		
 		plugin.saveChannelConfig();
 	}
 	
@@ -23,15 +32,23 @@ public class ChannelManager {
 	
 	public void ban(String name, String channelName) {
 		if (plugin.isPublic(channelName)) {
-			List<String> blacklist = plugin.getChannelConfig().getStringList("channels." + channelName + ".black-list");
-			blacklist.add(name);
-			plugin.getChannelConfig().set("channels." + channelName + ".black-list", blacklist);
+			if (plugin.getChannelConfig().getStringList("channels." + channelName + ".black-list") != null) {
+				List<String> blacklist = plugin.getChannelConfig().getStringList("channels." + channelName + ".black-list");
+				blacklist.add(name);
+				plugin.getChannelConfig().set("channels." + channelName + ".black-list", blacklist);
+				
+			} else {
+				List<String> blacklist = new ArrayList<String>();
+				blacklist.add(name);
+				plugin.getChannelConfig().set("channels." + channelName + ".black-list", blacklist);
+			}
 			
 		} else {
 			List<String> members = plugin.getChannelConfig().getStringList("channels." + channelName + ".members");
 			members.remove(name);
 			plugin.getChannelConfig().set("channels." + channelName + ".members", members);
 		}
+		
 		plugin.saveChannelConfig();
 	}
 	
@@ -44,6 +61,13 @@ public class ChannelManager {
 		setPrefix(channelName, "");
 		setPublic(channelName, true);
 		plugin.saveConfig();
+	}
+	
+	public void deleteChannel(String channelName) {
+		plugin.getConfig().set("channels." + channelName, null);
+		plugin.saveConfig();
+		plugin.getChannelConfig().set("channels." + channelName, null);
+		plugin.saveChannelConfig();
 	}
 	
 	// Demotes a player by changing the config
@@ -97,9 +121,17 @@ public class ChannelManager {
 	// Adds a Member to the list of Members in channels.yml
 	
 	public void whitelistMember(String name, String channelName) {
-		List<String> members = plugin.getChannelConfig().getStringList("channels." + channelName + ".members");
-		members.add(name);
-		plugin.getChannelConfig().set("channels." + channelName + ".members", members);
+		if (plugin.getChannelConfig().getStringList("channels." + channelName + ".members") != null) {
+			List<String> members = plugin.getChannelConfig().getStringList("channels." + channelName + ".members");
+			members.add(name);
+			plugin.getChannelConfig().set("channels." + channelName + ".members", members);
+			
+		} else {
+			List<String> members = new ArrayList<String>();
+			members.add(name);
+			plugin.getChannelConfig().set("channels." + channelName + ".members", members);
+		}
+		
 		plugin.saveChannelConfig();
 	}
 }

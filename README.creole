@@ -6,7 +6,11 @@ TitanChat, a chat management plugin for Bukkit.
 
 === Features
 
-* To be announced
+* Create new channels without editing config
+* Ban players from channels
+* Kick players from channels
+* Add Admins to administrate channels
+* Use colour codes on channels if not restricted
 
 -----------------------------------------------------------------------------------------------------------------------
 
@@ -32,19 +36,18 @@ TitanChat, a chat management plugin for Bukkit.
 
 * 06.01.12 - Project Start
 * 07.01.12 - Wild NPEs appeared
-* 08.01.12 - Fixed Login NPE
-*          - Fixed Channel Join NPE
+* 08.01.12 - Fixed all NPEs
 
 -----------------------------------------------------------------------------------------------------------------------
 
 === Todo
 
-* Fix everything that isn't fixed
+* Wait for GoMySQL's instructions
 
 -----------------------------------------------------------------------------------------------------------------------
 
 === Credits
 
-* Author: TitanDevelopment
+* Author: NodinChan
 
 -----------------------------------------------------------------------------------------------------------------------

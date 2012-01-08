@@ -13,3 +13,35 @@ permissions:
         default: op
         children:
             TitanChat.create: true
+            TitanChat.access.*: true
+            TitanChat.ban.*: true
+            TitanChat.kick.*: true
+            TitanChat.promote.*: true
+            TitanChat.demote.*: true
+            TitanChat.addmembers.*: true
+            TitanChat.invite.*: true
+            TitanChat.allowcolours.*: true
+    TitanChat.access.*:
+        description: Access to all channels
+        default: op
+    TitanChat.ban.*:
+        description: Access to ban command on all channels
+        default: op
+    TitanChat.kick.*:
+        description: Access to kick command on all channels
+        default: op
+    TitanChat.promote.*:
+        description: Access to promote command on all channels
+        default: op
+    TitanChat.demote.*:
+        description: Access to demote command on all channels
+        default: op
+    TitanChat.whitelist.*:
+        description: Access to add command on all channels
+        default: op
+    TitanChat.invite.*:
+        description: Access to invite command on all channels
+        default: op
+    TitanChat.allowcolours:
+        description: Allows usage of colour codes on all channels
+        default: op
