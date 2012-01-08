@@ -54,9 +54,18 @@ public class TitanChat extends JavaPlugin {
 	// Assigning an Admin to a channel
 	
 	public void assignAdmin(Player player, String channelName) {
-		List<Player> admins = channelAdmins.get(channelName);
-		admins.add(player);
-		channelAdmins.put(channelName, admins);
+		if (channelAdmins.isEmpty() || channelAdmins.get(channelName) == null) {
+			List<Player> admins = new ArrayList<Player>();
+			admins.add(player);
+			channelAdmins.put(channelName, admins);
+			
+		} else {
+			List<Player> admins = channelAdmins.get(channelName);
+			admins.add(player);
+			channelAdmins.put(channelName, admins);
+		}
+		
+		sendInfo(player, "You are now an Admin of " + channelName);
 	}
 	
 	// Banning a Member from a channel
@@ -95,6 +104,7 @@ public class TitanChat extends JavaPlugin {
 	public void createChannel(Player player, String channelName) {
 		assignAdmin(player, channelName);
 		channelSwitch(player, getChannel(player), channelName);
+		sendInfo(player, "You have created " + channelName + " channel");
 	}
 	
 	public String createList(List<String> channels) {
@@ -129,13 +139,15 @@ public class TitanChat extends JavaPlugin {
 		admins.remove(player);
 		channelAdmins.put(channelName, admins);
 		whitelistMember(player, channelName);
+		sendInfo(player, "You have been demoted in " + channelName);
 	}
 	
 	// Entering channels
 	
 	public void enterChannel(Player player, String channelName) {
 		channel.put(player, channelName);
-		if (participants.isEmpty()) {
+		
+		if (participants.isEmpty() || participants.get(channelName).isEmpty()) {
 			List<Player> players = new ArrayList<Player>();
 			players.add(player);
 			participants.put(channelName, players);
@@ -144,6 +156,10 @@ public class TitanChat extends JavaPlugin {
 			List<Player> players = participants.get(channelName);
 			players.add(player);
 			participants.put(channelName, players);
+		}
+		
+		for (Player receiver : getParticipants(channelName)) {
+			sendInfo(receiver, player.getDisplayName() + " has joined the channel");
 		}
 	}
 	
@@ -220,6 +236,8 @@ public class TitanChat extends JavaPlugin {
 			channels.add(channelName);
 			invitations.put(player, channels);
 		}
+		
+		sendInfo(player, "You have been invited to chat on " + channelName);
 	}
 	
 	// Check if the player is an admin of that channel
@@ -327,7 +345,17 @@ public class TitanChat extends JavaPlugin {
 		channel.remove(player);
 		List<Player> players = participants.get(channelName);
 		players.remove(player);
-		participants.put(channelName, players);
+		
+		if (players.isEmpty()) {
+			participants.remove(channelName);
+			
+		} else {
+			participants.put(channelName, players);
+		}
+		
+		for (Player receiver : getParticipants(channelName)) {
+			sendInfo(receiver, player.getDisplayName() + " has left the channel");
+		}
 	}
 	
 	@Override
@@ -393,12 +421,15 @@ public class TitanChat extends JavaPlugin {
 			log.warning("[" + this + "] Default channel not defined");
 		}
 		
-		if (getConfig().getConfigurationSection("channels").getKeys(false).isEmpty()) {
+		File config = new File(getDataFolder() + "config.yml");
+		File channelConfig = new File(getDataFolder() + "channels.yml");
+		
+		if (!config.exists()) {
 			getConfig().options().copyDefaults(true);
 			saveConfig();
 		}
 		
-		if (getChannelConfig().getConfigurationSection("channels").getKeys(false).isEmpty()) {
+		if (!channelConfig.exists()) {
 			getChannelConfig().options().copyDefaults(true);
 			saveChannelConfig();
 		}
@@ -438,6 +469,8 @@ public class TitanChat extends JavaPlugin {
 				}
 				
 				channelAdmins.put(channel, admins);
+				
+				infoLog("Admins of " + channel + " found");
 			}
 			
 			if (!memberNames.isEmpty()) {
@@ -446,8 +479,12 @@ public class TitanChat extends JavaPlugin {
 				}
 				
 				channelMembers.put(channel, members);
+				
+				infoLog("Members of " + channel + " found");
 			}
 		}
+		
+		infoLog("Chat Communities Loaded");
 	}
 	
 	// Promote a player on a channel
@@ -456,6 +493,7 @@ public class TitanChat extends JavaPlugin {
 		List<Player> members = channelMembers.get(channelName);
 		members.remove(player);
 		assignAdmin(player, channelName);
+		sendInfo(player, "You have been promoted in " + channelName);
 	}
 	
 	// Reloads the player config of the channels
@@ -499,8 +537,17 @@ public class TitanChat extends JavaPlugin {
 	// Whitelisting a Member on a channel
 	
 	public void whitelistMember(Player player, String channelName) {
-		List<Player> members = channelMembers.get(channelName);
-		members.add(player);
-		channelMembers.put(channelName, members);
+		if (channelMembers.isEmpty() || channelMembers.get(channelName) == null) {
+			List<Player> members = new ArrayList<Player>();
+			members.add(player);
+			channelMembers.put(channelName, members);
+			
+		} else {
+			List<Player> members = channelMembers.get(channelName);
+			members.add(player);
+			channelMembers.put(channelName, members);
+		}
+		
+		sendInfo(player, "You are now a Member of " + channelName);
 	}
 }

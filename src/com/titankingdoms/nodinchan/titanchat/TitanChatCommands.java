@@ -38,12 +38,12 @@ public class TitanChatCommands {
 				if (arg.contains(",")) {
 					for (String newMember : arg.split(",")) {
 						plugin.whitelistMember(plugin.getPlayer(newMember.replace(" ", "")), channel);
-						chManager.whitelistMember(newMember.replace(" ", ""), channel);
+						chManager.whitelistMember(plugin.getPlayer(newMember.replace(" ", "")).getName(), channel);
 					}
 					
 				} else {
 					plugin.whitelistMember(plugin.getPlayer(arg), channel);
-					chManager.whitelistMember(arg, channel);
+					chManager.whitelistMember(plugin.getPlayer(arg).getName(), channel);
 				}
 			}
 			break;
@@ -74,8 +74,8 @@ public class TitanChatCommands {
 			
 		case BAN:
 			if (plugin.isAdmin(player)) {
-				plugin.ban(plugin.getServer().getPlayer(arg), channel);
-				chManager.ban(arg, channel);
+				plugin.ban(plugin.getPlayer(arg), channel);
+				chManager.ban(plugin.getPlayer(arg).getName(), channel);
 				
 			} else {
 				plugin.sendWarning(player, "You do not have permission to ban on this channel");
@@ -167,7 +167,9 @@ public class TitanChatCommands {
 				
 			} else {
 				if (plugin.isAdmin(player, arg) || plugin.isMember(player, arg)) {
-					plugin.channelSwitch(player, channel, arg);
+					if (plugin.channelExist(arg)) {
+						plugin.channelSwitch(player, channel, arg);
+					}
 					
 				} else {
 					plugin.sendWarning(player, "You do not have permission to join this channel");
