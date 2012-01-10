@@ -30,7 +30,6 @@ TitanChat, a chat management plugin for Bukkit.
 
 === How to install
 
-* Only Test Version available through Github Download
 * Place in plugins folder
 * Confgiure if you wish to
 * Done!
