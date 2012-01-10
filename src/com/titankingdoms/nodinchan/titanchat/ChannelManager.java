@@ -58,7 +58,7 @@ public class ChannelManager {
 		assignAdmin(name, channelName);
 		setAllowColours(channelName, false);
 		setColour(channelName, "WHITE");
-		setPrefix(channelName, "");
+		setTag(channelName, "");
 		setPublic(channelName, true);
 		plugin.saveConfig();
 	}
@@ -104,10 +104,10 @@ public class ChannelManager {
 		plugin.saveConfig();
 	}
 	
-	// Sets the prefix of the channel
+	// Sets the tag of the channel
 	
-	public void setPrefix(String channelName, String prefix) {
-		plugin.getConfig().set("channels." + channelName + ".channel-prefix", prefix);
+	public void setTag(String channelName, String tag) {
+		plugin.getConfig().set("channels." + channelName + ".channel-tag", tag);
 		plugin.saveConfig();
 	}
 	
@@ -116,6 +116,17 @@ public class ChannelManager {
 	public void setPublic(String channelName, boolean whitelist) {
 		plugin.getConfig().set("channels." + channelName + ".public", whitelist);
 		plugin.saveConfig();
+	}
+	
+	// Removes the player from the black-list and adds them to the list of members if necessary
+	
+	public void unban(String name, String channelName) {
+		List<String> blacklist = plugin.getChannelConfig().getStringList("channels." + channelName + ".black-list");
+		blacklist.remove(name);
+		plugin.getChannelConfig().set("channels." + channelName + ".black-list", blacklist);
+		List<String> members = plugin.getChannelConfig().getStringList("channels." + channelName + ".members");
+		members.add(name);
+		plugin.getChannelConfig().set("channels." + channelName + ".members", members);
 	}
 	
 	// Adds a Member to the list of Members in channels.yml

@@ -26,13 +26,15 @@ public class TitanChatPlayerListener extends PlayerListener {
 		String msg = event.getMessage();
 		
 		for (Player receiver : plugin.getParticipants(plugin.getChannel(player))) {
-			if (player.hasPermission("TitanChat.allowcolours")) {
+			if (plugin.has(player, "TitanChat.allowcolours")) {
 				receiver.sendMessage(ch.format(player, ch.getChannelColour(player), ch.getChannelTag(player), msg, true));
 				
 			} else {
 				receiver.sendMessage(ch.format(player, ch.getChannelColour(player), ch.getChannelTag(player), msg, ch.allowColours(player)));
 			}
 		}
+		
+		plugin.getLogger().info("<" + player.getName() + "> " + msg);
 		
 		event.setCancelled(true);
 	}

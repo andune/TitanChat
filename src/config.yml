@@ -1,24 +1,24 @@
 channels:
     Default:
-        channel-prefix: '[D]'
+        channel-tag: '[D]'
         channel-colour: WHITE
         default: true
-        allow-colours: false
-    TitanKingdoms:
-        channel-prefix: '[TK]'
+    HerpChan:
+        channel-tag: '[HC]'
         channel-colour: GOLD
         public: false
         allow-colours: true
-    BehemothIndustries:
-        channel-prefix: '[BI]'
-        channel-colour: 
+    DerpChan:
+        channel-tag: '[DC]'
+        channel-colour: SILVER
+        public: true
+        allow-colours: false
     Donators:
-        channel-prefix: '[D]'
+        channel-tag: '[$]'
         channel-colour: GREEN
         public: false
         allow-colours: true
     Staff:
-        channel-prefix: '[S]'
+        channel-tag: '[S]'
         channel-colour: RED
         staff: true
-        allow-colours: true

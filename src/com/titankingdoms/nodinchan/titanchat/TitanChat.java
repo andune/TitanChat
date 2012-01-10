@@ -9,6 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import net.milkbowl.vault.chat.Chat;
+import net.milkbowl.vault.permission.Permission;
+
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -18,25 +21,36 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.event.Event.Type;
 import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import ru.tehkode.permissions.PermissionUser;
+import ru.tehkode.permissions.bukkit.PermissionsEx;
+
 import com.titankingdoms.nodinchan.titanchat.TitanChatCommands.Commands;
+
+import de.bananaco.permissions.Permissions;
 
 public class TitanChat extends JavaPlugin {
 	
 	private static Logger log = Logger.getLogger("TitanLog");
 	
 	private String defaultChannel = "";
+	private String staffChannel = "";
 	
 	private File channelConfigFile = null;
 	private FileConfiguration channelConfig = null;
 	
 	private Map<String, List<Player>> channelAdmins = new HashMap<String, List<Player>>();
 	private Map<String, List<Player>> channelMembers = new HashMap<String, List<Player>>();
+	private Map<String, List<Player>> channelBans = new HashMap<String, List<Player>>();
 	private Map<Player, String> channel = new HashMap<Player, String>();
 	private Map<Player, List<String>> invitations = new HashMap<Player, List<String>>();
 	private Map<String, List<Player>> invited = new HashMap<String, List<Player>>();
 	private Map<String, List<Player>> participants = new HashMap<String, List<Player>>();
+	
+	private Permission permission;
+	private Chat chat;
 	
 	// Accept the channel join request
 	
@@ -154,10 +168,16 @@ public class TitanChat extends JavaPlugin {
 	}
 	
 	public boolean canAccess(Player player, String channelName) {
-		if (player.hasPermission("TitanChat.access.*"))
+		if (isStaff(player))
 			return true;
 		
-		if (player.hasPermission("TitanChat.access." + channelName))
+		if (isBanned(player, channelName))
+			return false;
+		
+		if (has(player, "TitanChat.access.*"))
+			return true;
+		
+		if (has(player, "TitanChat.access." + channelName))
 			return true;
 		
 		if (isAdmin(player, channelName))
@@ -170,10 +190,10 @@ public class TitanChat extends JavaPlugin {
 	}
 	
 	public boolean canBan(Player player, String channelName) {
-		if (player.hasPermission("TitanChat.ban.*"))
+		if (has(player, "TitanChat.ban.*"))
 			return true;
 		
-		if (player.hasPermission("TitanChat.ban." + channelName))
+		if (has(player, "TitanChat.ban." + channelName))
 			return true;
 		
 		if (isAdmin(player))
@@ -183,10 +203,10 @@ public class TitanChat extends JavaPlugin {
 	}
 	
 	public boolean canDemote(Player player, String channelName) {
-		if (player.hasPermission("TitanChat.demote.*"))
+		if (has(player, "TitanChat.demote.*"))
 			return true;
 		
-		if (player.hasPermission("TitanChat.demote." + channelName))
+		if (has(player, "TitanChat.demote." + channelName))
 			return true;
 		
 		if (isAdmin(player))
@@ -196,10 +216,10 @@ public class TitanChat extends JavaPlugin {
 	}
 	
 	public boolean canInvite(Player player, String channelName) {
-		if (player.hasPermission("TitanChat.invite.*"))
+		if (has(player, "TitanChat.invite.*"))
 			return true;
 		
-		if (player.hasPermission("TitanChat.invite." + channelName))
+		if (has(player, "TitanChat.invite." + channelName))
 			return true;
 		
 		if (isAdmin(player))
@@ -209,10 +229,10 @@ public class TitanChat extends JavaPlugin {
 	}
 	
 	public boolean canKick(Player player, String channelName) {
-		if (player.hasPermission("TitanChat.kick.*"))
+		if (has(player, "TitanChat.kick.*"))
 			return true;
 		
-		if (player.hasPermission("TitanChat.kick." + channelName))
+		if (has(player, "TitanChat.kick." + channelName))
 			return true;
 		
 		if (isAdmin(player))
@@ -222,10 +242,10 @@ public class TitanChat extends JavaPlugin {
 	}
 	
 	public boolean canPromote(Player player, String channelName) {
-		if (player.hasPermission("TitanChat.promote.*"))
+		if (has(player, "TitanChat.promote.*"))
 			return true;
 		
-		if (player.hasPermission("TitanChat.promote." + channelName))
+		if (has(player, "TitanChat.promote." + channelName))
 			return true;
 		
 		if (isAdmin(player))
@@ -235,10 +255,10 @@ public class TitanChat extends JavaPlugin {
 	}
 	
 	public boolean canWhitelist(Player player, String channelName) {
-		if (player.hasPermission("TitanChat.whitelist.*"))
+		if (has(player, "TitanChat.whitelist.*"))
 			return true;
 		
-		if (player.hasPermission("TitanChat.whitelist." + channelName))
+		if (has(player, "TitanChat.whitelist." + channelName))
 			return true;
 		
 		if (isAdmin(player))
@@ -404,6 +424,10 @@ public class TitanChat extends JavaPlugin {
 		return defaultChannel;
 	}
 	
+	public Logger getLogger() {
+		return log;
+	}
+	
 	// Gets the participants of a channel
 	
 	public List<Player> getParticipants(String channelName) {
@@ -412,6 +436,71 @@ public class TitanChat extends JavaPlugin {
 	
 	public Player getPlayer(String name) {
 		return getServer().getPlayer(name);
+	}
+	
+	// Gets the prefix of the player
+	
+	public String getPrefix(Player player) {
+		String prefix = "";
+		
+		if (vault() && chat != null) {
+			prefix = chat.getPlayerPrefix(player);
+			
+		} else if (getServer().getPluginManager().getPlugin("PermissionsEx") != null) {
+			PermissionUser user = PermissionsEx.getPermissionManager().getUser(player);
+			
+			if (user != null) {
+				prefix = user.getPrefix();
+			}
+			
+		} else if (getServer().getPluginManager().getPlugin("bPermissions") != null) {
+			prefix = Permissions.getInfoReader().getPrefix(player);
+		}
+		
+		return prefix;
+	}
+	
+	// Gets the name of the staff channel
+	
+	public String getStaffChannel() {
+		for (String channel : getConfig().getConfigurationSection("channels").getKeys(false)) {
+			if (getConfig().get("channels." + channel + ".staff") != null) {
+				staffChannel = channel;
+			}
+		}
+		return staffChannel;
+	}
+	
+	// Gets the suffix of the player
+	
+	public String getSuffix(Player player) {
+		String suffix = "";
+		
+		if (vault() && chat != null) {
+			suffix = chat.getPlayerSuffix(player);
+			
+		} else if (getServer().getPluginManager().getPlugin("PermissionsEx") != null) {
+			PermissionUser user = PermissionsEx.getPermissionManager().getUser(player);
+			
+			if (user != null) {
+				suffix = user.getSuffix();
+			}
+			
+		} else if (getServer().getPluginManager().getPlugin("bPermissions") != null) {
+			suffix = Permissions.getInfoReader().getSuffix(player);
+		}
+		
+		return suffix;
+	}
+	
+	// Check for permission
+	
+	public boolean has(Player player, String permissionNode) {
+		if (permission != null) {
+			return permission.has(player, permissionNode);
+		}
+		
+		return player.hasPermission(permissionNode);
 	}
 	
 	public void infoLog(String info) {
@@ -449,33 +538,48 @@ public class TitanChat extends JavaPlugin {
 	// Check if the player is an admin of that channel
 	
 	public boolean isAdmin(Player player) {
-		if (player.hasPermission("TitanChat.admin"))
+		if (isStaff(player))
 			return true;
 		
 		List<Player> players = new ArrayList<Player>();
 		
 		if (!channelAdmins.get(getChannel(player)).isEmpty()) {
 			players = channelAdmins.get(getChannel(player));
-			
-			if (players.contains(player))
-				return true;
 		}
+		
+		if (players.contains(player))
+			return true;
 		
 		return false;
 	}
 	
 	public boolean isAdmin(Player player, String channelName) {
-		if (player.hasPermission("TitanChat.admin"))
+		if (isStaff(player))
 			return true;
 		
 		List<Player> players = new ArrayList<Player>();
 		
 		if (!channelAdmins.get(channelName).isEmpty()) {
 			players = channelAdmins.get(channelName);
-			
-			if (players.contains(player))
-				return true;
 		}
+		
+		if (players.contains(player))
+			return true;
+		
+		return false;
+	}
+	
+	// Check if the player is banned
+	
+	public boolean isBanned(Player player, String channelName) {
+		List<Player> players = new ArrayList<Player>();
+		
+		if (!channelBans.isEmpty()) {
+			players = channelBans.get(channelName);
+		}
+		
+		if (players.contains(player))
+			return true;
 		
 		return false;
 	}
@@ -499,13 +603,16 @@ public class TitanChat extends JavaPlugin {
 	// Check if the channel is public
 	
 	public boolean isPublic(String channelName) {
+		if (getStaffChannel() == channelName)
+			return false;
+		
+		if (getDefaultChannel() == channelName)
+			return true;
+		
 		if (getConfig().get("channels." + channelName + ".public") != null) {
 			if (getConfig().getBoolean("channels." + channelName + ".public"))
 				return true;
 		}
-		
-		if (channelName == getDefaultChannel())
-			return true;
 		
 		return false;
 	}
@@ -526,7 +633,7 @@ public class TitanChat extends JavaPlugin {
 	}
 	
 	public boolean isMember(Player player, String channelName) {
-		if (player.hasPermission("TitanChat.access." + channelName))
+		if (has(player, "TitanChat.access." + channelName))
 			return true;
 		
 		List<Player> players = new ArrayList<Player>();
@@ -537,6 +644,13 @@ public class TitanChat extends JavaPlugin {
 			if (players.contains(player))
 				return true;
 		}
+		
+		return false;
+	}
+	
+	public boolean isStaff(Player player) {
+		if (has(player, "TitanChat.admin"))
+			return true;
 		
 		return false;
 	}
@@ -623,6 +737,17 @@ public class TitanChat extends JavaPlugin {
 	public void onEnable() {
 		infoLog("is now enabling...");
 		
+		if (vault()) {
+			if (setupPermission()) {
+				infoLog(permission.getName() + " detected");
+				infoLog("Using " + permission.getName() + " for permissions");
+			}
+			
+			if (setupChat()) {
+				infoLog("Prefix and suffixes supported");
+			}
+		}
+		
 		if (getDefaultChannel() == null) {
 			log.warning("[" + this + "] Default channel not defined");
 		}
@@ -656,9 +781,22 @@ public class TitanChat extends JavaPlugin {
 	// Prepares the list of Admins and Members
 	
 	public void prepareChannelCommunities() {
+		if (channelAdmins != null) {
+			channelAdmins.clear();
+		}
+		
+		if (channelMembers != null) {
+			channelMembers.clear();
+		}
+		
+		if (channelBans != null) {
+			channelBans.clear();
+		}
+		
 		for (String channel : getChannelConfig().getConfigurationSection("channels").getKeys(false)) {
 			List<String> adminNames = new ArrayList<String>();
 			List<String> memberNames = new ArrayList<String>();
+			List<String> bannedNames = new ArrayList<String>();
 			
 			if (getChannelConfig().getStringList("channels." + channel + ".admins") != null) {
 				adminNames = getChannelConfig().getStringList("channels." + channel + ".admins");
@@ -668,8 +806,13 @@ public class TitanChat extends JavaPlugin {
 				memberNames = getChannelConfig().getStringList("channels." + channel + ".members");
 			}
 			
+			if (getChannelConfig().getStringList("channels." + channel + ".black-list") != null) {
+				bannedNames = getChannelConfig().getStringList("channels." + channel + ".black-list");
+			}
+			
 			List<Player> admins = new ArrayList<Player>();
 			List<Player> members = new ArrayList<Player>();
+			List<Player> banned = new ArrayList<Player>();
 			
 			if (!adminNames.isEmpty()) {
 				for (String name : adminNames) {
@@ -689,6 +832,16 @@ public class TitanChat extends JavaPlugin {
 				channelMembers.put(channel, members);
 				
 				infoLog("Members of " + channel + " found");
+			}
+			
+			if (!bannedNames.isEmpty()) {
+				for (String name : bannedNames) {
+					banned.add(getPlayer(name));
+				}
+				
+				channelBans.put(channel, banned);
+				
+				infoLog("Banned Players of " + channel + " found");
 			}
 		}
 		
@@ -753,6 +906,30 @@ public class TitanChat extends JavaPlugin {
 	
 	public void sendWarning(Player player, String warning) {
 		player.sendMessage("[TitanChat] " + ChatColor.RED + warning);
+	}
+	
+	public boolean setupChat() {
+		RegisteredServiceProvider<Chat> chatProvider = getServer().getServicesManager().getRegistration(Chat.class);
+		
+		if (chatProvider != null) {
+			chat = chatProvider.getProvider();
+		}
+		
+		return (chat != null);
+	}
+	
+	public boolean setupPermission() {
+		RegisteredServiceProvider<Permission> permissionProvider = getServer().getServicesManager().getRegistration(Permission.class);
+		
+		if (permissionProvider != null) {
+			permission = permissionProvider.getProvider();
+		}
+		
+		return (permission != null);
+	}
+	
+	public boolean vault() {
+		return getServer().getPluginManager().getPlugin("Vault") != null;
 	}
 	
 	// Whitelisting a Member on a channel

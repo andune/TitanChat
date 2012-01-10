@@ -1,13 +1,12 @@
 channels:
-    TitanKingdoms:
+    HerpChan:
         admins:
-        - gwinans
-        - Sgeour
+        - Herpina
         members:
-        - NodinChan
-        - MrBiscuity
-    BehemothIndustries:
+        - Herpy
+        - Herpes
+    DerpChan:
         admins:
-        - Xelephant
+        - Derplord
         black-list:
-        - Mixxit
+        - Herpina

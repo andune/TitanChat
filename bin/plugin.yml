@@ -1,7 +1,8 @@
 name: TitanChat
-version: 0.1
+version: 1.0
 author: NodinChan
 main: com.titankingdoms.nodinchan.titanchat.TitanChat
+solftdepend: [Vault, PermissionsEx, bPermissions]
 commands:
     titanchat:
         description: TitanChat Commands
@@ -13,6 +14,7 @@ permissions:
         default: op
         children:
             TitanChat.create: true
+            TitanChat.delete: true
             TitanChat.access.*: true
             TitanChat.ban.*: true
             TitanChat.kick.*: true
