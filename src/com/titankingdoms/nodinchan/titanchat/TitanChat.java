@@ -47,6 +47,7 @@ public class TitanChat extends JavaPlugin {
 	private Map<Player, String> channel = new HashMap<Player, String>();
 	private Map<Player, List<String>> invitations = new HashMap<Player, List<String>>();
 	private Map<String, List<Player>> invited = new HashMap<String, List<Player>>();
+	private Map<String, List<Player>> muted = new HashMap<String, List<Player>>();
 	private Map<String, List<Player>> participants = new HashMap<String, List<Player>>();
 	
 	private Permission permission;
@@ -142,6 +143,17 @@ public class TitanChat extends JavaPlugin {
 			}
 		}
 		
+		if (channelBans.isEmpty() || channelBans.get(channelName) == null) {
+			List<Player> banned = new ArrayList<Player>();
+			banned.add(player);
+			channelBans.put(channelName, banned);
+			
+		} else {
+			List<Player> banned = channelBans.get(channelName);
+			banned.add(player);
+			channelBans.put(channelName, banned);
+		}
+		
 		channelSwitch(player, getChannel(player), getDefaultChannel());
 		sendWarning(player, "You have been banned from " + channelName);
 	}
@@ -157,14 +169,6 @@ public class TitanChat extends JavaPlugin {
 	public void channelSwitch(Player player, String oldCh, String newCh) {
 		leaveChannel(player, oldCh);
 		enterChannel(player, newCh);
-	}
-	
-	// Creating channels
-	
-	public void createChannel(Player player, String channelName) {
-		assignAdmin(player, channelName);
-		channelSwitch(player, getChannel(player), channelName);
-		sendInfo(player, "You have created " + channelName + " channel");
 	}
 	
 	public boolean canAccess(Player player, String channelName) {
@@ -241,6 +245,16 @@ public class TitanChat extends JavaPlugin {
 		return false;
 	}
 	
+	public boolean canMute(Player player) {
+		if (has(player, "TitanChat.mute"))
+			return true;
+		
+		if (isAdmin(player))
+			return true;
+		
+		return false;
+	}
+	
 	public boolean canPromote(Player player, String channelName) {
 		if (has(player, "TitanChat.promote.*"))
 			return true;
@@ -265,6 +279,14 @@ public class TitanChat extends JavaPlugin {
 			return true;
 		
 		return false;
+	}
+	
+	// Creating channels
+	
+	public void createChannel(Player player, String channelName) {
+		assignAdmin(player, channelName);
+		channelSwitch(player, getChannel(player), channelName);
+		sendInfo(player, "You have created " + channelName + " channel");
 	}
 	
 	public String createList(List<String> channels) {
@@ -315,6 +337,8 @@ public class TitanChat extends JavaPlugin {
 		}
 	}
 	
+	// Deleting channels
+	
 	public void deleteChannel(Player player, String channelName) {
 		if (getParticipants(channelName) != null) {
 			List<Player> players = new ArrayList<Player>();
@@ -337,6 +361,10 @@ public class TitanChat extends JavaPlugin {
 		
 		if (getChannelMembers(channelName) != null) {
 			channelMembers.remove(channelName);
+		}
+		
+		if (getChannelBans(channelName) != null) {
+			channelBans.remove(channelName);
 		}
 	}
 	
@@ -395,6 +423,12 @@ public class TitanChat extends JavaPlugin {
 	
 	public List<Player> getChannelAdmins(String channelName) {
 		return channelAdmins.get(channelName);
+	}
+	
+	// Gets the banned players of the channel
+	
+	public List<Player> getChannelBans(String channelName) {
+		return channelBans.get(channelName);
 	}
 	
 	// Gets the player config of channels
@@ -584,6 +618,17 @@ public class TitanChat extends JavaPlugin {
 		return false;
 	}
 	
+	// Checks if the channel broadcasts to all channels
+	
+	public boolean isGlobal(String channelName) {
+		for (String channel : getConfig().getConfigurationSection("channels").getKeys(false)) {
+			if (getConfig().get("channels." + channel + ".global") != null) {
+				return getConfig().getBoolean("channels." + channel + "global");
+			}
+		}
+		return false;
+	}
+	
 	// Check if the player is invited
 	
 	public boolean isInvited(Player player, String channelName) {
@@ -648,6 +693,20 @@ public class TitanChat extends JavaPlugin {
 		return false;
 	}
 	
+	// Check if the player is muted
+	
+	public boolean isMuted(Player player, String channelName) {
+		if (muted.isEmpty() || muted.get(channelName) == null)
+			return false;
+		
+		if (muted.get(channelName).contains(player))
+			return true;
+		
+		return false;
+	}
+	
+	// Check if the player is staff
+	
 	public boolean isStaff(Player player) {
 		if (has(player, "TitanChat.admin"))
 			return true;
@@ -681,6 +740,22 @@ public class TitanChat extends JavaPlugin {
 				sendInfo(receiver, player.getDisplayName() + " has left the channel");
 			}
 		}
+	}
+	
+	// Mutes the player
+	
+	public void mute(Player player, String channelName) {
+		if (muted.isEmpty() || muted.get(channelName) == null) {
+			List<Player> players = new ArrayList<Player>();
+			players.add(player);
+			muted.put(channelName, players);
+			
+		} else {
+			List<Player> players = muted.get(channelName);
+			players.add(player);
+			muted.put(channelName, players);
+		}
+		sendWarning(player, "You have been muted on " + channelName);
 	}
 	
 	@Override
@@ -737,6 +812,11 @@ public class TitanChat extends JavaPlugin {
 	public void onEnable() {
 		infoLog("is now enabling...");
 		
+		if (getDefaultChannel() == null) {
+			log.warning("[" + this + "] Default channel not defined");
+			getServer().getPluginManager().disablePlugin(this);
+		}
+		
 		if (vault()) {
 			if (setupPermission()) {
 				infoLog(permission.getName() + " detected");
@@ -746,10 +826,6 @@ public class TitanChat extends JavaPlugin {
 			if (setupChat()) {
 				infoLog("Prefix and suffixes supported");
 			}
-		}
-		
-		if (getDefaultChannel() == null) {
-			log.warning("[" + this + "] Default channel not defined");
 		}
 		
 		File config = new File(getDataFolder() + "config.yml");
@@ -930,6 +1006,52 @@ public class TitanChat extends JavaPlugin {
 	
 	public boolean vault() {
 		return getServer().getPluginManager().getPlugin("Vault") != null;
+	}
+	
+	// Unbans the player from the channel
+	
+	public void unban(Player player, String channelName) {
+		List<Player> banned = new ArrayList<Player>();
+		
+		for (Player bannedPlayer : channelBans.get(channelName)) {
+			banned.add(bannedPlayer);
+		}
+		
+		banned.remove(player);
+		
+		if (banned.isEmpty()) {
+			channelBans.remove(channelName);
+			
+		} else {
+			channelBans.put(channelName, banned);
+		}
+		
+		if (!isPublic(channelName)) {
+			whitelistMember(player, channelName);
+		}
+		
+		sendInfo(player, "You have been unbanned from " + channelName);
+	}
+	
+	// Unmutes the player
+	
+	public void unmute(Player player, String channelName) {
+		List<Player> mutes = new ArrayList<Player>();
+		
+		for (Player mute : muted.get(channelName)) {
+			mutes.add(mute);
+		}
+		
+		mutes.remove(player);
+		
+		if (mutes.isEmpty()) {
+			muted.remove(channelName);
+			
+		} else {
+			muted.put(channelName, mutes);
+		}
+		
+		sendInfo(player, "You have been unmuted on " + channelName);
 	}
 	
 	// Whitelisting a Member on a channel

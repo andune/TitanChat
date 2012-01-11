@@ -124,9 +124,12 @@ public class ChannelManager {
 		List<String> blacklist = plugin.getChannelConfig().getStringList("channels." + channelName + ".black-list");
 		blacklist.remove(name);
 		plugin.getChannelConfig().set("channels." + channelName + ".black-list", blacklist);
-		List<String> members = plugin.getChannelConfig().getStringList("channels." + channelName + ".members");
-		members.add(name);
-		plugin.getChannelConfig().set("channels." + channelName + ".members", members);
+		
+		if (!plugin.isPublic(channelName)) {
+			whitelistMember(name, channelName);
+		}
+		
+		plugin.saveChannelConfig();
 	}
 	
 	// Adds a Member to the list of Members in channels.yml

@@ -95,6 +95,13 @@ public class TitanChatCommands {
 			}
 			break;
 			
+		// /titanchat broadcast [message]
+		// Broadcasts the message so all can see
+			
+		case BROADCAST:
+			
+			break;
+			
 		// /titanchat colour [colour]
 		// Sets the default chat colour
 			
@@ -247,6 +254,21 @@ public class TitanChatCommands {
 			}
 			break;
 			
+		// /titanchat mute [player]
+		// Mutes the player
+			
+		case MUTE:
+			if (plugin.canMute(player)) {
+				plugin.mute(plugin.getPlayer(arg), channel);
+				for (Player participants : plugin.getParticipants(channel)) {
+					participants.sendMessage(plugin.getPlayer(arg).getName() + " has been muted");
+				}
+				
+			} else {
+				plugin.sendWarning(player, "You do not have permission to mute people on this channel");
+			}
+			break;
+			
 		// /titanchat promote [player]
 		// Promotes the player on the channel
 			
@@ -307,6 +329,7 @@ public class TitanChatCommands {
 		case UNBAN:
 			if (plugin.canBan(player, channel)) {
 				if (plugin.isBanned(plugin.getPlayer(arg), channel)) {
+					plugin.unban(plugin.getPlayer(arg), channel);
 					chManager.unban(plugin.getPlayer(arg).getName(), channel);
 					
 				} else {
@@ -315,6 +338,23 @@ public class TitanChatCommands {
 				
 			} else {
 				plugin.sendWarning(player, "You do not have permission to unban on this channel");
+			}
+			break;
+			
+		// /titanchat unmute [player]
+		// Unmutes the player
+			
+		case UNMUTE:
+			if (plugin.canMute(player)) {
+				if (plugin.isMuted(plugin.getPlayer(arg), channel)) {
+					plugin.unmute(plugin.getPlayer(arg), channel);
+					for (Player participants : plugin.getParticipants(channel)) {
+						participants.sendMessage(plugin.getPlayer(arg).getName() + " has been unmuted");
+					}
+				}
+				
+			} else {
+				plugin.sendWarning(player, "You do not have permission to unmute on this channel");
 			}
 			break;
 		}
@@ -326,6 +366,7 @@ public class TitanChatCommands {
 		ALLOWCOLORS,
 		ALLOWCOLOURS,
 		BAN,
+		BROADCAST,
 		COLOR,
 		COLOUR,
 		CREATE,
@@ -335,9 +376,11 @@ public class TitanChatCommands {
 		INVITE,
 		JOIN,
 		KICK,
+		MUTE,
 		PROMOTE,
 		PUBLIC,
 		TAG,
-		UNBAN
+		UNBAN,
+		UNMUTE
 	}
 }

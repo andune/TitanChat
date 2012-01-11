@@ -3,6 +3,7 @@ channels:
         channel-tag: '[D]'
         channel-colour: WHITE
         default: true
+        global: true
     HerpChan:
         channel-tag: '[HC]'
         channel-colour: GOLD

@@ -25,16 +25,33 @@ public class TitanChatPlayerListener extends PlayerListener {
 		
 		String msg = event.getMessage();
 		
-		for (Player receiver : plugin.getParticipants(plugin.getChannel(player))) {
-			if (plugin.has(player, "TitanChat.allowcolours")) {
-				receiver.sendMessage(ch.format(player, ch.getChannelColour(player), ch.getChannelTag(player), msg, true));
-				
-			} else {
-				receiver.sendMessage(ch.format(player, ch.getChannelColour(player), ch.getChannelTag(player), msg, ch.allowColours(player)));
+		if (plugin.isMuted(player, plugin.getChannel(player))) {
+			event.setCancelled(true);
+			return;
+		}
+		
+		if (plugin.isGlobal(plugin.getChannel(player))) {
+			for (Player receiver : plugin.getServer().getOnlinePlayers()) {
+				if (plugin.has(player, "TitanChat.allowcolours")) {
+					receiver.sendMessage(ch.format(player, ch.getChannelColour(player), ch.getChannelTag(player), msg, true));
+					
+				} else {
+					receiver.sendMessage(ch.format(player, ch.getChannelColour(player), ch.getChannelTag(player), msg, ch.allowColours(player)));
+				}
+			}
+			
+		} else {
+			for (Player receiver : plugin.getParticipants(plugin.getChannel(player))) {
+				if (plugin.has(player, "TitanChat.allowcolours")) {
+					receiver.sendMessage(ch.format(player, ch.getChannelColour(player), ch.getChannelTag(player), msg, true));
+					
+				} else {
+					receiver.sendMessage(ch.format(player, ch.getChannelColour(player), ch.getChannelTag(player), msg, ch.allowColours(player)));
+				}
 			}
 		}
 		
-		plugin.getLogger().info("<" + player.getName() + "> " + msg);
+		plugin.getLogger().info("<" + player.getName() + "> " + ch.decolourize(msg));
 		
 		event.setCancelled(true);
 	}
@@ -44,13 +61,11 @@ public class TitanChatPlayerListener extends PlayerListener {
 		String channelName = "";
 		
 		if (event.getPlayer().hasPermission("TitanChat.admin")) {
-			for (String channel : plugin.getConfig().getConfigurationSection("channels").getKeys(false)) {
-				if (plugin.getConfig().get("channels." + channel + ".staff") != null) {
-					channelName = channel;
-					
-				} else {
-					channelName = plugin.getDefaultChannel();
-				}
+			if (plugin.getStaffChannel() != null) {
+				channelName = plugin.getStaffChannel();
+				
+			} else {
+				channelName = plugin.getDefaultChannel();
 			}
 			
 		} else {
