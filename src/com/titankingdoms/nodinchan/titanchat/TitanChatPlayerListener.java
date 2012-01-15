@@ -95,6 +95,17 @@ public class TitanChatPlayerListener extends PlayerListener {
 					receiver.sendMessage(ch.format(player, ch.getChannelColour(player), ch.getChannelTag(player), msg, ch.allowColours(player)));
 				}
 			}
+			
+			if (plugin.getFollowers(plugin.getChannel(player)) != null) {
+				for (Player receiver : plugin.getFollowers(plugin.getChannel(player))) {
+					if (plugin.has(player, "TitanChat.allowcolours")) {
+						receiver.sendMessage(ch.format(player, ch.getChannelColour(player), ch.getChannelTag(player), msg, true));
+						
+					} else {
+						receiver.sendMessage(ch.format(player, ch.getChannelColour(player), ch.getChannelTag(player), msg, ch.allowColours(player)));
+					}
+				}
+			}
 		}
 		
 		Logger.getLogger("TitanLog").info("<" + player.getName() + "> " + ch.decolourize(msg));

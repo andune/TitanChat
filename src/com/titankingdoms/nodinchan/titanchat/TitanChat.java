@@ -373,6 +373,12 @@ public class TitanChat extends JavaPlugin {
 		return defaultChannel;
 	}
 	
+	// Gets the followers of a channel
+	
+	public List<Player> getFollowers(String channelName) {
+		return followers.get(channelName);
+	}
+	
 	// Gets the participants of a channel
 	
 	public List<Player> getParticipants(String channelName) {
