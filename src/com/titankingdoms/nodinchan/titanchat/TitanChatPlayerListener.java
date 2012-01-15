@@ -1,5 +1,7 @@
 package com.titankingdoms.nodinchan.titanchat;
 
+import java.util.logging.Logger;
+
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -30,6 +32,16 @@ public class TitanChatPlayerListener extends PlayerListener {
 			return;
 		}
 		
+		if (plugin.isSilenced() && !plugin.hasVoice(player)) {
+			event.setCancelled(true);
+			return;
+		}
+		
+		if (plugin.isSilenced(plugin.getChannel(player)) && !plugin.hasVoice(player)) {
+			event.setCancelled(true);
+			return;
+		}
+		
 		if (plugin.isGlobal(plugin.getChannel(player))) {
 			for (Player receiver : plugin.getServer().getOnlinePlayers()) {
 				if (plugin.has(player, "TitanChat.allowcolours")) {
@@ -51,7 +63,7 @@ public class TitanChatPlayerListener extends PlayerListener {
 			}
 		}
 		
-		plugin.getLogger().info("<" + player.getName() + "> " + ch.decolourize(msg));
+		Logger.getLogger("TitanLog").info("<" + player.getName() + "> " + ch.decolourize(msg));
 		
 		event.setCancelled(true);
 	}

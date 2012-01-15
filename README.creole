@@ -31,7 +31,7 @@ TitanChat, a chat management plugin for Bukkit.
 === How to install
 
 * Place in plugins folder
-* Confgiure if you wish to
+* Configure if you wish to
 * Done!
 
 -----------------------------------------------------------------------------------------------------------------------
@@ -43,6 +43,7 @@ TitanChat, a chat management plugin for Bukkit.
 * 08.01.12 - Fixed all NPEs
 * 10.01.12 - Supports prefixes and suffixes
 * 11.01.12 - Mute, unmute and global
+* 13.01.12 - Silence, broadcast and command list
 
 -----------------------------------------------------------------------------------------------------------------------
 

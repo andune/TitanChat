@@ -41,6 +41,8 @@ public class TitanChat extends JavaPlugin {
 	private File channelConfigFile = null;
 	private FileConfiguration channelConfig = null;
 	
+	private boolean silence = false;
+	
 	private Map<String, List<Player>> channelAdmins = new HashMap<String, List<Player>>();
 	private Map<String, List<Player>> channelMembers = new HashMap<String, List<Player>>();
 	private Map<String, List<Player>> channelBans = new HashMap<String, List<Player>>();
@@ -49,46 +51,10 @@ public class TitanChat extends JavaPlugin {
 	private Map<String, List<Player>> invited = new HashMap<String, List<Player>>();
 	private Map<String, List<Player>> muted = new HashMap<String, List<Player>>();
 	private Map<String, List<Player>> participants = new HashMap<String, List<Player>>();
+	private Map<String, Boolean> silenced = new HashMap<String, Boolean>();
 	
 	private Permission permission;
 	private Chat chat;
-	
-	// Accept the channel join request
-	
-	public void accept(Player player, String newCh) {
-		String channel = getChannel(player);
-		channelSwitch(player, channel, newCh);
-		
-		List<Player> players = new ArrayList<Player>();
-		
-		for (Player invitedPlayer : invited.get(newCh)) {
-			players.add(invitedPlayer);
-		}
-		
-		players.remove(player);
-		
-		if (players.isEmpty()) {
-			invited.remove(newCh);
-			
-		} else {
-			invited.put(newCh, players);
-		}
-		
-		List<String> channels = new ArrayList<String>();
-		
-		for (String channelInvitation : invitations.get(player)) {
-			channels.add(channelInvitation);
-		}
-		
-		channels.remove(newCh);
-		
-		if (channels.isEmpty()) {
-			invitations.remove(player);
-			
-		} else {
-			invitations.put(player, channels);
-		}
-	}
 	
 	// Assigning an Admin to a channel
 	
@@ -158,26 +124,7 @@ public class TitanChat extends JavaPlugin {
 		sendWarning(player, "You have been banned from " + channelName);
 	}
 	
-	// Check if a channel exists
-	
-	public boolean channelExist(String channelName) {
-		return (getConfig().getConfigurationSection("channels").getKeys(false).contains(channelName));
-	}
-	
-	// Switching channels
-	
-	public void channelSwitch(Player player, String oldCh, String newCh) {
-		leaveChannel(player, oldCh);
-		enterChannel(player, newCh);
-	}
-	
-	public boolean canAccess(Player player, String channelName) {
-		if (isStaff(player))
-			return true;
-		
-		if (isBanned(player, channelName))
-			return false;
-		
+	public boolean canAccess(Player player, String channelName) {		
 		if (has(player, "TitanChat.access.*"))
 			return true;
 		
@@ -206,32 +153,6 @@ public class TitanChat extends JavaPlugin {
 		return false;
 	}
 	
-	public boolean canDemote(Player player, String channelName) {
-		if (has(player, "TitanChat.demote.*"))
-			return true;
-		
-		if (has(player, "TitanChat.demote." + channelName))
-			return true;
-		
-		if (isAdmin(player))
-			return true;
-		
-		return false;
-	}
-	
-	public boolean canInvite(Player player, String channelName) {
-		if (has(player, "TitanChat.invite.*"))
-			return true;
-		
-		if (has(player, "TitanChat.invite." + channelName))
-			return true;
-		
-		if (isAdmin(player))
-			return true;
-		
-		return false;
-	}
-	
 	public boolean canKick(Player player, String channelName) {
 		if (has(player, "TitanChat.kick.*"))
 			return true;
@@ -246,6 +167,9 @@ public class TitanChat extends JavaPlugin {
 	}
 	
 	public boolean canMute(Player player) {
+		if (has(player, "TitanChat.silence"))
+			return true;
+		
 		if (has(player, "TitanChat.mute"))
 			return true;
 		
@@ -255,11 +179,11 @@ public class TitanChat extends JavaPlugin {
 		return false;
 	}
 	
-	public boolean canPromote(Player player, String channelName) {
-		if (has(player, "TitanChat.promote.*"))
+	public boolean canRank(Player player, String channelName) {
+		if (has(player, "TitanChat.rank.*"))
 			return true;
 		
-		if (has(player, "TitanChat.promote." + channelName))
+		if (has(player, "TitanChat.rank." + channelName))
 			return true;
 		
 		if (isAdmin(player))
@@ -268,17 +192,17 @@ public class TitanChat extends JavaPlugin {
 		return false;
 	}
 	
-	public boolean canWhitelist(Player player, String channelName) {
-		if (has(player, "TitanChat.whitelist.*"))
-			return true;
-		
-		if (has(player, "TitanChat.whitelist." + channelName))
-			return true;
-		
-		if (isAdmin(player))
-			return true;
-		
-		return false;
+	// Check if a channel exists
+	
+	public boolean channelExist(String channelName) {
+		return (getConfig().getConfigurationSection("channels").getKeys(false).contains(channelName));
+	}
+	
+	// Switching channels
+	
+	public void channelSwitch(Player player, String oldCh, String newCh) {
+		leaveChannel(player, oldCh);
+		enterChannel(player, newCh);
 	}
 	
 	// Creating channels
@@ -286,6 +210,7 @@ public class TitanChat extends JavaPlugin {
 	public void createChannel(Player player, String channelName) {
 		assignAdmin(player, channelName);
 		channelSwitch(player, getChannel(player), channelName);
+		silenced.put(channelName, false);
 		sendInfo(player, "You have created " + channelName + " channel");
 	}
 	
@@ -301,40 +226,6 @@ public class TitanChat extends JavaPlugin {
 		}
 		
 		return str.toString();
-	}
-	
-	// Declining a channel join request
-	
-	public void decline(Player player, String newCh) {
-		List<Player> players = new ArrayList<Player>();
-		
-		for (Player invitedPlayer : invited.get(newCh)) {
-			players.add(invitedPlayer);
-		}
-		
-		players.remove(player);
-		
-		if (players.isEmpty()) {
-			invited.remove(newCh);
-			
-		} else {
-			invited.put(newCh, players);
-		}
-		
-		List<String> channels = new ArrayList<String>();
-		
-		for (String channelInvitation : invitations.get(player)) {
-			channels.add(channelInvitation);
-		}
-		
-		channels.remove(newCh);
-		
-		if (channels.isEmpty()) {
-			invitations.remove(player);
-			
-		} else {
-			invitations.put(player, channels);
-		}
 	}
 	
 	// Deleting channels
@@ -355,15 +246,15 @@ public class TitanChat extends JavaPlugin {
 			participants.remove(channelName);
 		}
 		
-		if (getChannelAdmins(channelName) != null) {
+		if (channelAdmins.get(channelName) != null) {
 			channelAdmins.remove(channelName);
 		}
 		
-		if (getChannelMembers(channelName) != null) {
+		if (channelMembers.get(channelName) != null) {
 			channelMembers.remove(channelName);
 		}
 		
-		if (getChannelBans(channelName) != null) {
+		if (channelBans.get(channelName) != null) {
 			channelBans.remove(channelName);
 		}
 	}
@@ -419,18 +310,6 @@ public class TitanChat extends JavaPlugin {
 		return channel.get(player);
 	}
 	
-	// Gets the admins of the channel
-	
-	public List<Player> getChannelAdmins(String channelName) {
-		return channelAdmins.get(channelName);
-	}
-	
-	// Gets the banned players of the channel
-	
-	public List<Player> getChannelBans(String channelName) {
-		return channelBans.get(channelName);
-	}
-	
 	// Gets the player config of channels
 	
 	public FileConfiguration getChannelConfig() {
@@ -441,12 +320,6 @@ public class TitanChat extends JavaPlugin {
 		return channelConfig;
 	}
 	
-	// Gets the members of the channel
-	
-	public List<Player> getChannelMembers(String channelName) {
-		return channelMembers.get(channelName);
-	}
-	
 	// Gets the name of the default channel
 	
 	public String getDefaultChannel() {
@@ -455,11 +328,8 @@ public class TitanChat extends JavaPlugin {
 				defaultChannel = channel;
 			}
 		}
+		
 		return defaultChannel;
-	}
-	
-	public Logger getLogger() {
-		return log;
 	}
 	
 	// Gets the participants of a channel
@@ -537,6 +407,12 @@ public class TitanChat extends JavaPlugin {
 		return player.hasPermission(permissionNode);
 	}
 	
+	// Check for Voice
+	
+	public boolean hasVoice(Player player) {
+		return has(player, "TitanChat.voice");
+	}
+	
 	public void infoLog(String info) {
 		log.info("[" + this + "] " + info);
 	}
@@ -567,6 +443,45 @@ public class TitanChat extends JavaPlugin {
 		}
 		
 		sendInfo(player, "You have been invited to chat on " + channelName);
+	}
+	
+	// Responding to invites
+	
+	public void inviteResponse(Player player, String channelName, boolean accept) {
+		List<Player> players = new ArrayList<Player>();
+		
+		for (Player invitedPlayer : invited.get(channelName)) {
+			players.add(invitedPlayer);
+		}
+		
+		players.remove(player);
+		
+		if (players.isEmpty()) {
+			invited.remove(channelName);
+			
+		} else {
+			invited.put(channelName, players);
+		}
+		
+		List<String> channels = new ArrayList<String>();
+		
+		for (String channelInvitation : invitations.get(player)) {
+			channels.add(channelInvitation);
+		}
+		
+		channels.remove(channelName);
+		
+		if (channels.isEmpty()) {
+			invitations.remove(player);
+			
+		} else {
+			invitations.put(player, channels);
+		}
+		
+		if (accept) {
+			String channel = getChannel(player);
+			channelSwitch(player, channel, channelName);
+		}
 	}
 	
 	// Check if the player is an admin of that channel
@@ -705,6 +620,24 @@ public class TitanChat extends JavaPlugin {
 		return false;
 	}
 	
+	// Check if the server is silenced
+	
+	public boolean isSilenced() {
+		return silence;
+	}
+	
+	// Check if the channel is silenced
+	
+	public boolean isSilenced(String channelName) {
+		if (channelName == getDefaultChannel())
+			return silence;
+		
+		if (channelName == getStaffChannel())
+			return false;
+		
+		return silenced.get(channelName);
+	}
+	
 	// Check if the player is staff
 	
 	public boolean isStaff(Player player) {
@@ -782,22 +715,88 @@ public class TitanChat extends JavaPlugin {
 					sendInfo(player, "Channel List: " + createList(channels));
 					return true;
 					
-				} else {
-					sendWarning(player, "Invalid Command");
 				}
+				
+				// /titanchat commands
+				// The TitanChat Command Directory
+				
+				if (args[0].equalsIgnoreCase("commands")) {
+					player.sendMessage("TitanChat Commands");
+					player.sendMessage("Command: /titanchat [action] [argument]");
+					player.sendMessage("Alias: /tc action [argument]");
+					player.sendMessage("/titanchat commands [page]");
+					return true;
+					
+				}
+				
+				if (args[0].equalsIgnoreCase("silence")) {
+					silence = (silence) ? false : true;
+					return true;
+				}
+				
+				sendWarning(player, "Invalid Command");
 				
 			} else if (args.length == 2) {
 				for (Commands command : Commands.values()) {
 					if (command.toString().equalsIgnoreCase(args[0])) {
-						new TitanChatCommands(this).onCommand(player, args[0], args[1]);
+						new TitanChatCommands(this).onCommand(player, args[0], args[1], getChannel(player));
 						return true;
 					}
 				}
 				
 				sendWarning(player, "Invalid Command");
+				
+			} else if (args.length == 3) {
+				if (channelExist(args[2])) {
+					for (Commands command : Commands.values()) {
+						if (command.toString().equalsIgnoreCase(args[0])) {
+							new TitanChatCommands(this).onCommand(player, args[0], args[1], args[2]);
+							return true;
+						}
+					}
+					
+				} else {
+					sendWarning(player, "Channel does not exist");
+				}
+				
+				sendWarning(player, "Invalid Command");
+				
+			} else {
+				
+				// /titanchat broadcast [message]
+				// Broadcasts the message globally
+				
+				if (args[0].equalsIgnoreCase("broadcast")) {
+					if (player.hasPermission("TitanChat.broadcast")) {
+						ChatColor broadcastColour = ChatColor.valueOf(getConfig().getString("broadcast.colour"));
+						String tag = getConfig().getString("broadcast.tag");
+						
+						StringBuilder str = new StringBuilder();
+						
+						for (int word = 1; word < args.length ; word++) {
+							if (str.length() > 0) {
+								str.append(" ");
+							}
+							
+							str.append(args[word]);
+						}
+						
+						String msg = new Channel(this).format(player, broadcastColour, tag, str.toString(), true);
+						
+						for (Player receiver : getServer().getOnlinePlayers()) {
+							receiver.sendMessage(msg);
+						}
+						
+						return true;
+						
+					} else {
+						sendWarning(player, "You do not have permission to broadcast");
+					}
+					
+				} else {
+					sendWarning(player, "Invalid Command");
+				}
 			}
-			
-			sendWarning(player, "Invalid Argument Length");
 		}
 		
 		return false;
@@ -921,6 +920,10 @@ public class TitanChat extends JavaPlugin {
 			}
 		}
 		
+		for (String channel : getConfig().getConfigurationSection("channels").getKeys(false)) {
+			silenced.put(channel, false);
+		}
+		
 		infoLog("Chat Communities Loaded");
 	}
 	
@@ -971,8 +974,10 @@ public class TitanChat extends JavaPlugin {
 		
 		try {
 			channelConfig.save(channelConfigFile);
+			
 		} catch (IOException e) {
 			log.severe("Could not save config to " + channelConfigFile);
+			
 		}
 	}
 	
@@ -1004,8 +1009,11 @@ public class TitanChat extends JavaPlugin {
 		return (permission != null);
 	}
 	
-	public boolean vault() {
-		return getServer().getPluginManager().getPlugin("Vault") != null;
+	// Toggle between silencing for channels
+	
+	public void silence(String channelName) {
+		boolean silence = (silenced.get(channelName)) ? false : true;
+		silenced.put(channelName, silence);
 	}
 	
 	// Unbans the player from the channel
@@ -1052,6 +1060,10 @@ public class TitanChat extends JavaPlugin {
 		}
 		
 		sendInfo(player, "You have been unmuted on " + channelName);
+	}
+	
+	public boolean vault() {
+		return getServer().getPluginManager().getPlugin("Vault") != null;
 	}
 	
 	// Whitelisting a Member on a channel
