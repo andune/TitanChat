@@ -17,6 +17,7 @@ permissions:
             TitanChat.delete: true
             TitanChat.broadcast: true
             TitanChat.silence: true
+            TitanChat.force: true
             TitanChat.access.*: true
             TitanChat.ban.*: true
             TitanChat.kick.*: true

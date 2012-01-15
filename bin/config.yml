@@ -1,3 +1,13 @@
+# List of available channel-colours:
+# AQUA, BLACK, BLUE, DARK_AQUA, DARK_BLUE,
+# DARK_GRAY, DARK_GREEN, DARK_PURPLE,
+# DARK_RED, GOLD, GRAY, GREEN,
+# LIGHT_PURPLE, RED, WHITE, YELLOW
+
+local:
+    colour: YELLOW
+    tag: '[L]'
+    radius: 15
 broadcast:
     colour: WHITE
     tag: '[Broadcast]'
@@ -26,9 +36,5 @@ channels:
         channel-tag: '[S]'
         channel-colour: RED
         staff: true
-
-# List of available channel-colours:
-# AQUA, BLACK, BLUE, DARK_AQUA, DARK_BLUE,
-# DARK_GRAY, DARK_GREEN, DARK_PURPLE,
-# DARK_RED, GOLD, GRAY, GREEN,
-# LIGHT_PURPLE, RED, WHITE, YELLOW
+filter:
+- this

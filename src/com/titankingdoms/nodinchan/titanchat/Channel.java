@@ -32,6 +32,22 @@ public class Channel {
 		return message.replaceAll("(&([a-f0-9A-F]))", "");
 	}
 	
+	// Filter
+	
+	public String filter(String line) {
+		String filtered = line;
+		
+		if (plugin.getConfig().getStringList("filter") != null) {
+			for (String word : plugin.getConfig().getStringList("filter")) {
+				if (line.contains(word)) {
+					filtered = line.replaceAll(word, word.replaceAll("[A-Za-z]", "*"));
+				}
+			}
+		}
+		
+		return filtered;
+	}
+	
 	// Formats the message
 	
 	public String format(Player player, ChatColor colour, String channeltag, String msg, boolean colourize) {
@@ -42,10 +58,10 @@ public class Channel {
 		String suffix = colourize(plugin.getSuffix(player));
 		
 		if (colourize) {
-			message = tag + " " + prefix + colour + colourize(player.getDisplayName()) + suffix + colour + ": " + colourize(msg);
+			message = tag + " " + prefix + colour + colourize(player.getDisplayName()) + suffix + colour + ": " + colourize(filter(msg));
 			
 		} else {
-			message = tag + " " + prefix + colour + colourize(player.getDisplayName()) + suffix + colour + ": " + decolourize(msg);
+			message = tag + " " + prefix + colour + colourize(player.getDisplayName()) + suffix + colour + ": " + decolourize(filter(msg));
 		}
 		
 		return message;

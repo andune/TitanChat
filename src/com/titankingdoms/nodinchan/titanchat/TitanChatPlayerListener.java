@@ -1,7 +1,11 @@
 package com.titankingdoms.nodinchan.titanchat;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
+import org.bukkit.ChatColor;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -27,17 +31,47 @@ public class TitanChatPlayerListener extends PlayerListener {
 		
 		String msg = event.getMessage();
 		
-		if (plugin.isMuted(player, plugin.getChannel(player))) {
-			event.setCancelled(true);
-			return;
-		}
-		
 		if (plugin.isSilenced() && !plugin.hasVoice(player)) {
 			event.setCancelled(true);
 			return;
 		}
 		
+		if (plugin.inLocal(player)) {
+			ChatColor colour = ChatColor.valueOf(plugin.getConfig().getString("local.colour"));
+			String tag = plugin.getConfig().getString("local.tag");
+			int radius = plugin.getConfig().getInt("local.radius");
+			
+			List<Player> receivers = new ArrayList<Player>();
+			
+			if (!player.getNearbyEntities(radius, radius, radius).isEmpty()) {
+				for (Entity entity : player.getNearbyEntities(radius, radius, radius)) {
+					if (entity instanceof Player) {
+						receivers.add((Player) entity);
+					}
+				}
+			}
+			
+			receivers.add(player);
+			
+			for (Player receiver : receivers) {
+				receiver.sendMessage(ch.format(player, colour, tag, msg, true));
+			}
+			
+			if (receivers.size() == 1)
+				plugin.sendInfo(player, "Nobody hears you...");
+			
+			Logger.getLogger("TitanLog").info("<" + player.getName() + "> " + ch.decolourize(msg));
+			
+			event.setCancelled(true);
+			return;
+		}
+		
 		if (plugin.isSilenced(plugin.getChannel(player)) && !plugin.hasVoice(player)) {
+			event.setCancelled(true);
+			return;
+		}
+		
+		if (plugin.isMuted(player, plugin.getChannel(player))) {
 			event.setCancelled(true);
 			return;
 		}
@@ -85,11 +119,19 @@ public class TitanChatPlayerListener extends PlayerListener {
 		}
 		
 		plugin.enterChannel(event.getPlayer(), channelName);
+		
+		if (plugin.isSilenced())
+			plugin.sendWarning(event.getPlayer(), "All channels have been silenced");
 	}
 	
 	@Override
 	public void onPlayerQuit(PlayerQuitEvent event) {
-		String channelName = plugin.getChannel(event.getPlayer());
-		plugin.leaveChannel(event.getPlayer(), channelName);
+		if (plugin.inLocal(event.getPlayer())) {
+			plugin.leaveLocal(event.getPlayer());
+			
+		} else {
+			String channelName = plugin.getChannel(event.getPlayer());
+			plugin.leaveChannel(event.getPlayer(), channelName);
+		}
 	}
 }
