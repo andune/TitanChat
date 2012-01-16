@@ -45,6 +45,8 @@ public class TitanChat extends JavaPlugin {
 	
 	private List<Player> local = new ArrayList<Player>();
 	
+	private List<String> channels = new ArrayList<String>();
+	
 	private Map<String, List<Player>> channelAdmins = new HashMap<String, List<Player>>();
 	private Map<String, List<Player>> channelMembers = new HashMap<String, List<Player>>();
 	private Map<String, List<Player>> channelBans = new HashMap<String, List<Player>>();
@@ -135,6 +137,9 @@ public class TitanChat extends JavaPlugin {
 			return true;
 		
 		if (has(player, "TitanChat.access." + channelName))
+			return true;
+		
+		if (isPublic(channelName))
 			return true;
 		
 		if (isAdmin(player, channelName))
@@ -229,6 +234,7 @@ public class TitanChat extends JavaPlugin {
 		assignAdmin(player, channelName);
 		channelSwitch(player, getChannel(player), channelName);
 		silenced.put(channelName, false);
+		channels.add(channelName);
 		sendInfo(player, "You have created " + channelName + " channel");
 	}
 	
@@ -275,6 +281,8 @@ public class TitanChat extends JavaPlugin {
 		if (channelBans.get(channelName) != null) {
 			channelBans.remove(channelName);
 		}
+		
+		channels.remove(channelName);
 	}
 	
 	// Demoting a player on a channel
@@ -347,6 +355,10 @@ public class TitanChat extends JavaPlugin {
 	
 	public String getChannel(Player player) {
 		return channel.get(player);
+	}
+	
+	public int getChannelAmount() {
+		return channels.size();
 	}
 	
 	// Gets the player config of channels
@@ -554,7 +566,7 @@ public class TitanChat extends JavaPlugin {
 		
 		List<Player> players = new ArrayList<Player>();
 		
-		if (!channelAdmins.get(channelName).isEmpty()) {
+		if (channelAdmins.get(channelName) != null) {
 			players = channelAdmins.get(channelName);
 		}
 		
@@ -567,7 +579,7 @@ public class TitanChat extends JavaPlugin {
 	// Check if the player is banned
 	
 	public boolean isBanned(Player player, String channelName) {
-		if (channelBans == null || channelBans.get(channelName) == null)
+		if (channelBans.get(channelName) == null)
 			return false;
 		
 		if (channelBans.isEmpty())
@@ -615,8 +627,10 @@ public class TitanChat extends JavaPlugin {
 	// Check if player is following
 	
 	public boolean isFollowing(Player player, String channelName) {
-		if (followers != null || followers.get(channelName) != null)
-			return followers.get(channelName).contains(player);
+		if (followers.get(channelName) != null) {
+			if (followers.get(channelName).contains(player))
+				return true;
+		}
 		
 		return false;
 	}
@@ -649,7 +663,7 @@ public class TitanChat extends JavaPlugin {
 		
 		List<Player> players = new ArrayList<Player>();
 		
-		if (!channelMembers.get(channelName).isEmpty()) {
+		if (channelMembers.get(channelName) != null) {
 			players = channelMembers.get(channelName);
 			
 			if (players.contains(player))
@@ -662,7 +676,7 @@ public class TitanChat extends JavaPlugin {
 	// Check if the player is muted
 	
 	public boolean isMuted(Player player, String channelName) {
-		if (muted.isEmpty() || muted.get(channelName) == null)
+		if (muted.get(channelName) == null)
 			return false;
 		
 		if (muted.get(channelName).contains(player))
@@ -789,10 +803,10 @@ public class TitanChat extends JavaPlugin {
 				// The TitanChat Command Directory
 				
 				if (args[0].equalsIgnoreCase("commands")) {
-					player.sendMessage("TitanChat Commands");
-					player.sendMessage("Command: /titanchat [action] [argument]");
-					player.sendMessage("Alias: /tc action [argument]");
-					player.sendMessage("/titanchat commands [page]");
+					player.sendMessage(ChatColor.AQUA + "TitanChat Commands");
+					player.sendMessage(ChatColor.AQUA + "Command: /titanchat [action] [argument]");
+					player.sendMessage(ChatColor.AQUA + "Alias: /tc action [argument]");
+					player.sendMessage(ChatColor.AQUA + "/titanchat commands [page]");
 					return true;
 					
 				}
@@ -801,7 +815,12 @@ public class TitanChat extends JavaPlugin {
 					silence = (silence) ? false : true;
 					
 					for (Player receiver : getServer().getOnlinePlayers()) {
-						sendWarning(receiver, "All channels have been silenced");
+						if (silence) {
+							sendWarning(receiver, "All channels have been silenced");
+							
+						} else {
+							sendInfo(receiver, "Channels are no longer silenced");
+						}
 					}
 					return true;
 				}
@@ -824,7 +843,7 @@ public class TitanChat extends JavaPlugin {
 				sendWarning(player, "Invalid Command");
 				
 			} else if (args.length == 3) {
-				if (args[0].equalsIgnoreCase("broadcast")) {
+				if (args[0].equalsIgnoreCase("broadcast") || args[0].equalsIgnoreCase("filter")) {
 					for (Commands command : Commands.values()) {
 						if (command.toString().equalsIgnoreCase(args[0])) {
 							new TitanChatCommands(this).onCommand(player, args[0], args[1], args[2]);
@@ -832,27 +851,26 @@ public class TitanChat extends JavaPlugin {
 						}
 					}
 					
+				} else if (args[0].equalsIgnoreCase("commands")) {
+					player.sendMessage(ChatColor.AQUA + "TitanChat Commands");
+					player.sendMessage(ChatColor.AQUA + "Command: /titanchat [action] [argument]");
+					player.sendMessage(ChatColor.AQUA + "Alias: /tc action [argument]");
+					player.sendMessage(ChatColor.AQUA + "/titanchat commands [page]");
+					return true;
+					
 				} else {
 					if (channelExist(args[2])) {
 						for (Commands command : Commands.values()) {
 							if (command.toString().equalsIgnoreCase(args[0])) {
 								new TitanChatCommands(this).onCommand(player, args[0], args[1], args[2]);
-								return true;
 							}
 						}
 						
 					} else {
 						sendWarning(player, "Channel does not exist");
 					}
-				}
-				
-				if (args[0].equalsIgnoreCase("commands")) {
-					player.sendMessage("TitanChat Commands");
-					player.sendMessage("Command: /titanchat [action] [argument]");
-					player.sendMessage("Alias: /tc action [argument]");
-					player.sendMessage("/titanchat commands [page]");
+
 					return true;
-					
 				}
 				
 				sendWarning(player, "Invalid Command");
@@ -869,7 +887,7 @@ public class TitanChat extends JavaPlugin {
 						
 						StringBuilder str = new StringBuilder();
 						
-						for (int word = 1; word < args.length ; word++) {
+						for (int word = 1; word < args.length; word++) {
 							if (str.length() > 0) {
 								str.append(" ");
 							}
@@ -884,24 +902,45 @@ public class TitanChat extends JavaPlugin {
 						}
 						
 						log.info("<" + player.getName() + "> " + new Channel(this).decolourize(msg));
-						return true;
 						
 					} else {
 						sendWarning(player, "You do not have permission to broadcast");
 					}
-					
-					if (args[0].equalsIgnoreCase("commands")) {
-						player.sendMessage("TitanChat Commands");
-						player.sendMessage("Command: /titanchat [action] [argument]");
-						player.sendMessage("Alias: /tc action [argument]");
-						player.sendMessage("/titanchat commands [page]");
-						return true;
-						
-					}
-					
-				} else {
-					sendWarning(player, "Invalid Command");
+
+					return true;
 				}
+				
+				if (args[0].equalsIgnoreCase("commands")) {
+					player.sendMessage(ChatColor.AQUA + "TitanChat Commands");
+					player.sendMessage(ChatColor.AQUA + "Command: /titanchat [action] [argument]");
+					player.sendMessage(ChatColor.AQUA + "Alias: /tc action [argument]");
+					player.sendMessage(ChatColor.AQUA + "/titanchat commands [page]");
+					return true;
+				}
+				
+				if (args[0].equalsIgnoreCase("filter")) {
+					if (isStaff(player)) {
+						StringBuilder str = new StringBuilder();
+						
+						for (int word = 1; word < args.length; word++) {
+							if (str.length() > 0) {
+								str.append(" ");
+							}
+							
+							str.append(args[word]);
+						}
+						
+						new ChannelManager(this).filter(str.toString());
+						sendInfo(player, "'" + str.toString() + "' has been filtered");
+						
+					} else {
+						sendWarning(player, "You do not have permission to use this command");
+					}
+
+					return true;
+				}
+				
+				sendWarning(player, "Invalid Command");
 			}
 		}
 		
@@ -945,6 +984,7 @@ public class TitanChat extends JavaPlugin {
 		if (!channelConfig.exists()) {
 			infoLog("Loading default channel players config");
 			getChannelConfig().options().copyDefaults(true);
+			getChannelConfig().options().copyHeader(true);
 			saveChannelConfig();
 		}
 		
@@ -974,10 +1014,15 @@ public class TitanChat extends JavaPlugin {
 			channelBans.clear();
 		}
 		
+		if (followers != null) {
+			followers.clear();
+		}
+		
 		for (String channel : getChannelConfig().getConfigurationSection("channels").getKeys(false)) {
 			List<String> adminNames = new ArrayList<String>();
 			List<String> memberNames = new ArrayList<String>();
 			List<String> bannedNames = new ArrayList<String>();
+			List<String> followerNames = new ArrayList<String>();
 			
 			if (getChannelConfig().getStringList("channels." + channel + ".admins") != null) {
 				adminNames = getChannelConfig().getStringList("channels." + channel + ".admins");
@@ -991,9 +1036,14 @@ public class TitanChat extends JavaPlugin {
 				bannedNames = getChannelConfig().getStringList("channels." + channel + ".black-list");
 			}
 			
+			if (getChannelConfig().getStringList("channels." + channel + ".followers") != null) {
+				followerNames = getChannelConfig().getStringList("channels." + channel + ".followers");
+			}
+			
 			List<Player> admins = new ArrayList<Player>();
 			List<Player> members = new ArrayList<Player>();
 			List<Player> banned = new ArrayList<Player>();
+			List<Player> following = new ArrayList<Player>();
 			
 			if (!adminNames.isEmpty()) {
 				for (String name : adminNames) {
@@ -1001,8 +1051,6 @@ public class TitanChat extends JavaPlugin {
 				}
 				
 				channelAdmins.put(channel, admins);
-				
-				infoLog("Admins of " + channel + " found");
 			}
 			
 			if (!memberNames.isEmpty()) {
@@ -1011,8 +1059,6 @@ public class TitanChat extends JavaPlugin {
 				}
 				
 				channelMembers.put(channel, members);
-				
-				infoLog("Members of " + channel + " found");
 			}
 			
 			if (!bannedNames.isEmpty()) {
@@ -1021,9 +1067,17 @@ public class TitanChat extends JavaPlugin {
 				}
 				
 				channelBans.put(channel, banned);
-				
-				infoLog("Banned Players of " + channel + " found");
 			}
+			
+			if (!followerNames.isEmpty()) {
+				for (String name : followerNames) {
+					following.add(getPlayer(name));
+				}
+				
+				followers.put(channel, following);
+			}
+			
+			channels.add(channel);
 		}
 		
 		for (String channel : getConfig().getConfigurationSection("channels").getKeys(false)) {

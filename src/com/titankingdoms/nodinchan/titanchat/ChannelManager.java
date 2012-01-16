@@ -80,6 +80,32 @@ public class ChannelManager {
 		plugin.saveChannelConfig();
 	}
 	
+	// Adds the phrase to the filter
+	
+	public void filter(String phrase) {
+		List<String> filter = plugin.getConfig().getStringList("filter");
+		filter.add(phrase);
+		plugin.getConfig().set("filter", filter);
+		plugin.saveConfig();
+	}
+	
+	// Adds a player to the followers list
+	
+	public void follow(String name, String channelName) {
+		if (plugin.getChannelConfig().getStringList("channels." + channelName + ".followers") != null) {
+			List<String> followers = plugin.getChannelConfig().getStringList("channels." + channelName + ".followers");
+			followers.add(name);
+			plugin.getChannelConfig().set("channels." + channelName + ".followers", followers);
+			
+		} else {
+			List<String> followers = new ArrayList<String>();
+			followers.add(name);
+			plugin.getChannelConfig().set("channels." + channelName + ".followers", followers);
+		}
+		
+		plugin.saveChannelConfig();
+	}
+	
 	// Promotes a player by changing the config
 	
 	public void promote(String name, String channelName) {
@@ -129,6 +155,15 @@ public class ChannelManager {
 			whitelistMember(name, channelName);
 		}
 		
+		plugin.saveChannelConfig();
+	}
+	
+	// Removes the player from the followers list
+	
+	public void unfollow(String name, String channelName) {
+		List<String> followers = plugin.getChannelConfig().getStringList("channels." + channelName + ".followers");
+		followers.remove(name);
+		plugin.getChannelConfig().set("channels." + channelName + ".followers", followers);
 		plugin.saveChannelConfig();
 	}
 	

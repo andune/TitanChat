@@ -23,11 +23,16 @@ public class TitanChatCommands {
 		// Accepts invitation to join the channel
 		
 		case ACCEPT:
-			if (plugin.isInvited(player, arg)) {
-				plugin.inviteResponse(player, arg, true);
+			if (plugin.channelExist(arg)) {
+				if (plugin.isInvited(player, arg)) {
+					plugin.inviteResponse(player, arg, true);
+					
+				} else {
+					plugin.sendWarning(player, "You did not receive any invitations from this channel");
+				}
 				
 			} else {
-				plugin.sendWarning(player, "You did not receive any invitations from this channel");
+				plugin.sendWarning(player, "No such channel");
 			}
 			break;
 			
@@ -35,38 +40,43 @@ public class TitanChatCommands {
 		// Adds a player to the whitelist
 			
 		case ADD:
-			if (plugin.canRank(player, targetChannel)) {
-				if (arg.contains(",")) {
-					List<String> members  = new ArrayList<String>();
-					
-					for (String newMember : arg.split(",")) {
+			if (plugin.channelExist(targetChannel)) {
+				if (plugin.canRank(player, targetChannel)) {
+					if (arg.contains(",")) {
+						List<String> members  = new ArrayList<String>();
+						
+						for (String newMember : arg.split(",")) {
+							if (plugin.getPlayer(arg) != null) {
+								members.add(plugin.getPlayer(newMember).getName());
+							}
+						}
+						
+						if (!members.isEmpty()) {
+							for (String newMember : members) {
+								plugin.whitelistMember(plugin.getPlayer(newMember.replace(" ", "")), targetChannel);
+								chManager.whitelistMember(plugin.getPlayer(newMember.replace(" ", "")).getName(), targetChannel);
+							}
+							
+							plugin.sendInfo(player, plugin.createList(members) + " have been added to the Member List");
+							
+						} else {
+							plugin.sendWarning(player, "Players not online");
+						}
+						
+					} else {
 						if (plugin.getPlayer(arg) != null) {
-							members.add(plugin.getPlayer(newMember).getName());
+							plugin.whitelistMember(plugin.getPlayer(arg), targetChannel);
+							chManager.whitelistMember(plugin.getPlayer(arg).getName(), targetChannel);
+							plugin.sendInfo(player, plugin.getPlayer(arg).getName() + " has been added to the Member List");
+							
+						} else {
+							plugin.sendWarning(player, "Player not online");
 						}
-					}
-					
-					if (!members.isEmpty()) {
-						for (String newMember : members) {
-							plugin.whitelistMember(plugin.getPlayer(newMember.replace(" ", "")), targetChannel);
-							chManager.whitelistMember(plugin.getPlayer(newMember.replace(" ", "")).getName(), targetChannel);
-						}
-						
-						plugin.sendInfo(player, plugin.createList(members) + " have been added to the Member List");
-						
-					} else {
-						plugin.sendWarning(player, "Players not online");
-					}
-					
-				} else {
-					if (plugin.getPlayer(arg) != null) {
-						plugin.whitelistMember(plugin.getPlayer(arg), targetChannel);
-						chManager.whitelistMember(plugin.getPlayer(arg).getName(), targetChannel);
-						plugin.sendInfo(player, plugin.getPlayer(arg).getName() + " has been added to the Member List");
-						
-					} else {
-						plugin.sendWarning(player, "Player not online");
 					}
 				}
+				
+			} else {
+				plugin.sendWarning(player, "No such channel");
 			}
 			break;
 			
@@ -75,21 +85,26 @@ public class TitanChatCommands {
 			
 		case ALLOWCOLORS:
 		case ALLOWCOLOURS:
-			if (plugin.has(player, "TitanChat.admin")) {
-				if (arg.equalsIgnoreCase("true")) {
-					chManager.setAllowColours(targetChannel, true);
-					plugin.sendInfo(player, "You have changed the settings");
-					
-				} else if (arg.equalsIgnoreCase("false")) {
-					chManager.setAllowColours(targetChannel, false);
-					plugin.sendInfo(player, "You have changed the settings");
+			if (plugin.channelExist(targetChannel)) {
+				if (plugin.has(player, "TitanChat.admin")) {
+					if (arg.equalsIgnoreCase("true")) {
+						chManager.setAllowColours(targetChannel, true);
+						plugin.sendInfo(player, "You have changed the settings");
+						
+					} else if (arg.equalsIgnoreCase("false")) {
+						chManager.setAllowColours(targetChannel, false);
+						plugin.sendInfo(player, "You have changed the settings");
+						
+					} else {
+						plugin.sendWarning(player, "True or False?");
+					}
 					
 				} else {
-					plugin.sendWarning(player, "True or False?");
+					plugin.sendWarning(player, "You do not have permission to change the state of this channel");
 				}
 				
 			} else {
-				plugin.sendWarning(player, "You do not have permission to change the state of this channel");
+				plugin.sendWarning(player, "No such channel");
 			}
 			break;
 			
@@ -97,21 +112,26 @@ public class TitanChatCommands {
 		// Bans the player from the channel
 			
 		case BAN:
-			if (plugin.canBan(player, targetChannel)) {
-				if (plugin.getPlayer(arg) != null) {
-					plugin.ban(plugin.getPlayer(arg), targetChannel);
-					chManager.ban(plugin.getPlayer(arg).getName(), targetChannel);
-					
-					for (Player participant : plugin.getParticipants(targetChannel)) {
-						participant.sendMessage(plugin.getPlayer(arg).getName() + " has been banned from the channel");
+			if (plugin.channelExist(targetChannel)) {
+				if (plugin.canBan(player, targetChannel)) {
+					if (plugin.getPlayer(arg) != null) {
+						plugin.ban(plugin.getPlayer(arg), targetChannel);
+						chManager.ban(plugin.getPlayer(arg).getName(), targetChannel);
+						
+						for (Player participant : plugin.getParticipants(targetChannel)) {
+							participant.sendMessage(plugin.getPlayer(arg).getName() + " has been banned from the channel");
+						}
+						
+					} else {
+						plugin.sendWarning(player, "Player not online");
 					}
 					
 				} else {
-					plugin.sendWarning(player, "Player not online");
+					plugin.sendWarning(player, "You do not have permission to ban on this channel");
 				}
 				
 			} else {
-				plugin.sendWarning(player, "You do not have permission to ban on this channel");
+				plugin.sendWarning(player, "No such channel");
 			}
 			break;
 			
@@ -146,17 +166,22 @@ public class TitanChatCommands {
 			
 		case COLOR:
 		case COLOUR:
-			if (plugin.isAdmin(player, targetChannel)) {
-				if (ChatColor.valueOf(arg) != null) {
-					chManager.setColour(targetChannel, arg.toUpperCase());
-					plugin.sendInfo(player, "You have changed the settings");
+			if (plugin.channelExist(targetChannel)) {
+				if (plugin.isAdmin(player, targetChannel)) {
+					if (ChatColor.valueOf(arg) != null) {
+						chManager.setColour(targetChannel, arg.toUpperCase());
+						plugin.sendInfo(player, "You have changed the settings");
+						
+					} else {
+						plugin.sendWarning(player, "Invalid Colour");
+					}
 					
 				} else {
-					plugin.sendWarning(player, "Invalid Colour");
+					plugin.sendWarning(player, "You do not have permission to change the channel colour");
 				}
 				
 			} else {
-				plugin.sendWarning(player, "You do not have permission to change the channel colour");
+				plugin.sendWarning(player, "No such channel");
 			}
 			break;
 			
@@ -182,22 +207,26 @@ public class TitanChatCommands {
 				
 			} else if (arg.equalsIgnoreCase("3")) {
 				player.sendMessage(ChatColor.AQUA + "== TitanChat Command List (3/5) ==");
+				player.sendMessage(ChatColor.AQUA + "filter [phrase] - Adds the phrase to the filter");
+				player.sendMessage(ChatColor.AQUA + "follow [channel] - Follows the channel and receive chat");
+				player.sendMessage(ChatColor.AQUA + "force [player] - Forces the player to join the channel");
 				player.sendMessage(ChatColor.AQUA + "invite [player] - Invites the player to join the channel");
 				player.sendMessage(ChatColor.AQUA + "join [channel] - Joins the channel");
-				player.sendMessage(ChatColor.AQUA + "kick [player] - Kicks the player from the channel");
-				player.sendMessage(ChatColor.AQUA + "list - Lists all channels you have acces to");
-				player.sendMessage(ChatColor.AQUA + "mute [player] - Mutes the player on the channel");
 				
 			} else if (arg.equalsIgnoreCase("4")) {
 				player.sendMessage(ChatColor.AQUA + "== TitanChat Command List (4/5) ==");
+				player.sendMessage(ChatColor.AQUA + "kick [player] - Kicks the player from the channel");
+				player.sendMessage(ChatColor.AQUA + "list - Lists all channels you have acces to");
+				player.sendMessage(ChatColor.AQUA + "mute [player] - Mutes the player on the channel");
 				player.sendMessage(ChatColor.AQUA + "promote [player] - Promotes the player on the channel");
 				player.sendMessage(ChatColor.AQUA + "public [true/false] - Sets whether the channel is public");
-				player.sendMessage(ChatColor.AQUA + "silence [channel] - Silences the channel; Leave out [channel] to silence all");
-				player.sendMessage(ChatColor.AQUA + "tag [tag] - Sets the channel tag");
-				player.sendMessage(ChatColor.AQUA + "unban [player] - Unbans the player from the channel");
 				
 			} else if (arg.equalsIgnoreCase("5")) {
 				player.sendMessage(ChatColor.AQUA + "== TitanChat Command List (5/5) ==");
+				player.sendMessage(ChatColor.AQUA + "silence [channel] - Silences the channel; Leave out [channel] to silence all");
+				player.sendMessage(ChatColor.AQUA + "tag [tag] - Sets the channel tag");
+				player.sendMessage(ChatColor.AQUA + "unban [player] - Unbans the player from the channel");
+				player.sendMessage(ChatColor.AQUA + "unfollow [channel] - Unfollows the channel");
 				player.sendMessage(ChatColor.AQUA + "unmute [player] - Unmutes the player on the channel");
 				
 			} else {
@@ -212,17 +241,38 @@ public class TitanChatCommands {
 		// Creates a new channel
 			
 		case CREATE:
-			if (!plugin.has(player, "TitanChat.create")) {
-				plugin.sendWarning(player, "You do not have permission to create channels");
-			}
-			
-			if (plugin.channelExist(arg)) {
-				plugin.sendWarning(player, "Channel already exists");
+			if (plugin.getConfig().getInt("channel-limit") < 0) {
+				if (plugin.has(player, "TitanChat.create")) {
+					if (plugin.channelExist(arg)) {
+						plugin.sendWarning(player, "Channel already exists");
+						
+					} else {
+						plugin.createChannel(player, arg);
+						chManager.createChannel(player.getName(), arg);
+						plugin.sendInfo(player, "You have created " + arg);
+					}
+					
+				} else {
+					plugin.sendWarning(player, "You do not have permission to create channels");
+				}
+				
+			} else if (plugin.getChannelAmount() < plugin.getConfig().getInt("channel-limit")) {
+				if (plugin.has(player, "TitanChat.create")) {
+					if (plugin.channelExist(arg)) {
+						plugin.sendWarning(player, "Channel already exists");
+						
+					} else {
+						plugin.createChannel(player, arg);
+						chManager.createChannel(player.getName(), arg);
+						plugin.sendInfo(player, "You have created " + arg);
+					}
+					
+				} else {
+					plugin.sendWarning(player, "You do not have permission to create channels");
+				}
 				
 			} else {
-				plugin.createChannel(player, arg);
-				chManager.createChannel(player.getName(), arg);
-				plugin.sendInfo(player, "You have created " + arg);
+				plugin.sendWarning(player, "Cannot create channel - Limit Passed");
 			}
 			break;
 			
@@ -230,12 +280,17 @@ public class TitanChatCommands {
 		// Declines invitation to join the channel
 			
 		case DECLINE:
-			if (plugin.isInvited(player, arg)) {
-				plugin.inviteResponse(player, arg, false);
-				plugin.sendInfo(player, "You have declined the invitation");
+			if (plugin.channelExist(arg)) {
+				if (plugin.isInvited(player, arg)) {
+					plugin.inviteResponse(player, arg, false);
+					plugin.sendInfo(player, "You have declined the invitation");
+					
+				} else {
+					plugin.sendWarning(player, "You did not receive any invitations from this channel");
+				}
 				
 			} else {
-				plugin.sendWarning(player, "You did not receive any invitations from this channel");
+				plugin.sendWarning(player, "No such channel");
 			}
 			break;
 			
@@ -270,23 +325,46 @@ public class TitanChatCommands {
 		// Demotes the player on the channel
 			
 		case DEMOTE:
-			if (plugin.canRank(player, targetChannel)) {
-				if (plugin.getPlayer(arg) != null) {
-					if (plugin.isAdmin(plugin.getPlayer(arg), targetChannel)) {
-						plugin.demote(plugin.getPlayer(arg), targetChannel);
-						chManager.demote(plugin.getPlayer(arg).getName(), targetChannel);
-						plugin.sendInfo(player, "You have demoted " + plugin.getPlayer(arg).getName());
+			if (plugin.channelExist(targetChannel)) {
+				if (plugin.canRank(player, targetChannel)) {
+					if (plugin.getPlayer(arg) != null) {
+						if (plugin.isAdmin(plugin.getPlayer(arg), targetChannel)) {
+							plugin.demote(plugin.getPlayer(arg), targetChannel);
+							chManager.demote(plugin.getPlayer(arg).getName(), targetChannel);
+							plugin.sendInfo(player, "You have demoted " + plugin.getPlayer(arg).getName());
+							
+						} else {
+							plugin.sendWarning(player, plugin.getPlayer(arg).getName() + " is not an Admin");
+						}
 						
 					} else {
-						plugin.sendWarning(player, plugin.getPlayer(arg).getName() + " is not an Admin");
+						plugin.sendWarning(player, "Player not online");
 					}
 					
 				} else {
-					plugin.sendWarning(player, "Player not online");
+					plugin.sendWarning(player, "You do not have permission to demote players on this channel");
 				}
 				
 			} else {
-				plugin.sendWarning(player, "You do not have permission to demote players on this channel");
+				plugin.sendWarning(player, "No such channel");
+			}
+			
+		// /titanchat filter [phrase]
+		// Adds the phrase to the filter
+			
+		case FILTER:
+			if (plugin.isStaff(player)) {
+				if (plugin.channelExist(targetChannel)) {
+					chManager.filter(arg);
+					plugin.sendInfo(player, "'" +  arg + "' has been filtered");
+					
+				} else {
+					chManager.filter(arg + " " + targetChannel);
+					plugin.sendInfo(player, "'" + arg + " " + targetChannel + "' has been filtered");
+				}
+				
+			} else {
+				plugin.sendWarning(player, "You do not have permission to use this command");
 			}
 			break;
 			
@@ -294,12 +372,18 @@ public class TitanChatCommands {
 		// Follows the channel
 			
 		case FOLLOW:
-			if (plugin.channelExist(targetChannel)) {
-				if (plugin.isFollowing(player, targetChannel)) {
-					plugin.sendWarning(player, "You are already following " + targetChannel);
+			if (plugin.channelExist(arg)) {
+				if (plugin.canAccess(player, arg)) {
+					if (plugin.isFollowing(player, arg)) {
+						plugin.sendWarning(player, "You are already following " + arg);
+						
+					} else {
+						plugin.follow(player, arg);
+						chManager.follow(player.getName(), arg);
+					}
 					
 				} else {
-					plugin.follow(player, targetChannel);
+					plugin.sendWarning(player, "You do not have permission to follow that channel");
 				}
 				
 			} else {
@@ -307,19 +391,24 @@ public class TitanChatCommands {
 			}
 			break;
 			
-		// /titanchat force [player] [channel]
+		// /titanchat force [player]
 		// Forces the player to join the channel
 			
 		case FORCE:
-			if (plugin.has(player, "TitanChat.force")) {
-				if (plugin.getPlayer(arg) != null) {
-					plugin.channelSwitch(plugin.getPlayer(arg), plugin.getChannel(plugin.getPlayer(arg)), targetChannel);
-					plugin.sendInfo(player, "You have forced " + plugin.getPlayer(arg).getName() + " to join the channel");
-					plugin.sendInfo(plugin.getPlayer(arg), "You have been forced to join " + targetChannel);
-					
-				} else {
-					plugin.sendWarning(player, "Player not online");
+			if (plugin.channelExist(targetChannel)) {
+				if (plugin.has(player, "TitanChat.force")) {
+					if (plugin.getPlayer(arg) != null) {
+						plugin.channelSwitch(plugin.getPlayer(arg), plugin.getChannel(plugin.getPlayer(arg)), targetChannel);
+						plugin.sendInfo(player, "You have forced " + plugin.getPlayer(arg).getName() + " to join the channel");
+						plugin.sendInfo(plugin.getPlayer(arg), "You have been forced to join " + targetChannel);
+						
+					} else {
+						plugin.sendWarning(player, "Player not online");
+					}
 				}
+				
+			} else {
+				plugin.sendWarning(player, "No such channel");
 			}
 			break;
 			
@@ -327,17 +416,19 @@ public class TitanChatCommands {
 		// Invites the player to chat on the channel
 			
 		case INVITE:
-			if (plugin.isAdmin(player, targetChannel)) {
-				if (plugin.getPlayer(arg) != null) {
-					plugin.invite(plugin.getServer().getPlayer(arg), targetChannel);
-					plugin.sendInfo(player, "You have invited " + plugin.getPlayer(arg).getName());
+			if (plugin.channelExist(targetChannel)) {
+				if (plugin.isAdmin(player, targetChannel)) {
+					if (plugin.getPlayer(arg) != null) {
+						plugin.invite(plugin.getServer().getPlayer(arg), targetChannel);
+						plugin.sendInfo(player, "You have invited " + plugin.getPlayer(arg).getName());
+						
+					} else {
+						plugin.sendWarning(player, "Player not online");
+					}
 					
 				} else {
-					plugin.sendWarning(player, "Player not online");
+					plugin.sendWarning(player, "You do not have permission to invite players on this channel");
 				}
-				
-			} else {
-				plugin.sendWarning(player, "You do not have permission to invite players on this channel");
 			}
 			break;
 			
@@ -354,28 +445,28 @@ public class TitanChatCommands {
 				plugin.sendInfo(player, "You switched channels");
 				
 			} else {
-				if (plugin.isPublic(arg)) {
-					if (plugin.isBanned(player, arg)) {
-						plugin.sendWarning(player, "You're banned on the channel");
-						
-					} else if (plugin.channelExist(arg)) {
-						plugin.channelSwitch(player, targetChannel, arg);
-						plugin.sendInfo(player, "You have switched channels");
-						
-					} else {
-						plugin.sendWarning(player, "No such channel");
-					}
-					
-				} else {
-					if (plugin.canAccess(player, arg)) {
-						if (plugin.channelExist(arg)) {
+				if (plugin.channelExist(arg)) {
+					if (plugin.isPublic(arg)) {
+						if (plugin.isBanned(player, arg)) {
+							plugin.sendWarning(player, "You're banned on the channel");
+							
+						} else {
 							plugin.channelSwitch(player, targetChannel, arg);
-							plugin.sendInfo(player, "You switched channels");
+							plugin.sendInfo(player, "You have switched channels");
 						}
 						
 					} else {
-						plugin.sendWarning(player, "You do not have permission to join this channel");
+						if (plugin.canAccess(player, arg)) {
+							plugin.channelSwitch(player, targetChannel, arg);
+							plugin.sendInfo(player, "You switched channels");
+							
+						} else {
+							plugin.sendWarning(player, "You do not have permission to join this channel");
+						}
 					}
+					
+				} else {
+					plugin.sendWarning(player, "No such channel");
 				}
 			}
 			break;
@@ -384,20 +475,25 @@ public class TitanChatCommands {
 		// Kicks the player from the channel
 			
 		case KICK:
-			if (plugin.canKick(player, targetChannel)) {
-				if (plugin.getPlayer(arg) != null) {
-					plugin.kick(plugin.getPlayer(arg), targetChannel);
-					
-					for (Player participants : plugin.getParticipants(targetChannel)) {
-						participants.sendMessage(plugin.getPlayer(arg).getName() + " has been kicked from the channel");
+			if (plugin.channelExist(targetChannel)) {
+				if (plugin.canKick(player, targetChannel)) {
+					if (plugin.getPlayer(arg) != null) {
+						plugin.kick(plugin.getPlayer(arg), targetChannel);
+						
+						for (Player participants : plugin.getParticipants(targetChannel)) {
+							participants.sendMessage(plugin.getPlayer(arg).getName() + " has been kicked from the channel");
+						}
+						
+					} else {
+						plugin.sendWarning(player, "Player not online");
 					}
 					
 				} else {
-					plugin.sendWarning(player, "Player not online");
+					plugin.sendWarning(player, "You do not have permission to kick on this channel");
 				}
 				
 			} else {
-				plugin.sendWarning(player, "You do not have permission to kick on this channel");
+				plugin.sendWarning(player, "No such channel");
 			}
 			break;
 			
@@ -405,20 +501,25 @@ public class TitanChatCommands {
 		// Mutes the player
 			
 		case MUTE:
-			if (plugin.canMute(player, targetChannel)) {
-				if (plugin.getPlayer(arg) != null) {
-					plugin.mute(plugin.getPlayer(arg), targetChannel);
-					
-					for (Player participants : plugin.getParticipants(targetChannel)) {
-						participants.sendMessage(plugin.getPlayer(arg).getName() + " has been muted");
+			if (plugin.channelExist(targetChannel)) {
+				if (plugin.canMute(player, targetChannel)) {
+					if (plugin.getPlayer(arg) != null) {
+						plugin.mute(plugin.getPlayer(arg), targetChannel);
+						
+						for (Player participants : plugin.getParticipants(targetChannel)) {
+							participants.sendMessage(plugin.getPlayer(arg).getName() + " has been muted");
+						}
+						
+					} else {
+						plugin.sendWarning(player, "Player not online");
 					}
 					
 				} else {
-					plugin.sendWarning(player, "Player not online");
+					plugin.sendWarning(player, "You do not have permission to mute people on this channel");
 				}
 				
 			} else {
-				plugin.sendWarning(player, "You do not have permission to mute people on this channel");
+				plugin.sendWarning(player, "No such channel");
 			}
 			break;
 			
@@ -426,24 +527,29 @@ public class TitanChatCommands {
 		// Promotes the player on the channel
 			
 		case PROMOTE:
-			if (plugin.canRank(player, targetChannel)) {
-				if (plugin.getPlayer(arg) != null) {
-					if (plugin.isAdmin(plugin.getPlayer(arg), targetChannel)) {
-						plugin.sendWarning(player, plugin.getPlayer(arg).getName() + " is already an Admin");
+			if (plugin.channelExist(targetChannel)) {
+				if (plugin.canRank(player, targetChannel)) {
+					if (plugin.getPlayer(arg) != null) {
+						if (plugin.isAdmin(plugin.getPlayer(arg), targetChannel)) {
+							plugin.sendWarning(player, plugin.getPlayer(arg).getName() + " is already an Admin");
+							
+						} else {
+							plugin.promote(plugin.getPlayer(arg), targetChannel);
+							chManager.promote(plugin.getPlayer(arg).getName(), targetChannel);
+							plugin.sendInfo(player, "You have promoted " + plugin.getPlayer(arg).getName());
+						}
 						
 					} else {
-						plugin.promote(plugin.getPlayer(arg), targetChannel);
-						chManager.promote(plugin.getPlayer(arg).getName(), targetChannel);
-						plugin.sendInfo(player, "You have promoted " + plugin.getPlayer(arg).getName());
+						plugin.sendWarning(player, "Player not online");
 					}
 					
+					
 				} else {
-					plugin.sendWarning(player, "Player not online");
+					plugin.sendWarning(player, "You do not have permission to promote players on this channel");
 				}
 				
-				
 			} else {
-				plugin.sendWarning(player, "You do not have permission to promote players on this channel");
+				plugin.sendWarning(player, "No such channel");
 			}
 			break;
 			
@@ -451,21 +557,26 @@ public class TitanChatCommands {
 		// Sets the state of the channel
 			
 		case PUBLIC:
-			if (plugin.isAdmin(player, targetChannel)) {
-				if (arg.equalsIgnoreCase("true")) {
-					chManager.setPublic(targetChannel, true);
-					plugin.sendInfo(player, "You have changed the settings");
-					
-				} else if (arg.equalsIgnoreCase("false")) {
-					chManager.setPublic(targetChannel, false);
-					plugin.sendInfo(player, "You have changed the settings");
+			if (plugin.channelExist(targetChannel)) {
+				if (plugin.isAdmin(player, targetChannel)) {
+					if (arg.equalsIgnoreCase("true")) {
+						chManager.setPublic(targetChannel, true);
+						plugin.sendInfo(player, "You have changed the settings");
+						
+					} else if (arg.equalsIgnoreCase("false")) {
+						chManager.setPublic(targetChannel, false);
+						plugin.sendInfo(player, "You have changed the settings");
+						
+					} else {
+						plugin.sendWarning(player, "True or False?");
+					}
 					
 				} else {
-					plugin.sendWarning(player, "True or False?");
+					plugin.sendWarning(player, "You do not have permission to change the state of this channel");
 				}
 				
 			} else {
-				plugin.sendWarning(player, "You do not have permission to change the state of this channel");
+				plugin.sendWarning(player, "No such channel");
 			}
 			break;
 			
@@ -478,7 +589,12 @@ public class TitanChatCommands {
 					plugin.silence(arg);
 					
 					for (Player participant : plugin.getParticipants(arg)) {
-						plugin.sendWarning(participant, "The channel has been silenced");
+						if (plugin.isSilenced(arg)) {
+							plugin.sendWarning(participant, "The channel has been silenced");
+							
+						} else {
+							plugin.sendInfo(participant, "The channel is no longer silenced");
+						}
 					}
 					
 				} else {
@@ -494,35 +610,45 @@ public class TitanChatCommands {
 		// Sets the channel tag
 			
 		case TAG:
-			if (plugin.isAdmin(player, targetChannel)) {
-				chManager.setTag(targetChannel, arg);
-				plugin.sendInfo(player, "You have changed the settings");
-				
-			} else {
-				plugin.sendWarning(player, "You do not have permission to change channel tags on this channel");
-			}
-			break;
-			
-		// /titanchat unban [plyaer]
-		// Unbans the player from the channel
-			
-		case UNBAN:
-			if (plugin.canBan(player, targetChannel)) {
-				if (plugin.getPlayer(arg) != null) {
-					if (plugin.isBanned(plugin.getPlayer(arg), targetChannel)) {
-						plugin.unban(plugin.getPlayer(arg), targetChannel);
-						chManager.unban(plugin.getPlayer(arg).getName(), targetChannel);
-						
-					} else {
-						plugin.sendWarning(player, plugin.getPlayer(arg).getName() + " is not banned");
-					}
+			if (plugin.channelExist(targetChannel)) {
+				if (plugin.isAdmin(player, targetChannel)) {
+					chManager.setTag(targetChannel, arg);
+					plugin.sendInfo(player, "You have changed the settings");
 					
 				} else {
-					plugin.sendWarning(player, "Player not online");
+					plugin.sendWarning(player, "You do not have permission to change channel tags on this channel");
 				}
 				
 			} else {
-				plugin.sendWarning(player, "You do not have permission to unban on this channel");
+				plugin.sendWarning(player, "No such channel");
+			}
+			break;
+			
+		// /titanchat unban [player]
+		// Unbans the player from the channel
+			
+		case UNBAN:
+			if (plugin.channelExist(targetChannel)) {
+				if (plugin.canBan(player, targetChannel)) {
+					if (plugin.getPlayer(arg) != null) {
+						if (plugin.isBanned(plugin.getPlayer(arg), targetChannel)) {
+							plugin.unban(plugin.getPlayer(arg), targetChannel);
+							chManager.unban(plugin.getPlayer(arg).getName(), targetChannel);
+							
+						} else {
+							plugin.sendWarning(player, plugin.getPlayer(arg).getName() + " is not banned");
+						}
+						
+					} else {
+						plugin.sendWarning(player, "Player not online");
+					}
+					
+				} else {
+					plugin.sendWarning(player, "You do not have permission to unban on this channel");
+				}
+				
+			} else {
+				plugin.sendWarning(player, "No such channel");
 			}
 			break;
 			
@@ -530,12 +656,13 @@ public class TitanChatCommands {
 		// Unfollows a channel
 			
 		case UNFOLLOW:
-			if (plugin.channelExist(targetChannel)) {
-				if (plugin.isFollowing(player, targetChannel)) {
-					plugin.unfollow(player, targetChannel);
+			if (plugin.channelExist(arg)) {
+				if (plugin.isFollowing(player, arg)) {
+					plugin.unfollow(player, arg);
+					chManager.unfollow(player.getName(), arg);
 					
 				} else {
-					plugin.sendWarning(player, "You are not following " + targetChannel);
+					plugin.sendWarning(player, "You are not following " + arg);
 				}
 				
 			} else {
@@ -547,21 +674,26 @@ public class TitanChatCommands {
 		// Unmutes the player
 			
 		case UNMUTE:
-			if (plugin.canMute(player, targetChannel)) {
-				if (plugin.getPlayer(arg) != null) {
-					if (plugin.isMuted(plugin.getPlayer(arg), targetChannel)) {
-						plugin.unmute(plugin.getPlayer(arg), targetChannel);
-						for (Player participants : plugin.getParticipants(targetChannel)) {
-							participants.sendMessage(plugin.getPlayer(arg).getName() + " has been unmuted");
+			if (plugin.channelExist(targetChannel)) {
+				if (plugin.canMute(player, targetChannel)) {
+					if (plugin.getPlayer(arg) != null) {
+						if (plugin.isMuted(plugin.getPlayer(arg), targetChannel)) {
+							plugin.unmute(plugin.getPlayer(arg), targetChannel);
+							for (Player participants : plugin.getParticipants(targetChannel)) {
+								participants.sendMessage(plugin.getPlayer(arg).getName() + " has been unmuted");
+							}
 						}
+						
+					} else {
+						plugin.sendWarning(player, "Player not online");
 					}
 					
 				} else {
-					plugin.sendWarning(player, "Player not online");
+					plugin.sendWarning(player, "You do not have permission to unmute on this channel");
 				}
 				
 			} else {
-				plugin.sendWarning(player, "You do not have permission to unmute on this channel");
+				plugin.sendWarning(player, "No such channel");
 			}
 			break;
 		}
@@ -581,6 +713,7 @@ public class TitanChatCommands {
 		DECLINE,
 		DELETE,
 		DEMOTE,
+		FILTER,
 		FOLLOW,
 		FORCE,
 		INVITE,

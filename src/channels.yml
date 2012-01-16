@@ -10,3 +10,11 @@ channels:
         - Derplord
         black-list:
         - Herpina
+    MemeChan:
+        admins:
+        - NyanCat
+        followers:
+        - Arrow
+        - To
+        - The
+        - Knee

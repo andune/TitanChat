@@ -39,8 +39,8 @@ public class Channel {
 		
 		if (plugin.getConfig().getStringList("filter") != null) {
 			for (String word : plugin.getConfig().getStringList("filter")) {
-				if (line.contains(word)) {
-					filtered = line.replaceAll(word, word.replaceAll("[A-Za-z]", "*"));
+				if (line.toLowerCase().contains(word.toLowerCase())) {
+					filtered = line.replaceAll("(?i)" + word, word.replaceAll("[A-Za-z]", "*"));
 				}
 			}
 		}

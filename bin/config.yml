@@ -4,6 +4,7 @@
 # DARK_RED, GOLD, GRAY, GREEN,
 # LIGHT_PURPLE, RED, WHITE, YELLOW
 
+channel-limit: -1
 local:
     colour: YELLOW
     tag: '[L]'
@@ -37,4 +38,4 @@ channels:
         channel-colour: RED
         staff: true
 filter:
-- this
+- filter

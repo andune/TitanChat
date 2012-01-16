@@ -10,6 +10,7 @@ TitanChat, a chat management plugin for Bukkit.
 * Create or delete channels
 * Ban, unban, kick, mute or unmute players
 * Admins, whitelists and blacklists for better administration
+* Follow channels and receive their chat
 * Use colour codes on channels if not restricted
 * Supports prefixes and suffixes
 * All can be done with simple commands
@@ -45,6 +46,7 @@ TitanChat, a chat management plugin for Bukkit.
 * 11.01.12 - Mute and unmute commands and global channels
 * 13.01.12 - Silence, broadcast and command list commands
 * 15.01.12 - Follow, force and unfollow commands and local channel
+* 16.01.12 - Filter is now perfect, 1 month until NodinChan's Birthday
 
 -----------------------------------------------------------------------------------------------------------------------
 
