@@ -133,7 +133,7 @@ public class TitanChat extends JavaPlugin {
 			}
 		}
 		
-		if (channelBans.isEmpty() || channelBans.get(channelName) == null) {
+		if (channelBans.get(channelName) == null) {
 			List<Player> banned = new ArrayList<Player>();
 			banned.add(player);
 			channelBans.put(channelName, banned);
@@ -337,7 +337,7 @@ public class TitanChat extends JavaPlugin {
 		
 		channel.put(player, channelName);
 		
-		if (participants == null || participants.get(channelName) == null) {
+		if (participants.get(channelName) == null) {
 			List<Player> players = new ArrayList<Player>();
 			players.add(player);
 			participants.put(channelName, players);
@@ -775,7 +775,7 @@ public class TitanChat extends JavaPlugin {
 	// Mutes the player
 	
 	public void mute(Player player, String channelName) {
-		if (muted.isEmpty() || muted.get(channelName) == null) {
+		if (muted.get(channelName) == null) {
 			List<Player> players = new ArrayList<Player>();
 			players.add(player);
 			muted.put(channelName, players);
@@ -1253,7 +1253,7 @@ public class TitanChat extends JavaPlugin {
 	// Unfollows the channel
 	
 	public void unfollow(Player player, String channelName) {
-		if (followers == null || followers.get(channelName) == null) {
+		if (followers.get(channelName) == null) {
 			List<Player> players = new ArrayList<Player>();
 			players.remove(player);
 			followers.put(channelName, players);
@@ -1295,7 +1295,7 @@ public class TitanChat extends JavaPlugin {
 	// Whitelisting a Member on a channel
 	
 	public void whitelistMember(Player player, String channelName) {
-		if (channelMembers.isEmpty() || channelMembers.get(channelName) == null) {
+		if (channelMembers.get(channelName) == null) {
 			List<Player> members = new ArrayList<Player>();
 			members.add(player);
 			channelMembers.put(channelName, members);
