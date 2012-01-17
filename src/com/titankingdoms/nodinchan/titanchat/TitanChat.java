@@ -1125,7 +1125,7 @@ public class TitanChat extends JavaPlugin {
 			channels.add(channel);
 			
 			if (getConfig().get("channels." + channel + ".global") != null) {
-				globalChannels.add(getConfig().getString("channels." + channel + ".global"));
+				globalChannels.add(channel);
 			}
 		}
 		
