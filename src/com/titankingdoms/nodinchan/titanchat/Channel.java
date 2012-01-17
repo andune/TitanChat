@@ -13,11 +13,11 @@ public class Channel {
 	
 	// Checks if colour codes are allowed on the channel
 	
-	public boolean allowColours(Player player) {
-		if (plugin.getStaffChannel() == plugin.getChannel(player))
+	public boolean allowColours(String channelName) {
+		if (plugin.getStaffChannel() == channelName)
 			return true;
 		
-		return plugin.getConfig().getBoolean("channels." + plugin.getChannel(player) + ".allow-colours");
+		return plugin.getConfig().getBoolean("channels." + channelName + ".allow-colours");
 	}
 	
 	// Colourizes the message

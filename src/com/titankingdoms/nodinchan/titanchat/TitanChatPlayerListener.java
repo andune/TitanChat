@@ -82,7 +82,7 @@ public class TitanChatPlayerListener extends PlayerListener {
 					receiver.sendMessage(ch.format(player, ch.getChannelColour(player), ch.getChannelTag(player), msg, true));
 					
 				} else {
-					receiver.sendMessage(ch.format(player, ch.getChannelColour(player), ch.getChannelTag(player), msg, ch.allowColours(player)));
+					receiver.sendMessage(ch.format(player, ch.getChannelColour(player), ch.getChannelTag(player), msg, ch.allowColours(plugin.getChannel(player))));
 				}
 			}
 			
@@ -92,7 +92,7 @@ public class TitanChatPlayerListener extends PlayerListener {
 					receiver.sendMessage(ch.format(player, ch.getChannelColour(player), ch.getChannelTag(player), msg, true));
 					
 				} else {
-					receiver.sendMessage(ch.format(player, ch.getChannelColour(player), ch.getChannelTag(player), msg, ch.allowColours(player)));
+					receiver.sendMessage(ch.format(player, ch.getChannelColour(player), ch.getChannelTag(player), msg, ch.allowColours(plugin.getChannel(player))));
 				}
 			}
 			
@@ -103,7 +103,7 @@ public class TitanChatPlayerListener extends PlayerListener {
 							receiver.sendMessage(ch.format(player, ch.getChannelColour(player), ch.getChannelTag(player), msg, true));
 							
 						} else {
-							receiver.sendMessage(ch.format(player, ch.getChannelColour(player), ch.getChannelTag(player), msg, ch.allowColours(player)));
+							receiver.sendMessage(ch.format(player, ch.getChannelColour(player), ch.getChannelTag(player), msg, ch.allowColours(plugin.getChannel(player))));
 						}
 					}
 				}
@@ -119,7 +119,7 @@ public class TitanChatPlayerListener extends PlayerListener {
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		String channelName = "";
 		
-		if (event.getPlayer().hasPermission("TitanChat.admin")) {
+		if (plugin.has(event.getPlayer(), "TitanChat.admin")) {
 			if (plugin.getStaffChannel() != null) {
 				channelName = plugin.getStaffChannel();
 				

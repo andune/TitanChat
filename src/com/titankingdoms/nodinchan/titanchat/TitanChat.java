@@ -31,6 +31,24 @@ import com.titankingdoms.nodinchan.titanchat.TitanChatCommands.Commands;
 
 import de.bananaco.permissions.Permissions;
 
+/*
+ *     TitanChat 1.0
+ *     Copyright (C) 2011  Nodin Chan <nodinchan@nodinchan.net>
+ *     
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *     
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *     
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 public class TitanChat extends JavaPlugin {
 	
 	private static Logger log = Logger.getLogger("TitanLog");
@@ -339,7 +357,7 @@ public class TitanChat extends JavaPlugin {
 	// Follows the channel
 	
 	public void follow(Player player, String channelName) {
-		if (followers == null || followers.get(channelName) == null) {
+		if (followers.get(channelName) == null) {
 			List<Player> players = new ArrayList<Player>();
 			players.add(player);
 			followers.put(channelName, players);
@@ -349,6 +367,8 @@ public class TitanChat extends JavaPlugin {
 			players.add(player);
 			followers.put(channelName, players);
 		}
+		
+		sendInfo(player, "You have unfollowed " + channelName);
 	}
 	
 	// Gets the channel the player is in
@@ -782,6 +802,32 @@ public class TitanChat extends JavaPlugin {
 		if (label.equalsIgnoreCase("titanchat") || label.equalsIgnoreCase("tc")) {
 			if (args.length == 1) {
 				
+				// /titanchat allowcolours
+				// Sets whether colour codes are allowed on the channel
+				
+				if (args[0].equalsIgnoreCase("allowcolours") || args[0].equalsIgnoreCase("allowcolors")) {
+					if (has(player, "TitanChat.admin")) {
+						new ChannelManager(this).setAllowColours(getChannel(player), (new Channel(this).allowColours(getChannel(player))) ? false : true);
+						sendInfo(player, "The channel now " + ((new Channel(this).allowColours(getChannel(player))) ? "allows" : "disallows") + " colours");
+						
+					} else {
+						sendWarning(player, "You do not have permission to change the state of this channel");
+					}
+					
+					return true;
+				}
+				
+				// /titanchat commands
+				// The TitanChat Command Directory
+				
+				if (args[0].equalsIgnoreCase("commands")) {
+					player.sendMessage(ChatColor.AQUA + "TitanChat Commands");
+					player.sendMessage(ChatColor.AQUA + "Command: /titanchat [action] [argument]");
+					player.sendMessage(ChatColor.AQUA + "Alias: /tc action [argument]");
+					player.sendMessage(ChatColor.AQUA + "/titanchat commands [page]");
+					return true;
+				}
+				
 				// /titanchat list
 				// Lists out the channels you have access to
 				
@@ -796,19 +842,18 @@ public class TitanChat extends JavaPlugin {
 					
 					sendInfo(player, "Channel List: " + createList(channels));
 					return true;
-					
 				}
 				
-				// /titanchat commands
-				// The TitanChat Command Directory
-				
-				if (args[0].equalsIgnoreCase("commands")) {
-					player.sendMessage(ChatColor.AQUA + "TitanChat Commands");
-					player.sendMessage(ChatColor.AQUA + "Command: /titanchat [action] [argument]");
-					player.sendMessage(ChatColor.AQUA + "Alias: /tc action [argument]");
-					player.sendMessage(ChatColor.AQUA + "/titanchat commands [page]");
-					return true;
+				if (args[0].equalsIgnoreCase("status")) {
+					if (isAdmin(player, getChannel(player))) {
+						new ChannelManager(this).setPublic(getChannel(player), (isPublic(getChannel(player))) ? false : true);
+						sendInfo(player, "The channel is now " + ((isPublic(getChannel(player))) ? "public" : "private"));
+						
+					} else {
+						sendWarning(player, "You do not have permission to change the state of this channel");
+					}
 					
+					return true;
 				}
 				
 				if (args[0].equalsIgnoreCase("silence")) {
@@ -882,26 +927,31 @@ public class TitanChat extends JavaPlugin {
 				
 				if (args[0].equalsIgnoreCase("broadcast")) {
 					if (player.hasPermission("TitanChat.broadcast")) {
-						ChatColor broadcastColour = ChatColor.valueOf(getConfig().getString("broadcast.colour"));
-						String tag = getConfig().getString("broadcast.tag");
-						
-						StringBuilder str = new StringBuilder();
-						
-						for (int word = 1; word < args.length; word++) {
-							if (str.length() > 0) {
-								str.append(" ");
+						try {
+							ChatColor broadcastColour = ChatColor.valueOf(getConfig().getString("broadcast.colour"));
+							String tag = getConfig().getString("broadcast.tag");
+							
+							StringBuilder str = new StringBuilder();
+							
+							for (int word = 1; word < args.length; word++) {
+								if (str.length() > 0) {
+									str.append(" ");
+								}
+								
+								str.append(args[word]);
 							}
 							
-							str.append(args[word]);
+							String msg = new Channel(this).format(player, broadcastColour, tag, new Channel(this).filter(str.toString()), true);
+							
+							for (Player receiver : getServer().getOnlinePlayers()) {
+								receiver.sendMessage(msg);
+							}
+							
+							log.info("<" + player.getName() + "> " + ChatColor.stripColor(msg));
+							
+						} catch (IllegalArgumentException e) {
+							sendWarning(player, "Invalid Colour");
 						}
-						
-						String msg = new Channel(this).format(player, broadcastColour, tag, new Channel(this).filter(str.toString()), true);
-						
-						for (Player receiver : getServer().getOnlinePlayers()) {
-							receiver.sendMessage(msg);
-						}
-						
-						log.info("<" + player.getName() + "> " + new Channel(this).decolourize(msg));
 						
 					} else {
 						sendWarning(player, "You do not have permission to broadcast");

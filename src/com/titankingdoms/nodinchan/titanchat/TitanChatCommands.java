@@ -2,6 +2,7 @@ package com.titankingdoms.nodinchan.titanchat;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -80,24 +81,15 @@ public class TitanChatCommands {
 			}
 			break;
 			
-		// /titanchat allowcolours [true/false]
+		// /titanchat allowcolours [channel]
 		// Sets whether colour codes are allowed on the channel
 			
 		case ALLOWCOLORS:
 		case ALLOWCOLOURS:
-			if (plugin.channelExist(targetChannel)) {
+			if (plugin.channelExist(arg)) {
 				if (plugin.has(player, "TitanChat.admin")) {
-					if (arg.equalsIgnoreCase("true")) {
-						chManager.setAllowColours(targetChannel, true);
-						plugin.sendInfo(player, "You have changed the settings");
-						
-					} else if (arg.equalsIgnoreCase("false")) {
-						chManager.setAllowColours(targetChannel, false);
-						plugin.sendInfo(player, "You have changed the settings");
-						
-					} else {
-						plugin.sendWarning(player, "True or False?");
-					}
+					chManager.setAllowColours(arg, (new Channel(plugin).allowColours(arg)) ? false : true);
+					plugin.sendInfo(player, "The channel now " + ((new Channel(plugin).allowColours(arg)) ? "allows" : "disallows") + " colours");
 					
 				} else {
 					plugin.sendWarning(player, "You do not have permission to change the state of this channel");
@@ -140,20 +132,27 @@ public class TitanChatCommands {
 			
 		case BROADCAST:
 			if (player.hasPermission("TitanChat.broadcast")) {
-				ChatColor broadcastColour = ChatColor.valueOf(plugin.getConfig().getString("broadcast.colour"));
-				String tag = plugin.getConfig().getString("broadcast.tag");
-				
-				String msg = "";
-				
-				if (plugin.channelExist(targetChannel)) {
-					msg = new Channel(plugin).format(player, broadcastColour, tag, arg, true);
+				try {
+					ChatColor broadcastColour = ChatColor.valueOf(plugin.getConfig().getString("broadcast.colour"));
+					String tag = plugin.getConfig().getString("broadcast.tag");
 					
-				} else {
-					msg = new Channel(plugin).format(player, broadcastColour, tag, arg + " " + targetChannel, true);
-				}
-				
-				for (Player receiver : plugin.getServer().getOnlinePlayers()) {
-					receiver.sendMessage(msg);
+					String msg = "";
+					
+					if (plugin.channelExist(targetChannel)) {
+						msg = new Channel(plugin).format(player, broadcastColour, tag, arg, true);
+						
+					} else {
+						msg = new Channel(plugin).format(player, broadcastColour, tag, arg + " " + targetChannel, true);
+					}
+					
+					for (Player receiver : plugin.getServer().getOnlinePlayers()) {
+						receiver.sendMessage(msg);
+					}
+					
+					Logger.getLogger("TitanLog").info("<" + player.getName() + "> " + ChatColor.stripColor(msg));
+					
+				} catch (IllegalArgumentException e) {
+					plugin.sendWarning(player, "Invalid Colour");
 				}
 				
 			} else {
@@ -168,11 +167,11 @@ public class TitanChatCommands {
 		case COLOUR:
 			if (plugin.channelExist(targetChannel)) {
 				if (plugin.isAdmin(player, targetChannel)) {
-					if (ChatColor.valueOf(arg) != null) {
+					try {
+						ChatColor.valueOf(arg.toUpperCase());
 						chManager.setColour(targetChannel, arg.toUpperCase());
-						plugin.sendInfo(player, "You have changed the settings");
-						
-					} else {
+						plugin.sendInfo(player, "You have changed the colour to " + arg);
+					} catch (IllegalArgumentException e) {
 						plugin.sendWarning(player, "Invalid Colour");
 					}
 					
@@ -193,7 +192,7 @@ public class TitanChatCommands {
 				player.sendMessage(ChatColor.AQUA + "== TitanChat Command List (1/5) ==");
 				player.sendMessage(ChatColor.AQUA + "accept [channel] - Accepts the channel join invitation and joins the channel");
 				player.sendMessage(ChatColor.AQUA + "add [player] - Adds the player to the whitelist");
-				player.sendMessage(ChatColor.AQUA + "allowcolours [true/false] - Sets whether colour codes are used; Alias: allowcolors");
+				player.sendMessage(ChatColor.AQUA + "allowcolours [channel] - Sets whether colour codes are used; Alias: allowcolors");
 				player.sendMessage(ChatColor.AQUA + "ban [player] - Bans the player from the channel");
 				player.sendMessage(ChatColor.AQUA + "broadcast [message] - Broadcasts the message globally");
 				
@@ -219,11 +218,11 @@ public class TitanChatCommands {
 				player.sendMessage(ChatColor.AQUA + "list - Lists all channels you have acces to");
 				player.sendMessage(ChatColor.AQUA + "mute [player] - Mutes the player on the channel");
 				player.sendMessage(ChatColor.AQUA + "promote [player] - Promotes the player on the channel");
-				player.sendMessage(ChatColor.AQUA + "public [true/false] - Sets whether the channel is public");
+				player.sendMessage(ChatColor.AQUA + "silence [channel] - Silences the channel; Leave out [channel] to silence all");
 				
 			} else if (arg.equalsIgnoreCase("5")) {
 				player.sendMessage(ChatColor.AQUA + "== TitanChat Command List (5/5) ==");
-				player.sendMessage(ChatColor.AQUA + "silence [channel] - Silences the channel; Leave out [channel] to silence all");
+				player.sendMessage(ChatColor.AQUA + "status [channel] - Sets whether the channel is private");
 				player.sendMessage(ChatColor.AQUA + "tag [tag] - Sets the channel tag");
 				player.sendMessage(ChatColor.AQUA + "unban [player] - Unbans the player from the channel");
 				player.sendMessage(ChatColor.AQUA + "unfollow [channel] - Unfollows the channel");
@@ -553,33 +552,6 @@ public class TitanChatCommands {
 			}
 			break;
 			
-		// /titanchat public [true/false]
-		// Sets the state of the channel
-			
-		case PUBLIC:
-			if (plugin.channelExist(targetChannel)) {
-				if (plugin.isAdmin(player, targetChannel)) {
-					if (arg.equalsIgnoreCase("true")) {
-						chManager.setPublic(targetChannel, true);
-						plugin.sendInfo(player, "You have changed the settings");
-						
-					} else if (arg.equalsIgnoreCase("false")) {
-						chManager.setPublic(targetChannel, false);
-						plugin.sendInfo(player, "You have changed the settings");
-						
-					} else {
-						plugin.sendWarning(player, "True or False?");
-					}
-					
-				} else {
-					plugin.sendWarning(player, "You do not have permission to change the state of this channel");
-				}
-				
-			} else {
-				plugin.sendWarning(player, "No such channel");
-			}
-			break;
-			
 		// /titanchat silence [channel]
 		// Silences the channel
 			
@@ -603,6 +575,24 @@ public class TitanChatCommands {
 				
 			} else {
 				plugin.sendWarning(player, "You do not have permission to silence channels");
+			}
+			break;
+			
+		// /titanchat status [channel]
+		// Sets the state of the channel
+			
+		case STATUS:
+			if (plugin.channelExist(arg)) {
+				if (plugin.isAdmin(player, arg)) {
+					chManager.setPublic(arg, (plugin.isPublic(arg)) ? false : true);
+					plugin.sendInfo(player, "The channel is now " + ((plugin.isPublic(arg)) ? "public" : "private"));
+					
+				} else {
+					plugin.sendWarning(player, "You do not have permission to change the state of this channel");
+				}
+				
+			} else {
+				plugin.sendWarning(player, "No such channel");
 			}
 			break;
 			
@@ -721,8 +711,8 @@ public class TitanChatCommands {
 		KICK,
 		MUTE,
 		PROMOTE,
-		PUBLIC,
 		SILENCE,
+		STATUS,
 		TAG,
 		UNBAN,
 		UNFOLLOW,
