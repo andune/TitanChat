@@ -49,7 +49,7 @@ TitanChat, a chat management plugin for Bukkit.
 * 13.01.12 - Silence, broadcast and command list commands
 * 15.01.12 - Follow, force and unfollow commands and local channel
 * 16.01.12 - Filter is now perfect, 1 month until NodinChan's Birthday
-* 17.01.12 - Public command renamed to Status
+* 17.01.12 - Public command renamed to Status and fixed global
 
 -----------------------------------------------------------------------------------------------------------------------
 

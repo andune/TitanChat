@@ -64,6 +64,7 @@ public class TitanChat extends JavaPlugin {
 	private List<Player> local = new ArrayList<Player>();
 	
 	private List<String> channels = new ArrayList<String>();
+	private List<String> globalChannels = new ArrayList<String>();
 	
 	private Map<String, List<Player>> channelAdmins = new HashMap<String, List<Player>>();
 	private Map<String, List<Player>> channelMembers = new HashMap<String, List<Player>>();
@@ -617,13 +618,7 @@ public class TitanChat extends JavaPlugin {
 	// Checks if the channel broadcasts to all channels
 	
 	public boolean isGlobal(String channelName) {
-		for (String channel : getConfig().getConfigurationSection("channels").getKeys(false)) {
-			if (getConfig().get("channels." + channel + ".global") != null) {
-				return getConfig().getBoolean("channels." + channel + "global");
-			}
-		}
-		
-		return false;
+		return globalChannels.contains(channelName);
 	}
 	
 	// Check if the player is invited
@@ -1128,6 +1123,10 @@ public class TitanChat extends JavaPlugin {
 			}
 			
 			channels.add(channel);
+			
+			if (getConfig().get("channels." + channel + ".global") != null) {
+				globalChannels.add(getConfig().getString("channels." + channel + ".global"));
+			}
 		}
 		
 		for (String channel : getConfig().getConfigurationSection("channels").getKeys(false)) {
