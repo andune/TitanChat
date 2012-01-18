@@ -13,6 +13,7 @@ import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.permission.Permission;
 
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -65,12 +66,12 @@ public class TitanChat extends JavaPlugin {
 	
 	private List<String> channels = new ArrayList<String>();
 	private List<String> globalChannels = new ArrayList<String>();
-	
-	private Map<String, List<Player>> channelAdmins = new HashMap<String, List<Player>>();
-	private Map<String, List<Player>> channelMembers = new HashMap<String, List<Player>>();
-	private Map<String, List<Player>> channelBans = new HashMap<String, List<Player>>();
+
 	private Map<Player, String> channel = new HashMap<Player, String>();
-	private Map<String, List<Player>> followers = new HashMap<String, List<Player>>();
+	private Map<String, List<OfflinePlayer>> channelAdmins = new HashMap<String, List<OfflinePlayer>>();
+	private Map<String, List<OfflinePlayer>> channelMembers = new HashMap<String, List<OfflinePlayer>>();
+	private Map<String, List<OfflinePlayer>> channelBans = new HashMap<String, List<OfflinePlayer>>();
+	private Map<String, List<OfflinePlayer>> followers = new HashMap<String, List<OfflinePlayer>>();
 	private Map<Player, List<String>> invitations = new HashMap<Player, List<String>>();
 	private Map<String, List<Player>> invited = new HashMap<String, List<Player>>();
 	private Map<String, List<Player>> muted = new HashMap<String, List<Player>>();
@@ -84,12 +85,12 @@ public class TitanChat extends JavaPlugin {
 	
 	public void assignAdmin(Player player, String channelName) {
 		if (channelAdmins.isEmpty() || channelAdmins.get(channelName) == null) {
-			List<Player> admins = new ArrayList<Player>();
+			List<OfflinePlayer> admins = new ArrayList<OfflinePlayer>();
 			admins.add(player);
 			channelAdmins.put(channelName, admins);
 			
 		} else {
-			List<Player> admins = channelAdmins.get(channelName);
+			List<OfflinePlayer> admins = channelAdmins.get(channelName);
 			admins.add(player);
 			channelAdmins.put(channelName, admins);
 		}
@@ -101,9 +102,9 @@ public class TitanChat extends JavaPlugin {
 	
 	public void ban(Player player, String channelName) {
 		if (isAdmin(player, channelName)) {
-			List<Player> admins = new ArrayList<Player>();
+			List<OfflinePlayer> admins = new ArrayList<OfflinePlayer>();
 			
-			for (Player admin : channelAdmins.get(channelName)) {
+			for (OfflinePlayer admin : channelAdmins.get(channelName)) {
 				admins.add(admin);
 			}
 			
@@ -117,9 +118,9 @@ public class TitanChat extends JavaPlugin {
 			}
 			
 		} else if (isMember(player, channelName)) {
-			List<Player> members = new ArrayList<Player>();
+			List<OfflinePlayer> members = new ArrayList<OfflinePlayer>();
 			
-			for (Player member : channelMembers.get(channelName)) {
+			for (OfflinePlayer member : channelMembers.get(channelName)) {
 				members.add(member);
 			}
 			
@@ -134,12 +135,12 @@ public class TitanChat extends JavaPlugin {
 		}
 		
 		if (channelBans.get(channelName) == null) {
-			List<Player> banned = new ArrayList<Player>();
+			List<OfflinePlayer> banned = new ArrayList<OfflinePlayer>();
 			banned.add(player);
 			channelBans.put(channelName, banned);
 			
 		} else {
-			List<Player> banned = channelBans.get(channelName);
+			List<OfflinePlayer> banned = channelBans.get(channelName);
 			banned.add(player);
 			channelBans.put(channelName, banned);
 		}
@@ -307,9 +308,9 @@ public class TitanChat extends JavaPlugin {
 	// Demoting a player on a channel
 	
 	public void demote(Player player, String channelName) {
-		List<Player> admins = new ArrayList<Player>();
+		List<OfflinePlayer> admins = new ArrayList<OfflinePlayer>();
 		
-		for (Player admin : channelAdmins.get(channelName)) {
+		for (OfflinePlayer admin : channelAdmins.get(channelName)) {
 			admins.add(admin);
 		}
 		
@@ -359,12 +360,12 @@ public class TitanChat extends JavaPlugin {
 	
 	public void follow(Player player, String channelName) {
 		if (followers.get(channelName) == null) {
-			List<Player> players = new ArrayList<Player>();
+			List<OfflinePlayer> players = new ArrayList<OfflinePlayer>();
 			players.add(player);
 			followers.put(channelName, players);
 			
 		} else {
-			List<Player> players = followers.get(channelName);
+			List<OfflinePlayer> players = followers.get(channelName);
 			players.add(player);
 			followers.put(channelName, players);
 		}
@@ -409,13 +410,27 @@ public class TitanChat extends JavaPlugin {
 	// Gets the followers of a channel
 	
 	public List<Player> getFollowers(String channelName) {
-		return followers.get(channelName);
+		List<Player> followerList = new ArrayList<Player>();
+		
+		if (followers.get(channelName) != null) {
+			for (OfflinePlayer player : followers.get(channelName)) {
+				if (player.isOnline()) {
+					followerList.add((Player) player);
+				}
+			}
+		}
+		
+		return followerList;
 	}
 	
 	// Gets the format of chat
 	
 	public String getFormat() {
 		return getConfig().getString("formating.format");
+	}
+	
+	public OfflinePlayer getOfflinePlayer(String name) {
+		return getServer().getOfflinePlayer(name);
 	}
 	
 	// Gets the participants of a channel
@@ -591,7 +606,7 @@ public class TitanChat extends JavaPlugin {
 		if (isStaff(player))
 			return true;
 		
-		List<Player> players = new ArrayList<Player>();
+		List<OfflinePlayer> players = new ArrayList<OfflinePlayer>();
 		
 		if (channelAdmins.get(channelName) != null) {
 			players = channelAdmins.get(channelName);
@@ -682,7 +697,7 @@ public class TitanChat extends JavaPlugin {
 		if (has(player, "TitanChat.access." + channelName))
 			return true;
 		
-		List<Player> players = new ArrayList<Player>();
+		List<OfflinePlayer> players = new ArrayList<OfflinePlayer>();
 		
 		if (channelMembers.get(channelName) != null) {
 			players = channelMembers.get(channelName);
@@ -1091,14 +1106,14 @@ public class TitanChat extends JavaPlugin {
 				followerNames = getChannelConfig().getStringList("channels." + channel + ".followers");
 			}
 			
-			List<Player> admins = new ArrayList<Player>();
-			List<Player> members = new ArrayList<Player>();
-			List<Player> banned = new ArrayList<Player>();
-			List<Player> following = new ArrayList<Player>();
+			List<OfflinePlayer> admins = new ArrayList<OfflinePlayer>();
+			List<OfflinePlayer> members = new ArrayList<OfflinePlayer>();
+			List<OfflinePlayer> banned = new ArrayList<OfflinePlayer>();
+			List<OfflinePlayer> following = new ArrayList<OfflinePlayer>();
 			
 			if (!adminNames.isEmpty()) {
 				for (String name : adminNames) {
-					admins.add(getPlayer(name));
+					admins.add(getOfflinePlayer(name));
 				}
 				
 				channelAdmins.put(channel, admins);
@@ -1106,7 +1121,7 @@ public class TitanChat extends JavaPlugin {
 			
 			if (!memberNames.isEmpty()) {
 				for (String name : memberNames) {
-					members.add(getPlayer(name));
+					members.add(getOfflinePlayer(name));
 				}
 				
 				channelMembers.put(channel, members);
@@ -1114,7 +1129,7 @@ public class TitanChat extends JavaPlugin {
 			
 			if (!bannedNames.isEmpty()) {
 				for (String name : bannedNames) {
-					banned.add(getPlayer(name));
+					banned.add(getOfflinePlayer(name));
 				}
 				
 				channelBans.put(channel, banned);
@@ -1122,7 +1137,7 @@ public class TitanChat extends JavaPlugin {
 			
 			if (!followerNames.isEmpty()) {
 				for (String name : followerNames) {
-					following.add(getPlayer(name));
+					following.add(getOfflinePlayer(name));
 				}
 				
 				followers.put(channel, following);
@@ -1145,9 +1160,9 @@ public class TitanChat extends JavaPlugin {
 	// Promote a player on a channel
 	
 	public void promote(Player player, String channelName) {
-		List<Player> members = new ArrayList<Player>();
+		List<OfflinePlayer> members = new ArrayList<OfflinePlayer>();
 		
-		for (Player member : channelMembers.get(channelName)) {
+		for (OfflinePlayer member : channelMembers.get(channelName)) {
 			members.add(member);
 		}
 		
@@ -1234,9 +1249,9 @@ public class TitanChat extends JavaPlugin {
 	// Unbans the player from the channel
 	
 	public void unban(Player player, String channelName) {
-		List<Player> banned = new ArrayList<Player>();
+		List<OfflinePlayer> banned = new ArrayList<OfflinePlayer>();
 		
-		for (Player bannedPlayer : channelBans.get(channelName)) {
+		for (OfflinePlayer bannedPlayer : channelBans.get(channelName)) {
 			banned.add(bannedPlayer);
 		}
 		
@@ -1260,12 +1275,12 @@ public class TitanChat extends JavaPlugin {
 	
 	public void unfollow(Player player, String channelName) {
 		if (followers.get(channelName) == null) {
-			List<Player> players = new ArrayList<Player>();
+			List<OfflinePlayer> players = new ArrayList<OfflinePlayer>();
 			players.remove(player);
 			followers.put(channelName, players);
 			
 		} else {
-			List<Player> players = followers.get(channelName);
+			List<OfflinePlayer> players = followers.get(channelName);
 			players.remove(player);
 			followers.put(channelName, players);
 		}
@@ -1308,12 +1323,12 @@ public class TitanChat extends JavaPlugin {
 	
 	public void whitelistMember(Player player, String channelName) {
 		if (channelMembers.get(channelName) == null) {
-			List<Player> members = new ArrayList<Player>();
+			List<OfflinePlayer> members = new ArrayList<OfflinePlayer>();
 			members.add(player);
 			channelMembers.put(channelName, members);
 			
 		} else {
-			List<Player> members = channelMembers.get(channelName);
+			List<OfflinePlayer> members = channelMembers.get(channelName);
 			members.add(player);
 			channelMembers.put(channelName, members);
 		}
