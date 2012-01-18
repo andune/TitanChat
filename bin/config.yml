@@ -37,5 +37,8 @@ channels:
         channel-tag: '[S]'
         channel-colour: RED
         staff: true
+formating:
+   use-built-in: true
+   format: "%tag %prefix%player%suffix: %message"
 filter:
 - filter

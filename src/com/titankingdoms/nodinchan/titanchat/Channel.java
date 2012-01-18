@@ -57,11 +57,41 @@ public class Channel {
 		String prefix = colourize(plugin.getPrefix(player));
 		String suffix = colourize(plugin.getSuffix(player));
 		
-		if (colourize) {
-			message = tag + " " + prefix + colour + colourize(player.getDisplayName()) + suffix + colour + ": " + colourize(filter(msg));
+		if (!plugin.useDefaultFormat()) {
+			message = plugin.getFormat();
+			
+			StringBuilder str = new StringBuilder();
+			
+			for (String word : message.split("%")) {
+				if (str.length() < 1) {
+					str.append(colour + word);
+					
+				} else {
+					str.append(colour + "%" + word);
+				}
+			}
+			
+			message = str.toString();
+			
+			message = message.replace("%tag", tag);
+			message = message.replace("%prefix", prefix);
+			message = message.replace("%player", colourize(player.getDisplayName()));
+			message = message.replace("%suffix", suffix);
+			
+			if (colourize) {
+				message = message.replace("%message", colourize(filter(msg)));
+				
+			} else {
+				message = message.replace("%message", decolourize(filter(msg)));
+			}
 			
 		} else {
-			message = tag + " " + prefix + colour + colourize(player.getDisplayName()) + suffix + colour + ": " + decolourize(filter(msg));
+			if (colourize) {
+				message = tag + " " + prefix + colour + colourize(player.getDisplayName()) + suffix + colour + ": " + colourize(filter(msg));
+				
+			} else {
+				message = tag + " " + prefix + colour + colourize(player.getDisplayName()) + suffix + colour + ": " + decolourize(filter(msg));
+			}
 		}
 		
 		return message;

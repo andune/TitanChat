@@ -412,6 +412,12 @@ public class TitanChat extends JavaPlugin {
 		return followers.get(channelName);
 	}
 	
+	// Gets the format of chat
+	
+	public String getFormat() {
+		return getConfig().getString("formating.format");
+	}
+	
 	// Gets the participants of a channel
 	
 	public List<Player> getParticipants(String channelName) {
@@ -1286,6 +1292,12 @@ public class TitanChat extends JavaPlugin {
 		}
 		
 		sendInfo(player, "You have been unmuted on " + channelName);
+	}
+	
+	// Checks whether or not to use the default format
+	
+	public boolean useDefaultFormat() {
+		return getConfig().getBoolean("formating.use-built-in");
 	}
 	
 	public boolean vault() {
