@@ -51,6 +51,7 @@ TitanChat, a chat management plugin for Bukkit.
 * 16.01.12 - Filter is now perfect, 1 month until NodinChan's Birthday
 * 17.01.12 - Public command renamed to Status, fixed global and cleaned up code
 * 18.01.12 - Chat format now customisable and huge fix to a potential problem
+* 24.01.12 - Updated for 1.1 and added commands
 
 -----------------------------------------------------------------------------------------------------------------------
 

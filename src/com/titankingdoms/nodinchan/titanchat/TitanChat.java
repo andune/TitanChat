@@ -19,8 +19,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event.Priority;
-import org.bukkit.event.Event.Type;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -811,6 +809,11 @@ public class TitanChat extends JavaPlugin {
 	
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+		if (!(sender instanceof Player)) {
+			infoLog("Please use commands in-game");
+			return true;
+		}
+		
 		Player player = (Player) sender;
 		
 		// TitanChat Commands
@@ -844,6 +847,41 @@ public class TitanChat extends JavaPlugin {
 					return true;
 				}
 				
+				// /titanchat info
+				// Gets the info on the channel
+				
+				if (args[0].equalsIgnoreCase("info")) {
+					List<String> participants = new ArrayList<String>();
+					List<String> followers = new ArrayList<String>();
+					
+					for (Player participant : getParticipants(getChannel(player))) {
+						participants.add(participant.getName());
+					}
+					
+					for (Player follower : getFollowers(getChannel(player))) {
+						if (follower.isOnline()) {
+							followers.add(follower.getName());
+						}
+					}
+					
+					String participantList = "";
+					String followerList = "";
+					
+					if (participants.isEmpty())
+						participantList = "None";
+					else
+						participantList = createList(participants);
+					
+					if (followers.isEmpty())
+						followerList = "None";
+					else
+						followerList = createList(followers);
+					
+					player.sendMessage(ChatColor.AQUA + "Participants: " + participantList);
+					player.sendMessage(ChatColor.AQUA + "Followers: " + followerList);
+					return true;
+				}
+				
 				// /titanchat list
 				// Lists out the channels you have access to
 				
@@ -856,9 +894,33 @@ public class TitanChat extends JavaPlugin {
 						}
 					}
 					
-					sendInfo(player, "Channel List: " + createList(channels));
+					if (channels.isEmpty())
+						sendInfo(player, "Channel List: None");
+					else
+						sendInfo(player, "Channel List: " + createList(channels));
+					
 					return true;
 				}
+				
+				// /titanchat reload
+				// Reloads the configuration
+				
+				if (args[0].equalsIgnoreCase("reload")) {
+					if (isStaff(player)) {
+						infoLog("Reloading configs...");
+						sendInfo(player, "Reloading configs...");
+						saveConfig();
+						saveChannelConfig();
+						reloadConfig();
+						reloadChannelConfig();
+						prepareChannelCommunities();
+						infoLog("Configs reloaded");
+						sendInfo(player, "Configs reloaded");
+					}
+				}
+				
+				// /titanchat status
+				// Changes the state of the channel
 				
 				if (args[0].equalsIgnoreCase("status")) {
 					if (isAdmin(player, getChannel(player))) {
@@ -871,6 +933,9 @@ public class TitanChat extends JavaPlugin {
 					
 					return true;
 				}
+				
+				// /titanchat silence
+				// Silences the whole server
 				
 				if (args[0].equalsIgnoreCase("silence")) {
 					silence = (silence) ? false : true;
@@ -944,7 +1009,12 @@ public class TitanChat extends JavaPlugin {
 				if (args[0].equalsIgnoreCase("broadcast")) {
 					if (player.hasPermission("TitanChat.broadcast")) {
 						try {
-							ChatColor broadcastColour = ChatColor.valueOf(getConfig().getString("broadcast.colour"));
+							ChatColor broadcastColour = null;
+							
+							if (!getConfig().getString("broadcast.colour").equalsIgnoreCase("NONE")) {
+								broadcastColour = ChatColor.valueOf(getConfig().getString("broadcast.colour"));
+							}
+							
 							String tag = getConfig().getString("broadcast.tag");
 							
 							StringBuilder str = new StringBuilder();
@@ -957,7 +1027,14 @@ public class TitanChat extends JavaPlugin {
 								str.append(args[word]);
 							}
 							
-							String msg = new Channel(this).format(player, broadcastColour, tag, new Channel(this).filter(str.toString()), true);
+							String msg = "";
+							
+							if (broadcastColour == null) {
+								msg = new Channel(this).format(player, tag, new Channel(this).filter(str.toString()), true);
+								
+							} else {
+								msg = new Channel(this).format(player, broadcastColour, broadcastColour, tag, new Channel(this).filter(str.toString()), true);
+							}
 							
 							for (Player receiver : getServer().getOnlinePlayers()) {
 								receiver.sendMessage(msg);
@@ -976,6 +1053,8 @@ public class TitanChat extends JavaPlugin {
 					return true;
 				}
 				
+				// /titanchat commands [page]
+				
 				if (args[0].equalsIgnoreCase("commands")) {
 					player.sendMessage(ChatColor.AQUA + "TitanChat Commands");
 					player.sendMessage(ChatColor.AQUA + "Command: /titanchat [action] [argument]");
@@ -983,6 +1062,8 @@ public class TitanChat extends JavaPlugin {
 					player.sendMessage(ChatColor.AQUA + "/titanchat commands [page]");
 					return true;
 				}
+				
+				// /titanchat filter [phrase]
 				
 				if (args[0].equalsIgnoreCase("filter")) {
 					if (isStaff(player)) {
@@ -1022,9 +1103,11 @@ public class TitanChat extends JavaPlugin {
 	public void onEnable() {
 		infoLog("is now enabling...");
 		
+		PluginManager pm = getServer().getPluginManager();
+		
 		if (getDefaultChannel() == null) {
 			log.warning("[" + this + "] Default channel not defined");
-			getServer().getPluginManager().disablePlugin(this);
+			pm.disablePlugin(this);
 		}
 		
 		if (vault()) {
@@ -1056,11 +1139,7 @@ public class TitanChat extends JavaPlugin {
 		
 		prepareChannelCommunities();
 		
-		PluginManager pm = getServer().getPluginManager();
-		
-		pm.registerEvent(Type.PLAYER_CHAT, new TitanChatPlayerListener(this), Priority.Highest, this);
-		pm.registerEvent(Type.PLAYER_JOIN, new TitanChatPlayerListener(this), Priority.Highest, this);
-		pm.registerEvent(Type.PLAYER_QUIT, new TitanChatPlayerListener(this), Priority.Highest, this);
+		pm.registerEvents(new TitanChatPlayerListener(this), this);
 		
 		infoLog("is now enabled");
 	}
@@ -1144,9 +1223,11 @@ public class TitanChat extends JavaPlugin {
 			}
 			
 			channels.add(channel);
+			infoLog("No. of channels: " + channels.size());
 			
 			if (getConfig().get("channels." + channel + ".global") != null) {
 				globalChannels.add(channel);
+				infoLog("No. of global broadcasting channels: " + globalChannels.size());
 			}
 		}
 		

@@ -7,12 +7,14 @@ import java.util.logging.Logger;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-public class TitanChatPlayerListener extends PlayerListener {
+public class TitanChatPlayerListener implements Listener {
 	
 	private TitanChat plugin;
 	private Channel ch;
@@ -22,7 +24,7 @@ public class TitanChatPlayerListener extends PlayerListener {
 		this.ch = new Channel(plugin);
 	}
 	
-	@Override
+	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onPlayerChat(PlayerChatEvent event) {
 		if (event.isCancelled())
 			return;
@@ -37,7 +39,12 @@ public class TitanChatPlayerListener extends PlayerListener {
 		}
 		
 		if (plugin.inLocal(player)) {
-			ChatColor colour = ChatColor.valueOf(plugin.getConfig().getString("local.colour"));
+			ChatColor colour = null;
+			
+			if (!plugin.getConfig().getString("local.colour").equalsIgnoreCase("NONE")) {
+				colour = ChatColor.valueOf(plugin.getConfig().getString("local.colour"));
+			}
+			
 			String tag = plugin.getConfig().getString("local.tag");
 			int radius = plugin.getConfig().getInt("local.radius");
 			
@@ -54,7 +61,12 @@ public class TitanChatPlayerListener extends PlayerListener {
 			receivers.add(player);
 			
 			for (Player receiver : receivers) {
-				receiver.sendMessage(ch.format(player, colour, tag, msg, true));
+				if (colour == null) {
+					receiver.sendMessage(ch.format(player, tag, msg, true));
+					
+				} else {
+					receiver.sendMessage(ch.format(player, colour, colour, tag, msg, true));
+				}
 			}
 			
 			if (receivers.size() == 1)
@@ -78,33 +90,80 @@ public class TitanChatPlayerListener extends PlayerListener {
 		
 		if (plugin.isGlobal(plugin.getChannel(player))) {
 			for (Player receiver : plugin.getServer().getOnlinePlayers()) {
+				String message = "";
+				
 				if (plugin.has(player, "TitanChat.allowcolours")) {
-					receiver.sendMessage(ch.format(player, ch.getChannelColour(player), ch.getChannelTag(player), msg, true));
+					if (ch.getNameColour(player) == null && ch.getChannelColour(player) == null) {
+						message = ch.format(player, ch.getChannelTag(player), msg, true);
+						
+					} else if (ch.getNameColour(player) == null) {
+						message = ch.formatColourName(player, ch.getNameColour(player), ch.getChannelTag(player), msg, true);
+						
+					} else if (ch.getNameColour(player) == null) {
+						message = ch.formatColourChannel(player, ch.getChannelColour(player), ch.getChannelTag(player), msg, true);
+						
+					} else {
+						message = ch.format(player, ch.getNameColour(player), ch.getChannelColour(player), ch.getChannelTag(player), msg, true);
+					}
 					
 				} else {
-					receiver.sendMessage(ch.format(player, ch.getChannelColour(player), ch.getChannelTag(player), msg, ch.allowColours(plugin.getChannel(player))));
+					if (ch.getNameColour(player) == null && ch.getChannelColour(player) == null) {
+						message = ch.format(player, ch.getChannelTag(player), msg, ch.allowColours(plugin.getChannel(player)));
+						
+					} else if (ch.getNameColour(player) == null) {
+						message = ch.formatColourName(player, ch.getNameColour(player), ch.getChannelTag(player), msg, ch.allowColours(plugin.getChannel(player)));
+						
+					} else if (ch.getNameColour(player) == null) {
+						message = ch.formatColourChannel(player, ch.getChannelColour(player), ch.getChannelTag(player), msg, ch.allowColours(plugin.getChannel(player)));
+						
+					} else {
+						message = ch.format(player, ch.getNameColour(player), ch.getChannelColour(player), ch.getChannelTag(player), msg, ch.allowColours(plugin.getChannel(player)));
+					}
 				}
+				
+				receiver.sendMessage(message);
 			}
 			
 		} else {
-			for (Player receiver : plugin.getParticipants(plugin.getChannel(player))) {
-				if (plugin.has(player, "TitanChat.allowcolours")) {
-					receiver.sendMessage(ch.format(player, ch.getChannelColour(player), ch.getChannelTag(player), msg, true));
+			String message = "";
+			
+			if (plugin.has(player, "TitanChat.allowcolours")) {
+				if (ch.getNameColour(player) == null && ch.getChannelColour(player) == null) {
+					message = ch.format(player, ch.getChannelTag(player), msg, true);
+					
+				} else if (ch.getNameColour(player) == null) {
+					message = ch.formatColourName(player, ch.getNameColour(player), ch.getChannelTag(player), msg, true);
+					
+				} else if (ch.getNameColour(player) == null) {
+					message = ch.formatColourChannel(player, ch.getChannelColour(player), ch.getChannelTag(player), msg, true);
 					
 				} else {
-					receiver.sendMessage(ch.format(player, ch.getChannelColour(player), ch.getChannelTag(player), msg, ch.allowColours(plugin.getChannel(player))));
+					message = ch.format(player, ch.getNameColour(player), ch.getChannelColour(player), ch.getChannelTag(player), msg, true);
 				}
+				
+			} else {
+				if (ch.getNameColour(player) == null && ch.getChannelColour(player) == null) {
+					message = ch.format(player, ch.getChannelTag(player), msg, ch.allowColours(plugin.getChannel(player)));
+					
+				} else if (ch.getNameColour(player) == null) {
+					message = ch.formatColourName(player, ch.getNameColour(player), ch.getChannelTag(player), msg, ch.allowColours(plugin.getChannel(player)));
+					
+				} else if (ch.getNameColour(player) == null) {
+					message = ch.formatColourChannel(player, ch.getChannelColour(player), ch.getChannelTag(player), msg, ch.allowColours(plugin.getChannel(player)));
+					
+				} else {
+					message = ch.format(player, ch.getNameColour(player), ch.getChannelColour(player), ch.getChannelTag(player), msg, ch.allowColours(plugin.getChannel(player)));
+				}
+			}
+			
+			for (Player receiver : plugin.getParticipants(plugin.getChannel(player))) {
+				receiver.sendMessage(message);
 			}
 			
 			if (plugin.getFollowers(plugin.getChannel(player)) != null) {
 				for (Player receiver : plugin.getFollowers(plugin.getChannel(player))) {
 					if (!plugin.getParticipants(plugin.getChannel(player)).contains(receiver)) {
-						if (plugin.has(player, "TitanChat.allowcolours")) {
-							receiver.sendMessage(ch.format(player, ch.getChannelColour(player), ch.getChannelTag(player), msg, true));
-							
-						} else {
-							receiver.sendMessage(ch.format(player, ch.getChannelColour(player), ch.getChannelTag(player), msg, ch.allowColours(plugin.getChannel(player))));
-						}
+						receiver.sendMessage(message);
 					}
 				}
 			}
@@ -115,7 +174,7 @@ public class TitanChatPlayerListener extends PlayerListener {
 		event.setCancelled(true);
 	}
 	
-	@Override
+	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		String channelName = "";
 		
@@ -137,7 +196,7 @@ public class TitanChatPlayerListener extends PlayerListener {
 			plugin.sendWarning(event.getPlayer(), "All channels have been silenced");
 	}
 	
-	@Override
+	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onPlayerQuit(PlayerQuitEvent event) {
 		if (plugin.inLocal(event.getPlayer())) {
 			plugin.leaveLocal(event.getPlayer());

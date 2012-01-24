@@ -132,27 +132,45 @@ public class TitanChatCommands {
 			
 		case BROADCAST:
 			if (player.hasPermission("TitanChat.broadcast")) {
-				try {
-					ChatColor broadcastColour = ChatColor.valueOf(plugin.getConfig().getString("broadcast.colour"));
+				if (plugin.getConfig().getString("broadcast.colour").equalsIgnoreCase("NONE")) {
 					String tag = plugin.getConfig().getString("broadcast.tag");
 					
 					String msg = "";
 					
 					if (plugin.channelExist(targetChannel)) {
-						msg = new Channel(plugin).format(player, broadcastColour, tag, arg, true);
+						msg = new Channel(plugin).format(player, tag, arg, true);
 						
 					} else {
-						msg = new Channel(plugin).format(player, broadcastColour, tag, arg + " " + targetChannel, true);
+						msg = new Channel(plugin).format(player, tag, arg + " " + targetChannel, true);
 					}
 					
 					for (Player receiver : plugin.getServer().getOnlinePlayers()) {
 						receiver.sendMessage(msg);
 					}
 					
-					Logger.getLogger("TitanLog").info("<" + player.getName() + "> " + ChatColor.stripColor(msg));
-					
-				} catch (IllegalArgumentException e) {
-					plugin.sendWarning(player, "Invalid Colour");
+				} else {
+					try {
+						ChatColor broadcastColour = ChatColor.valueOf(plugin.getConfig().getString("broadcast.colour"));
+						String tag = plugin.getConfig().getString("broadcast.tag");
+						
+						String msg = "";
+						
+						if (plugin.channelExist(targetChannel)) {
+							msg = new Channel(plugin).format(player, broadcastColour, broadcastColour, tag, arg, true);
+							
+						} else {
+							msg = new Channel(plugin).format(player, broadcastColour, broadcastColour, tag, arg + " " + targetChannel, true);
+						}
+						
+						for (Player receiver : plugin.getServer().getOnlinePlayers()) {
+							receiver.sendMessage(msg);
+						}
+						
+						Logger.getLogger("TitanLog").info("<" + player.getName() + "> " + ChatColor.stripColor(msg));
+						
+					} catch (IllegalArgumentException e) {
+						plugin.sendWarning(player, "Invalid Colour");
+					}
 				}
 				
 			} else {
@@ -189,7 +207,7 @@ public class TitanChatCommands {
 			
 		case COMMANDS:
 			if (arg.equalsIgnoreCase("1")) {
-				player.sendMessage(ChatColor.AQUA + "== TitanChat Command List (1/5) ==");
+				player.sendMessage(ChatColor.AQUA + "== TitanChat Command List (1/6) ==");
 				player.sendMessage(ChatColor.AQUA + "accept [channel] - Accepts the channel join invitation and joins the channel");
 				player.sendMessage(ChatColor.AQUA + "add [player] - Adds the player to the whitelist");
 				player.sendMessage(ChatColor.AQUA + "allowcolours [channel] - Sets whether colour codes are used; Alias: allowcolors");
@@ -197,7 +215,7 @@ public class TitanChatCommands {
 				player.sendMessage(ChatColor.AQUA + "broadcast [message] - Broadcasts the message globally");
 				
 			} else if (arg.equalsIgnoreCase("2")) {
-				player.sendMessage(ChatColor.AQUA + "== TitanChat Command List (2/5) ==");
+				player.sendMessage(ChatColor.AQUA + "== TitanChat Command List (2/6) ==");
 				player.sendMessage(ChatColor.AQUA + "colour [colour] - Sets the chat colour of the channel; Alias: color");
 				player.sendMessage(ChatColor.AQUA + "create [channel] - Creates a channel by that name");
 				player.sendMessage(ChatColor.AQUA + "decline [channel] - Declines the channel join invitation");
@@ -205,28 +223,33 @@ public class TitanChatCommands {
 				player.sendMessage(ChatColor.AQUA + "demote [player] - Demotes the player on the channel");
 				
 			} else if (arg.equalsIgnoreCase("3")) {
-				player.sendMessage(ChatColor.AQUA + "== TitanChat Command List (3/5) ==");
+				player.sendMessage(ChatColor.AQUA + "== TitanChat Command List (3/6) ==");
 				player.sendMessage(ChatColor.AQUA + "filter [phrase] - Adds the phrase to the filter");
 				player.sendMessage(ChatColor.AQUA + "follow [channel] - Follows the channel and receive chat");
 				player.sendMessage(ChatColor.AQUA + "force [player] - Forces the player to join the channel");
+				player.sendMessage(ChatColor.AQUA + "info [channel] - Gives the participants and followers of the channel");
 				player.sendMessage(ChatColor.AQUA + "invite [player] - Invites the player to join the channel");
-				player.sendMessage(ChatColor.AQUA + "join [channel] - Joins the channel");
 				
 			} else if (arg.equalsIgnoreCase("4")) {
-				player.sendMessage(ChatColor.AQUA + "== TitanChat Command List (4/5) ==");
+				player.sendMessage(ChatColor.AQUA + "== TitanChat Command List (4/6) ==");
+				player.sendMessage(ChatColor.AQUA + "join [channel] - Joins the channel");
 				player.sendMessage(ChatColor.AQUA + "kick [player] - Kicks the player from the channel");
 				player.sendMessage(ChatColor.AQUA + "list - Lists all channels you have acces to");
 				player.sendMessage(ChatColor.AQUA + "mute [player] - Mutes the player on the channel");
 				player.sendMessage(ChatColor.AQUA + "promote [player] - Promotes the player on the channel");
-				player.sendMessage(ChatColor.AQUA + "silence [channel] - Silences the channel; Leave out [channel] to silence all");
 				
 			} else if (arg.equalsIgnoreCase("5")) {
-				player.sendMessage(ChatColor.AQUA + "== TitanChat Command List (5/5) ==");
+				player.sendMessage(ChatColor.AQUA + "== TitanChat Command List (5/6) ==");
+				player.sendMessage(ChatColor.AQUA + "reload - Reloads the configs");
+				player.sendMessage(ChatColor.AQUA + "silence [channel] - Silences the channel; Leave out [channel] to silence all");
 				player.sendMessage(ChatColor.AQUA + "status [channel] - Sets whether the channel is private");
 				player.sendMessage(ChatColor.AQUA + "tag [tag] - Sets the channel tag");
 				player.sendMessage(ChatColor.AQUA + "unban [player] - Unbans the player from the channel");
-				player.sendMessage(ChatColor.AQUA + "unfollow [channel] - Unfollows the channel");
+				
+			} else if (arg.equalsIgnoreCase("6")) {
+				player.sendMessage(ChatColor.AQUA + "== TitanChat Command List (6/6) ==");
 				player.sendMessage(ChatColor.AQUA + "unmute [player] - Unmutes the player on the channel");
+				player.sendMessage(ChatColor.AQUA + "unfollow [channel] - Unfollows the channel");
 				
 			} else {
 				player.sendMessage(ChatColor.AQUA + "TitanChat Commands");
@@ -411,6 +434,51 @@ public class TitanChatCommands {
 			}
 			break;
 			
+		// /titanchat info [channel]
+		// Gets the info on the channel
+			
+		case INFO:
+			if (plugin.channelExist(arg)) {
+				if (plugin.canAccess(player, arg)) {
+					List<String> participants = new ArrayList<String>();
+					List<String> followers = new ArrayList<String>();
+					
+					for (Player participant : plugin.getParticipants(arg)) {
+						participants.add(participant.getName());
+					}
+					
+					for (Player follower : plugin.getFollowers(arg)) {
+						if (follower.isOnline()) {
+							followers.add(follower.getName());
+						}
+					}
+					
+					String participantList = plugin.createList(participants);
+					String followerList = plugin.createList(followers);
+					
+					if (participants.isEmpty())
+						participantList = "empty";
+					else
+						participantList = plugin.createList(participants);
+					
+					if (followers.isEmpty())
+						followerList = "empty";
+					else
+						followerList = plugin.createList(followers);
+					
+					player.sendMessage(ChatColor.AQUA + "Participants: " + participantList);
+					player.sendMessage(ChatColor.AQUA + "Followers: " + followerList);
+					
+				} else {
+					plugin.sendWarning(player, "You do not have access to that channel");
+				}
+				
+				
+			} else {
+				plugin.sendWarning(player, "No such channel");
+			}
+			break;
+			
 		// /titanchat invite [player]
 		// Invites the player to chat on the channel
 			
@@ -428,6 +496,9 @@ public class TitanChatCommands {
 				} else {
 					plugin.sendWarning(player, "You do not have permission to invite players on this channel");
 				}
+				
+			} else {
+				plugin.sendWarning(player, "No such channel");
 			}
 			break;
 			
@@ -467,6 +538,7 @@ public class TitanChatCommands {
 				} else {
 					plugin.sendWarning(player, "No such channel");
 				}
+				
 			}
 			break;
 			
@@ -706,6 +778,7 @@ public class TitanChatCommands {
 		FILTER,
 		FOLLOW,
 		FORCE,
+		INFO,
 		INVITE,
 		JOIN,
 		KICK,

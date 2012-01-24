@@ -3,6 +3,7 @@
 # DARK_GRAY, DARK_GREEN, DARK_PURPLE,
 # DARK_RED, GOLD, GRAY, GREEN,
 # LIGHT_PURPLE, RED, WHITE, YELLOW
+# Use "NONE" if you don't want it to change colours
 
 channel-limit: -1
 local:
@@ -15,27 +16,32 @@ broadcast:
 channels:
     Default:
         channel-tag: '[D]'
-        channel-colour: WHITE
+        channel-colour: NONE
+        name-colour: NONE
         default: true
         global: true
     HerpChan:
         channel-tag: '[HC]'
         channel-colour: GOLD
+        name-colour: GOLD
         public: false
         allow-colours: true
     DerpChan:
         channel-tag: '[DC]'
         channel-colour: GRAY
+        name-colour: GRAY
         public: true
         allow-colours: false
     Donators:
         channel-tag: '[$]'
         channel-colour: GREEN
+        name-colour: GREEN
         public: false
         allow-colours: true
     Staff:
         channel-tag: '[S]'
         channel-colour: RED
+        name-colour: RED
         staff: true
 formating:
    use-built-in: true
