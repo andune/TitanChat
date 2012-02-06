@@ -1,5 +1,5 @@
 name: TitanChat
-version: 1.0
+version: 1.1
 author: NodinChan
 main: com.titankingdoms.nodinchan.titanchat.TitanChat
 solftdepend: [Vault, PermissionsEx, bPermissions]
