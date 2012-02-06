@@ -22,7 +22,7 @@ permissions:
             TitanChat.ban.*: true
             TitanChat.kick.*: true
             TitanChat.rank.*: true
-            TitanChat.allowcolours: true
+            TitanChat.colours: true
             TitanChat.voice: true
     TitanChat.silence:
         description: Access to silence

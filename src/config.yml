@@ -1,50 +1,63 @@
-# List of available channel-colours:
-# AQUA, BLACK, BLUE, DARK_AQUA, DARK_BLUE,
-# DARK_GRAY, DARK_GREEN, DARK_PURPLE,
-# DARK_RED, GOLD, GRAY, GREEN,
-# LIGHT_PURPLE, RED, WHITE, YELLOW
-# Use "NONE" if you don't want it to change colours
+# Available colour codes:
+# &0 (black), &1 (dark blue), &2 (green),
+# &3 (sea green), &4 (red), &5 (purple),
+# &6 (gold), &7 (silver), &8 (grey),
+# &9 (blue), &a (light green), &b (light blue),
+# &c (light red), &d (pink), &e (yellow),
+# &f (white)
 
 channel-limit: -1
 local:
-    colour: YELLOW
+    chat-display-colour: '&e'
     tag: '[L]'
     radius: 15
 broadcast:
-    colour: WHITE
+    chat-display-colour: ''
     tag: '[Broadcast]'
 channels:
     Default:
-        channel-tag: '[D]'
-        channel-colour: NONE
-        name-colour: NONE
-        default: true
+        tag: '[D]'
+        channel-display-colour: ''
+        name-display-colour: ''
+        status: default
         global: true
     HerpChan:
-        channel-tag: '[HC]'
-        channel-colour: GOLD
-        name-colour: GOLD
-        public: false
-        allow-colours: true
+        tag: '[HC]'
+        channel-display-colour: '&6'
+        name-display-colour: '&6'
+        status: private
+        colour-code: true
     DerpChan:
-        channel-tag: '[DC]'
-        channel-colour: GRAY
-        name-colour: GRAY
-        public: true
-        allow-colours: false
+        tag: '[DC]'
+        channel-display-colour: '&7'
+        name-display-colour: '&7'
+        status: public
+        colour-code: false
+    MemeChan:
+        tag: '[MC]'
+        channel-display-colour: '&4'
+        name-display-colour: '&4'
+        status: password
+        password: pass
+        global: true
+        colour-code: true
     Donators:
-        channel-tag: '[$]'
-        channel-colour: GREEN
-        name-colour: GREEN
-        public: false
-        allow-colours: true
+        tag: '$'
+        channel-display-colour: '&2'
+        name-display-colour: '&2'
+        status: private
+        colour-code: true
+        format: '&f[&2%tag&f] %prefix%player%suffix: %message'
     Staff:
-        channel-tag: '[S]'
-        channel-colour: RED
-        name-colour: RED
-        staff: true
-formating:
-   use-built-in: true
-   format: "%tag %prefix%player%suffix: %message"
+        tag: '&f[&4S&f]'
+        channel-display-colour: '&4'
+        name-display-colour: '&4'
+        status: staff
+formatting:
+    use-built-in: true
+    format: "%tag %prefix%player%suffix: %message"
 filter:
-- filter
+    enable: true
+    censor: '*'
+    phrases:
+    - filter

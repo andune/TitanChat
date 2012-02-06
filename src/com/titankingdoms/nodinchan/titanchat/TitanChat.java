@@ -23,16 +23,16 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.titankingdoms.nodinchan.titanchat.TitanChatCommandHandler.Commands;
+
 import ru.tehkode.permissions.PermissionUser;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
-
-import com.titankingdoms.nodinchan.titanchat.TitanChatCommands.Commands;
 
 import de.bananaco.permissions.Permissions;
 
 /*
- *     TitanChat 1.0
- *     Copyright (C) 2011  Nodin Chan <nodinchan@nodinchan.net>
+ *     TitanChat 1.1
+ *     Copyright (C) 2012  Nodin Chan <nodinchan@nodinchan.net>
  *     
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
@@ -236,7 +236,7 @@ public class TitanChat extends JavaPlugin {
 	// Check if a channel exists
 	
 	public boolean channelExist(String channelName) {
-		return (getConfig().getConfigurationSection("channels").getKeys(false).contains(channelName));
+		return getConfig().getConfigurationSection("channels").getKeys(false).contains(channelName);
 	}
 	
 	// Switching channels
@@ -244,6 +244,14 @@ public class TitanChat extends JavaPlugin {
 	public void channelSwitch(Player player, String oldCh, String newCh) {
 		leaveChannel(player, oldCh);
 		enterChannel(player, newCh);
+	}
+	
+	// Check if the password is correct
+	
+	public boolean correctPass(String channelName, String password) {
+		String pass = getConfig().getString("channels." + channelName + ".password");
+		
+		return pass.equals(password);
 	}
 	
 	// Creating channels
@@ -396,8 +404,10 @@ public class TitanChat extends JavaPlugin {
 	public String getDefaultChannel() {
 		if (defaultChannel == "") {
 			for (String channel : getConfig().getConfigurationSection("channels").getKeys(false)) {
-				if (getConfig().get("channels." + channel + ".default") != null) {
-					defaultChannel = channel;
+				if (getConfig().get("channels." + channel + ".status") != null) {
+					if (getConfig().getString("channels." + channel + ".status").equalsIgnoreCase("default")) {
+						defaultChannel = channel;
+					}
 				}
 			}
 		}
@@ -423,8 +433,12 @@ public class TitanChat extends JavaPlugin {
 	
 	// Gets the format of chat
 	
-	public String getFormat() {
-		return getConfig().getString("formating.format");
+	public String getFormat(String channelName) {
+		if (getConfig().get("channels." + channelName + ".format") != null && !getConfig().getString("channels." + channelName + ".format").equalsIgnoreCase(""))
+			
+			return getConfig().getString("channels." + channelName + ".format");
+		
+		return getConfig().getString("formatting.format");
 	}
 	
 	public OfflinePlayer getOfflinePlayer(String name) {
@@ -466,15 +480,29 @@ public class TitanChat extends JavaPlugin {
 	// Gets the name of the staff channel
 	
 	public String getStaffChannel() {
-		if (staffChannel == "") {
+		if (staffChannel.equals("")) {
 			for (String channel : getConfig().getConfigurationSection("channels").getKeys(false)) {
-				if (getConfig().get("channels." + channel + ".staff") != null) {
-					staffChannel = channel;
+				if (getConfig().get("channels." + channel + ".status") != null) {
+					if (getConfig().getString("channels." + channel + ".status").equalsIgnoreCase("staff")) {
+						staffChannel = channel;
+					}
 				}
 			}
 		}
 		
 		return staffChannel;
+	}
+	
+	// Gets the list of status available for channels {
+	
+	public List<String> getStatuses() {
+		List<String> statuses = new ArrayList<String>();
+		
+		for (Status status : Status.values()) {
+			statuses.add(status.toString().toLowerCase());
+		}
+		
+		return statuses;
 	}
 	
 	// Gets the suffix of the player
@@ -669,19 +697,47 @@ public class TitanChat extends JavaPlugin {
 		return false;
 	}
 	
+	// Check if the channel is password protected
+	
+	public boolean isPassword(String channelName) {
+		if (getStaffChannel().equals(channelName))
+			return false;
+		
+		if (getDefaultChannel().equals(channelName))
+			return false;
+		
+		if (getConfig().get("channels." + channelName + ".status") != null)
+			return getConfig().getString("channels." + channelName + ".status").equalsIgnoreCase("password");
+		
+		return false;
+	}
+	
+	// Check if the channel is private
+	
+	public boolean isPrivate(String channelName) {
+		if (getStaffChannel().equals(channelName))
+			return false;
+		
+		if (getDefaultChannel().equals(channelName))
+			return true;
+		
+		if (getConfig().get("channels." + channelName + ".status") != null)
+			return getConfig().getString("channels." + channelName + ".status").equalsIgnoreCase("private");
+		
+		return false;
+	}
+	
 	// Check if the channel is public
 	
 	public boolean isPublic(String channelName) {
-		if (getStaffChannel() == channelName)
+		if (getStaffChannel().equals(channelName))
 			return false;
 		
-		if (getDefaultChannel() == channelName)
+		if (getDefaultChannel().equals(channelName))
 			return true;
 		
-		if (getConfig().get("channels." + channelName + ".public") != null) {
-			if (getConfig().getBoolean("channels." + channelName + ".public"))
-				return true;
-		}
+		if (getConfig().get("channels." + channelName + ".status") != null)
+			return getConfig().getString("channels." + channelName + ".status").equalsIgnoreCase("public");
 		
 		return false;
 	}
@@ -728,10 +784,10 @@ public class TitanChat extends JavaPlugin {
 	// Check if the channel is silenced
 	
 	public boolean isSilenced(String channelName) {
-		if (channelName == getDefaultChannel())
+		if (channelName.equals(getDefaultChannel()))
 			return silence;
 		
-		if (channelName == getStaffChannel())
+		if (channelName.equals(getStaffChannel()))
 			return false;
 		
 		return silenced.get(channelName);
@@ -826,8 +882,8 @@ public class TitanChat extends JavaPlugin {
 				
 				if (args[0].equalsIgnoreCase("allowcolours") || args[0].equalsIgnoreCase("allowcolors")) {
 					if (has(player, "TitanChat.admin")) {
-						new ChannelManager(this).setAllowColours(getChannel(player), (new Channel(this).allowColours(getChannel(player))) ? false : true);
-						sendInfo(player, "The channel now " + ((new Channel(this).allowColours(getChannel(player))) ? "allows" : "disallows") + " colours");
+						new ConfigManager(this).setConvertColours(getChannel(player), (new Format(this).colours(getChannel(player))) ? false : true);
+						sendInfo(player, "The channel now " + ((new Format(this).colours(getChannel(player))) ? "allows" : "disallows") + " colours");
 						
 					} else {
 						sendWarning(player, "You do not have permission to change the state of this channel");
@@ -919,21 +975,6 @@ public class TitanChat extends JavaPlugin {
 					}
 				}
 				
-				// /titanchat status
-				// Changes the state of the channel
-				
-				if (args[0].equalsIgnoreCase("status")) {
-					if (isAdmin(player, getChannel(player))) {
-						new ChannelManager(this).setPublic(getChannel(player), (isPublic(getChannel(player))) ? false : true);
-						sendInfo(player, "The channel is now " + ((isPublic(getChannel(player))) ? "public" : "private"));
-						
-					} else {
-						sendWarning(player, "You do not have permission to change the state of this channel");
-					}
-					
-					return true;
-				}
-				
 				// /titanchat silence
 				// Silences the whole server
 				
@@ -951,28 +992,28 @@ public class TitanChat extends JavaPlugin {
 					return true;
 				}
 				
-				sendWarning(player, "Invalid Command");
+				sendWarning(player, "Invalid Command/Argument");
 				
 			} else if (args.length == 2) {
 				for (Commands command : Commands.values()) {
 					if (command.toString().equalsIgnoreCase(args[0])) {
 						if (getChannel(player) != null) {
-							new TitanChatCommands(this).onCommand(player, args[0], args[1], getChannel(player));
+							new TitanChatCommandHandler(this).onCommand(player, args[0], args[1], getChannel(player));
 							
 						} else {
-							new TitanChatCommands(this).onCommand(player, args[0], args[1], "local");
+							new TitanChatCommandHandler(this).onCommand(player, args[0], args[1], "local");
 						}
 						return true;
 					}
 				}
 				
-				sendWarning(player, "Invalid Command");
+				sendWarning(player, "Invalid Command/Argument");
 				
 			} else if (args.length == 3) {
 				if (args[0].equalsIgnoreCase("broadcast") || args[0].equalsIgnoreCase("filter")) {
 					for (Commands command : Commands.values()) {
 						if (command.toString().equalsIgnoreCase(args[0])) {
-							new TitanChatCommands(this).onCommand(player, args[0], args[1], args[2]);
+							new TitanChatCommandHandler(this).onCommand(player, args[0], args[1], args[2]);
 							return true;
 						}
 					}
@@ -988,7 +1029,7 @@ public class TitanChat extends JavaPlugin {
 					if (channelExist(args[2])) {
 						for (Commands command : Commands.values()) {
 							if (command.toString().equalsIgnoreCase(args[0])) {
-								new TitanChatCommands(this).onCommand(player, args[0], args[1], args[2]);
+								new TitanChatCommandHandler(this).onCommand(player, args[0], args[1], args[2]);
 							}
 						}
 						
@@ -999,7 +1040,7 @@ public class TitanChat extends JavaPlugin {
 					return true;
 				}
 				
-				sendWarning(player, "Invalid Command");
+				sendWarning(player, "Invalid Command/Arguments");
 				
 			} else {
 				
@@ -1008,43 +1049,23 @@ public class TitanChat extends JavaPlugin {
 				
 				if (args[0].equalsIgnoreCase("broadcast")) {
 					if (player.hasPermission("TitanChat.broadcast")) {
-						try {
-							ChatColor broadcastColour = null;
-							
-							if (!getConfig().getString("broadcast.colour").equalsIgnoreCase("NONE")) {
-								broadcastColour = ChatColor.valueOf(getConfig().getString("broadcast.colour"));
+						StringBuilder str = new StringBuilder();
+						
+						for (int word = 1; word < args.length; word++) {
+							if (str.length() > 0) {
+								str.append(" ");
 							}
 							
-							String tag = getConfig().getString("broadcast.tag");
-							
-							StringBuilder str = new StringBuilder();
-							
-							for (int word = 1; word < args.length; word++) {
-								if (str.length() > 0) {
-									str.append(" ");
-								}
-								
-								str.append(args[word]);
-							}
-							
-							String msg = "";
-							
-							if (broadcastColour == null) {
-								msg = new Channel(this).format(player, tag, new Channel(this).filter(str.toString()), true);
-								
-							} else {
-								msg = new Channel(this).format(player, broadcastColour, broadcastColour, tag, new Channel(this).filter(str.toString()), true);
-							}
-							
-							for (Player receiver : getServer().getOnlinePlayers()) {
-								receiver.sendMessage(msg);
-							}
-							
-							log.info("<" + player.getName() + "> " + ChatColor.stripColor(msg));
-							
-						} catch (IllegalArgumentException e) {
-							sendWarning(player, "Invalid Colour");
+							str.append(args[word]);
 						}
+						
+						String msg = new Format(this).broadcast(player, new Format(this).filter(str.toString()));
+						
+						for (Player receiver : getServer().getOnlinePlayers()) {
+							receiver.sendMessage(msg);
+						}
+						
+						log.info("<" + player.getName() + "> " + str.toString());
 						
 					} else {
 						sendWarning(player, "You do not have permission to broadcast");
@@ -1077,7 +1098,7 @@ public class TitanChat extends JavaPlugin {
 							str.append(args[word]);
 						}
 						
-						new ChannelManager(this).filter(str.toString());
+						new ConfigManager(this).filter(str.toString());
 						sendInfo(player, "'" + str.toString() + "' has been filtered");
 						
 					} else {
@@ -1087,7 +1108,32 @@ public class TitanChat extends JavaPlugin {
 					return true;
 				}
 				
-				sendWarning(player, "Invalid Command");
+				// /titanchat format [format]
+				// Sets the format of the channel
+				
+				if (args[0].equalsIgnoreCase("format")) {
+					if (isAdmin(player, getChannel(player))) {
+						StringBuilder str = new StringBuilder();
+						
+						for (int word = 1; word < args.length; word++) {
+							if (str.length() > 0) {
+								str.append(" ");
+							}
+							
+							str.append(args[word]);
+						}
+						
+						new ConfigManager(this).setFormat(getChannel(player), str.toString());
+						sendInfo(player, "The format of " + getChannel(player) + " is now '" + str.toString() + "'");
+						
+					} else {
+						sendWarning(player, "You do not have permission to use this command");
+					}
+					
+					return true;
+				}
+				
+				sendWarning(player, "Invalid Command/Argument");
 			}
 		}
 		
@@ -1105,7 +1151,7 @@ public class TitanChat extends JavaPlugin {
 		
 		PluginManager pm = getServer().getPluginManager();
 		
-		if (getDefaultChannel() == null) {
+		if (getDefaultChannel().equals("")) {
 			log.warning("[" + this + "] Default channel not defined");
 			pm.disablePlugin(this);
 		}
@@ -1127,6 +1173,7 @@ public class TitanChat extends JavaPlugin {
 		if (!config.exists()) {
 			infoLog("Loading default config");
 			getConfig().options().copyDefaults(true);
+			getChannelConfig().options().copyHeader(true);
 			saveConfig();
 		}
 		
@@ -1161,6 +1208,14 @@ public class TitanChat extends JavaPlugin {
 		
 		if (followers != null) {
 			followers.clear();
+		}
+		
+		if (channels != null) {
+			channels.clear();
+		}
+		
+		if (globalChannels != null) {
+			globalChannels.clear();
 		}
 		
 		for (String channel : getChannelConfig().getConfigurationSection("channels").getKeys(false)) {
@@ -1345,9 +1400,7 @@ public class TitanChat extends JavaPlugin {
 			channelBans.put(channelName, banned);
 		}
 		
-		if (!isPublic(channelName)) {
-			whitelistMember(player, channelName);
-		}
+		whitelistMember(player, channelName);
 		
 		sendInfo(player, "You have been unbanned from " + channelName);
 	}
@@ -1393,7 +1446,7 @@ public class TitanChat extends JavaPlugin {
 	// Checks whether or not to use the default format
 	
 	public boolean useDefaultFormat() {
-		return getConfig().getBoolean("formating.use-built-in");
+		return getConfig().getBoolean("formatting.use-built-in");
 	}
 	
 	public boolean vault() {
@@ -1415,5 +1468,13 @@ public class TitanChat extends JavaPlugin {
 		}
 		
 		sendInfo(player, "You are now a Member of " + channelName);
+	}
+	
+	public enum Status {
+		DEFAULT,
+		PASSWORD,
+		PRIVATE,
+		PUBLIC,
+		STAFF
 	}
 }

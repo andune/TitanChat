@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -17,11 +16,11 @@ import org.bukkit.event.player.PlayerQuitEvent;
 public class TitanChatPlayerListener implements Listener {
 	
 	private TitanChat plugin;
-	private Channel ch;
+	private Format fmt;
 	
 	public TitanChatPlayerListener(TitanChat plugin) {
 		this.plugin = plugin;
-		this.ch = new Channel(plugin);
+		this.fmt = new Format(plugin);
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
@@ -39,13 +38,6 @@ public class TitanChatPlayerListener implements Listener {
 		}
 		
 		if (plugin.inLocal(player)) {
-			ChatColor colour = null;
-			
-			if (!plugin.getConfig().getString("local.colour").equalsIgnoreCase("NONE")) {
-				colour = ChatColor.valueOf(plugin.getConfig().getString("local.colour"));
-			}
-			
-			String tag = plugin.getConfig().getString("local.tag");
 			int radius = plugin.getConfig().getInt("local.radius");
 			
 			List<Player> receivers = new ArrayList<Player>();
@@ -61,18 +53,13 @@ public class TitanChatPlayerListener implements Listener {
 			receivers.add(player);
 			
 			for (Player receiver : receivers) {
-				if (colour == null) {
-					receiver.sendMessage(ch.format(player, tag, msg, true));
-					
-				} else {
-					receiver.sendMessage(ch.format(player, colour, colour, tag, msg, true));
-				}
+				receiver.sendMessage(fmt.local(player, fmt.filter(msg)));
 			}
 			
 			if (receivers.size() == 1)
 				plugin.sendInfo(player, "Nobody hears you...");
 			
-			Logger.getLogger("TitanLog").info("<" + player.getName() + "> " + ch.decolourize(msg));
+			Logger.getLogger("TitanLog").info("<" + player.getName() + "> " + fmt.decolourize(msg));
 			
 			event.setCancelled(true);
 			return;
@@ -89,72 +76,14 @@ public class TitanChatPlayerListener implements Listener {
 		}
 		
 		if (plugin.isGlobal(plugin.getChannel(player))) {
+			String message = fmt.format(player, plugin.getChannel(player), msg);
+			
 			for (Player receiver : plugin.getServer().getOnlinePlayers()) {
-				String message = "";
-				
-				if (plugin.has(player, "TitanChat.allowcolours")) {
-					if (ch.getNameColour(player) == null && ch.getChannelColour(player) == null) {
-						message = ch.format(player, ch.getChannelTag(player), msg, true);
-						
-					} else if (ch.getNameColour(player) == null) {
-						message = ch.formatColourName(player, ch.getNameColour(player), ch.getChannelTag(player), msg, true);
-						
-					} else if (ch.getNameColour(player) == null) {
-						message = ch.formatColourChannel(player, ch.getChannelColour(player), ch.getChannelTag(player), msg, true);
-						
-					} else {
-						message = ch.format(player, ch.getNameColour(player), ch.getChannelColour(player), ch.getChannelTag(player), msg, true);
-					}
-					
-				} else {
-					if (ch.getNameColour(player) == null && ch.getChannelColour(player) == null) {
-						message = ch.format(player, ch.getChannelTag(player), msg, ch.allowColours(plugin.getChannel(player)));
-						
-					} else if (ch.getNameColour(player) == null) {
-						message = ch.formatColourName(player, ch.getNameColour(player), ch.getChannelTag(player), msg, ch.allowColours(plugin.getChannel(player)));
-						
-					} else if (ch.getNameColour(player) == null) {
-						message = ch.formatColourChannel(player, ch.getChannelColour(player), ch.getChannelTag(player), msg, ch.allowColours(plugin.getChannel(player)));
-						
-					} else {
-						message = ch.format(player, ch.getNameColour(player), ch.getChannelColour(player), ch.getChannelTag(player), msg, ch.allowColours(plugin.getChannel(player)));
-					}
-				}
-				
 				receiver.sendMessage(message);
 			}
 			
 		} else {
-			String message = "";
-			
-			if (plugin.has(player, "TitanChat.allowcolours")) {
-				if (ch.getNameColour(player) == null && ch.getChannelColour(player) == null) {
-					message = ch.format(player, ch.getChannelTag(player), msg, true);
-					
-				} else if (ch.getNameColour(player) == null) {
-					message = ch.formatColourName(player, ch.getNameColour(player), ch.getChannelTag(player), msg, true);
-					
-				} else if (ch.getNameColour(player) == null) {
-					message = ch.formatColourChannel(player, ch.getChannelColour(player), ch.getChannelTag(player), msg, true);
-					
-				} else {
-					message = ch.format(player, ch.getNameColour(player), ch.getChannelColour(player), ch.getChannelTag(player), msg, true);
-				}
-				
-			} else {
-				if (ch.getNameColour(player) == null && ch.getChannelColour(player) == null) {
-					message = ch.format(player, ch.getChannelTag(player), msg, ch.allowColours(plugin.getChannel(player)));
-					
-				} else if (ch.getNameColour(player) == null) {
-					message = ch.formatColourName(player, ch.getNameColour(player), ch.getChannelTag(player), msg, ch.allowColours(plugin.getChannel(player)));
-					
-				} else if (ch.getNameColour(player) == null) {
-					message = ch.formatColourChannel(player, ch.getChannelColour(player), ch.getChannelTag(player), msg, ch.allowColours(plugin.getChannel(player)));
-					
-				} else {
-					message = ch.format(player, ch.getNameColour(player), ch.getChannelColour(player), ch.getChannelTag(player), msg, ch.allowColours(plugin.getChannel(player)));
-				}
-			}
+			String message = fmt.format(player, plugin.getChannel(player), msg);
 			
 			for (Player receiver : plugin.getParticipants(plugin.getChannel(player))) {
 				receiver.sendMessage(message);
@@ -169,7 +98,7 @@ public class TitanChatPlayerListener implements Listener {
 			}
 		}
 		
-		Logger.getLogger("TitanLog").info("<" + player.getName() + "> " + ch.decolourize(msg));
+		Logger.getLogger("TitanLog").info("<" + player.getName() + "> " + fmt.decolourize(msg));
 		
 		event.setCancelled(true);
 	}
