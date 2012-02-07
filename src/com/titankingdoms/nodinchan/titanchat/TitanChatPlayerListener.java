@@ -107,16 +107,25 @@ public class TitanChatPlayerListener implements Listener {
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		String channelName = "";
 		
-		if (plugin.has(event.getPlayer(), "TitanChat.admin")) {
-			if (plugin.getStaffChannel() != null) {
-				channelName = plugin.getStaffChannel();
+		for (String channel : plugin.getChannels()) {
+			if (plugin.has(event.getPlayer(), "TitanChat.spawn." + channel)) {
+				channelName = channel;
+				break;
+			}
+		}
+		
+		if (channelName != "") {
+			if (plugin.has(event.getPlayer(), "TitanChat.admin")) {
+				if (plugin.getStaffChannel() != null) {
+					channelName = plugin.getStaffChannel();
+					
+				} else {
+					channelName = plugin.getDefaultChannel();
+				}
 				
 			} else {
 				channelName = plugin.getDefaultChannel();
 			}
-			
-		} else {
-			channelName = plugin.getDefaultChannel();
 		}
 		
 		plugin.enterChannel(event.getPlayer(), channelName);

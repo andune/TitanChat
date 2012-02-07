@@ -56,6 +56,9 @@ channels:
 formatting:
     use-built-in: true
     format: "%tag %prefix%player%suffix: %message"
+channel-messages:
+    join: true
+    leave: true
 filter:
     enable: true
     censor: '*'

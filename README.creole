@@ -52,12 +52,13 @@ TitanChat, a chat management plugin for Bukkit.
 * 17.01.12 - Public command renamed to Status, fixed global and cleaned up code
 * 18.01.12 - Chat format now customisable and huge fix to a potential problem
 * 24.01.12 - Updated for 1.1 and added commands
+* 07.02.12 - Added permission for setting default channels for players
 
 -----------------------------------------------------------------------------------------------------------------------
 
 === Todo
 
-* Wait for gwinans's instructions
+* Add features and make TitanChat better
 
 -----------------------------------------------------------------------------------------------------------------------
 

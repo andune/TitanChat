@@ -157,7 +157,7 @@ public class TitanChat extends JavaPlugin {
 		if (has(player, "TitanChat.access." + channelName))
 			return true;
 		
-		if (isPublic(channelName))
+		if (new Settings(this).isPublic(channelName))
 			return true;
 		
 		if (isAdmin(player, channelName))
@@ -336,9 +336,11 @@ public class TitanChat extends JavaPlugin {
 	// Entering channels
 	
 	public void enterChannel(Player player, String channelName) {
-		if (getParticipants(channelName) != null) {
-			for (Player receiver : getParticipants(channelName)) {
-				sendInfo(receiver, player.getDisplayName() + " has joined the channel");
+		if (new Settings(this).enableJoinMessages()) {
+			if (getParticipants(channelName) != null) {
+				for (Player receiver : getParticipants(channelName)) {
+					sendInfo(receiver, player.getDisplayName() + " has joined the channel");
+				}
 			}
 		}
 		
@@ -397,6 +399,12 @@ public class TitanChat extends JavaPlugin {
 		}
 		
 		return channelConfig;
+	}
+	
+	// Gets the list of channels
+	
+	public List<String> getChannels() {
+		return channels;
 	}
 	
 	// Gets the name of the default channel
@@ -697,51 +705,6 @@ public class TitanChat extends JavaPlugin {
 		return false;
 	}
 	
-	// Check if the channel is password protected
-	
-	public boolean isPassword(String channelName) {
-		if (getStaffChannel().equals(channelName))
-			return false;
-		
-		if (getDefaultChannel().equals(channelName))
-			return false;
-		
-		if (getConfig().get("channels." + channelName + ".status") != null)
-			return getConfig().getString("channels." + channelName + ".status").equalsIgnoreCase("password");
-		
-		return false;
-	}
-	
-	// Check if the channel is private
-	
-	public boolean isPrivate(String channelName) {
-		if (getStaffChannel().equals(channelName))
-			return false;
-		
-		if (getDefaultChannel().equals(channelName))
-			return true;
-		
-		if (getConfig().get("channels." + channelName + ".status") != null)
-			return getConfig().getString("channels." + channelName + ".status").equalsIgnoreCase("private");
-		
-		return false;
-	}
-	
-	// Check if the channel is public
-	
-	public boolean isPublic(String channelName) {
-		if (getStaffChannel().equals(channelName))
-			return false;
-		
-		if (getDefaultChannel().equals(channelName))
-			return true;
-		
-		if (getConfig().get("channels." + channelName + ".status") != null)
-			return getConfig().getString("channels." + channelName + ".status").equalsIgnoreCase("public");
-		
-		return false;
-	}
-	
 	// Check if the player is a member of that channel
 	
 	public boolean isMember(Player player, String channelName) {
@@ -823,9 +786,11 @@ public class TitanChat extends JavaPlugin {
 			participants.put(channelName, players);
 		}
 		
-		if (getParticipants(channelName) != null) {
-			for (Player receiver : getParticipants(channelName)) {
-				sendInfo(receiver, player.getDisplayName() + " has left the channel");
+		if (new Settings(this).enableLeaveMessages()) {
+			if (getParticipants(channelName) != null) {
+				for (Player receiver : getParticipants(channelName)) {
+					sendInfo(receiver, player.getDisplayName() + " has left the channel");
+				}
 			}
 		}
 	}
@@ -877,13 +842,13 @@ public class TitanChat extends JavaPlugin {
 		if (label.equalsIgnoreCase("titanchat") || label.equalsIgnoreCase("tc")) {
 			if (args.length == 1) {
 				
-				// /titanchat allowcolours
-				// Sets whether colour codes are allowed on the channel
+				// /titanchat convertcolour
+				// Sets whether colour codes will be converted
 				
-				if (args[0].equalsIgnoreCase("allowcolours") || args[0].equalsIgnoreCase("allowcolors")) {
+				if (args[0].equalsIgnoreCase("convertcolour") || args[0].equalsIgnoreCase("convertcolor")) {
 					if (has(player, "TitanChat.admin")) {
 						new ConfigManager(this).setConvertColours(getChannel(player), (new Format(this).colours(getChannel(player))) ? false : true);
-						sendInfo(player, "The channel now " + ((new Format(this).colours(getChannel(player))) ? "allows" : "disallows") + " colours");
+						sendInfo(player, "The channel now " + ((new Format(this).colours(getChannel(player))) ? "converts" : "ignores") + " colour codes");
 						
 					} else {
 						sendWarning(player, "You do not have permission to change the state of this channel");

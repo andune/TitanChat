@@ -11,10 +11,12 @@ public class TitanChatCommandHandler {
 	
 	private TitanChat plugin;
 	private ConfigManager cfgManager;
+	private Settings settings;
 	
 	public TitanChatCommandHandler(TitanChat plugin) {
 		this.plugin = plugin;
 		this.cfgManager = new ConfigManager(plugin);
+		this.settings = new Settings(plugin);
 	}
 	
 	public void onCommand(Player player, String action, String arg, String targetChannel) {
@@ -506,7 +508,7 @@ public class TitanChatCommandHandler {
 				
 			} else {
 				if (plugin.channelExist(arg)) {
-					if (plugin.isPublic(arg)) {
+					if (settings.isPublic(arg)) {
 						if (plugin.isBanned(player, arg)) {
 							plugin.sendWarning(player, "You're banned on the channel");
 							
@@ -515,7 +517,7 @@ public class TitanChatCommandHandler {
 							plugin.sendInfo(player, "You have switched channels");
 						}
 						
-					} else if (plugin.isPassword(arg)) {
+					} else if (settings.isPassword(arg)) {
 						if (plugin.isBanned(player, arg)) {
 							plugin.sendWarning(player, "You're banned on the channel");
 							
@@ -529,7 +531,7 @@ public class TitanChatCommandHandler {
 							}
 						}
 						
-					} else if (plugin.isPrivate(arg)) {
+					} else if (settings.isPrivate(arg)) {
 						if (plugin.canAccess(player, arg)) {
 							plugin.channelSwitch(player, targetChannel, arg);
 							plugin.sendInfo(player, "You switched channels");
