@@ -27,7 +27,8 @@ TitanChat, a chat management plugin for Bukkit.
 
 === Dependecies
 
-* CraftBukkit Build #1597
+* CraftBukkit 1.1-R4
+* Vault
 
 -----------------------------------------------------------------------------------------------------------------------
 
@@ -53,6 +54,8 @@ TitanChat, a chat management plugin for Bukkit.
 * 18.01.12 - Chat format now customisable and huge fix to a potential problem
 * 24.01.12 - Updated for 1.1 and added commands
 * 07.02.12 - Added permission for setting default channels for players
+* 16.02.12 - Added TCSupport Loader and TCSupport
+* 17.02.12 - New managing code and permissions
 
 -----------------------------------------------------------------------------------------------------------------------
 

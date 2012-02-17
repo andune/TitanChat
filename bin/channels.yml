@@ -2,13 +2,13 @@ channels:
     HerpChan:
         admins:
         - Herpina
-        members:
+        whitelist:
         - Herpy
         - Herpes
     DerpChan:
         admins:
         - Derplord
-        black-list:
+        blacklist:
         - Herpina
     MemeChan:
         admins:

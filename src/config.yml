@@ -47,7 +47,7 @@ channels:
         name-display-colour: '&2'
         status: private
         colour-code: true
-        format: '&f[&2%tag&f] %prefix%player%suffix: %message'
+        format: '&f[&2%tag&f] %gprefix%player%gsuffix: %message'
     Staff:
         tag: '&f[&4S&f]'
         channel-display-colour: '&4'
@@ -55,7 +55,7 @@ channels:
         status: staff
 formatting:
     use-built-in: true
-    format: "%tag %prefix%player%suffix: %message"
+    format: "%tag %pprefix%player%psuffix: %message"
 channel-messages:
     join: true
     leave: true
