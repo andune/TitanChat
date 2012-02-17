@@ -628,8 +628,8 @@ public class TitanChat extends JavaPlugin {
 		
 		log(Level.INFO, "Vault hooked");
 		
-		File config = new File(getDataFolder() + "config.yml");
-		File channelConfig = new File(getDataFolder() + "channels.yml");
+		File config = new File(getDataFolder(), "config.yml");
+		File channelConfig = new File(getDataFolder(), "channels.yml");
 		File dir = new File(getDataFolder(), "supports");
 		
 		if (!config.exists()) {
