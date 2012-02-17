@@ -598,6 +598,7 @@ public class TitanChat extends JavaPlugin {
 		if (!vault()) {
 			log(Level.WARNING, "Vault not found!");
 			pm.disablePlugin(this);
+			return;
 		}
 		
 		cmdHandler = new TitanChatCommandHandler(this);
@@ -613,6 +614,7 @@ public class TitanChat extends JavaPlugin {
 		if (getDefaultChannel() == null) {
 			log(Level.WARNING, "Default channel not defined");
 			pm.disablePlugin(this);
+			return;
 		}
 		
 		if (setupPermission()) {
@@ -650,9 +652,6 @@ public class TitanChat extends JavaPlugin {
 		}
 		
 		pm.registerEvents(new TitanChatPlayerListener(this), this);
-		
-		if (getSupports() == null)
-			supports = new ArrayList<TCSupport>();
 		
 		try { supports.addAll(new SupportLoader(this).load()); } catch (Exception e) {}
 		
