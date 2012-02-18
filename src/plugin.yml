@@ -1,5 +1,5 @@
 name: TitanChat
-version: 2.0
+version: 2.0.1
 author: NodinChan
 main: com.titankingdoms.nodinchan.titanchat.TitanChat
 depend: [Vault]

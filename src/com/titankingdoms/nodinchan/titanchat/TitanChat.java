@@ -32,7 +32,7 @@ import com.titankingdoms.nodinchan.titanchat.util.Format;
 import com.titankingdoms.nodinchan.titanchat.util.Settings;
 
 /*
- *     TitanChat 2.0
+ *     TitanChat 2.0.1
  *     Copyright (C) 2012  Nodin Chan <nodinchan@nodinchan.net>
  *     
  *     This program is free software: you can redistribute it and/or modify
@@ -72,7 +72,7 @@ public class TitanChat extends JavaPlugin {
 	public void assignAdmin(Player player, String channelName) {
 		Channel channel = getChannel(channelName);
 		channel.getAdminList().add(player.getName());
-		
+
 		sendInfo(player, "You are now an Admin of " + channelName);
 	}
 	
@@ -609,25 +609,6 @@ public class TitanChat extends JavaPlugin {
 		channels = new ArrayList<Channel>();
 		supports = new ArrayList<TCSupport>();
 		
-		prepareChannelCommunities();
-		
-		if (getDefaultChannel() == null) {
-			log(Level.WARNING, "Default channel not defined");
-			pm.disablePlugin(this);
-			return;
-		}
-		
-		if (setupPermission()) {
-			log(Level.INFO, permission.getName() + " detected");
-			log(Level.INFO, "Using " + permission.getName() + " for permissions");
-		}
-		
-		if (setupChat()) {
-			log(Level.INFO, "Prefixes and suffixes supported");
-		}
-		
-		log(Level.INFO, "Vault hooked");
-		
 		File config = new File(getDataFolder(), "config.yml");
 		File channelConfig = new File(getDataFolder(), "channels.yml");
 		File dir = new File(getDataFolder(), "supports");
@@ -650,6 +631,25 @@ public class TitanChat extends JavaPlugin {
 			log(Level.INFO, "Loading support folder");
 			dir.mkdir();
 		}
+		
+		prepareChannelCommunities();
+		
+		if (getDefaultChannel() == null) {
+			log(Level.WARNING, "Default channel not defined");
+			pm.disablePlugin(this);
+			return;
+		}
+		
+		if (setupPermission()) {
+			log(Level.INFO, permission.getName() + " detected");
+			log(Level.INFO, "Using " + permission.getName() + " for permissions");
+		}
+		
+		if (setupChat()) {
+			log(Level.INFO, "Prefixes and suffixes supported");
+		}
+		
+		log(Level.INFO, "Vault hooked");
 		
 		pm.registerEvents(new TitanChatPlayerListener(this), this);
 		

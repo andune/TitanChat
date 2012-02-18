@@ -56,6 +56,7 @@ TitanChat, a chat management plugin for Bukkit.
 * 07.02.12 - Added permission for setting default channels for players
 * 16.02.12 - Added TCSupport Loader and TCSupport
 * 17.02.12 - New managing code and permissions
+* 18.02.12 - Fixed config files not generating
 
 -----------------------------------------------------------------------------------------------------------------------
 

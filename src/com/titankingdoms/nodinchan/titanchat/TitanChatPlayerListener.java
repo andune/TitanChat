@@ -1,7 +1,6 @@
 package com.titankingdoms.nodinchan.titanchat;
 
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -35,10 +34,6 @@ public class TitanChatPlayerListener implements Listener {
 		String msg = event.getMessage();
 		Channel channel = plugin.getChannel(player);
 		
-		if (channel.isSilenced() && !plugin.hasVoice(player)) {
-			return;
-		}
-		
 		if (channel.getStatus().equals(Status.LOCAL)) {
 			channel.sendLocalMessage(player.getName(), plugin.getFormat().local(player, plugin.getFormat().filter(msg)));
 			
@@ -46,24 +41,23 @@ public class TitanChatPlayerListener implements Listener {
 			return;
 		}
 		
-		if (channel.isSilenced() && !plugin.hasVoice(player)) {
+		if (plugin.isSilenced() && !plugin.hasVoice(player))
 			return;
-		}
 		
-		if (channel.getMuteList().contains(player.getName()) && !plugin.hasVoice(player)) {
+		if (channel.isSilenced() && !plugin.hasVoice(player))
 			return;
-		}
+		
+		if (channel.getMuteList().contains(player.getName()) && !plugin.hasVoice(player))
+			return;
 
 		String message = plugin.getFormat().format(player, channel.getName(), msg);
 		
-		if (channel.isGlobal()) {
+		if (channel.isGlobal())
 			channel.sendGlobalMessage(message);
-			
-		} else {
+		else
 			channel.sendMessage(message);
-		}
 		
-		Logger.getLogger("TitanLog").info("<" + player.getName() + "> " + plugin.getFormat().decolourize(msg));
+		plugin.log(Level.INFO, "<" + player.getName() + "> " + plugin.getFormat().decolourize(msg));
 		
 		for (TCSupport support : plugin.getSupports()) {
 			support.chatMade(player.getName(), msg);
@@ -86,9 +80,8 @@ public class TitanChatPlayerListener implements Listener {
 					}
 				}
 				
-				if (channelName.equals("")) {
+				if (channelName.equals(""))
 					channelName = plugin.getDefaultChannel().getName();
-				}
 			}
 			
 		} else {
@@ -107,7 +100,10 @@ public class TitanChatPlayerListener implements Listener {
 		plugin.enterChannel(event.getPlayer(), channelName);
 		
 		if (plugin.isSilenced())
-			plugin.sendWarning(event.getPlayer(), "All channels have been silenced");
+			plugin.sendWarning(event.getPlayer(), "All channels are silenced");
+		
+		if (plugin.getChannel(channelName).isSilenced() && !plugin.isSilenced())
+			plugin.sendWarning(event.getPlayer(), channelName + " is silenced");
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
