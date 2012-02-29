@@ -15,25 +15,25 @@ channels:
         tag: '[D]'
         channel-display-colour: ''
         name-display-colour: ''
-        status: default
+        type: default
         global: true
     HerpChan:
         tag: '[HC]'
         channel-display-colour: '&6'
         name-display-colour: '&6'
-        status: private
+        type: private
         colour-code: true
     DerpChan:
         tag: '[DC]'
         channel-display-colour: '&7'
         name-display-colour: '&7'
-        status: public
+        type: public
         colour-code: false
     MemeChan:
         tag: '[MC]'
         channel-display-colour: '&4'
         name-display-colour: '&4'
-        status: password
+        type: password
         password: pass
         global: true
         colour-code: true
@@ -41,22 +41,17 @@ channels:
         tag: '$'
         channel-display-colour: '&2'
         name-display-colour: '&2'
-        status: private
+        type: private
         colour-code: true
         format: '&f[&2%tag&f] %gprefix%player%gsuffix: %message'
     Staff:
         tag: '&f[&4S&f]'
         channel-display-colour: '&4'
         name-display-colour: '&4'
-        status: staff
+        type: staff
 formatting:
     use-built-in: true
     format: "%tag %pprefix%player%psuffix: %message"
 channel-messages:
     join: true
     leave: true
-filter:
-    enable: true
-    censor: '*'
-    phrases:
-    - filter

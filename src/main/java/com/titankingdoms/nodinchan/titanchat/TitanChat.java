@@ -494,11 +494,11 @@ public class TitanChat extends JavaPlugin {
 	
 	public void prepareChannels() throws Exception {
 		List<String> globalChannels = new ArrayList<String>();
+		customChannels = loader.loadChannels();
 		
-		for (CustomChannel customChannel : loader.loadChannels()) {
+		for (CustomChannel customChannel : customChannels) {
 			Channel channel = new Channel(this, customChannel.getName());
 			channel = customChannel.load(channel);
-			customChannels.add(customChannel);
 			channels.add(channel);
 		}
 		
