@@ -13,24 +13,30 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
+import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 
-public abstract class Support {
-	
+public abstract class CustomChannel extends Channel {
+
 	protected TitanChat plugin;
-	
-	private String name;
 	
 	private File configFile = null;
 	private FileConfiguration config = null;
 	
-	public Support(TitanChat plugin, String name) {
+	public CustomChannel(TitanChat plugin, String name) {
+		super(plugin, name);
 		this.plugin = plugin;
-		this.name = name;
+		setType("custom");
 	}
 	
-	public abstract void chatMade(String name, String message);
+	public String colourise(String message) {
+		return message.replaceAll("(&([a-f0-9A-F|kK]))", "\u00A7$2");
+	}
 	
-	public abstract String chatMade(Player player, String message);
+	public String decolourise(String message) {
+		return message.replaceAll("(&([a-f0-9A-F|kK]))", "");
+	}
+	
+	public abstract String format(Player player, String message);
 	
 	public FileConfiguration getConfig() {
 		if (config == null)
@@ -40,10 +46,8 @@ public abstract class Support {
 	}
 	
 	public File getDataFolder() {
-		File dir = new File(plugin.getSupportsFolder(), name);
-		
+		File dir = new File(plugin.getChannelsFolder(), getName());
 		dir.mkdir();
-		
 		return dir;
 	}
 	
@@ -51,12 +55,8 @@ public abstract class Support {
 		return Logger.getLogger(name);
 	}
 	
-	public String getName() {
-		return name;
-	}
-	
 	public InputStream getResource(String filename) {
-		File file = new File(plugin.getSupportsFolder(), plugin.getSupportLoader().getPluginAddonJar(name));
+		File file = new File(plugin.getChannelsFolder(), plugin.getSupportLoader().getCustomChannelJar(getName()));
 		
 		try {
 			JarFile jarFile = new JarFile(file);
@@ -75,6 +75,12 @@ public abstract class Support {
 	}
 	
 	public abstract void init();
+	
+	public abstract Channel load(Channel channel);
+	
+	public abstract boolean onJoin(Player player);
+	
+	public abstract void onLeave(Player player);
 	
 	public void reloadConfig() {
 		if (configFile == null)
@@ -96,4 +102,6 @@ public abstract class Support {
 		
 		try { config.save(configFile); } catch (IOException e) {}
 	}
+	
+	public abstract void sendMessage(Player player, String message);
 }

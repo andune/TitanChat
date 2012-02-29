@@ -9,7 +9,9 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
@@ -20,28 +22,41 @@ public class SupportLoader {
 	
 	private TitanChat plugin;
 	
-	private File dir;
+	private File channelDir;
+	private File supportDir;
 	
-	private ClassLoader loader;
-
-	private List<File> files;
-	private List<TCSupport> supports;
+	private ClassLoader channelLoader;
+	private ClassLoader supportLoader;
+	
+	private List<File> channelFiles;
+	private List<File> supportFiles;
+	private List<CustomChannel> channels;
+	private List<Support> supports;
+	
+	private Map<String, String> ccJarNames;
+	private Map<String, String> paJarNames;
 	
 	public SupportLoader(TitanChat plugin) {
 		this.plugin = plugin;
-		files = new ArrayList<File>();
-		supports = new ArrayList<TCSupport>();
-		dir = new File(plugin.getDataFolder(), "supports");
-		dir.mkdir();
+		channelFiles = new ArrayList<File>();
+		supportFiles = new ArrayList<File>();
+		channels = new ArrayList<CustomChannel>();
+		supports = new ArrayList<Support>();
+		channelDir = plugin.getChannelsFolder();
+		supportDir = plugin.getSupportsFolder();
+		ccJarNames = new HashMap<String, String>();
+		paJarNames = new HashMap<String, String>();
 		
-		List<URL> urls = new ArrayList<URL>();
-		for (String supportFile : dir.list()) {
-			if (supportFile.endsWith(".jar")) {
-				File file = new File(dir, supportFile);
+		List<URL> channelUrls = new ArrayList<URL>();
+		List<URL> supportUrls = new ArrayList<URL>();
+		
+		for (String channelFile : channelDir.list()) {
+			if (channelFile.endsWith(".jar")) {
+				File file = new File(channelDir, channelFile);
 				
-				files.add(file);
+				channelFiles.add(file);
 				try {
-					urls.add(file.toURI().toURL());
+					channelUrls.add(file.toURI().toURL());
 					
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
@@ -49,11 +64,34 @@ public class SupportLoader {
 			}
 		}
 		
-		loader = URLClassLoader.newInstance(urls.toArray(new URL[urls.size()]), plugin.getClass().getClassLoader());
+		for (String supportFile : supportDir.list()) {
+			if (supportFile.endsWith(".jar")) {
+				File file = new File(supportDir, supportFile);
+				
+				supportFiles.add(file);
+				try {
+					supportUrls.add(file.toURI().toURL());
+					
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		channelLoader = URLClassLoader.newInstance(channelUrls.toArray(new URL[channelUrls.size()]), plugin.getClass().getClassLoader());
+		supportLoader = URLClassLoader.newInstance(supportUrls.toArray(new URL[supportUrls.size()]), plugin.getClass().getClassLoader());
 	}
 	
-	public List<TCSupport> load() throws Exception {
-		for (File file : files) {
+	public String getCustomChannelJar(String name) {
+		return ccJarNames.get(name);
+	}
+	
+	public String getPluginAddonJar(String name) {
+		return paJarNames.get(name);
+	}
+	
+	public List<CustomChannel> loadChannels() throws Exception {
+		for (File file : channelFiles) {
 			try {
 				JarFile jarFile = new JarFile(file);
 				Enumeration<JarEntry> entries = jarFile.entries();
@@ -71,14 +109,64 @@ public class SupportLoader {
 				}
 				
 				if (mainClass != null) {
-					Class<?> clazz = Class.forName(mainClass, true, loader);
-					Class<? extends TCSupport> supportClass = clazz.asSubclass(TCSupport.class);
-					Constructor<? extends TCSupport> ctor = supportClass.getConstructor(plugin.getClass());
-					TCSupport support = ctor.newInstance(plugin);
+					Class<?> clazz = Class.forName(mainClass, true, channelLoader);
+					Class<? extends CustomChannel> channelClass = clazz.asSubclass(CustomChannel.class);
+					Constructor<? extends CustomChannel> ctor = channelClass.getConstructor(plugin.getClass());
+					CustomChannel channel = ctor.newInstance(plugin);
+					ccJarNames.put(channel.getName(), file.getName());
+					channel.init();
+					channels.add(channel);
+					
+				} else {
+					throw new Exception();
+				}
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+				plugin.log(Level.INFO, "The custom channel " + file.getName() + " failed to load");
+			}
+		}
+		
+		StringBuilder str = new StringBuilder();
+		
+		for (CustomChannel channel : channels) {
+			if (str.length() > 0)
+				str.append(", ");
+			
+			str.append(channel.getName());
+		}
+		
+		plugin.log(Level.INFO, "Loaded custom channels: " + str.toString());
+		
+		return channels;
+	}
+	
+	public List<Support> loadSupports() throws Exception {
+		for (File file : supportFiles) {
+			try {
+				JarFile jarFile = new JarFile(file);
+				Enumeration<JarEntry> entries = jarFile.entries();
+				
+				String mainClass = null;
+				
+				while (entries.hasMoreElements()) {
+					JarEntry element = entries.nextElement();
+					
+					if (element.getName().equalsIgnoreCase("path.yml")) {
+						BufferedReader reader = new BufferedReader(new InputStreamReader(jarFile.getInputStream(element)));
+						mainClass = reader.readLine().substring(12);
+						break;
+					}
+				}
+				
+				if (mainClass != null) {
+					Class<?> clazz = Class.forName(mainClass, true, supportLoader);
+					Class<? extends Support> supportClass = clazz.asSubclass(Support.class);
+					Constructor<? extends Support> ctor = supportClass.getConstructor(plugin.getClass());
+					Support support = ctor.newInstance(plugin);
+					paJarNames.put(support.getName(), file.getName());
 					support.init();
 					supports.add(support);
-					
-					plugin.log(Level.INFO, "Loaded plugin support: " + file.getName().replace(".jar", ""));
 					
 				} else {
 					throw new Exception();
@@ -89,6 +177,17 @@ public class SupportLoader {
 				plugin.log(Level.INFO, "The plugin support " + file.getName() + " failed to load");
 			}
 		}
+		
+		StringBuilder str = new StringBuilder();
+		
+		for (Support support : supports) {
+			if (str.length() > 0)
+				str.append(", ");
+			
+			str.append(support.getName());
+		}
+		
+		plugin.log(Level.INFO, "Loaded plugin supports: " + str.toString());
 		
 		return supports;
 	}

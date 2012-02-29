@@ -15,180 +15,132 @@ public class ConfigManager {
 		this.plugin = plugin;
 	}
 	
-	// Adds the player to the admin list of the channel
-	
 	public void assignAdmin(Player player, String channelName) {
-		List<String> admins = (!isEmpty("channels." + channelName + ".admins")) ? plugin.getChannelConfig().getStringList("channels." + channelName + ".admins") : new ArrayList<String>();
-		
-		admins.add(player.getName());
-		
-		plugin.getChannelConfig().set("channels." + channelName + ".admins", admins);
-		plugin.saveChannelConfig();
+		List<String> adminList = (!isEmpty(plugin.getExactName(channelName), "admins")) ? get(plugin.getExactName(channelName), "admins") : new ArrayList<String>();
+		adminList.add(player.getName());
+		set(plugin.getExactName(channelName), "admins", adminList);
 	}
-	
-	// Bans the player
 	
 	public void ban(Player player, String channelName) {
-		List<String> admins = (!isEmpty("channels." + channelName + ".admins")) ? plugin.getChannelConfig().getStringList("channels." + channelName + ".admins") : new ArrayList<String>();
-		List<String> bans = (!isEmpty("channels." + channelName + ".black-list")) ? plugin.getChannelConfig().getStringList("channels." + channelName + ".black-list") : new ArrayList<String>();
-		List<String> members = (!isEmpty("channels." + channelName + ".members")) ? plugin.getChannelConfig().getStringList("channels." + channelName + ".members") : new ArrayList<String>();
+		List<String> adminList = (!isEmpty(plugin.getExactName(channelName), "admins")) ? get(plugin.getExactName(channelName), "admins") : new ArrayList<String>();
+		List<String> blacklist = (!isEmpty(plugin.getExactName(channelName), "blacklist")) ? get(plugin.getExactName(channelName), "blacklist") : new ArrayList<String>();
+		List<String> whitelist = (!isEmpty(plugin.getExactName(channelName), "whitelist")) ? get(plugin.getExactName(channelName), "whitelist") : new ArrayList<String>();
 		
-		admins.remove(player.getName());
-		bans.add(player.getName());
-		members.remove(player.getName());
+		adminList.remove(player.getName());
+		blacklist.add(player.getName());
+		whitelist.remove(player.getName());
 		
-		plugin.getChannelConfig().set("channels." + channelName + ".admins", admins);
-		plugin.getChannelConfig().set("channels." + channelName + ".black-list", bans);
-		plugin.getChannelConfig().set("channels." + channelName + ".members", members);
-		plugin.saveChannelConfig();
+		set(plugin.getExactName(channelName), "admins", adminList);
+		set(plugin.getExactName(channelName), "blacklist", blacklist);
+		set(plugin.getExactName(channelName), "whitelist", whitelist);
 	}
-	
-	// Creates the channel
 	
 	public void createChannel(Player player, String channelName) {
-		assignAdmin(player, channelName);
-		setTag(channelName, "[]");
-		setChannelColour(channelName, "");
-		setNameColour(channelName, "");
-		setConvertColours(channelName, false);
-		setStatus(channelName, "public");
-		setFormat(channelName, "");
+		assignAdmin(player, plugin.getExactName(channelName));
+		setTag(plugin.getExactName(channelName), "[]");
+		setChannelColour(plugin.getExactName(channelName), "");
+		setNameColour(plugin.getExactName(channelName), "");
+		setConvertColours(plugin.getExactName(channelName), false);
+		setType(plugin.getExactName(channelName), "public");
+		setFormat(plugin.getExactName(channelName), "");
 	}
-	
-	// Deletes the channel
 	
 	public void deleteChannel(String channelName) {
-		plugin.getConfig().set("channels." + channelName, null);
+		plugin.getConfig().set("channels." + plugin.getExactName(channelName), null);
 		plugin.saveConfig();
-		plugin.getChannelConfig().set("channels." + channelName, null);
+		plugin.getChannelConfig().set("channels." + plugin.getExactName(channelName), null);
 		plugin.saveChannelConfig();
 	}
-	
-	// Demotes the player
 	
 	public void demote(Player player, String channelName) {
-		List<String> admins = (!isEmpty("channels." + channelName + ".admins")) ? plugin.getChannelConfig().getStringList("channels." + channelName + ".admins") : new ArrayList<String>();
-		admins.remove(player.getName());
-		plugin.getChannelConfig().set("channels." + channelName + ".admins", admins);
-		whitelistMember(player, channelName);
-		plugin.saveChannelConfig();
+		List<String> adminList = (!isEmpty(plugin.getExactName(channelName), "admins")) ? get(plugin.getExactName(channelName), "admins") : new ArrayList<String>();
+		adminList.remove(player.getName());
+		set(plugin.getExactName(channelName), "admins", adminList);
 	}
 	
-	// Adds the phrase to the filter list
-	
-	public void filter(String phrase) {
-		List<String> filter = (plugin.getConfig().getStringList("filter") != null) ? plugin.getConfig().getStringList("filter") : new ArrayList<String>();
-		filter.add(phrase);
-		plugin.getConfig().set("filter", filter);
-		plugin.saveConfig();
+	public boolean enableJoinMessages() {
+		return plugin.getConfig().getBoolean("channel-messages.join");
 	}
 	
-	// Adds the player to the follower list of the channel
+	public boolean enableLeaveMessages() {
+		return plugin.getConfig().getBoolean("channel-messages.leave");
+	}
 	
 	public void follow(Player player, String channelName) {
-		List<String> followers = (!isEmpty("channels." + channelName + ".followers")) ? plugin.getChannelConfig().getStringList("channels." + channelName + ".followers") : new ArrayList<String>();
-		
-		followers.add(player.getName());
-		
-		plugin.getChannelConfig().set("channels." + channelName + ".followers", followers);
-		plugin.saveChannelConfig();
+		List<String> followerList = (!isEmpty(plugin.getExactName(channelName), "followers")) ? get(plugin.getExactName(channelName), "followers") : new ArrayList<String>();
+		followerList.add(player.getName());
+		set(plugin.getExactName(channelName), "followers", followerList);
 	}
 	
-	// Check if a list exists for a channel
-	
-	public boolean isEmpty(String path) {
-		return plugin.getChannelConfig().getStringList(path) == null;
+	public List<String> get(String channelName, String path) {
+		return plugin.getChannelConfig().getStringList("channels." + plugin.getExactName(channelName) + "." + path);
 	}
 	
-	// Promotes the player
+	public boolean isEmpty(String channelName, String path) {
+		return plugin.getChannelConfig().getStringList("channels." + plugin.getExactName(channelName) + "." + path) == null;
+	}
 	
 	public void promote(Player player, String channelName) {
-		List<String> members = (!isEmpty("channels." + channelName + ".members")) ? plugin.getChannelConfig().getStringList("channels." + channelName + ".members") : new ArrayList<String>();
-		members.remove(player.getName());
-		plugin.getChannelConfig().set("channels." + channelName + ".members", members);
-		assignAdmin(player, channelName);
-		plugin.saveChannelConfig();
+		assignAdmin(player, plugin.getExactName(channelName));
 	}
 	
-	// Sets the channel colour of the channel
+	public void set(String channelName, String path, Object value) {
+		plugin.getChannelConfig().set("channels." + plugin.getExactName(channelName) + "." + path, value);
+		plugin.saveChannelConfig();
+	}
 	
 	public void setChannelColour(String channelName, String colour) {
-		plugin.getConfig().set("channels." + channelName + ".channel-display-colour", colour);
+		plugin.getConfig().set("channels." + plugin.getExactName(channelName) + ".channel-display-colour", colour);
 		plugin.saveConfig();
 	}
-	
-	// Sets whether the channel converts colour codes
 	
 	public void setConvertColours(String channelName, boolean convert) {
-		plugin.getConfig().set("channels." + channelName + ".colour-code", convert);
+		plugin.getConfig().set("channels." + plugin.getExactName(channelName) + ".colour-code", convert);
 		plugin.saveConfig();
 	}
-	
-	// Sets the format of the channel
 	
 	public void setFormat(String channelName, String format) {
-		plugin.getConfig().set("channels." + channelName + ".format", format);
+		plugin.getConfig().set("channels." + plugin.getExactName(channelName) + ".format", format);
 		plugin.saveConfig();
 	}
-	
-	// Sets the name colour of the channel
 	
 	public void setNameColour(String channelName, String colour) {
-		plugin.getConfig().set("channels." + channelName + ".name-display-colour", colour);
+		plugin.getConfig().set("channels." + plugin.getExactName(channelName) + ".name-display-colour", colour);
 		plugin.saveConfig();
 	}
-	
-	// Sets the password of the channel
 	
 	public void setPassword(String channelName, String password) {
-		plugin.getConfig().set("channels." + channelName + ".password", password);
+		plugin.getConfig().set("channels." + plugin.getExactName(channelName) + ".password", password);
 		plugin.saveConfig();
 	}
-	
-	// Sets the status of the channel
-	
-	public void setStatus(String channelName, String status) {
-		plugin.getConfig().set("channels." + channelName + ".status", status);
-		plugin.saveConfig();
-	}
-	
-	// Sets the tag of the channel
 	
 	public void setTag(String channelName, String tag) {
-		plugin.getConfig().set("channels." + channelName + ".tag", tag);
+		plugin.getConfig().set("channels." + plugin.getExactName(channelName) + ".tag", tag);
 		plugin.saveConfig();
 	}
 	
-	// Unbans the player
+	public void setType(String channelName, String type) {
+		plugin.getConfig().set("channels." + plugin.getExactName(channelName) + ".type", type);
+		plugin.saveConfig();
+	}
 	
 	public void unban(Player player, String channelName) {
-		List<String> bans = (!isEmpty("channels." + channelName + ".black-list")) ? plugin.getChannelConfig().getStringList("channels." + channelName + ".black-list") : new ArrayList<String>();
-		bans.remove(player.getName());
-		plugin.getChannelConfig().set("channels." + channelName + ".black-list", bans);
+		List<String> blacklist = (!isEmpty(plugin.getExactName(channelName), "blacklist")) ? get(plugin.getExactName(channelName), "blacklist") : new ArrayList<String>();
+		blacklist.remove(player.getName());
+		set(plugin.getExactName(channelName), "blacklist", blacklist);
 		
-		whitelistMember(player, channelName);
-		plugin.saveChannelConfig();
+		whitelistMember(player, plugin.getExactName(channelName));
 	}
-	
-	// Removes the player from the follower list of the channel
 	
 	public void unfollow(Player player, String channelName) {
-		List<String> followers = (!isEmpty("channels." + channelName + ".followers")) ? plugin.getChannelConfig().getStringList("channels." + channelName + ".followers") : new ArrayList<String>();
-		
-		followers.remove(player.getName());
-		
-		plugin.getChannelConfig().set("channels." + channelName + ".followers", followers);
-		plugin.saveChannelConfig();
+		List<String> followerList = (!isEmpty(plugin.getExactName(channelName), "followers")) ? get(plugin.getExactName(channelName), "followers") : new ArrayList<String>();
+		followerList.remove(player.getName());
+		set(plugin.getExactName(channelName), "followers", followerList);
 	}
 	
-	// Adds the player to the member list of the channel
-	
 	public void whitelistMember(Player player, String channelName) {
-		List<String> members = (!isEmpty("channels." + channelName + ".members")) ? plugin.getChannelConfig().getStringList("channels." + channelName + ".members") : new ArrayList<String>();
-		
-		members.add(player.getName());
-		
-		plugin.getChannelConfig().set("channels." + channelName + ".members", members);
-		plugin.saveChannelConfig();
+		List<String> whitelist = (!isEmpty(plugin.getExactName(channelName), "whitelist")) ? get(plugin.getExactName(channelName), "whitelist") : new ArrayList<String>();
+		whitelist.add(player.getName());
+		set(plugin.getExactName(channelName), "whitelist", whitelist);
 	}
 }

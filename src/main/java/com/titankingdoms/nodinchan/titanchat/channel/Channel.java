@@ -5,9 +5,6 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.bukkit.ChatColor;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
@@ -19,9 +16,7 @@ public class Channel {
 	private String name;
 	private String password;
 	
-	private int radius;
-	
-	private Status status;
+	private Type type;
 	
 	private boolean global;
 	private boolean silenced;
@@ -38,8 +33,7 @@ public class Channel {
 		this.plugin = plugin;
 		this.name = channelName;
 		this.password = "";
-		this.radius = 0;
-		this.status = Status.UNKNOWN;
+		this.type = Type.UNKNOWN;
 		this.global = false;
 		this.silenced = false;
 		this.adminlist = new ArrayList<String>();
@@ -56,7 +50,7 @@ public class Channel {
 			return true;
 		if (blacklist.contains(player.getName()))
 			return false;
-		if (status.equals(Status.DEFAULT) || status.equals(Status.PUBLIC))
+		if (type.equals(Type.DEFAULT) || type.equals(Type.PUBLIC))
 			return true;
 		if (adminlist.contains(player.getName()) || whitelist.contains(player.getName()))
 			return true;
@@ -128,8 +122,8 @@ public class Channel {
 		return password;
 	}
 	
-	public Status getStatus() {
-		return status;
+	public Type getType() {
+		return type;
 	}
 	
 	public List<String> getWhiteList() {
@@ -155,23 +149,6 @@ public class Channel {
 	public void sendGlobalMessage(String message) {
 		plugin.getServer().broadcastMessage(message);
 	}
-
-	public void sendLocalMessage(String name, String message) {
-		if (plugin.getPlayer(name) != null) {
-			List<Entity> entities = plugin.getPlayer(name).getNearbyEntities(radius, radius, radius);
-			entities.add(plugin.getPlayer(name));
-			
-			for (Entity entity : entities) {
-				if (entity instanceof Player)
-					((Player) entity).sendMessage(message);
-				else
-					entities.remove(entity);
-			}
-			
-			if (entities.size() == 1)
-				plugin.getPlayer(name).sendMessage(ChatColor.GOLD + "Nobody hears you...");
-		}
-	}
 	
 	public void sendMessage(String message) {
 		for (String name : participants) {
@@ -188,21 +165,17 @@ public class Channel {
 		this.password = password;
 	}
 	
-	public void setRadius(int radius) {
-		this.radius = radius;
-	}
-	
 	public void setSilence(boolean silence) {
 		this.silenced = silence;
 	}
 	
-	public void setStatus(String status) {
-		this.status = Status.fromName(status);
+	public void setType(String type) {
+		this.type = Type.fromName(type);
 	}
 	
-	public enum Status {
+	public enum Type {
+		CUSTOM("custom"),
 		DEFAULT("default"),
-		LOCAL("local"),
 		PASSWORD("password"),
 		PRIVATE("private"),
 		PUBLIC("public"),
@@ -211,19 +184,19 @@ public class Channel {
 		
 		private String name;
 		
-		private static final Map<String, Status> NAME_MAP = new HashMap<String, Status>();
+		private static final Map<String, Type> NAME_MAP = new HashMap<String, Type>();
 		
-		private Status(String name) {
+		private Type(String name) {
 			this.name = name;
 		}
 		
 		static {
-			for (Status status : EnumSet.allOf(Status.class)) {
-				NAME_MAP.put(status.name, status);
+			for (Type type : EnumSet.allOf(Type.class)) {
+				NAME_MAP.put(type.name, type);
 			}
 		}
 		
-		public static Status fromName(String name) {
+		public static Type fromName(String name) {
 			return NAME_MAP.get(name);
 		}
 		

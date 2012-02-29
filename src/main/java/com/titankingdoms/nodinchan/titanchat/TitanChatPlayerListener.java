@@ -1,7 +1,5 @@
 package com.titankingdoms.nodinchan.titanchat;
 
-import java.util.logging.Level;
-
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -11,8 +9,9 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
-import com.titankingdoms.nodinchan.titanchat.channel.Channel.Status;
-import com.titankingdoms.nodinchan.titanchat.support.TCSupport;
+import com.titankingdoms.nodinchan.titanchat.channel.Channel.Type;
+import com.titankingdoms.nodinchan.titanchat.support.CustomChannel;
+import com.titankingdoms.nodinchan.titanchat.support.Support;
 
 public class TitanChatPlayerListener implements Listener {
 	
@@ -34,13 +33,6 @@ public class TitanChatPlayerListener implements Listener {
 		String msg = event.getMessage();
 		Channel channel = plugin.getChannel(player);
 		
-		if (channel.getStatus().equals(Status.LOCAL)) {
-			channel.sendLocalMessage(player.getName(), plugin.getFormat().local(player, plugin.getFormat().filter(msg)));
-			
-			plugin.log(Level.INFO, "<" + player.getName() + "> " + plugin.getFormat().decolourize(msg));
-			return;
-		}
-		
 		if (plugin.isSilenced() && !plugin.hasVoice(player))
 			return;
 		
@@ -49,6 +41,12 @@ public class TitanChatPlayerListener implements Listener {
 		
 		if (channel.getMuteList().contains(player.getName()) && !plugin.hasVoice(player))
 			return;
+		
+		if (channel.getType().equals(Type.CUSTOM)) {
+			CustomChannel customChannel = plugin.getChannel(channel);
+			customChannel.sendMessage(player, customChannel.format(player, msg));
+			return;
+		}
 
 		String message = plugin.getFormat().format(player, channel.getName(), msg);
 		
@@ -57,9 +55,7 @@ public class TitanChatPlayerListener implements Listener {
 		else
 			channel.sendMessage(message);
 		
-		plugin.log(Level.INFO, "<" + player.getName() + "> " + plugin.getFormat().decolourize(msg));
-		
-		for (TCSupport support : plugin.getSupports()) {
+		for (Support support : plugin.getSupports()) {
 			support.chatMade(player.getName(), msg);
 		}
 	}

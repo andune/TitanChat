@@ -7,10 +7,6 @@
 # &f (white)
 
 channel-limit: -1
-local:
-    chat-display-colour: '&e'
-    tag: '[L]'
-    radius: 15
 broadcast:
     chat-display-colour: ''
     tag: '[Broadcast]'

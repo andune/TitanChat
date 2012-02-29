@@ -16,6 +16,7 @@ public class Invite {
 		if (plugin.channelExist(channelName)) {
 			if (plugin.getChannel(channelName).getInviteList().contains(player.getName())) {
 				plugin.inviteResponse(player, channelName, true);
+				plugin.sendInfo(player, "You have accepted the invitation");
 				
 			} else {
 				plugin.sendWarning(player, "You did not receive any invitations from this channel");
