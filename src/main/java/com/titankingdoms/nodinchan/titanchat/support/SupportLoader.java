@@ -127,16 +127,18 @@ public class SupportLoader {
 			}
 		}
 		
-		StringBuilder str = new StringBuilder();
-		
-		for (CustomChannel channel : channels) {
-			if (str.length() > 0)
-				str.append(", ");
+		if (!channels.isEmpty()) {
+			StringBuilder str = new StringBuilder();
 			
-			str.append(channel.getName());
+			for (CustomChannel channel : channels) {
+				if (str.length() > 0)
+					str.append(", ");
+				
+				str.append(channel.getName());
+			}
+			
+			plugin.log(Level.INFO, "Loaded custom channels: " + str.toString());
 		}
-		
-		plugin.log(Level.INFO, "Loaded custom channels: " + str.toString());
 		
 		return channels;
 	}
@@ -178,16 +180,18 @@ public class SupportLoader {
 			}
 		}
 		
-		StringBuilder str = new StringBuilder();
-		
-		for (Support support : supports) {
-			if (str.length() > 0)
-				str.append(", ");
+		if (!supports.isEmpty()) {
+			StringBuilder str = new StringBuilder();
 			
-			str.append(support.getName());
+			for (Support support : supports) {
+				if (str.length() > 0)
+					str.append(", ");
+				
+				str.append(support.getName());
+			}
+			
+			plugin.log(Level.INFO, "Loaded plugin supports: " + str.toString());
 		}
-		
-		plugin.log(Level.INFO, "Loaded plugin supports: " + str.toString());
 		
 		return supports;
 	}
