@@ -142,8 +142,33 @@ public class Channel {
 		return silenced;
 	}
 	
+	public void join(Player player) {
+		participants.add(player.getName());
+		
+		if (plugin.getConfigManager().enableJoinMessages()) {
+			for (String participant : participants) {
+				if (plugin.getPlayer(participant) != null && !plugin.getPlayer(participant).equals(player))
+					plugin.sendInfo(plugin.getPlayer(participant), player.getDisplayName() + " has joined the channel");
+			}
+		}
+	}
+	
 	public List<String> getParticipants() {
 		return participants;
+	}
+	
+	public void leave(Player player) {
+		participants.remove(player.getName());
+		
+		if (type.equals(Type.CUSTOM))
+			plugin.getChannel(this);
+			
+		else if (plugin.getConfigManager().enableLeaveMessages()) {
+			for (String participant : participants) {
+				if (plugin.getPlayer(participant) != null)
+					plugin.sendInfo(plugin.getPlayer(participant), player.getDisplayName() + " has left the channel");
+			}
+		}
 	}
 	
 	public void sendGlobalMessage(String message) {

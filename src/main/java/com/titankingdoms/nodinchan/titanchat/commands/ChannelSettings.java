@@ -3,6 +3,7 @@ package com.titankingdoms.nodinchan.titanchat.commands;
 import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
+import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel.Type;
 import com.titankingdoms.nodinchan.titanchat.util.ConfigManager;
 import com.titankingdoms.nodinchan.titanchat.util.Format;
@@ -54,7 +55,10 @@ public class ChannelSettings {
 					plugin.sendWarning(player, "You are already following " + channelName);
 					
 				} else {
-					plugin.follow(player, channelName);
+					Channel channel = plugin.getChannel(channelName);
+					channel.getFollowers().add(player.getName());
+					plugin.sendInfo(player, "You have followed " + channel.getName());
+					
 					cfgManager.follow(player, channelName);
 				}
 				
@@ -100,8 +104,11 @@ public class ChannelSettings {
 	public void password(Player player, String password, String channelName) {
 		if (plugin.channelExist(channelName)) {
 			if (plugin.getChannel(channelName).getAdminList().contains(player.getName())) {
+				Channel channel = plugin.getChannel(channelName);
+				channel.setPassword(password);
+				
 				cfgManager.setPassword(channelName, password);
-				plugin.sendInfo(player, "You have changed the password of " + channelName + " to " + password);
+				plugin.sendInfo(player, "You have changed the password of " + channel.getName() + " to " + password);
 				
 			} else {
 				plugin.sendWarning(player, "You do not have permission to change the password of this channel");
@@ -140,8 +147,11 @@ public class ChannelSettings {
 					case DEFAULT:
 					case STAFF:
 						if (plugin.isStaff(player)) {
-							cfgManager.setType(channelName, Type.fromName(type).getName().toLowerCase());
-							plugin.sendInfo(player, "The channel is now " + Type.fromName(type).getName().toLowerCase());
+							Channel channel = plugin.getChannel(channelName);
+							channel.setType(type);
+							
+							cfgManager.setType(channelName, Type.fromName(type).getName());
+							plugin.sendInfo(player, "The channel is now " + Type.fromName(type).getName());
 							
 						} else {
 							plugin.sendWarning(player, "You do not have permission to set the channel as this type");
@@ -151,8 +161,11 @@ public class ChannelSettings {
 					case PASSWORD:
 					case PRIVATE:
 					case PUBLIC:
-						cfgManager.setType(channelName, Type.fromName(type).getName().toLowerCase());
-						plugin.sendInfo(player, "The channel is now " + Type.fromName(type).getName().toLowerCase());
+						Channel channel = plugin.getChannel(channelName);
+						channel.setType(type);
+						
+						cfgManager.setType(channelName, Type.fromName(type).getName());
+						plugin.sendInfo(player, "The channel is now " + Type.fromName(type).getName());
 						break;
 					}
 					
@@ -183,7 +196,10 @@ public class ChannelSettings {
 	public void unfollow(Player player, String channelName) {
 		if (plugin.channelExist(channelName)) {
 			if (plugin.getChannel(channelName).isFollowing(player)) {
-				plugin.unfollow(player, channelName);
+				Channel channel = plugin.getChannel(channelName);
+				channel.getFollowers().remove(player.getName());
+				plugin.sendInfo(player, "You have unfollowed " + channel.getName());
+				
 				cfgManager.unfollow(player, channelName);
 				
 			} else {

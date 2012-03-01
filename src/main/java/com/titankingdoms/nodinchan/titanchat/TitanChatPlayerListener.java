@@ -62,48 +62,19 @@ public class TitanChatPlayerListener implements Listener {
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onPlayerJoin(PlayerJoinEvent event) {
-		String channelName = "";
-		
-		if (plugin.has(event.getPlayer(), "TitanChat.admin") && plugin.has(event.getPlayer(), "TitanChat.admin.spawn")) {
-			if (plugin.getStaffChannel() != null) {
-				channelName = plugin.getStaffChannel().getName();
-				
-			} else {
-				for (Channel channel : plugin.getChannels()) {
-					if (plugin.has(event.getPlayer(), "TitanChat.spawn." + channel.getName())) {
-						channelName = channel.getName();
-						break;
-					}
-				}
-				
-				if (channelName.equals(""))
-					channelName = plugin.getDefaultChannel().getName();
-			}
-			
-		} else {
-			for (Channel channel : plugin.getChannels()) {
-				if (plugin.has(event.getPlayer(), "TitanChat.spawn." + channel.getName())) {
-					channelName = channel.getName();
-					break;
-				}
-			}
-			
-			if (channelName.equals("")) {
-				channelName = plugin.getDefaultChannel().getName();
-			}
-		}
-		
-		plugin.enterChannel(event.getPlayer(), channelName);
+		Channel channel = plugin.getSpawnChannel(event.getPlayer());
+		channel.join(event.getPlayer());
 		
 		if (plugin.isSilenced())
 			plugin.sendWarning(event.getPlayer(), "All channels are silenced");
 		
-		if (plugin.getChannel(channelName).isSilenced() && !plugin.isSilenced())
-			plugin.sendWarning(event.getPlayer(), channelName + " is silenced");
+		if (plugin.getChannel(channel.getName()).isSilenced() && !plugin.isSilenced())
+			plugin.sendWarning(event.getPlayer(), channel.getName() + " is silenced");
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onPlayerQuit(PlayerQuitEvent event) {
-		plugin.leaveChannel(event.getPlayer(), plugin.getChannel(event.getPlayer()).getName());
+		Channel channel = plugin.getChannel(event.getPlayer());
+		channel.leave(event.getPlayer());
 	}
 }

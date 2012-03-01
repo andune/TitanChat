@@ -30,7 +30,7 @@ import com.titankingdoms.nodinchan.titanchat.util.ConfigManager;
 import com.titankingdoms.nodinchan.titanchat.util.Format;
 
 /*
- *     TitanChat 2.1
+ *     TitanChat 2.1.1
  *     Copyright (C) 2012  Nodin Chan <nodinchan@nodinchan.net>
  *     
  *     This program is free software: you can redistribute it and/or modify
@@ -59,6 +59,9 @@ public class TitanChat extends JavaPlugin {
 	private File channelConfigFile = null;
 	private FileConfiguration channelConfig = null;
 	
+	private Channel defaultChannel = null;
+	private Channel staffChannel = null;
+	
 	private boolean silence = false;
 	
 	private List<Channel> channels;
@@ -75,17 +78,6 @@ public class TitanChat extends JavaPlugin {
 		sendInfo(player, "You are now an Admin of " + channel.getName());
 	}
 	
-	public void ban(Player player, String channelName) {
-		Channel channel = getChannel(channelName);
-		
-		channel.getAdminList().remove(player.getName());
-		channel.getWhiteList().remove(player.getName());
-		channel.getBlackList().add(player.getName());
-		
-		leaveChannel(player, channelName);
-		sendWarning(player, "You have been banned from " + channel.getName());
-	}
-	
 	public boolean channelExist(String channelName) {
 		for (Channel channel : channels) {
 			if (channel.getName().equalsIgnoreCase(channelName))
@@ -96,8 +88,11 @@ public class TitanChat extends JavaPlugin {
 	}
 	
 	public void channelSwitch(Player player, String oldCh, String newCh) {
-		leaveChannel(player, oldCh);
-		enterChannel(player, newCh);
+		Channel join = getChannel(newCh);
+		Channel leave = getChannel(oldCh);
+		
+		leave.leave(player);
+		join.join(player);
 	}
 	
 	public boolean correctPass(String channelName, String password) {
@@ -109,7 +104,7 @@ public class TitanChat extends JavaPlugin {
 		channel.setType("public");
 		
 		assignAdmin(player, channelName);
-		enterChannel(player, channelName);
+		channelSwitch(player, getChannel(player).getName(), channel.getName());
 		sendInfo(player, "You have created " + channel.getName() + " channel");
 	}
 	
@@ -131,36 +126,12 @@ public class TitanChat extends JavaPlugin {
 		
 		for (String participant : channel.getParticipants()) {
 			if (getPlayer(participant) != null) {
-				leaveChannel(getPlayer(participant), channelName);
+				channelSwitch(player, channel.getName(), getSpawnChannel(player).getName());
 				sendWarning(getPlayer(participant), channel.getName() + " has been deleted");
 			}
 		}
 		
 		channels.remove(channel);
-	}
-	
-	public void demote(Player player, String channelName) {
-		Channel channel = getChannel(channelName);
-		channel.getAdminList().remove(player.getName());
-		sendInfo(player, "You have been demoted in " + channel.getName());
-	}
-	
-	public void enterChannel(Player player, String channelName) {
-		Channel channel = getChannel(channelName);
-		channel.getParticipants().add(player.getName());
-		
-		if (configManager.enableJoinMessages()) {
-			for (String participant : channel.getParticipants()) {
-				if (getPlayer(participant) != null && !getPlayer(participant).equals(player))
-					sendInfo(getPlayer(participant), player.getDisplayName() + " has joined the channel");
-			}
-		}
-	}
-	
-	public void follow(Player player, String channelName) {
-		Channel channel = getChannel(channelName);
-		channel.getFollowers().add(player.getName());
-		sendInfo(player, "You have unfollowed " + channel.getName());
 	}
 	
 	public Channel getChannel(String channelName) {
@@ -219,6 +190,9 @@ public class TitanChat extends JavaPlugin {
 	}
 	
 	public Channel getDefaultChannel() {
+		if (defaultChannel != null)
+			return defaultChannel;
+		
 		for (Channel channel : channels) {
 			if (channel.getType().equals(Type.DEFAULT))
 				return channel;
@@ -262,7 +236,24 @@ public class TitanChat extends JavaPlugin {
 		return chat.getPlayerSuffix(player);
 	}
 	
+	public Channel getSpawnChannel(Player player) {
+		if (has(player, "TitanChat.admin") && has(player, "TitanChat.admin.spawn")) {
+			if (staffChannel != null)
+				return staffChannel;
+		}
+		
+		for (Channel channel : channels) {
+			if (has(player, "TitanChat.spawn." + channel.getName()))
+				return channel;
+		}
+		
+		return defaultChannel;
+	}
+	
 	public Channel getStaffChannel() {
+		if (staffChannel != null)
+			return staffChannel;
+		
 		for (Channel channel : channels) {
 			if (channel.getType().equals(Type.STAFF))
 				return channel;
@@ -295,22 +286,6 @@ public class TitanChat extends JavaPlugin {
 		return has(player, "TitanChat.voice");
 	}
 	
-	public void invite(Player player, String channelName) {
-		Channel channel = getChannel(channelName);
-		channel.getInviteList().add(player.getName());
-		
-		sendInfo(player, "You have been invited to chat on " + channel.getName());
-	}
-	
-	public void inviteResponse(Player player, String channelName, boolean accept) {
-		Channel channel = getChannel(channelName);
-		
-		channel.getInviteList().remove(player.getName());
-		
-		if (accept)
-			enterChannel(player, channelName);
-	}
-	
 	public boolean isSilenced() {
 		return silence;
 	}
@@ -322,29 +297,8 @@ public class TitanChat extends JavaPlugin {
 		return false;
 	}
 	
-	public void leaveChannel(Player player, String channelName) {
-		Channel channel = getChannel(channelName);
-		channel.getParticipants().remove(player.getName());
-		
-		if (channel.getType().equals(Type.CUSTOM))
-			getChannel(channel).onLeave(player);
-		
-		else if (configManager.enableLeaveMessages()) {
-			for (String participant : channel.getParticipants()) {
-				if (getPlayer(participant) != null)
-					sendInfo(getPlayer(participant), player.getDisplayName() + " has left the channel");
-			}
-		}
-	}
-	
 	public void log(Level level, String msg) {
 		log.log(level, "[" + this + "] " + msg);
-	}
-	
-	public void mute(Player player, String channelName) {
-		Channel channel = getChannel(channelName);
-		channel.getMuteList().add(player.getName());
-		sendWarning(player, "You have been muted on " + channel.getName());
 	}
 	
 	@Override
@@ -554,11 +508,6 @@ public class TitanChat extends JavaPlugin {
 		log(Level.INFO, "TitanChat Channels Loaded");
 	}
 	
-	public void promote(Player player, String channelName) {
-		assignAdmin(player, channelName);
-		sendInfo(player, "You have been promoted in " + getExactName(channelName));
-	}
-	
 	public void registerCommand(com.titankingdoms.nodinchan.titanchat.support.Command cmd) {
 		cmds.add(cmd);
 	}
@@ -620,26 +569,6 @@ public class TitanChat extends JavaPlugin {
 		}
 		
 		return (permission != null);
-	}
-	
-	public void unban(Player player, String channelName) {
-		Channel channel = getChannel(channelName);
-		channel.getBlackList().remove(player.getName());
-		
-		whitelistMember(player, channelName);
-		sendInfo(player, "You have been unbanned from " + channel.getName());
-	}
-	
-	public void unfollow(Player player, String channelName) {
-		Channel channel = getChannel(channelName);
-		channel.getFollowers().remove(player.getName());
-		sendInfo(player, "You have unfollowed " + channel.getName());
-	}
-	
-	public void unmute(Player player, String channelName) {
-		Channel channel = getChannel(channelName);
-		channel.getMuteList().remove(player.getName());
-		sendInfo(player, "You have been unmuted on " + channel.getName());
 	}
 	
 	public boolean useDefaultFormat() {

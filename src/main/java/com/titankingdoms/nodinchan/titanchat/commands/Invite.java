@@ -3,6 +3,7 @@ package com.titankingdoms.nodinchan.titanchat.commands;
 import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
+import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 
 public class Invite {
 	
@@ -15,7 +16,10 @@ public class Invite {
 	public void accept(Player player, String channelName) {
 		if (plugin.channelExist(channelName)) {
 			if (plugin.getChannel(channelName).getInviteList().contains(player.getName())) {
-				plugin.inviteResponse(player, channelName, true);
+				Channel channel = plugin.getChannel(channelName);
+				channel.getInviteList().remove(player.getName());
+				
+				plugin.channelSwitch(player, plugin.getChannel(player).getName(), channel.getName());
 				plugin.sendInfo(player, "You have accepted the invitation");
 				
 			} else {
@@ -30,7 +34,9 @@ public class Invite {
 	public void decline(Player player, String channelName) {
 		if (plugin.channelExist(channelName)) {
 			if (plugin.getChannel(channelName).getInviteList().contains(player.getName())) {
-				plugin.inviteResponse(player, channelName, false);
+				Channel channel = plugin.getChannel(channelName);
+				channel.getInviteList().remove(player.getName());
+				
 				plugin.sendInfo(player, "You have declined the invitation");
 				
 			} else {
@@ -46,8 +52,10 @@ public class Invite {
 		if (plugin.channelExist(channelName)) {
 			if (plugin.getChannel(channelName).getAdminList().contains(player.getName())) {
 				if (plugin.getPlayer(target) != null) {
-					plugin.invite(plugin.getServer().getPlayer(target), channelName);
+					Channel channel = plugin.getChannel(channelName);
+					channel.getInviteList().add(plugin.getPlayer(target).getName());
 					plugin.sendInfo(player, "You have invited " + plugin.getPlayer(target).getName());
+					plugin.sendInfo(plugin.getPlayer(target), "You have been invited to chat on " + channel.getName());
 					
 				} else {
 					plugin.sendWarning(player, "Player not online");
