@@ -198,6 +198,14 @@ public class Channel {
 		this.type = Type.fromName(type);
 	}
 	
+	public void unload() {
+		plugin.getChannelConfig().set("channels." + name + ".admins", adminlist);
+		plugin.getChannelConfig().set("channels." + name + ".blacklist", blacklist);
+		plugin.getChannelConfig().set("channels." + name + ".whitelist", whitelist);
+		plugin.getChannelConfig().set("channels." + name + ".followers", followerlist);
+		plugin.saveChannelConfig();
+	}
+	
 	public enum Type {
 		CUSTOM("custom"),
 		DEFAULT("default"),

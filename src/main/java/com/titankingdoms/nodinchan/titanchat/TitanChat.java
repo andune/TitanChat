@@ -30,7 +30,7 @@ import com.titankingdoms.nodinchan.titanchat.util.ConfigManager;
 import com.titankingdoms.nodinchan.titanchat.util.Format;
 
 /*
- *     TitanChat 2.1.1
+ *     TitanChat 2.1.2
  *     Copyright (C) 2012  Nodin Chan <nodinchan@nodinchan.net>
  *     
  *     This program is free software: you can redistribute it and/or modify
@@ -190,15 +190,16 @@ public class TitanChat extends JavaPlugin {
 	}
 	
 	public Channel getDefaultChannel() {
-		if (defaultChannel != null)
-			return defaultChannel;
-		
-		for (Channel channel : channels) {
-			if (channel.getType().equals(Type.DEFAULT))
-				return channel;
+		if (defaultChannel == null) {
+			for (Channel channel : channels) {
+				if (channel.getType().equals(Type.DEFAULT)) {
+					defaultChannel = channel;
+					break;
+				}
+			}
 		}
 		
-		return null;
+		return defaultChannel;
 	}
 	
 	public String getExactName(String channelName) {
@@ -217,11 +218,21 @@ public class TitanChat extends JavaPlugin {
 	}
 	
 	public String getGroupPrefix(Player player) {
-		return chat.getGroupPrefix(player.getWorld(), permission.getPrimaryGroup(player));
+		String prefix = chat.getGroupPrefix(player.getWorld(), permission.getPrimaryGroup(player));
+		
+		if (prefix == null)
+			return "";
+		
+		return prefix;
 	}
 	
 	public String getGroupSuffix(Player player) {
-		return chat.getGroupSuffix(player.getWorld(), permission.getPrimaryGroup(player));
+		String suffix = chat.getGroupSuffix(player.getWorld(), permission.getPrimaryGroup(player));
+		
+		if (suffix == null)
+			return "";
+		
+		return suffix;
 	}
 	
 	public Player getPlayer(String name) {
@@ -229,21 +240,21 @@ public class TitanChat extends JavaPlugin {
 	}
 	
 	public String getPlayerPrefix(Player player) {
-		return chat.getPlayerPrefix(player);
+		return (chat.getPlayerPrefix(player) == null) ? "" : chat.getPlayerPrefix(player);
 	}
 	
 	public String getPlayerSuffix(Player player) {
-		return chat.getPlayerSuffix(player);
+		return (chat.getPlayerSuffix(player) == null) ? "" : chat.getPlayerSuffix(player);
 	}
 	
 	public Channel getSpawnChannel(Player player) {
-		if (has(player, "TitanChat.admin") && has(player, "TitanChat.admin.spawn")) {
+		if (has(player, "TitanChat.admin") && has(player, "TitanChat.adminspawn")) {
 			if (staffChannel != null)
 				return staffChannel;
 		}
 		
 		for (Channel channel : channels) {
-			if (has(player, "TitanChat.spawn." + channel.getName()))
+			if (has(player, "TitanChat.spawn." + channel.getName()) && !has(player, "TitanChat.adminspawn." + channel.getName()))
 				return channel;
 		}
 		
@@ -251,15 +262,16 @@ public class TitanChat extends JavaPlugin {
 	}
 	
 	public Channel getStaffChannel() {
-		if (staffChannel != null)
-			return staffChannel;
-		
-		for (Channel channel : channels) {
-			if (channel.getType().equals(Type.STAFF))
-				return channel;
+		if (staffChannel == null) {
+			for (Channel channel : channels) {
+				if (channel.getType().equals(Type.STAFF)) {
+					staffChannel = channel;
+					break;
+				}
+			}
 		}
 		
-		return null;
+		return staffChannel;
 	}
 	
 	public SupportLoader getSupportLoader() {
@@ -346,6 +358,15 @@ public class TitanChat extends JavaPlugin {
 	
 	@Override
 	public void onDisable() {
+		log(Level.INFO, "Saving channel information...");
+		
+		for (Channel channel : channels) {
+			if (channel.getType().equals(Type.CUSTOM))
+				getChannel(channel).unload();
+			else
+				channel.unload();
+		}
+		
 		log(Level.INFO, "Clearing useless data...");
 		
 		channels.clear();
@@ -437,7 +458,7 @@ public class TitanChat extends JavaPlugin {
 			if (str.length() > 0)
 				str.append(" ");
 			
-			if (arg.equals(args[0]) || arg.equals(args[1]))
+			if (arg.equals(args[0]))
 				continue;
 			
 			str.append(arg);
@@ -453,6 +474,7 @@ public class TitanChat extends JavaPlugin {
 		for (CustomChannel customChannel : customChannels) {
 			Channel channel = new Channel(this, customChannel.getName());
 			channel = customChannel.load(channel);
+			channel.setType("custom");
 			channels.add(channel);
 		}
 		
@@ -462,36 +484,22 @@ public class TitanChat extends JavaPlugin {
 			
 			Channel channel = new Channel(this, channelName);
 			
-			if (getChannelConfig().getStringList("channels." + channel.getName() + ".admins") != null) {
-				for (String name : getChannelConfig().getStringList("channels." + channel.getName() + ".admins")) {
-					channel.getAdminList().add(name);
-				}
-			}
+			if (getChannelConfig().getStringList("channels." + channel.getName() + ".admins") != null)
+				channel.getAdminList().addAll(getChannelConfig().getStringList("channels." + channel.getName() + ".admins"));
 			
-			if (getChannelConfig().getStringList("channels." + channel.getName() + ".whitelist") != null) {
-				for (String name : getChannelConfig().getStringList("channels." + channel.getName() + ".whitelist")) {
-					channel.getWhiteList().add(name);
-				}
-			}
+			if (getChannelConfig().getStringList("channels." + channel.getName() + ".whitelist") != null)
+				channel.getWhiteList().addAll(getChannelConfig().getStringList("channels." + channel.getName() + ".whitelist"));
 			
-			if (getChannelConfig().getStringList("channels." + channel.getName() + ".blacklist") != null) {
-				for (String name : getChannelConfig().getStringList("channels." + channel.getName() + ".blacklist")) {
-					channel.getBlackList().add(name);
-				}
-			}
+			if (getChannelConfig().getStringList("channels." + channel.getName() + ".blacklist") != null)
+				channel.getBlackList().addAll(getChannelConfig().getStringList("channels." + channel.getName() + ".blacklist"));
 			
-			if (getChannelConfig().getStringList("channels." + channel.getName() + ".followers") != null) {
-				for (String name : getChannelConfig().getStringList("channels." + channel.getName() + ".followers")) {
-					channel.getFollowers().add(name);
-				}
-			}
+			if (getChannelConfig().getStringList("channels." + channel.getName() + ".followers") != null)
+				channel.getFollowers().addAll(getChannelConfig().getStringList("channels." + channel.getName() + ".followers"));
 			
 			channel.setType(getConfig().getString("channels." + channel.getName() + ".type"));
 			
-			if (channel.getType().equals(Type.PASSWORD)) {
-				String password = getConfig().getString("channels." + channel.getName() + ".password");
-				channel.setPassword(password);
-			}
+			if (channel.getType().equals(Type.PASSWORD))
+				channel.setPassword(getConfig().getString("channels." + channel.getName() + ".password"));
 			
 			if (getConfig().get("channels." + channel.getName() + ".global") != null) {
 				if (getConfig().getBoolean("channels." + channelName + ".global")) {

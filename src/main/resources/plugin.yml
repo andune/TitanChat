@@ -1,5 +1,5 @@
 name: TitanChat
-version: 2.1.1
+version: 2.1.2
 author: NodinChan
 main: com.titankingdoms.nodinchan.titanchat.TitanChat
 depend: [Vault]
@@ -24,7 +24,7 @@ permissions:
             TitanChat.rank.*: true
             TitanChat.colours: true
             TitanChat.voice: true
-            TitanChat.admin.spawn: true
+            TitanChat.adminspawn: true
     TitanChat.mod:
         description: Access to moderation perms, has voice
         default: op
@@ -38,6 +38,6 @@ permissions:
         default: op
         children:
             TitanChat.mute: true
-    TitanChat.admin.spawn:
-        description: Enforces Admin to join Staff Channel as Default
+    TitanChat.adminspawn:
+        description: Enforces Admin to join Staff Channel as default
         default: op

@@ -7,16 +7,13 @@ import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
-import com.titankingdoms.nodinchan.titanchat.util.ConfigManager;
 
 public class Administrate {
 	
 	private TitanChat plugin;
-	private ConfigManager cfgManager;
 	
 	public Administrate(TitanChat plugin) {
 		this.plugin = plugin;
-		this.cfgManager = new ConfigManager(plugin);
 	}
 	
 	public void add(Player player, String target, String channelName) {
@@ -36,7 +33,6 @@ public class Administrate {
 					if (!members.isEmpty()) {
 						for (String newMember : members) {
 							plugin.whitelistMember(plugin.getPlayer(newMember.replace(" ", "")), channelName);
-							cfgManager.whitelistMember(plugin.getPlayer(newMember.replace(" ", "")), channelName);
 						}
 						
 						plugin.sendInfo(player, plugin.createList(display) + " have been added to the Member List");
@@ -48,7 +44,6 @@ public class Administrate {
 				} else {
 					if (plugin.getPlayer(target) != null) {
 						plugin.whitelistMember(plugin.getPlayer(target), channelName);
-						cfgManager.whitelistMember(plugin.getPlayer(target), channelName);
 						plugin.sendInfo(player, plugin.getPlayer(target).getDisplayName() + " has been added to the Member List");
 						
 					} else {
@@ -79,8 +74,6 @@ public class Administrate {
 					plugin.channelSwitch(targetPlayer, channel.getName(), plugin.getSpawnChannel(player).getName());
 					plugin.sendWarning(targetPlayer, "You have been banned from " + channel.getName());
 					
-					cfgManager.ban(targetPlayer, channelName);
-					
 					for (String participant : plugin.getChannel(player).getParticipants()) {
 						if (plugin.getPlayer(participant) != null)
 							plugin.getPlayer(participant).sendMessage(targetPlayer.getDisplayName() + " has been banned from the channel");
@@ -109,8 +102,6 @@ public class Administrate {
 						Channel channel = plugin.getChannel(channelName);
 						channel.getAdminList().remove(targetPlayer.getName());
 						plugin.sendInfo(targetPlayer, "You have been demoted in " + channel.getName());
-						
-						cfgManager.demote(targetPlayer, channelName);
 						plugin.sendInfo(player, "You have demoted " + targetPlayer.getDisplayName());
 						
 					} else {
@@ -219,8 +210,6 @@ public class Administrate {
 					} else {
 						plugin.assignAdmin(targetPlayer, channelName);
 						plugin.sendInfo(player, "You have been promoted in " + plugin.getExactName(channelName));
-						
-						cfgManager.promote(targetPlayer, channelName);
 						plugin.sendInfo(player, "You have promoted " + targetPlayer.getDisplayName());
 					}
 					
@@ -250,8 +239,6 @@ public class Administrate {
 						
 						plugin.whitelistMember(targetPlayer, channelName);
 						plugin.sendInfo(targetPlayer, "You have been unbanned from " + channel.getName());
-						
-						cfgManager.unban(targetPlayer, channelName);
 						plugin.sendInfo(player, "You have unbanned " + targetPlayer.getDisplayName());
 						
 					} else {

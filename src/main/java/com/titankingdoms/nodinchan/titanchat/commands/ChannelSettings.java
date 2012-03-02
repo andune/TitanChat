@@ -58,8 +58,6 @@ public class ChannelSettings {
 					Channel channel = plugin.getChannel(channelName);
 					channel.getFollowers().add(player.getName());
 					plugin.sendInfo(player, "You have followed " + channel.getName());
-					
-					cfgManager.follow(player, channelName);
 				}
 				
 			} else {
@@ -199,8 +197,6 @@ public class ChannelSettings {
 				Channel channel = plugin.getChannel(channelName);
 				channel.getFollowers().remove(player.getName());
 				plugin.sendInfo(player, "You have unfollowed " + channel.getName());
-				
-				cfgManager.unfollow(player, channelName);
 				
 			} else {
 				plugin.sendWarning(player, "You are not following " + channelName);

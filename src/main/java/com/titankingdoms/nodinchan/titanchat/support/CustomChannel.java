@@ -25,7 +25,6 @@ public abstract class CustomChannel extends Channel {
 	public CustomChannel(TitanChat plugin, String name) {
 		super(plugin, name);
 		this.plugin = plugin;
-		setType("custom");
 	}
 	
 	public String colourise(String message) {
@@ -104,4 +103,6 @@ public abstract class CustomChannel extends Channel {
 	}
 	
 	public abstract void sendMessage(Player player, String message);
+	
+	public abstract void unload();
 }
