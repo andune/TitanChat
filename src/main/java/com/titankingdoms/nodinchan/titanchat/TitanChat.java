@@ -69,11 +69,10 @@ public class TitanChat extends JavaPlugin {
 	private List<CustomChannel> customChannels;
 	private List<Support> supports;
 	
-	private Permission permission;
+	private Permission perm;
 	private Chat chat;
 	
-	public void assignAdmin(Player player, String channelName) {
-		Channel channel = getChannel(channelName);
+	public void assignAdmin(Player player, Channel channel) {
 		channel.getAdminList().add(player.getName());
 		sendInfo(player, "You are now an Admin of " + channel.getName());
 	}
@@ -87,31 +86,29 @@ public class TitanChat extends JavaPlugin {
 		return false;
 	}
 	
-	public void channelSwitch(Player player, String oldCh, String newCh) {
-		Channel join = getChannel(newCh);
-		Channel leave = getChannel(oldCh);
-		
-		leave.leave(player);
-		join.join(player);
+	public void channelSwitch(Player player, Channel oldCh, Channel newCh) {
+		oldCh.leave(player);
+		newCh.join(player);
 	}
 	
-	public boolean correctPass(String channelName, String password) {
-		return getChannel(channelName).getPassword().equals(password);
+	public boolean correctPass(Channel channel, String password) {
+		return channel.getPassword().equals(password);
 	}
 	
 	public void createChannel(Player player, String channelName) {
 		Channel channel = new Channel(this, channelName);
 		channel.setType("public");
+		channels.add(channel);
 		
-		assignAdmin(player, channelName);
-		channelSwitch(player, getChannel(player).getName(), channel.getName());
+		assignAdmin(player, channel);
+		channelSwitch(player, getChannel(player), channel);
 		sendInfo(player, "You have created " + channel.getName() + " channel");
 	}
 	
-	public String createList(List<String> channels) {
+	public String createList(List<String> list) {
 		StringBuilder str = new StringBuilder();
 		
-		for (String item : channels) {
+		for (String item : list) {
 			if (str.length() > 0)
 				str.append(", ");
 			
@@ -121,12 +118,10 @@ public class TitanChat extends JavaPlugin {
 		return str.toString();
 	}
 	
-	public void deleteChannel(Player player, String channelName) {
-		Channel channel = getChannel(channelName);
-		
+	public void deleteChannel(Player player, Channel channel) {
 		for (String participant : channel.getParticipants()) {
 			if (getPlayer(participant) != null) {
-				channelSwitch(player, channel.getName(), getSpawnChannel(player).getName());
+				channelSwitch(player, channel, getSpawnChannel(player));
 				sendWarning(getPlayer(participant), channel.getName() + " has been deleted");
 			}
 		}
@@ -147,15 +142,6 @@ public class TitanChat extends JavaPlugin {
 		for (Channel channel : channels) {
 			if (channel.getParticipants().contains(player.getName()))
 				return channel;
-		}
-		
-		return null;
-	}
-	
-	public CustomChannel getChannel(Channel channel) {
-		for (CustomChannel customChannel : customChannels) {
-			if (customChannel.getName().equals(channel.getName()))
-				return customChannel;
 		}
 		
 		return null;
@@ -189,6 +175,15 @@ public class TitanChat extends JavaPlugin {
 		return channels;
 	}
 	
+	public CustomChannel getCustomChannel(Channel channel) {
+		for (CustomChannel customChannel : customChannels) {
+			if (customChannel.getName().equals(channel.getName()))
+				return customChannel;
+		}
+		
+		return null;
+	}
+	
 	public Channel getDefaultChannel() {
 		if (defaultChannel == null) {
 			for (Channel channel : channels) {
@@ -218,7 +213,7 @@ public class TitanChat extends JavaPlugin {
 	}
 	
 	public String getGroupPrefix(Player player) {
-		String prefix = chat.getGroupPrefix(player.getWorld(), permission.getPrimaryGroup(player));
+		String prefix = chat.getGroupPrefix(player.getWorld(), perm.getPrimaryGroup(player));
 		
 		if (prefix == null)
 			return "";
@@ -227,7 +222,7 @@ public class TitanChat extends JavaPlugin {
 	}
 	
 	public String getGroupSuffix(Player player) {
-		String suffix = chat.getGroupSuffix(player.getWorld(), permission.getPrimaryGroup(player));
+		String suffix = chat.getGroupSuffix(player.getWorld(), perm.getPrimaryGroup(player));
 		
 		if (suffix == null)
 			return "";
@@ -286,12 +281,11 @@ public class TitanChat extends JavaPlugin {
 		return new File(getDataFolder(), "supports");
 	}
 	
-	public boolean has(Player player, String permissionNode) {
-		if (permission != null) {
-			return permission.has(player, permissionNode);
-		}
+	public boolean has(Player player, String permission) {
+		if (perm != null)
+			return perm.has(player, permission);
 		
-		return player.hasPermission(permissionNode);
+		return player.hasPermission(permission);
 	}
 	
 	public boolean hasVoice(Player player) {
@@ -341,8 +335,8 @@ public class TitanChat extends JavaPlugin {
 		
 		if (args.length < 1) {
 			player.sendMessage(ChatColor.AQUA + "TitanChat Commands");
-			player.sendMessage(ChatColor.AQUA + "Command: /titanchat [action] [argument]");
-			player.sendMessage(ChatColor.AQUA + "Alias: /tc action [argument]");
+			player.sendMessage(ChatColor.AQUA + "Command: /titanchat [command] [arguments]");
+			player.sendMessage(ChatColor.AQUA + "Alias: /tc [command] [arguments]");
 			player.sendMessage(ChatColor.AQUA + "/titanchat commands [page]");
 			return true;
 		}
@@ -362,7 +356,7 @@ public class TitanChat extends JavaPlugin {
 		
 		for (Channel channel : channels) {
 			if (channel.getType().equals(Type.CUSTOM))
-				getChannel(channel).unload();
+				getCustomChannel(channel).unload();
 			else
 				channel.unload();
 		}
@@ -392,8 +386,8 @@ public class TitanChat extends JavaPlugin {
 		}
 		
 		if (setupPermission()) {
-			log(Level.INFO, permission.getName() + " detected");
-			log(Level.INFO, "Using " + permission.getName() + " for permissions");
+			log(Level.INFO, perm.getName() + " detected");
+			log(Level.INFO, "Using " + perm.getName() + " for permissions");
 		}
 		
 		if (setupChat()) {
@@ -446,7 +440,7 @@ public class TitanChat extends JavaPlugin {
 			return;
 		}
 		
-		pm.registerEvents(new TitanChatPlayerListener(this), this);
+		pm.registerEvents(new TitanChatListener(this), this);
 		
 		log(Level.INFO, "is now enabled");
 	}
@@ -573,10 +567,10 @@ public class TitanChat extends JavaPlugin {
 		RegisteredServiceProvider<Permission> permissionProvider = getServer().getServicesManager().getRegistration(Permission.class);
 		
 		if (permissionProvider != null) {
-			permission = permissionProvider.getProvider();
+			perm = permissionProvider.getProvider();
 		}
 		
-		return (permission != null);
+		return (perm != null);
 	}
 	
 	public boolean useDefaultFormat() {

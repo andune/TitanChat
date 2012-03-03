@@ -39,6 +39,7 @@ public class TitanChatCommandHandler {
 	public void onCommand(Player player, String cmd, String[] args) {
 		if (Commands.fromName(cmd) != null) {
 			if (args.length < 1) {
+				Channel channel = plugin.getChannel(player);
 				String channelName = plugin.getChannel(player).getName();
 				
 				switch (Commands.fromName(cmd)) {
@@ -56,8 +57,8 @@ public class TitanChatCommandHandler {
 					
 				case COMMANDS:
 					player.sendMessage(ChatColor.AQUA + "TitanChat Commands");
-					player.sendMessage(ChatColor.AQUA + "Command: /titanchat [command] [argument]");
-					player.sendMessage(ChatColor.AQUA + "Alias: /tc command [argument]");
+					player.sendMessage(ChatColor.AQUA + "Command: /titanchat [command] [arguments]");
+					player.sendMessage(ChatColor.AQUA + "Alias: /tc [command] [arguments]");
 					player.sendMessage(ChatColor.AQUA + "/titanchat commands [page]");
 					break;
 					
@@ -65,15 +66,15 @@ public class TitanChatCommandHandler {
 					String participantList = "";
 					String followerList = "";
 					
-					if (plugin.getChannel(channelName).getParticipants().isEmpty())
+					if (channel.getParticipants().isEmpty())
 						participantList = "None";
 					else
-						participantList = plugin.createList(plugin.getChannel(channelName).getParticipants());
+						participantList = plugin.createList(channel.getParticipants());
 					
-					if (plugin.getChannel(channelName).getFollowers().isEmpty())
+					if (channel.getFollowers().isEmpty())
 						followerList = "None";
 					else
-						followerList = plugin.createList(plugin.getChannel(channelName).getFollowers());
+						followerList = plugin.createList(channel.getFollowers());
 					
 					player.sendMessage(ChatColor.AQUA + "Participants: " + participantList);
 					player.sendMessage(ChatColor.AQUA + "Followers: " + followerList);
@@ -82,9 +83,9 @@ public class TitanChatCommandHandler {
 				case LIST:
 					List<String> channelList = new ArrayList<String>();
 					
-					for (Channel channel : plugin.getChannels()) {
-						if (channel.canAccess(player)) {
-							channelList.add(channel.getName());
+					for (Channel ch : plugin.getChannels()) {
+						if (ch.canAccess(player)) {
+							channelList.add(ch.getName());
 						}
 					}
 					
@@ -221,8 +222,8 @@ public class TitanChatCommandHandler {
 						
 					} else {
 						player.sendMessage(ChatColor.AQUA + "TitanChat Commands");
-						player.sendMessage(ChatColor.AQUA + "Command: /titanchat [command] [argument]");
-						player.sendMessage(ChatColor.AQUA + "Alias: /tc command [argument]");
+						player.sendMessage(ChatColor.AQUA + "Command: /titanchat [command] [arguments]");
+						player.sendMessage(ChatColor.AQUA + "Alias: /tc command [arguments]");
 						player.sendMessage(ChatColor.AQUA + "/titanchat commands [page]");
 					}
 					break;
@@ -271,7 +272,7 @@ public class TitanChatCommandHandler {
 					if (plugin.has(player, "TitanChat.delete")) {
 						if (plugin.channelExist(args[0])) {
 							if (plugin.getDefaultChannel().getName() != args[0] && plugin.getStaffChannel().getName() != args[0]) {
-								plugin.deleteChannel(player, args[0]);
+								plugin.deleteChannel(player, plugin.getChannel(args[0]));
 								cfgManager.deleteChannel(args[0]);
 								plugin.sendInfo(player, "You have deleted " + args[0]);
 								
@@ -337,8 +338,8 @@ public class TitanChatCommandHandler {
 						Channel channel = plugin.getChannel(args[0]);
 						
 						if (channel.getType().equals(Type.CUSTOM)) {
-							if (plugin.getChannel(channel).onJoin(player)) {
-								plugin.channelSwitch(player, channelName, args[0]);
+							if (plugin.getCustomChannel(channel).onJoin(player)) {
+								plugin.channelSwitch(player, plugin.getChannel(channelName), channel);
 								plugin.sendInfo(player, "You have switched channels");
 								
 							} else {
@@ -346,7 +347,7 @@ public class TitanChatCommandHandler {
 							}
 							
 						} else if (channel.getType().equals(Type.DEFAULT)) {
-							plugin.channelSwitch(player, channelName, args[0]);
+							plugin.channelSwitch(player, plugin.getChannel(channelName), channel);
 							plugin.sendInfo(player, "You have switched channels");
 							
 						} else if (channel.getType().equals(Type.PASSWORD)) {
@@ -354,7 +355,7 @@ public class TitanChatCommandHandler {
 							
 						} else if (channel.getType().equals(Type.PRIVATE)) {
 							if (plugin.getChannel(args[0]).canAccess(player)) {
-								plugin.channelSwitch(player, channelName, args[0]);
+								plugin.channelSwitch(player, plugin.getChannel(channelName), channel);
 								plugin.sendInfo(player, "You have switched channels");
 								
 							} else {
@@ -363,7 +364,7 @@ public class TitanChatCommandHandler {
 							
 						} else if (channel.getType().equals(Type.PUBLIC)) {
 							if (channel.canAccess(player)) {
-								plugin.channelSwitch(player, channelName, args[0]);
+								plugin.channelSwitch(player, plugin.getChannel(channelName), channel);
 								plugin.sendInfo(player, "You have switched channels");
 								
 							} else {
@@ -372,7 +373,7 @@ public class TitanChatCommandHandler {
 							
 						} else if (channel.getType().equals(Type.STAFF)) {
 							if (plugin.isStaff(player)) {
-								plugin.channelSwitch(player, channelName, args[0]);
+								plugin.channelSwitch(player, plugin.getChannel(channelName), channel);
 								plugin.sendInfo(player, "You have switched channels");
 								
 							} else {
@@ -556,8 +557,8 @@ public class TitanChatCommandHandler {
 						
 					} else {
 						player.sendMessage(ChatColor.AQUA + "TitanChat Commands");
-						player.sendMessage(ChatColor.AQUA + "Command: /titanchat [command] [argument]");
-						player.sendMessage(ChatColor.AQUA + "Alias: /tc command [argument]");
+						player.sendMessage(ChatColor.AQUA + "Command: /titanchat [command] [arguments]");
+						player.sendMessage(ChatColor.AQUA + "Alias: /tc command [arguments]");
 						player.sendMessage(ChatColor.AQUA + "/titanchat commands [page]");
 					}
 					break;
@@ -583,8 +584,8 @@ public class TitanChatCommandHandler {
 						Channel channel = plugin.getChannel(args[0]);
 						
 						if (channel.getType().equals(Type.CUSTOM)) {
-							if (plugin.getChannel(channel).onJoin(player)) {
-								plugin.channelSwitch(player, plugin.getChannel(player).getName(), args[0]);
+							if (plugin.getCustomChannel(channel).onJoin(player)) {
+								plugin.channelSwitch(player, plugin.getChannel(player), channel);
 								plugin.sendInfo(player, "You have switched channels");
 								
 							} else {
@@ -592,12 +593,12 @@ public class TitanChatCommandHandler {
 							}
 							
 						} else if (channel.getType().equals(Type.DEFAULT)) {
-							plugin.channelSwitch(player, plugin.getChannel(player).getName(), args[0]);
+							plugin.channelSwitch(player, plugin.getChannel(player), channel);
 							plugin.sendInfo(player, "You have switched channels");
 							
 						} else if (channel.getType().equals(Type.PASSWORD)) {
-							if (plugin.correctPass(args[0], args[1])) {
-								plugin.channelSwitch(player, args[1], args[0]);
+							if (plugin.correctPass(channel, args[1])) {
+								plugin.channelSwitch(player, plugin.getChannel(player), channel);
 								plugin.sendInfo(player, "You switched channels");
 								
 							} else {
@@ -606,7 +607,7 @@ public class TitanChatCommandHandler {
 							
 						} else if (channel.getType().equals(Type.PRIVATE)) {
 							if (plugin.getChannel(args[0]).canAccess(player)) {
-								plugin.channelSwitch(player, plugin.getChannel(player).getName(), args[0]);
+								plugin.channelSwitch(player, plugin.getChannel(player), channel);
 								plugin.sendInfo(player, "You have switched channels");
 								
 							} else {
@@ -615,7 +616,7 @@ public class TitanChatCommandHandler {
 							
 						} else if (channel.getType().equals(Type.PUBLIC)) {
 							if (channel.canAccess(player)) {
-								plugin.channelSwitch(player, plugin.getChannel(player).getName(), args[0]);
+								plugin.channelSwitch(player, plugin.getChannel(player), channel);
 								plugin.sendInfo(player, "You have switched channels");
 								
 							} else {
@@ -624,7 +625,7 @@ public class TitanChatCommandHandler {
 							
 						} else if (channel.getType().equals(Type.STAFF)) {
 							if (plugin.isStaff(player)) {
-								plugin.channelSwitch(player, plugin.getChannel(player).getName(), args[0]);
+								plugin.channelSwitch(player, plugin.getChannel(player), channel);
 								plugin.sendInfo(player, "You have switched channels");
 								
 							} else {
@@ -775,8 +776,8 @@ public class TitanChatCommandHandler {
 						
 					} else {
 						player.sendMessage(ChatColor.AQUA + "TitanChat Commands");
-						player.sendMessage(ChatColor.AQUA + "Command: /titanchat [command] [argument]");
-						player.sendMessage(ChatColor.AQUA + "Alias: /tc command [argument]");
+						player.sendMessage(ChatColor.AQUA + "Command: /titanchat [command] [arguments]");
+						player.sendMessage(ChatColor.AQUA + "Alias: /tc command [arguments]");
 						player.sendMessage(ChatColor.AQUA + "/titanchat commands [page]");
 					}
 					break;

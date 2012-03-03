@@ -161,7 +161,7 @@ public class Channel {
 		participants.remove(player.getName());
 		
 		if (type.equals(Type.CUSTOM))
-			plugin.getChannel(this);
+			plugin.getCustomChannel(this);
 			
 		else if (plugin.getConfigManager().enableLeaveMessages()) {
 			for (String participant : participants) {

@@ -19,7 +19,7 @@ public class Invite {
 				Channel channel = plugin.getChannel(channelName);
 				channel.getInviteList().remove(player.getName());
 				
-				plugin.channelSwitch(player, plugin.getChannel(player).getName(), channel.getName());
+				plugin.channelSwitch(player, plugin.getChannel(player), channel);
 				plugin.sendInfo(player, "You have accepted the invitation");
 				
 			} else {

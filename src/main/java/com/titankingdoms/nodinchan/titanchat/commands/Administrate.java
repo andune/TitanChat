@@ -71,7 +71,7 @@ public class Administrate {
 					channel.getWhiteList().remove(targetPlayer.getName());
 					channel.getBlackList().add(targetPlayer.getName());
 					
-					plugin.channelSwitch(targetPlayer, channel.getName(), plugin.getSpawnChannel(player).getName());
+					plugin.channelSwitch(targetPlayer, channel, plugin.getSpawnChannel(player));
 					plugin.sendWarning(targetPlayer, "You have been banned from " + channel.getName());
 					
 					for (String participant : plugin.getChannel(player).getParticipants()) {
@@ -126,7 +126,7 @@ public class Administrate {
 			if (plugin.has(player, "TitanChat.force")) {
 				if (plugin.getPlayer(target) != null) {
 					Player targetPlayer = plugin.getPlayer(target);
-					plugin.channelSwitch(targetPlayer, plugin.getChannel(targetPlayer).getName(), channelName);
+					plugin.channelSwitch(targetPlayer, plugin.getChannel(targetPlayer), plugin.getChannel(channelName));
 					plugin.sendInfo(player, "You have forced " + targetPlayer.getDisplayName() + " to join the channel");
 					plugin.sendInfo(targetPlayer, "You have been forced to join " + plugin.getExactName(channelName));
 					
@@ -150,7 +150,7 @@ public class Administrate {
 					Player targetPlayer = plugin.getPlayer(target);
 					Channel channel = plugin.getChannel(channelName);
 					
-					plugin.channelSwitch(targetPlayer, channel.getName(), plugin.getSpawnChannel(targetPlayer).getName());
+					plugin.channelSwitch(targetPlayer, channel, plugin.getSpawnChannel(targetPlayer));
 					plugin.sendWarning(targetPlayer, "You have been kicked from " + channel.getName());
 					
 					for (String participant : channel.getParticipants()) {
@@ -208,7 +208,7 @@ public class Administrate {
 						plugin.sendWarning(player, targetPlayer.getDisplayName() + " is already an Admin");
 						
 					} else {
-						plugin.assignAdmin(targetPlayer, channelName);
+						plugin.assignAdmin(targetPlayer, plugin.getChannel(channelName));
 						plugin.sendInfo(player, "You have been promoted in " + plugin.getExactName(channelName));
 						plugin.sendInfo(player, "You have promoted " + targetPlayer.getDisplayName());
 					}
