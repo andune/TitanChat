@@ -57,7 +57,7 @@ public class ConfigManager {
 	}
 	
 	public void setChannelColour(String channelName, String colour) {
-		plugin.getConfig().set("channels." + plugin.getExactName(channelName) + ".channel-display-colour", colour);
+		plugin.getConfig().set("channels." + plugin.getExactName(channelName) + ".chat-display-colour", colour);
 		plugin.saveConfig();
 	}
 	

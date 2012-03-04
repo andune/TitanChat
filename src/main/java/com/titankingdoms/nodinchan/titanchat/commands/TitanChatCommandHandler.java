@@ -35,8 +35,6 @@ public class TitanChatCommandHandler {
 	
 	public void onCommand(Player player, String cmd, String[] args) {
 		if (Commands.fromName(cmd) != null) {
-			String channelName = "";
-			
 			switch (Commands.fromName(cmd)) {
 			
 			case ACCEPT:
@@ -75,6 +73,8 @@ public class TitanChatCommandHandler {
 				break;
 			
 			case CONVERT:
+				String channelName = "";
+				
 				try { channelName = plugin.getExactName(args[0]); } catch (IndexOutOfBoundsException e) { channelName = plugin.getChannel(player).getName(); }
 				
 				if (plugin.isStaff(player)) {

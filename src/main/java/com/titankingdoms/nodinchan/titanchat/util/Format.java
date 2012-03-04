@@ -50,7 +50,7 @@ public class Format {
 		String playerSuffix = plugin.getPlayerSuffix(player);
 		String groupPrefix = plugin.getGroupPrefix(player);
 		String groupSuffix = plugin.getGroupSuffix(player);
-		String channelColour = get(channelName, "channel-display-colour");
+		String channelColour = get(channelName, "chat-display-colour");
 		String nameColour = get(channelName, "name-display-colour");
 		
 		if (plugin.useDefaultFormat()) {
