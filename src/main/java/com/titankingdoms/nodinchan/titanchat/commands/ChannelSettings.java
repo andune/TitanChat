@@ -20,12 +20,12 @@ public class ChannelSettings {
 	
 	public void channelColour(Player player, String colourCode, String channelName) {
 		if (plugin.channelExist(channelName)) {
-			if (plugin.getChannel(channelName).getAdminList().contains(player.getName())) {
+			if (plugin.getChannel(channelName).getAdminList().contains(player.getName()) || plugin.isStaff(player)) {
 				cfgManager.setChannelColour(channelName, colourCode);
 				plugin.sendInfo(player, "You have changed the colour to " + colourCode);
 				
 			} else {
-				plugin.sendWarning(player, "You do not have permission to change the channel colour");
+				plugin.sendWarning(player, "You do not have permission");
 			}
 			
 		} else {
@@ -35,12 +35,12 @@ public class ChannelSettings {
 	
 	public void convertColour(Player player, String channelName) {
 		if (plugin.channelExist(channelName)) {
-			if (plugin.has(player, "TitanChat.admin")) {
+			if (plugin.isStaff(player)) {
 				cfgManager.setConvertColours(channelName, (new Format(plugin).colours(channelName)) ? false : true);
 				plugin.sendInfo(player, "The channel now " + ((new Format(plugin).colours(channelName)) ? "converts" : "ignores") + " colour codes");
 				
 			} else {
-				plugin.sendWarning(player, "You do not have permission to change this setting of this channel");
+				plugin.sendWarning(player, "You do not have permission");
 			}
 			
 		} else {
@@ -61,22 +61,7 @@ public class ChannelSettings {
 				}
 				
 			} else {
-				plugin.sendWarning(player, "You do not have permission to follow that channel");
-			}
-			
-		} else {
-			plugin.sendWarning(player, "No such channel");
-		}
-	}
-	
-	public void format(Player player, String format, String channelName) {
-		if (plugin.channelExist(channelName)) {
-			if (plugin.getChannel(channelName).getAdminList().contains(player.getName())) {
-				cfgManager.setFormat(channelName, format);
-				plugin.sendInfo(player, "The format of " + channelName + " is now '" + format + "'");
-				
-			} else {
-				plugin.sendWarning(player, "You do not have permission to change the format of the channel");
+				plugin.sendWarning(player, "You do not have permission");
 			}
 			
 		} else {
@@ -86,12 +71,12 @@ public class ChannelSettings {
 	
 	public void nameColour(Player player, String colourCode, String channelName) {
 		if (plugin.channelExist(channelName)) {
-			if (plugin.getChannel(channelName).getAdminList().contains(player.getName())) {
+			if (plugin.getChannel(channelName).getAdminList().contains(player.getName()) || plugin.isStaff(player)) {
 				cfgManager.setNameColour(channelName, colourCode);
 				plugin.sendInfo(player, "You have changed the colour to " + colourCode);
 				
 			} else {
-				plugin.sendWarning(player, "You do not have permission to change the name colour");
+				plugin.sendWarning(player, "You do not have permission");
 			}
 			
 		} else {
@@ -101,7 +86,7 @@ public class ChannelSettings {
 	
 	public void password(Player player, String password, String channelName) {
 		if (plugin.channelExist(channelName)) {
-			if (plugin.getChannel(channelName).getAdminList().contains(player.getName())) {
+			if (plugin.getChannel(channelName).getAdminList().contains(player.getName()) || plugin.isStaff(player)) {
 				Channel channel = plugin.getChannel(channelName);
 				channel.setPassword(password);
 				
@@ -109,7 +94,7 @@ public class ChannelSettings {
 				plugin.sendInfo(player, "You have changed the password of " + channel.getName() + " to " + password);
 				
 			} else {
-				plugin.sendWarning(player, "You do not have permission to change the password of this channel");
+				plugin.sendWarning(player, "You do not have permission");
 			}
 			
 		} else {
@@ -119,12 +104,12 @@ public class ChannelSettings {
 	
 	public void tag(Player player, String tag, String channelName) {
 		if (plugin.channelExist(channelName)) {
-			if (plugin.getChannel(channelName).getAdminList().contains(player.getName())) {
+			if (plugin.getChannel(channelName).getAdminList().contains(player.getName()) || plugin.isStaff(player)) {
 				cfgManager.setTag(channelName, tag);
 				plugin.sendInfo(player, "You have changed the settings");
 				
 			} else {
-				plugin.sendWarning(player, "You do not have permission to change the tag on this channel");
+				plugin.sendWarning(player, "You do not have permission");
 			}
 			
 		} else {
@@ -152,7 +137,7 @@ public class ChannelSettings {
 							plugin.sendInfo(player, "The channel is now " + Type.fromName(type).getName());
 							
 						} else {
-							plugin.sendWarning(player, "You do not have permission to set the channel as this type");
+							plugin.sendWarning(player, "You do not have permission");
 						}
 						break;
 						
@@ -183,7 +168,7 @@ public class ChannelSettings {
 				}
 				
 			} else {
-				plugin.sendWarning(player, "You do not have permission to change the type of this channel");
+				plugin.sendWarning(player, "You do not have permission");
 			}
 			
 		} else {

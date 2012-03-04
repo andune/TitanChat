@@ -1,8 +1,5 @@
 package com.titankingdoms.nodinchan.titanchat.commands;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
@@ -19,40 +16,16 @@ public class Administrate {
 	public void add(Player player, String target, String channelName) {
 		if (plugin.channelExist(channelName)) {
 			if (plugin.getChannel(channelName).canRank(player)) {
-				if (target.contains(",")) {
-					List<String> members  = new ArrayList<String>();
-					List<String> display = new ArrayList<String>();
-					
-					for (String newMember : target.split(",")) {
-						if (plugin.getPlayer(target) != null) {
-							members.add(plugin.getPlayer(newMember).getName());
-							display.add(plugin.getPlayer(newMember).getDisplayName());
-						}
-					}
-					
-					if (!members.isEmpty()) {
-						for (String newMember : members) {
-							plugin.whitelistMember(plugin.getPlayer(newMember.replace(" ", "")), channelName);
-						}
-						
-						plugin.sendInfo(player, plugin.createList(display) + " have been added to the Member List");
-						
-					} else {
-						plugin.sendWarning(player, "Players not online");
-					}
+				if (plugin.getPlayer(target) != null) {
+					plugin.whitelistMember(plugin.getPlayer(target), channelName);
+					plugin.sendInfo(player, plugin.getPlayer(target).getDisplayName() + " has been added to the Member List");
 					
 				} else {
-					if (plugin.getPlayer(target) != null) {
-						plugin.whitelistMember(plugin.getPlayer(target), channelName);
-						plugin.sendInfo(player, plugin.getPlayer(target).getDisplayName() + " has been added to the Member List");
-						
-					} else {
-						plugin.sendWarning(player, "Player not online");
-					}
+					plugin.sendWarning(player, "Player not online");
 				}
 				
 			} else {
-				plugin.sendWarning(player, "You do not have permission to do this on this channel");
+				plugin.sendWarning(player, "You do not have permission");
 			}
 			
 		} else {
@@ -84,7 +57,7 @@ public class Administrate {
 				}
 				
 			} else {
-				plugin.sendWarning(player, "You do not have permission to do this on this channel");
+				plugin.sendWarning(player, "You do not have permission");
 			}
 			
 		} else {
@@ -113,7 +86,7 @@ public class Administrate {
 				}
 				
 			} else {
-				plugin.sendWarning(player, "You do not have permission to do this on this channel");
+				plugin.sendWarning(player, "You do not have permission");
 			}
 			
 		} else {
@@ -135,7 +108,7 @@ public class Administrate {
 				}
 				
 			} else {
-				plugin.sendWarning(player, "You do not have permission to do this");
+				plugin.sendWarning(player, "You do not have permission");
 			}
 			
 		} else {
@@ -163,7 +136,7 @@ public class Administrate {
 				}
 				
 			} else {
-				plugin.sendWarning(player, "You do not have permission to do this on this channel");
+				plugin.sendWarning(player, "You do not have permission");
 			}
 			
 		} else {
@@ -190,7 +163,7 @@ public class Administrate {
 				}
 				
 			} else {
-				plugin.sendWarning(player, "You do not have permission to do this on this channel");
+				plugin.sendWarning(player, "You do not have permission");
 			}
 			
 		} else {
@@ -219,7 +192,7 @@ public class Administrate {
 				
 				
 			} else {
-				plugin.sendWarning(player, "You do not have permission to do this on this channel");
+				plugin.sendWarning(player, "You do not have permission");
 			}
 			
 		} else {
@@ -250,7 +223,7 @@ public class Administrate {
 				}
 				
 			} else {
-				plugin.sendWarning(player, "You do not have permission to do this on this channel");
+				plugin.sendWarning(player, "You do not have permission");
 			}
 			
 		} else {
@@ -280,7 +253,7 @@ public class Administrate {
 				}
 				
 			} else {
-				plugin.sendWarning(player, "You do not have permission to do this on this channel");
+				plugin.sendWarning(player, "You do not have permission");
 			}
 			
 		} else {

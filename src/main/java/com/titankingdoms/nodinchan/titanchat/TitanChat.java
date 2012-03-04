@@ -62,7 +62,7 @@ public class TitanChat extends JavaPlugin {
 	private Channel defaultChannel = null;
 	private Channel staffChannel = null;
 	
-	private boolean silence = false;
+	private boolean silenced = false;
 	
 	private List<Channel> channels;
 	private List<com.titankingdoms.nodinchan.titanchat.support.Command> cmds;
@@ -249,7 +249,7 @@ public class TitanChat extends JavaPlugin {
 		}
 		
 		for (Channel channel : channels) {
-			if (has(player, "TitanChat.spawn." + channel.getName()) && !has(player, "TitanChat.adminspawn." + channel.getName()))
+			if (has(player, "TitanChat.spawn." + channel.getName()) && !has(player, "TitanChat.forced." + channel.getName()) && !channel.canAccess(player))
 				return channel;
 		}
 		
@@ -293,7 +293,7 @@ public class TitanChat extends JavaPlugin {
 	}
 	
 	public boolean isSilenced() {
-		return silence;
+		return silenced;
 	}
 	
 	public boolean isStaff(Player player) {
@@ -313,11 +313,10 @@ public class TitanChat extends JavaPlugin {
 			if (args[0].equalsIgnoreCase("reload")) {
 				log(Level.INFO, "Reloading configs...");
 				
-				saveConfig();
-				saveChannelConfig();
-				
 				reloadConfig();
 				reloadChannelConfig();
+				
+				channels.clear();
 				
 				try { prepareChannels(); } catch (Exception e) {}
 				
@@ -440,7 +439,14 @@ public class TitanChat extends JavaPlugin {
 			return;
 		}
 		
+		log(Level.INFO, "Default Channel is " + getDefaultChannel().getName());
+		log(Level.INFO, "Staff Channel is " + getStaffChannel().getName());
+		
 		pm.registerEvents(new TitanChatListener(this), this);
+		
+		for (Player player : getServer().getOnlinePlayers()) {
+			getSpawnChannel(player).join(player);
+		}
 		
 		log(Level.INFO, "is now enabled");
 	}
@@ -549,8 +555,8 @@ public class TitanChat extends JavaPlugin {
 		player.sendMessage("[TitanChat] " + ChatColor.RED + warning);
 	}
 	
-	public void setSilence(boolean silence) {
-		this.silence = silence;
+	public void setSilenced(boolean silenced) {
+		this.silenced = silenced;
 	}
 	
 	public boolean setupChat() {

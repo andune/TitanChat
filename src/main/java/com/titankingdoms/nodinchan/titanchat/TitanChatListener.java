@@ -63,7 +63,7 @@ public class TitanChatListener implements Listener {
 		
 		if (plugin.isSilenced())
 			plugin.sendWarning(event.getPlayer(), "All channels are silenced");
-		else if (plugin.getChannel(channel.getName()).isSilenced())
+		else if (channel.isSilenced())
 			plugin.sendWarning(event.getPlayer(), channel.getName() + " is silenced");
 	}
 	

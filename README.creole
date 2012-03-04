@@ -60,6 +60,7 @@ TitanChat, a chat management and formatting plugin for Bukkit.
 * 01.03.12 - Fix for empty channel.yml
 * 02.03.12 - Fix for broken commands
 * 03.03.12 - Fix for fail CREATE command
+* 04.03.12 - Rewrote the command handler
 
 -----------------------------------------------------------------------------------------------------------------------
 

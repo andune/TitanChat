@@ -190,8 +190,8 @@ public class Channel {
 		this.password = password;
 	}
 	
-	public void setSilence(boolean silence) {
-		this.silenced = silence;
+	public void setSilenced(boolean silenced) {
+		this.silenced = silenced;
 	}
 	
 	public void setType(String type) {

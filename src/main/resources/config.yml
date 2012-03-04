@@ -13,25 +13,25 @@ broadcast:
 channels:
     Default:
         tag: '[D]'
-        channel-display-colour: ''
+        chat-display-colour: ''
         name-display-colour: ''
         type: default
         global: true
     HerpChan:
         tag: '[HC]'
-        channel-display-colour: '&6'
+        chat-display-colour: '&6'
         name-display-colour: '&6'
         type: private
         colour-code: true
     DerpChan:
         tag: '[DC]'
-        channel-display-colour: '&7'
+        chat-display-colour: '&7'
         name-display-colour: '&7'
         type: public
         colour-code: false
     MemeChan:
         tag: '[MC]'
-        channel-display-colour: '&4'
+        chat-display-colour: '&4'
         name-display-colour: '&4'
         type: password
         password: pass
@@ -39,14 +39,14 @@ channels:
         colour-code: true
     Donators:
         tag: '$'
-        channel-display-colour: '&2'
+        chat-display-colour: '&2'
         name-display-colour: '&2'
         type: private
         colour-code: true
         format: '&f[&2%tag&f] %gprefix%player%gsuffix: %message'
     Staff:
         tag: '&f[&4S&f]'
-        channel-display-colour: '&4'
+        chat-display-colour: '&4'
         name-display-colour: '&4'
         type: staff
 formatting:

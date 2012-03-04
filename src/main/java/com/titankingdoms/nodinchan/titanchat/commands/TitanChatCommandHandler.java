@@ -5,15 +5,12 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
-import com.titankingdoms.nodinchan.titanchat.channel.Channel.Type;
 import com.titankingdoms.nodinchan.titanchat.support.Command;
 import com.titankingdoms.nodinchan.titanchat.util.ConfigManager;
 
@@ -25,8 +22,7 @@ public class TitanChatCommandHandler {
 	private Administrate admin;
 	private ChannelSettings chSettings;
 	private Invite invite;
-	
-	private static Logger log = Logger.getLogger("TitanLog");
+	private Util util;
 	
 	public TitanChatCommandHandler(TitanChat plugin) {
 		this.plugin = plugin;
@@ -34,201 +30,127 @@ public class TitanChatCommandHandler {
 		this.admin = new Administrate(plugin);
 		this.chSettings = new ChannelSettings(plugin);
 		this.invite = new Invite(plugin);
+		this.util = new Util(plugin);
 	}
 	
 	public void onCommand(Player player, String cmd, String[] args) {
 		if (Commands.fromName(cmd) != null) {
-			if (args.length < 1) {
-				Channel channel = plugin.getChannel(player);
-				String channelName = plugin.getChannel(player).getName();
+			String channelName = "";
+			
+			switch (Commands.fromName(cmd)) {
+			
+			case ACCEPT:
+				try { invite.accept(player, args[0]); } catch (IndexOutOfBoundsException e) { plugin.sendWarning(player, "Invalid Argument Length"); }
+				break;
 				
-				switch (Commands.fromName(cmd)) {
+			case ADD:
+				if (args.length < 1) { plugin.sendWarning(player, "Invalid Argument Length"); return; }
+				try { admin.add(player, args[0], args[1]); } catch (IndexOutOfBoundsException e) { admin.add(player, args[0], plugin.getChannel(player).getName()); }
+				break;
 				
-				case CONVERTCOLOR:
-				case CONVERTCOLOUR:
-					if (plugin.has(player, "TitanChat.admin")) {
-						plugin.getConfigManager().setConvertColours(channelName, (plugin.getFormat().colours(channelName)) ? false : true);
-						plugin.sendInfo(player, "The channel now " + ((plugin.getFormat().colours(channelName)) ? "converts" : "ignores") + " colour codes");
-						
-					} else {
-						plugin.sendWarning(player, "You do not have permission to change this setting");
-					}
-					break;
+			case BAN:
+				if (args.length < 1) { plugin.sendWarning(player, "Invalid Argument Length"); return; }
+				try { admin.ban(player, args[0], args[1]); } catch (IndexOutOfBoundsException e) { admin.ban(player, args[0], plugin.getChannel(player).getName()); }
+				break;
+				
+			case BROADCAST:
+				if (args.length < 1 || !plugin.has(player, "TitanChat.broadcast")) { return; }
+				
+				StringBuilder broadcastStr = new StringBuilder();
+				
+				for (String word : args) {
+					if (broadcastStr.length() > 1)
+						broadcastStr.append(" ");
 					
-				case COMMANDS:
-					player.sendMessage(ChatColor.AQUA + "TitanChat Commands");
-					player.sendMessage(ChatColor.AQUA + "Command: /titanchat [command] [arguments]");
-					player.sendMessage(ChatColor.AQUA + "Alias: /tc [command] [arguments]");
-					player.sendMessage(ChatColor.AQUA + "/titanchat commands [page]");
-					break;
-					
-				case INFO:
-					String participantList = "";
-					String followerList = "";
-					
-					if (channel.getParticipants().isEmpty())
-						participantList = "None";
-					else
-						participantList = plugin.createList(channel.getParticipants());
-					
-					if (channel.getFollowers().isEmpty())
-						followerList = "None";
-					else
-						followerList = plugin.createList(channel.getFollowers());
-					
-					player.sendMessage(ChatColor.AQUA + "Participants: " + participantList);
-					player.sendMessage(ChatColor.AQUA + "Followers: " + followerList);
-					break;
-					
-				case LIST:
-					List<String> channelList = new ArrayList<String>();
-					
-					for (Channel ch : plugin.getChannels()) {
-						if (ch.canAccess(player)) {
-							channelList.add(ch.getName());
-						}
-					}
-					
-					if (channelList.isEmpty())
-						plugin.sendInfo(player, "Channel list: None");
-					else
-						plugin.sendInfo(player, "Channel list: " + plugin.createList(channelList));
-					break;
-					
-				case RELOAD:
-					if (plugin.isStaff(player)) {
-						plugin.log(Level.INFO, "Reloading configs...");
-						plugin.sendInfo(player, "Reloading configs...");
-						
-						plugin.saveConfig();
-						plugin.saveChannelConfig();
-						
-						plugin.reloadConfig();
-						plugin.reloadChannelConfig();
-						
-						try { plugin.prepareChannels(); } catch (Exception e) {}
-						
-						plugin.log(Level.INFO, "Configs reloaded");
-						plugin.sendInfo(player, "Configs reloaded");
-						
-					} else {
-						plugin.sendWarning(player, "You do not have permission");
-					}
-					break;
-					
-				case SILENCE:
-					plugin.setSilence((plugin.isSilenced()) ? false : true);
-					
-					for (Player receiver : plugin.getServer().getOnlinePlayers()) {
-						if (plugin.isSilenced()) {
-							plugin.sendWarning(receiver, "All channels have been silenced");
-							
-						} else {
-							plugin.sendInfo(receiver, "Channels are no longer silenced");
-						}
-					}
-					break;
+					broadcastStr.append(word);
 				}
 				
-				return;
-			}
+				plugin.getServer().broadcastMessage(plugin.getFormat().broadcastFormat(player, broadcastStr.toString()));
+				plugin.getLogger().info("<" + player.getName() + "> " + broadcastStr.toString());
+				break;
+				
+			case CHCOLOUR:
+				if (args.length < 1) { plugin.sendWarning(player, "Invalid Argument Length"); return; }
+				try { chSettings.channelColour(player, args[0], args[1]); } catch (IndexOutOfBoundsException e) { chSettings.channelColour(player, args[0], plugin.getChannel(player).getName()); }
+				break;
 			
-			if (args.length < 2) {
-				String channelName = plugin.getChannel(player).getName();
+			case CONVERT:
+				try { channelName = plugin.getExactName(args[0]); } catch (IndexOutOfBoundsException e) { channelName = plugin.getChannel(player).getName(); }
 				
-				switch (Commands.fromName(cmd)) {
+				if (plugin.isStaff(player)) {
+					plugin.getConfigManager().setConvertColours(channelName, (plugin.getFormat().colours(channelName)) ? false : true);
+					plugin.sendInfo(player, "The channel now " + ((plugin.getFormat().colours(channelName)) ? "converts" : "ignores") + " colour codes");
+					
+				} else {
+					plugin.sendWarning(player, "You do not have permission");
+				}
+				break;
+			
+			case COMMANDS:
+				try {
+					int page = Integer.parseInt(args[0]);
+					
+					try {
+						int numPages = Commands.values().length / 5;
+						int start = page * 5;
+						int end = start + 5;
+						
+						if (Commands.values().length % 5 != 0)
+							numPages++;
+						
+						if (numPages == 0)
+							numPages++;
+						
+						if (end > Commands.values().length)
+							end = Commands.values().length;
+						
+						if (page > 0 || page < numPages) {
+							player.sendMessage(ChatColor.AQUA + "=== TitanChat Command List (" + page + "/" + numPages + ") ===");
+							for (int cmdNum = start; cmdNum < end; cmdNum++) {
+								Commands command = Commands.values()[cmdNum];
+								player.sendMessage(ChatColor.AQUA + command.toString().toLowerCase());
+							}
+							player.sendMessage(ChatColor.AQUA + "'/titanchat commands [command]' for more info");
+							
+						} else {
+							player.sendMessage(ChatColor.AQUA + "TitanChat Commands");
+							player.sendMessage(ChatColor.AQUA + "Command: /titanchat [command] [arguments]");
+							player.sendMessage(ChatColor.AQUA + "Alias: /tc command [arguments]");
+							player.sendMessage(ChatColor.AQUA + "/titanchat commands [page]");
+						}
+						
+					} catch (NumberFormatException e) {
+						if (Commands.fromName(args[0]) == null) {
+							plugin.sendWarning(player, "No info on command");
+							return;
+						}
+						
+						player.sendMessage(ChatColor.AQUA + "=== " + Commands.fromName(args[0]).getName() + " Command ===");
+						player.sendMessage(ChatColor.AQUA + "Description: " + Commands.fromName(args[0]).getDescription());
+						
+						StringBuilder cmdStr = new StringBuilder();
+						
+						for (String alias : Commands.fromName(args[0]).getAliases()) {
+							if (cmdStr.length() > 0)
+								cmdStr.append(", ");
+							
+							cmdStr.append(alias);
+						}
+						
+						player.sendMessage(ChatColor.AQUA + "Aliases: " + cmdStr.toString());
+						player.sendMessage(ChatColor.AQUA + "Usage: " + Commands.fromName(args[0]).getUsage());
+					}
+					
+				} catch (IndexOutOfBoundsException e) {
+					player.sendMessage(ChatColor.AQUA + "TitanChat Commands");
+					player.sendMessage(ChatColor.AQUA + "Command: /titanchat [command] [arguments]");
+					player.sendMessage(ChatColor.AQUA + "Alias: /tc command [arguments]");
+					player.sendMessage(ChatColor.AQUA + "/titanchat commands [page]");
+				}
+				break;
 				
-				case ACCEPT:
-					invite.accept(player, args[0]);
-					
-				case ADD:
-					admin.add(player, args[0], channelName);
-					break;
-					
-				case BAN:
-					admin.ban(player, args[0], channelName);
-					break;
-					
-				case BROADCAST:
-					if (plugin.has(player, "TitanChat.broadcast")) {
-						String msg = plugin.getFormat().broadcastFormat(player, args[0]);
-						
-						plugin.getServer().broadcastMessage(msg);
-						
-						log.info("<" + player.getName() + ">" + args[0]);
-						
-					} else {
-						plugin.sendWarning(player, "You do not have permission to broadcast");
-					}
-					break;
-					
-				case CHCOLOR:
-				case CHCOLOUR:
-					chSettings.channelColour(player, args[0], channelName);
-					break;
-					
-				case CONVERTCOLOR:
-				case CONVERTCOLOUR:
-					chSettings.convertColour(player, args[0]);
-					break;
-					
-				case COMMANDS:
-					if (args[0].equalsIgnoreCase("1")) {
-						player.sendMessage(ChatColor.AQUA + "== TitanChat Command List (1/6) ==");
-						player.sendMessage(ChatColor.AQUA + "accept [channel] - Accepts the channel join invitation and joins the channel");
-						player.sendMessage(ChatColor.AQUA + "add [player] - Adds the player to the whitelist");
-						player.sendMessage(ChatColor.AQUA + "ban [player] - Bans the player from the channel");
-						player.sendMessage(ChatColor.AQUA + "broadcast [message] - Broadcasts the message globally");
-						player.sendMessage(ChatColor.AQUA + "chcolour [colourcode] - Sets the display colour of the channel; Alias: chcolor");
-						
-					} else if (args[0].equalsIgnoreCase("2")) {
-						player.sendMessage(ChatColor.AQUA + "== TitanChat Command List (2/6) ==");
-						player.sendMessage(ChatColor.AQUA + "convertcolour [channel] - Sets whether colour codes will be converted on the channel; Alias: convertcolor");
-						player.sendMessage(ChatColor.AQUA + "create [channel] - Creates a channel by that name");
-						player.sendMessage(ChatColor.AQUA + "decline [channel] - Declines the channel join invitation");
-						player.sendMessage(ChatColor.AQUA + "delete [channel] - Deletes the channel with that name");
-						player.sendMessage(ChatColor.AQUA + "demote [player] - Demotes the player on the channel");
-						
-					} else if (args[0].equalsIgnoreCase("3")) {
-						player.sendMessage(ChatColor.AQUA + "== TitanChat Command List (3/6) ==");
-						player.sendMessage(ChatColor.AQUA + "follow [channel] - Follows the channel and receive chat");
-						player.sendMessage(ChatColor.AQUA + "force [player] - Forces the player to join the channel");
-						player.sendMessage(ChatColor.AQUA + "format [format] - Sets the format of the channel");
-						player.sendMessage(ChatColor.AQUA + "info [channel] - Gives the participants and followers of the channel");
-						player.sendMessage(ChatColor.AQUA + "invite [player] - Invites the player to join the channel");
-						
-					} else if (args[0].equalsIgnoreCase("4")) {
-						player.sendMessage(ChatColor.AQUA + "== TitanChat Command List (4/6) ==");
-						player.sendMessage(ChatColor.AQUA + "join [channel] - Joins the channel");
-						player.sendMessage(ChatColor.AQUA + "kick [player] - Kicks the player from the channel");
-						player.sendMessage(ChatColor.AQUA + "list - Lists all channels you have access to");
-						player.sendMessage(ChatColor.AQUA + "mute [player] - Mutes the player on the channel");
-						player.sendMessage(ChatColor.AQUA + "ncolour [colourcode] - Sets the display colour of the player name; Alias: ncolor");
-						
-					} else if (args[0].equalsIgnoreCase("5")) {
-						player.sendMessage(ChatColor.AQUA + "== TitanChat Command List (5/6) ==");
-						player.sendMessage(ChatColor.AQUA + "password [password] - Sets the password of the channel");
-						player.sendMessage(ChatColor.AQUA + "promote [player] - Promotes the player on the channel");
-						player.sendMessage(ChatColor.AQUA + "reload - Reloads the configs");
-						player.sendMessage(ChatColor.AQUA + "silence [channel] - Silences the channel; Leave out [channel] to silence all");
-						player.sendMessage(ChatColor.AQUA + "tag [tag] - Sets the channel tag");
-						
-					} else if (args[0].equalsIgnoreCase("6")) {
-						player.sendMessage(ChatColor.AQUA + "== TitanChat Command List (6/6) ==");
-						player.sendMessage(ChatColor.AQUA + "type [password/private/public] - Sets the state of the channel");
-						player.sendMessage(ChatColor.AQUA + "unban [player] - Unbans the player from the channel");
-						player.sendMessage(ChatColor.AQUA + "unmute [player] - Unmutes the player on the channel");
-						player.sendMessage(ChatColor.AQUA + "unfollow [channel] - Unfollows the channel");
-						
-					} else {
-						player.sendMessage(ChatColor.AQUA + "TitanChat Commands");
-						player.sendMessage(ChatColor.AQUA + "Command: /titanchat [command] [arguments]");
-						player.sendMessage(ChatColor.AQUA + "Alias: /tc command [arguments]");
-						player.sendMessage(ChatColor.AQUA + "/titanchat commands [page]");
-					}
-					break;
-					
-				case CREATE:
+			case CREATE:
+				try {
 					if (plugin.getConfig().getInt("channel-limit") < 0) {
 						if (plugin.has(player, "TitanChat.create")) {
 							if (plugin.channelExist(args[0])) {
@@ -262,13 +184,18 @@ public class TitanChatCommandHandler {
 					} else {
 						plugin.sendWarning(player, "Cannot create channel - Limit Passed");
 					}
-					break;
 					
-				case DECLINE:
-					invite.decline(player, args[0]);
-					break;
-					
-				case DELETE:
+				} catch (IndexOutOfBoundsException e) {
+					plugin.sendWarning(player, "Invalid Argument Length");
+				}
+				break;
+				
+			case DECLINE:
+				try { invite.decline(player, args[0]); } catch (IndexOutOfBoundsException e) { plugin.sendWarning(player, "Invalid Argument Length"); }
+				break;
+				
+			case DELETE:
+				try {
 					if (plugin.has(player, "TitanChat.delete")) {
 						if (plugin.channelExist(args[0])) {
 							if (plugin.getDefaultChannel().getName() != args[0] && plugin.getStaffChannel().getName() != args[0]) {
@@ -287,158 +214,179 @@ public class TitanChatCommandHandler {
 					} else {
 						plugin.sendWarning(player, "You do not have permission to delete channels");
 					}
-					break;
 					
-				case DEMOTE:
-					admin.demote(player, args[0], channelName);
-					break;
+				} catch (IndexOutOfBoundsException e) {
+					plugin.sendWarning(player, "Invalid Argument Length");
+				}
+				break;
+				
+			case DEMOTE:
+				if (args.length < 1) { plugin.sendWarning(player, "Invalid Argument Length"); return; }
+				try { admin.demote(player, args[0], args[1]); } catch (IndexOutOfBoundsException e) { admin.demote(player, args[0], plugin.getChannel(player).getName()); }
+				break;
+				
+			case FOLLOW:
+				try { chSettings.follow(player, args[0]); } catch (IndexOutOfBoundsException e) { plugin.sendWarning(player, "Invalid Argument Length"); }
+				break;
+				
+			case FORCE:
+				if (args.length < 1) { plugin.sendWarning(player, "Invalid Argument Length"); return; }
+				try { admin.force(player, args[0], args[1]); } catch (IndexOutOfBoundsException e) { admin.force(player, args[0], plugin.getChannel(player).getName()); }
+				break;
+				
+			case INFO:
+				try {
+					Channel channel = plugin.getChannel(args[0]);
 					
-				case FOLLOW:
-					chSettings.follow(player, args[0]);
-					break;
-					
-				case FORCE:
-					admin.force(player, args[0], channelName);
-					break;
-					
-				case FORMAT:
-					chSettings.format(player, args[0], channelName);
-					break;
-					
-				case INFO:
-					if (plugin.channelExist(args[0])) {
-						if (plugin.getChannel(args[0]).canAccess(player)) {
-							String participantList = plugin.createList(plugin.getChannel(args[0]).getParticipants());
-							String followerList = plugin.createList(plugin.getChannel(args[0]).getFollowers());
-							
-							if (plugin.getChannel(args[0]).getParticipants().isEmpty())
-								participantList = "None";
-							
-							if (plugin.getChannel(args[0]).getFollowers().isEmpty())
-								followerList = "None";
-							
-							player.sendMessage(ChatColor.AQUA + "Participants: " + participantList);
-							player.sendMessage(ChatColor.AQUA + "Followers: " + followerList);
-							
-						} else {
-							plugin.sendWarning(player, "You do not have access to that channel");
-						}
-						
-					} else {
-						plugin.sendWarning(player, "No such channel");
+					if (channel.canAccess(player)) {
+						player.sendMessage(ChatColor.AQUA + "=== " + channel.getName() + " ===");
+						player.sendMessage(ChatColor.AQUA + "Participants: " + plugin.createList(channel.getParticipants()));
+						player.sendMessage(ChatColor.AQUA + "Followers: " + plugin.createList(channel.getFollowers()));
 					}
-					break;
 					
-				case INVITE:
-					invite.invite(player, args[0], channelName);
-					break;
+				} catch (IndexOutOfBoundsException e) {
+					Channel channel = plugin.getChannel(player);
 					
-				case JOIN:
-					if (plugin.channelExist(args[0])) {
-						Channel channel = plugin.getChannel(args[0]);
-						
-						if (channel.getType().equals(Type.CUSTOM)) {
-							if (plugin.getCustomChannel(channel).onJoin(player)) {
-								plugin.channelSwitch(player, plugin.getChannel(channelName), channel);
-								plugin.sendInfo(player, "You have switched channels");
-								
-							} else {
-								plugin.sendWarning(player, "You do not have permission to join " + channel.getName());
-							}
-							
-						} else if (channel.getType().equals(Type.DEFAULT)) {
-							plugin.channelSwitch(player, plugin.getChannel(channelName), channel);
+					player.sendMessage(ChatColor.AQUA + "=== " + channel.getName() + " ===");
+					player.sendMessage(ChatColor.AQUA + "Participants: " + plugin.createList(channel.getParticipants()));
+					player.sendMessage(ChatColor.AQUA + "Followers: " + plugin.createList(channel.getFollowers()));
+				}
+				break;
+				
+			case INVITE:
+				if (args.length < 0) { plugin.sendWarning(player, "Invalid Argument Length"); return; }
+				try { invite.invite(player, args[0], args[1]); } catch (IndexOutOfBoundsException e) { invite.invite(player, args[0], plugin.getChannel(player).getName()); }
+				break;
+				
+			case JOIN:
+				if (args.length < 0) { plugin.sendWarning(player, "Invalid Argument Length"); return; }
+				
+				if (plugin.channelExist(args[0])) {
+					Channel channel = plugin.getChannel(args[0]);
+					String password = "";
+					
+					try { password = args[1]; } catch (IndexOutOfBoundsException e) {}
+					
+					switch (channel.getType()) {
+					
+					case CUSTOM:
+						if (plugin.getCustomChannel(channel).onJoin(player)) {
+							plugin.channelSwitch(player, plugin.getChannel(player), channel);
 							plugin.sendInfo(player, "You have switched channels");
 							
-						} else if (channel.getType().equals(Type.PASSWORD)) {
-							plugin.sendWarning(player, channel.getName() + " is a password protected channel");
-							
-						} else if (channel.getType().equals(Type.PRIVATE)) {
-							if (plugin.getChannel(args[0]).canAccess(player)) {
-								plugin.channelSwitch(player, plugin.getChannel(channelName), channel);
-								plugin.sendInfo(player, "You have switched channels");
-								
-							} else {
-								plugin.sendWarning(player, channel.getName() + "is a private channel");
-							}
-							
-						} else if (channel.getType().equals(Type.PUBLIC)) {
-							if (channel.canAccess(player)) {
-								plugin.channelSwitch(player, plugin.getChannel(channelName), channel);
-								plugin.sendInfo(player, "You have switched channels");
-								
-							} else {
-								plugin.sendWarning(player, "You're banned on the channel");
-							}
-							
-						} else if (channel.getType().equals(Type.STAFF)) {
-							if (plugin.isStaff(player)) {
-								plugin.channelSwitch(player, plugin.getChannel(channelName), channel);
-								plugin.sendInfo(player, "You have switched channels");
-								
-							} else {
-								plugin.sendWarning(player, "You do not have permission to join the staff channel");
-							}
+						} else {
+							plugin.sendWarning(player, "You do not have permission to join " + channel.getName());
+						}
+						break;
+					
+					case DEFAULT:
+						plugin.channelSwitch(player, plugin.getChannel(player), channel);
+						plugin.sendInfo(player, "You have switched channels");
+						break;
+						
+					case PASSWORD:
+						if (password.equals("")) {
+							plugin.sendWarning(player, "You need to enter a password");
 							
 						} else {
-							plugin.sendWarning(player, "That channel has not been loaded properly");
+							if (plugin.correctPass(channel, password)) {
+								if (channel.canAccess(player)) {
+									plugin.channelSwitch(player, plugin.getChannel(player), channel);
+									plugin.sendInfo(player, "You have switched channels");
+									
+								} else {
+									plugin.sendWarning(player, "You are banned on this channel");
+								}
+								
+							} else {
+								plugin.sendWarning(player, "Incorrect password");
+							}
 						}
+						break;
 						
-					} else {
-						plugin.sendWarning(player, "No such channel");
+					case PRIVATE:
+						if (channel.canAccess(player)) {
+							plugin.channelSwitch(player, plugin.getChannel(player), channel);
+							plugin.sendInfo(player, "You have switched channels");
+							
+						} else {
+							plugin.sendWarning(player, "You are not on the whitelist");
+						}
+						break;
+						
+					case PUBLIC:
+						if (channel.canAccess(player)) {
+							plugin.channelSwitch(player, plugin.getChannel(player), channel);
+							plugin.sendInfo(player, "You have switched channels");
+							
+						} else {
+							plugin.sendWarning(player, "You are banned on this channel");
+						}
+						break;
+						
+					case STAFF:
+						if (plugin.isStaff(player)) {
+							plugin.channelSwitch(player, plugin.getChannel(player), channel);
+							plugin.sendInfo(player, "You have switched channels");
+							
+						} else {
+							plugin.sendWarning(player, "You do not have permission to join " + channel.getName());
+						}
+						break;
 					}
-					break;
-					
-				case KICK:
-					admin.kick(player, args[0], channelName);
-					break;
-					
-				case MUTE:
-					admin.mute(player, args[0], channelName);
-					break;
-					
-				case NCOLOR:
-				case NCOLOUR:
-					chSettings.nameColour(player, args[0], channelName);
-					break;
-					
-				case PASSWORD:
-					chSettings.password(player, args[0], channelName);
-					break;
-					
-				case PROMOTE:
-					admin.promote(player, args[0], channelName);
-					break;
-					
-				case RELOAD:
-					if (plugin.isStaff(player)) {
-						plugin.log(Level.INFO, "Reloading configs...");
-						plugin.sendInfo(player, "Reloading configs...");
-						
-						plugin.saveConfig();
-						plugin.saveChannelConfig();
-						
-						plugin.reloadConfig();
-						plugin.reloadChannelConfig();
-						
-						try { plugin.prepareChannels(); } catch (Exception e) {}
-						
-						plugin.log(Level.INFO, "Configs reloaded");
-						plugin.sendInfo(player, "Configs reloaded");
-						
-					} else {
-						plugin.sendWarning(player, "You do not have permission");
-					}
-					break;
-					
-				case SILENCE:
-					if (plugin.has(player, "TitanChat.silence")) {
+				}
+				break;
+				
+			case KICK:
+				if (args.length < 0) { plugin.sendWarning(player, "Invalid Argument Length"); return; }
+				try { admin.kick(player, args[0], args[1]); } catch (IndexOutOfBoundsException e) { admin.kick(player, args[0], plugin.getChannel(player).getName()); }
+				break;
+				
+			case LIST:
+				List<String> channels = new ArrayList<String>();
+				
+				for (Channel channel : plugin.getChannels()) {
+					if (channel.canAccess(player))
+						channels.add(channel.getName());
+				}
+				
+				player.sendMessage(ChatColor.AQUA + "Channels: " + plugin.createList(channels));
+				break;
+				
+			case MUTE:
+				if (args.length < 0) { plugin.sendWarning(player, "Invalid Argument Length"); return; }
+				try { admin.mute(player, args[0], args[1]); } catch (IndexOutOfBoundsException e) { admin.mute(player, args[0], plugin.getChannel(player).getName()); }
+				break;
+				
+			case NCOLOUR:
+				if (args.length < 0) { plugin.sendWarning(player, "Invalid Argument Length"); return; }
+				try { chSettings.nameColour(player, args[0], args[1]); } catch (IndexOutOfBoundsException e) { chSettings.nameColour(player, args[0], plugin.getChannel(player).getName()); }
+				break;
+				
+			case PASSWORD:
+				if (args.length < 0) { plugin.sendWarning(player, "Invalid Argument Length"); return; }
+				try { chSettings.password(player, args[0], args[1]); } catch (IndexOutOfBoundsException e) { chSettings.password(player, args[0], plugin.getChannel(player).getName()); }
+				break;
+				
+			case PROMOTE:
+				if (args.length < 0) { plugin.sendWarning(player, "Invalid Argument Length"); return; }
+				try { admin.promote(player, args[0], args[1]); } catch (IndexOutOfBoundsException e) { admin.promote(player, args[0], plugin.getChannel(player).getName()); }
+				break;
+			
+			case RELOAD:
+				util.reload(player);
+				break;
+				
+			case SILENCE:
+				if (plugin.has(player, "TitanChat.silence")) {
+					try {
 						if (plugin.channelExist(args[0])) {
-							plugin.getChannel(args[0]).setSilence((plugin.getChannel(args[0]).isSilenced()) ? false : true);
+							Channel channel = plugin.getChannel(args[0]);
+							channel.setSilenced((channel.isSilenced()) ? false : true);
 							
 							for (String participant : plugin.getChannel(args[0]).getParticipants()) {
 								if (plugin.getPlayer(participant) != null) {
-									if (plugin.getChannel(args[0]).isSilenced())
+									if (channel.isSilenced())
 										plugin.sendWarning(plugin.getPlayer(participant), "The channel has been silenced");
 									else
 										plugin.sendInfo(player, "The channel is no longer silenced");
@@ -449,358 +397,43 @@ public class TitanChatCommandHandler {
 							plugin.sendWarning(player, "No such channel");
 						}
 						
-					} else {
-						plugin.sendWarning(player, "You do not have permission to silence channels");
-					}
-					break;
-					
-				case TAG:
-					chSettings.tag(player, args[0], channelName);
-					break;
-					
-				case TYPE:
-					chSettings.type(player, args[0], channelName);
-					break;
-					
-				case UNBAN:
-					admin.unban(player, args[0], channelName);
-					break;
-					
-				case UNFOLLOW:
-					chSettings.unfollow(player, args[0]);
-					break;
-					
-				case UNMUTE:
-					admin.unmute(player, args[0], channelName);
-					break;
-				}
-				
-				return;
-			}
-			
-			if (args.length < 3) {
-				switch (Commands.fromName(cmd)) {
-				
-				case ADD:
-					admin.add(player, args[0], args[1]);
-					break;
-					
-				case BAN:
-					admin.ban(player, args[0], args[1]);
-					break;
-					
-				case BROADCAST:
-					if (player.hasPermission("TitanChat.broadcast")) {
-						plugin.getServer().broadcastMessage(args[0] + " " + args[1]);
+					} catch (IndexOutOfBoundsException e) {
+						plugin.setSilenced((plugin.isSilenced()) ? false : true);
 						
-						String msg = plugin.getFormat().broadcastFormat(player, args[0] + " " + args[1]);
-						
-						log.info("<" + player.getName() + "> " + msg);
-						
-					} else {
-						plugin.sendWarning(player, "You do not have permission to broadcast");
-					}
-					break;
-					
-				case CHCOLOR:
-				case CHCOLOUR:
-					chSettings.channelColour(player, args[0], args[1]);
-					break;
-					
-				case COMMANDS:
-					if (args[0].equalsIgnoreCase("1")) {
-						player.sendMessage(ChatColor.AQUA + "== TitanChat Command List (1/6) ==");
-						player.sendMessage(ChatColor.AQUA + "accept [channel] - Accepts the channel join invitation and joins the channel");
-						player.sendMessage(ChatColor.AQUA + "add [player] - Adds the player to the whitelist");
-						player.sendMessage(ChatColor.AQUA + "ban [player] - Bans the player from the channel");
-						player.sendMessage(ChatColor.AQUA + "broadcast [message] - Broadcasts the message globally");
-						player.sendMessage(ChatColor.AQUA + "chcolour [colourcode] - Sets the display colour of the channel; Alias: chcolor");
-						
-					} else if (args[0].equalsIgnoreCase("2")) {
-						player.sendMessage(ChatColor.AQUA + "== TitanChat Command List (2/6) ==");
-						player.sendMessage(ChatColor.AQUA + "convertcolour [channel] - Sets whether colour codes will be converted on the channel; Alias: convertcolor");
-						player.sendMessage(ChatColor.AQUA + "create [channel] - Creates a channel by that name");
-						player.sendMessage(ChatColor.AQUA + "decline [channel] - Declines the channel join invitation");
-						player.sendMessage(ChatColor.AQUA + "delete [channel] - Deletes the channel with that name");
-						player.sendMessage(ChatColor.AQUA + "demote [player] - Demotes the player on the channel");
-						
-					} else if (args[0].equalsIgnoreCase("3")) {
-						player.sendMessage(ChatColor.AQUA + "== TitanChat Command List (3/6) ==");
-						player.sendMessage(ChatColor.AQUA + "follow [channel] - Follows the channel and receive chat");
-						player.sendMessage(ChatColor.AQUA + "force [player] - Forces the player to join the channel");
-						player.sendMessage(ChatColor.AQUA + "format [format] - Sets the format of the channel");
-						player.sendMessage(ChatColor.AQUA + "info [channel] - Gives the participants and followers of the channel");
-						player.sendMessage(ChatColor.AQUA + "invite [player] - Invites the player to join the channel");
-						
-					} else if (args[0].equalsIgnoreCase("4")) {
-						player.sendMessage(ChatColor.AQUA + "== TitanChat Command List (4/6) ==");
-						player.sendMessage(ChatColor.AQUA + "join [channel] - Joins the channel");
-						player.sendMessage(ChatColor.AQUA + "kick [player] - Kicks the player from the channel");
-						player.sendMessage(ChatColor.AQUA + "list - Lists all channels you have access to");
-						player.sendMessage(ChatColor.AQUA + "mute [player] - Mutes the player on the channel");
-						player.sendMessage(ChatColor.AQUA + "ncolour [colourcode] - Sets the display colour of the player name; Alias: ncolor");
-						
-					} else if (args[0].equalsIgnoreCase("5")) {
-						player.sendMessage(ChatColor.AQUA + "== TitanChat Command List (5/6) ==");
-						player.sendMessage(ChatColor.AQUA + "password [password] - Sets the password of the channel");
-						player.sendMessage(ChatColor.AQUA + "promote [player] - Promotes the player on the channel");
-						player.sendMessage(ChatColor.AQUA + "reload - Reloads the configs");
-						player.sendMessage(ChatColor.AQUA + "silence [channel] - Silences the channel; Leave out [channel] to silence all");
-						player.sendMessage(ChatColor.AQUA + "tag [tag] - Sets the channel tag");
-						
-					} else if (args[0].equalsIgnoreCase("6")) {
-						player.sendMessage(ChatColor.AQUA + "== TitanChat Command List (6/6) ==");
-						player.sendMessage(ChatColor.AQUA + "type [password/private/public] - Sets the state of the channel");
-						player.sendMessage(ChatColor.AQUA + "unban [player] - Unbans the player from the channel");
-						player.sendMessage(ChatColor.AQUA + "unmute [player] - Unmutes the player on the channel");
-						player.sendMessage(ChatColor.AQUA + "unfollow [channel] - Unfollows the channel");
-						
-					} else {
-						player.sendMessage(ChatColor.AQUA + "TitanChat Commands");
-						player.sendMessage(ChatColor.AQUA + "Command: /titanchat [command] [arguments]");
-						player.sendMessage(ChatColor.AQUA + "Alias: /tc command [arguments]");
-						player.sendMessage(ChatColor.AQUA + "/titanchat commands [page]");
-					}
-					break;
-					
-				case DEMOTE:
-					admin.demote(player, args[0], args[1]);
-					break;
-				
-				case FORCE:
-					admin.force(player, args[0], args[1]);
-					break;
-					
-				case FORMAT:
-					chSettings.format(player, args[0] + " " + args[1], plugin.getChannel(player).getName());
-					break;
-					
-				case INVITE:
-					invite.invite(player, args[0], args[1]);
-					break;
-					
-				case JOIN:
-					if (plugin.channelExist(args[0])) {
-						Channel channel = plugin.getChannel(args[0]);
-						
-						if (channel.getType().equals(Type.CUSTOM)) {
-							if (plugin.getCustomChannel(channel).onJoin(player)) {
-								plugin.channelSwitch(player, plugin.getChannel(player), channel);
-								plugin.sendInfo(player, "You have switched channels");
-								
-							} else {
-								plugin.sendWarning(player, "You do not have permission to join " + channel.getName());
-							}
-							
-						} else if (channel.getType().equals(Type.DEFAULT)) {
-							plugin.channelSwitch(player, plugin.getChannel(player), channel);
-							plugin.sendInfo(player, "You have switched channels");
-							
-						} else if (channel.getType().equals(Type.PASSWORD)) {
-							if (plugin.correctPass(channel, args[1])) {
-								plugin.channelSwitch(player, plugin.getChannel(player), channel);
-								plugin.sendInfo(player, "You switched channels");
-								
-							} else {
-								plugin.sendWarning(player, "Incorrect password");
-							}
-							
-						} else if (channel.getType().equals(Type.PRIVATE)) {
-							if (plugin.getChannel(args[0]).canAccess(player)) {
-								plugin.channelSwitch(player, plugin.getChannel(player), channel);
-								plugin.sendInfo(player, "You have switched channels");
-								
-							} else {
-								plugin.sendWarning(player, channel.getName() + "is a private channel");
-							}
-							
-						} else if (channel.getType().equals(Type.PUBLIC)) {
-							if (channel.canAccess(player)) {
-								plugin.channelSwitch(player, plugin.getChannel(player), channel);
-								plugin.sendInfo(player, "You have switched channels");
-								
-							} else {
-								plugin.sendWarning(player, "You're banned on the channel");
-							}
-							
-						} else if (channel.getType().equals(Type.STAFF)) {
-							if (plugin.isStaff(player)) {
-								plugin.channelSwitch(player, plugin.getChannel(player), channel);
-								plugin.sendInfo(player, "You have switched channels");
-								
-							} else {
-								plugin.sendWarning(player, "You do not have permission to join the staff channel");
-							}
+						for (Player receiver : plugin.getServer().getOnlinePlayers()) {
+							if (plugin.isSilenced())
+								plugin.sendWarning(receiver, "All channels have been silenced");
+							else
+								plugin.sendInfo(receiver, "Channels are no longer silenced");
 						}
-						
-					} else {
-						plugin.sendWarning(player, "No such channel");
 					}
-					break;
-					
-				case KICK:
-					admin.kick(player, args[0], args[1]);
-					break;
-					
-				case MUTE:
-					admin.mute(player, args[0], args[1]);
-					break;
-					
-				case NCOLOR:
-				case NCOLOUR:
-					chSettings.nameColour(player, args[0], args[1]);
-					break;
-					
-				case PASSWORD:
-					chSettings.password(player, args[0], args[1]);
-					break;
-					
-				case PROMOTE:
-					admin.promote(player, args[0], args[1]);
-					break;
-					
-				case RELOAD:
-					if (plugin.isStaff(player)) {
-						plugin.log(Level.INFO, "Reloading configs...");
-						plugin.sendInfo(player, "Reloading configs...");
-						
-						plugin.saveConfig();
-						plugin.saveChannelConfig();
-						
-						plugin.reloadConfig();
-						plugin.reloadChannelConfig();
-						
-						try { plugin.prepareChannels(); } catch (Exception e) {}
-						
-						plugin.log(Level.INFO, "Configs reloaded");
-						plugin.sendInfo(player, "Configs reloaded");
-						
-					} else {
-						plugin.sendWarning(player, "You do not have permission");
-					}
-					break;
-					
-				case TAG:
-					chSettings.tag(player, args[0], args[1]);
-					break;
-					
-				case TYPE:
-					chSettings.type(player, args[0], args[1]);
-					break;
-					
-				case UNBAN:
-					admin.unban(player, args[0], args[1]);
-					break;
-					
-				case UNMUTE:
-					admin.unmute(player, args[0], args[1]);
-					break;
 				}
+				break;
 				
-				return;
+			case TAG:
+				if (args.length < 0) { plugin.sendWarning(player, "Invalid Argument Length"); return; }
+				try { chSettings.tag(player, args[0], args[1]); } catch (IndexOutOfBoundsException e) { chSettings.tag(player, args[0], plugin.getChannel(player).getName()); }
+				break;
+				
+			case TYPE:
+				if (args.length < 0) { plugin.sendWarning(player, "Invalid Argument Length"); return; }
+				try { chSettings.type(player, args[0], args[1]); } catch (IndexOutOfBoundsException e) { chSettings.type(player, args[0], plugin.getChannel(player).getName()); }
+				break;
+				
+			case UNBAN:
+				if (args.length < 0) { plugin.sendWarning(player, "Invalid Argument Length"); return; }
+				try { admin.unban(player, args[0], args[1]); } catch (IndexOutOfBoundsException e) { admin.unban(player, args[0], plugin.getChannel(player).getName()); }
+				break;
+				
+			case UNFOLLOW:
+				try { chSettings.unfollow(player, args[0]); } catch (IndexOutOfBoundsException e) { plugin.sendWarning(player, "Invalid Argument Length"); }
+				break;
+				
+			case UNMUTE:
+				if (args.length < 0) { plugin.sendWarning(player, "Invalid Argument Length"); return; }
+				try { admin.unmute(player, args[0], args[1]); } catch (IndexOutOfBoundsException e) { admin.unmute(player, args[0], plugin.getChannel(player).getName()); }
+				break;
 			}
-			
-			if (args.length > 3) {
-				switch (Commands.fromName(cmd)) {
-				
-				case BROADCAST:
-					if (player.hasPermission("TitanChat.broadcast")) {
-						StringBuilder str = new StringBuilder();
-						
-						for (int word = 1; word < args.length; word++) {
-							if (str.length() > 0) {
-								str.append(" ");
-							}
-							
-							str.append(args[word]);
-						}
-						
-						String msg = plugin.getFormat().broadcastFormat(player, str.toString());
-						
-						plugin.getServer().broadcastMessage(msg);
-						
-						log.info("<" + player.getName() + "> " + str.toString());
-						
-					} else {
-						plugin.sendWarning(player, "You do not have permission to broadcast");
-					}
-					break;
-					
-				case COMMANDS:
-					if (args[1].equalsIgnoreCase("1")) {
-						player.sendMessage(ChatColor.AQUA + "== TitanChat Command List (1/6) ==");
-						player.sendMessage(ChatColor.AQUA + "accept [channel] - Accepts the channel join invitation and joins the channel");
-						player.sendMessage(ChatColor.AQUA + "add [player] - Adds the player to the whitelist");
-						player.sendMessage(ChatColor.AQUA + "ban [player] - Bans the player from the channel");
-						player.sendMessage(ChatColor.AQUA + "broadcast [message] - Broadcasts the message globally");
-						player.sendMessage(ChatColor.AQUA + "chcolour [colourcode] - Sets the display colour of the channel; Alias: chcolor");
-						
-					} else if (args[1].equalsIgnoreCase("2")) {
-						player.sendMessage(ChatColor.AQUA + "== TitanChat Command List (2/6) ==");
-						player.sendMessage(ChatColor.AQUA + "convertcolour [channel] - Sets whether colour codes will be converted on the channel; Alias: convertcolor");
-						player.sendMessage(ChatColor.AQUA + "create [channel] - Creates a channel by that name");
-						player.sendMessage(ChatColor.AQUA + "decline [channel] - Declines the channel join invitation");
-						player.sendMessage(ChatColor.AQUA + "delete [channel] - Deletes the channel with that name");
-						player.sendMessage(ChatColor.AQUA + "demote [player] - Demotes the player on the channel");
-						
-					} else if (args[1].equalsIgnoreCase("3")) {
-						player.sendMessage(ChatColor.AQUA + "== TitanChat Command List (3/6) ==");
-						player.sendMessage(ChatColor.AQUA + "follow [channel] - Follows the channel and receive chat");
-						player.sendMessage(ChatColor.AQUA + "force [player] - Forces the player to join the channel");
-						player.sendMessage(ChatColor.AQUA + "format [format] - Sets the format of the channel");
-						player.sendMessage(ChatColor.AQUA + "info [channel] - Gives the participants and followers of the channel");
-						player.sendMessage(ChatColor.AQUA + "invite [player] - Invites the player to join the channel");
-						
-					} else if (args[1].equalsIgnoreCase("4")) {
-						player.sendMessage(ChatColor.AQUA + "== TitanChat Command List (4/6) ==");
-						player.sendMessage(ChatColor.AQUA + "join [channel] - Joins the channel");
-						player.sendMessage(ChatColor.AQUA + "kick [player] - Kicks the player from the channel");
-						player.sendMessage(ChatColor.AQUA + "list - Lists all channels you have access to");
-						player.sendMessage(ChatColor.AQUA + "mute [player] - Mutes the player on the channel");
-						player.sendMessage(ChatColor.AQUA + "ncolour [colourcode] - Sets the display colour of the player name; Alias: ncolor");
-						
-					} else if (args[1].equalsIgnoreCase("5")) {
-						player.sendMessage(ChatColor.AQUA + "== TitanChat Command List (5/6) ==");
-						player.sendMessage(ChatColor.AQUA + "password [password] - Sets the password of the channel");
-						player.sendMessage(ChatColor.AQUA + "promote [player] - Promotes the player on the channel");
-						player.sendMessage(ChatColor.AQUA + "reload - Reloads the configs");
-						player.sendMessage(ChatColor.AQUA + "silence [channel] - Silences the channel; Leave out [channel] to silence all");
-						player.sendMessage(ChatColor.AQUA + "tag [tag] - Sets the channel tag");
-						
-					} else if (args[1].equalsIgnoreCase("6")) {
-						player.sendMessage(ChatColor.AQUA + "== TitanChat Command List (6/6) ==");
-						player.sendMessage(ChatColor.AQUA + "type [password/private/public] - Sets the state of the channel");
-						player.sendMessage(ChatColor.AQUA + "unban [player] - Unbans the player from the channel");
-						player.sendMessage(ChatColor.AQUA + "unmute [player] - Unmutes the player on the channel");
-						player.sendMessage(ChatColor.AQUA + "unfollow [channel] - Unfollows the channel");
-						
-					} else {
-						player.sendMessage(ChatColor.AQUA + "TitanChat Commands");
-						player.sendMessage(ChatColor.AQUA + "Command: /titanchat [command] [arguments]");
-						player.sendMessage(ChatColor.AQUA + "Alias: /tc command [arguments]");
-						player.sendMessage(ChatColor.AQUA + "/titanchat commands [page]");
-					}
-					break;
-					
-				case FORMAT:
-					StringBuilder str = new StringBuilder();
-					
-					for (String word : args) {
-						if (str.length() > 0) {
-							str.append(" ");
-						}
-						
-						str.append(word);
-					}
-					
-					chSettings.format(player, str.toString(), plugin.getChannel(player).getName());
-					break;
-				}
-				
-				return;
-			}
-			
-			plugin.sendWarning(player, "Invalid Argument Length");
 			
 		} else {
 			if (runCommands(player, cmd, args))
@@ -820,51 +453,59 @@ public class TitanChatCommandHandler {
 	}
 	
 	public enum Commands {
-		ACCEPT("accept"),
-		ADD("add"),
-		BAN("ban"),
-		BROADCAST("broadcast"),
-		CHCOLOR("chcolor"),
-		CHCOLOUR("chcolour"),
-		CONVERTCOLOR("convertcolor"),
-		CONVERTCOLOUR("convertcolour"),
-		COMMANDS("commands"),
-		CREATE("create"),
-		DECLINE("decline"),
-		DELETE("delete"),
-		DEMOTE("demote"),
-		FOLLOW("follow"),
-		FORCE("force"),
-		FORMAT("format"),
-		INFO("info"),
-		INVITE("invite"),
-		JOIN("join"),
-		KICK("kick"),
-		LIST("list"),
-		MUTE("mute"),
-		NCOLOR("ncolor"),
-		NCOLOUR("ncolour"),
-		PASSWORD("password"),
-		PROMOTE("promote"),
-		RELOAD("reload"),
-		SILENCE("silence"),
-		TAG("tag"),
-		TYPE("type"),
-		UNBAN("unban"),
-		UNFOLLOW("unfollow"),
-		UNMUTE("unmute");
+		ACCEPT("Accept", new String[] { "accept" }, "Accepts the channel join invitation and joins the channel", "accept [channel]"),
+		ADD("Add", new String[] { "add" }, "Whitelists the player for the channel", "add [player] <channel>"),
+		BAN("Ban", new String[] { "ban" }, "Bans the player from the channel", "ban [player] <channel>"),
+		BROADCAST("Broadcast", new String[] { "broadcast" }, "Broadcasts the message globally", "broadcast [message]"),
+		CHCOLOUR("ChColour", new String[] { "chcolour", "chcolor" }, "Changes the chat display colour of the channel", "chcolour [colourcode] <channel>"),
+		CONVERT("Convert", new String[] { "convert" }, "Toggles colour code converting", "convert <channel>"),
+		COMMANDS("Commands", new String[] { "commands" }, "Shows the Command List", "commands <page/command>"),
+		CREATE("Create", new String[] { "create" }, "Creates a new channel", "create [channel]"),
+		DECLINE("Decline", new String[] { "decline" }, "Declines the channel join invitation", "decline [channel]"),
+		DELETE("Delete", new String[] { "delete" }, "Deletes the channel", "delete [channel]"),
+		DEMOTE("Demote", new String[] { "demote" }, "Demotes the player of the channel", "demote [player] <channel>"),
+		FOLLOW("Follow", new String[] { "follow" }, "Follows the channel", "follow [channel]"),
+		FORCE("Force", new String[] { "force" }, "Forces the player to join the channel", "force [player] <channel>"),
+		INFO("Info", new String[] { "info" }, "Gets the participants and followers of the channel", "info <channel>"),
+		INVITE("Invite", new String[] { "invite" }, "Invites the player to join the channel", "invite [player] <channel>"),
+		JOIN("Join", new String[] { "join" }, "Joins the channel", "join [channel] <password>"),
+		KICK("Kick", new String[] { "kick" }, "Kicks the player from the channel", "kick [player] <channel>"),
+		LIST("List", new String[] { "list" }, "Lists all channels you have access to", "list"),
+		MUTE("Mute", new String[] { "mute" }, "Mutes the player on the channel", "mute [player] <channel>"),
+		NCOLOUR("NColour", new String[] { "ncolour", "ncolor" }, "Changes the name display colour of the channel", "ncolour [colourcode] <channel>"),
+		PASSWORD("Password", new String[] { "password" }, "Sets the password of the channel", "password [password] <channel>"),
+		PROMOTE("Promote", new String[] { "promote" }, "Promotes the player of the channel", "promote [player] <channel>"),
+		RELOAD("Reload", new String[] { "reload" }, "Reloads the config", "reload"),
+		SILENCE("Silence", new String[] { "silence" }, "Silences the channel/server", "silence <channel>"),
+		TAG("Tag", new String[] { "tag" }, "Sets the tag of the channel", "tag [tag] <channel>"),
+		TYPE("Type", new String[] { "type" }, "Sets the type of the channel", "type [type] <channel>"),
+		UNBAN("Unban", new String[] { "unban" }, "Unbans the player from the channel", "unban [player] <channel>"),
+		UNFOLLOW("Unfollow", new String[] { "unfollow" }, "Unfollows the channel", "unfollow [channel]"),
+		UNMUTE("Unmute", new String[] { "unmute" }, "Unmutes the player on the channel", "unmute [player] <channel>");
 		
 		private String name;
+		private String[] names;
+		private String description;
+		private String usage;
 		
 		private static Map<String, Commands> NAME_MAP = new HashMap<String, Commands>();
+		private static Map<String, String> DESCRIPTION_MAP = new HashMap<String, String>();
+		private static Map<String, String> USAGE_MAP = new HashMap<String, String>();
 		
-		private Commands(String name) {
+		private Commands(String name, String[] names, String description, String usage) {
 			this.name = name;
+			this.names = names;
+			this.description = description;
+			this.usage = usage;
 		}
 		
 		static {
 			for (Commands command : EnumSet.allOf(Commands.class)) {
-				NAME_MAP.put(command.name, command);
+				for (String name : command.names) {
+					NAME_MAP.put(name, command);
+					DESCRIPTION_MAP.put(name, command.description);
+					USAGE_MAP.put(name, command.usage);
+				}
 			}
 		}
 		
@@ -872,8 +513,20 @@ public class TitanChatCommandHandler {
 			return NAME_MAP.get(name);
 		}
 		
+		public String[] getAliases() {
+			return names;
+		}
+		
 		public String getName() {
 			return name;
+		}
+		
+		public String getDescription() {
+			return description;
+		}
+		
+		public String getUsage() {
+			return usage;
 		}
 	}
 }
