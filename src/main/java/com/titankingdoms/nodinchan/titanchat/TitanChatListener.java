@@ -33,9 +33,10 @@ public class TitanChatListener implements Listener {
 		String msg = event.getMessage();
 		Channel channel = plugin.getChannel(player);
 		
-		if (plugin.isSilenced() || channel.isSilenced() || channel.getMuteList().contains(player.getName()))
+		if (plugin.isSilenced() || channel.isSilenced() || channel.getMuteList().contains(player.getName())) {
 			if (!plugin.hasVoice(player))
 				return;
+		}
 		
 		if (channel.getType().equals(Type.CUSTOM)) {
 			CustomChannel customChannel = plugin.getCustomChannel(channel);
