@@ -55,10 +55,8 @@ public abstract class CustomChannel extends Channel {
 	}
 	
 	public InputStream getResource(String filename) {
-		File file = new File(plugin.getChannelsFolder(), plugin.getSupportLoader().getCustomChannelJar(getName()));
-		
 		try {
-			JarFile jarFile = new JarFile(file);
+			JarFile jarFile = new JarFile(new File(plugin.getChannelsFolder(), plugin.getSupportLoader().getCustomChannelJar(getName())));
 			Enumeration<JarEntry> entries = jarFile.entries();
 			
 			while (entries.hasMoreElements()) {
@@ -82,8 +80,7 @@ public abstract class CustomChannel extends Channel {
 	public abstract void onLeave(Player player);
 	
 	public void reloadConfig() {
-		if (configFile == null)
-			configFile = new File(getDataFolder(), "config.yml");
+		if (configFile == null) { configFile = new File(getDataFolder(), "config.yml"); }
 		
 		config = YamlConfiguration.loadConfiguration(configFile);
 		

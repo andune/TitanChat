@@ -336,7 +336,7 @@ public class TitanChat extends JavaPlugin {
 			player.sendMessage(ChatColor.AQUA + "TitanChat Commands");
 			player.sendMessage(ChatColor.AQUA + "Command: /titanchat [command] [arguments]");
 			player.sendMessage(ChatColor.AQUA + "Alias: /tc [command] [arguments]");
-			player.sendMessage(ChatColor.AQUA + "/titanchat commands [page]");
+			sendInfo(player, "'/titanchat commands [page]' for command list");
 			return true;
 		}
 		
@@ -345,12 +345,13 @@ public class TitanChat extends JavaPlugin {
 			return true;
 		}
 		
-		sendWarning(player, "Invalid Command");
 		return false;
 	}
 	
 	@Override
 	public void onDisable() {
+		log(Level.INFO, "is now disabling...");
+		
 		log(Level.INFO, "Saving channel information...");
 		
 		for (Channel channel : channels) {
@@ -374,9 +375,9 @@ public class TitanChat extends JavaPlugin {
 	public void onEnable() {
 		log(Level.INFO, "is now enabling...");
 		
-		log(Level.INFO, "Checking for Vault...");
-		
 		PluginManager pm = getServer().getPluginManager();
+		
+		log(Level.INFO, "Checking for Vault...");
 		
 		if (pm.getPlugin("Vault") == null) {
 			log(Level.WARNING, "Vault not found!");
@@ -384,15 +385,8 @@ public class TitanChat extends JavaPlugin {
 			return;
 		}
 		
-		if (setupPermission()) {
-			log(Level.INFO, perm.getName() + " detected");
-			log(Level.INFO, "Using " + perm.getName() + " for permissions");
-		}
-		
-		if (setupChat()) {
-			log(Level.INFO, "Prefixes and suffixes supported");
-		}
-		
+		setupPermission();
+		setupChat();
 		log(Level.INFO, "Vault hooked");
 		
 		cmdHandler = new TitanChatCommandHandler(this);
@@ -409,15 +403,15 @@ public class TitanChat extends JavaPlugin {
 		
 		if (!config.exists()) {
 			log(Level.INFO, "Loading default config");
+			getConfig().options().copyHeader(true);
 			getConfig().options().copyDefaults(true);
-			getChannelConfig().options().copyHeader(true);
 			saveConfig();
 		}
 		
 		if (!channelConfig.exists()) {
 			log(Level.INFO, "Loading default channel players config");
-			getChannelConfig().options().copyDefaults(true);
 			getChannelConfig().options().copyHeader(true);
+			getChannelConfig().options().copyDefaults(true);
 			saveChannelConfig();
 		}
 		
@@ -521,9 +515,7 @@ public class TitanChat extends JavaPlugin {
 	}
 	
 	public void reloadChannelConfig() {
-		if (channelConfigFile == null) {
-			channelConfigFile = new File(getDataFolder(), "channel.yml");
-		}
+		if (channelConfigFile == null) { channelConfigFile = new File(getDataFolder(), "channel.yml"); }
 		
 		channelConfig = YamlConfiguration.loadConfiguration(channelConfigFile);
 		
@@ -536,15 +528,8 @@ public class TitanChat extends JavaPlugin {
 	}
 	
 	public void saveChannelConfig() {
-		if (channelConfig == null || channelConfigFile == null)
-			return;
-		
-		try {
-			channelConfig.save(channelConfigFile);
-			
-		} catch (IOException e) {
-			log.severe("Could not save config to " + channelConfigFile);
-		}
+		if (channelConfig == null || channelConfigFile == null) { return; }
+		try { channelConfig.save(channelConfigFile); } catch (IOException e) { log(Level.SEVERE, "Could not save config to " + channelConfigFile); }
 	}
 	
 	public void sendInfo(Player player, String info) {
@@ -562,21 +547,19 @@ public class TitanChat extends JavaPlugin {
 	public boolean setupChat() {
 		RegisteredServiceProvider<Chat> chatProvider = getServer().getServicesManager().getRegistration(Chat.class);
 		
-		if (chatProvider != null) {
+		if (chatProvider != null)
 			chat = chatProvider.getProvider();
-		}
 		
-		return (chat != null);
+		return chat != null;
 	}
 	
 	public boolean setupPermission() {
 		RegisteredServiceProvider<Permission> permissionProvider = getServer().getServicesManager().getRegistration(Permission.class);
 		
-		if (permissionProvider != null) {
+		if (permissionProvider != null)
 			perm = permissionProvider.getProvider();
-		}
 		
-		return (perm != null);
+		return perm != null;
 	}
 	
 	public boolean useDefaultFormat() {

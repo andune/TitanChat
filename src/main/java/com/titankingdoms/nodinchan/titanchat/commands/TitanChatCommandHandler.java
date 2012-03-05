@@ -33,21 +33,28 @@ public class TitanChatCommandHandler {
 		this.util = new Util(plugin);
 	}
 	
+	public void invalidArgLength(Player player, Commands command) {
+		plugin.sendWarning(player, "Invalid Argument Length");
+		plugin.sendInfo(player, "Usage: " + command.getUsage());
+	}
+	
 	public void onCommand(Player player, String cmd, String[] args) {
 		if (Commands.fromName(cmd) != null) {
-			switch (Commands.fromName(cmd)) {
+			Commands command = Commands.fromName(cmd);
+			
+			switch (command) {
 			
 			case ACCEPT:
-				try { invite.accept(player, args[0]); } catch (IndexOutOfBoundsException e) { plugin.sendWarning(player, "Invalid Argument Length"); }
+				try { invite.accept(player, args[0]); } catch (IndexOutOfBoundsException e) { invalidArgLength(player, command); }
 				break;
 				
 			case ADD:
-				if (args.length < 1) { plugin.sendWarning(player, "Invalid Argument Length"); return; }
+				if (args.length < 1) { invalidArgLength(player, command); return; }
 				try { admin.add(player, args[0], args[1]); } catch (IndexOutOfBoundsException e) { admin.add(player, args[0], plugin.getChannel(player).getName()); }
 				break;
 				
 			case BAN:
-				if (args.length < 1) { plugin.sendWarning(player, "Invalid Argument Length"); return; }
+				if (args.length < 1) { invalidArgLength(player, command); return; }
 				try { admin.ban(player, args[0], args[1]); } catch (IndexOutOfBoundsException e) { admin.ban(player, args[0], plugin.getChannel(player).getName()); }
 				break;
 				
@@ -68,7 +75,7 @@ public class TitanChatCommandHandler {
 				break;
 				
 			case CHCOLOUR:
-				if (args.length < 1) { plugin.sendWarning(player, "Invalid Argument Length"); return; }
+				if (args.length < 1) { invalidArgLength(player, command); return; }
 				try { chSettings.channelColour(player, args[0], args[1]); } catch (IndexOutOfBoundsException e) { chSettings.channelColour(player, args[0], plugin.getChannel(player).getName()); }
 				break;
 			
@@ -93,10 +100,7 @@ public class TitanChatCommandHandler {
 					int start = page * 5;
 					int end = start + 5;
 					
-					if (Commands.values().length % 5 != 0)
-						numPages++;
-					
-					if (numPages == 0)
+					if (Commands.values().length % 5 != 0 && (numPages * 5) - Commands.values().length < 0)
 						numPages++;
 					
 					if (end > Commands.values().length)
@@ -105,23 +109,22 @@ public class TitanChatCommandHandler {
 					if (page > 0 || page < numPages) {
 						player.sendMessage(ChatColor.AQUA + "=== TitanChat Command List (" + page + "/" + numPages + ") ===");
 						for (int cmdNum = start; cmdNum < end; cmdNum++) {
-							Commands command = Commands.values()[cmdNum];
-							player.sendMessage(ChatColor.AQUA + command.toString().toLowerCase());
+							player.sendMessage(ChatColor.AQUA + Commands.values()[cmdNum].toString().toLowerCase());
 						}
-						player.sendMessage(ChatColor.AQUA + "'/titanchat commands [command]' for more info");
+						plugin.sendInfo(player, "'/titanchat commands [command]' for more info");
 						
 					} else {
 						player.sendMessage(ChatColor.AQUA + "TitanChat Commands");
 						player.sendMessage(ChatColor.AQUA + "Command: /titanchat [command] [arguments]");
 						player.sendMessage(ChatColor.AQUA + "Alias: /tc command [arguments]");
-						player.sendMessage(ChatColor.AQUA + "/titanchat commands [page]");
+						plugin.sendInfo(player, "'/titanchat commands [page]' for command list");
 					}
 					
 				} catch (IndexOutOfBoundsException e) {
 					player.sendMessage(ChatColor.AQUA + "TitanChat Commands");
 					player.sendMessage(ChatColor.AQUA + "Command: /titanchat [command] [arguments]");
 					player.sendMessage(ChatColor.AQUA + "Alias: /tc command [arguments]");
-					player.sendMessage(ChatColor.AQUA + "/titanchat commands [page]");
+					plugin.sendInfo(player, "'/titanchat commands [page]' for command list");
 					
 				} catch (NumberFormatException e) {
 					if (Commands.fromName(args[0]) == null) {
@@ -183,12 +186,12 @@ public class TitanChatCommandHandler {
 					}
 					
 				} catch (IndexOutOfBoundsException e) {
-					plugin.sendWarning(player, "Invalid Argument Length");
+					invalidArgLength(player, command);
 				}
 				break;
 				
 			case DECLINE:
-				try { invite.decline(player, args[0]); } catch (IndexOutOfBoundsException e) { plugin.sendWarning(player, "Invalid Argument Length"); }
+				try { invite.decline(player, args[0]); } catch (IndexOutOfBoundsException e) { invalidArgLength(player, command); }
 				break;
 				
 			case DELETE:
@@ -213,21 +216,21 @@ public class TitanChatCommandHandler {
 					}
 					
 				} catch (IndexOutOfBoundsException e) {
-					plugin.sendWarning(player, "Invalid Argument Length");
+					invalidArgLength(player, command);
 				}
 				break;
 				
 			case DEMOTE:
-				if (args.length < 1) { plugin.sendWarning(player, "Invalid Argument Length"); return; }
+				if (args.length < 1) { invalidArgLength(player, command); return; }
 				try { admin.demote(player, args[0], args[1]); } catch (IndexOutOfBoundsException e) { admin.demote(player, args[0], plugin.getChannel(player).getName()); }
 				break;
 				
 			case FOLLOW:
-				try { chSettings.follow(player, args[0]); } catch (IndexOutOfBoundsException e) { plugin.sendWarning(player, "Invalid Argument Length"); }
+				try { chSettings.follow(player, args[0]); } catch (IndexOutOfBoundsException e) { invalidArgLength(player, command); }
 				break;
 				
 			case FORCE:
-				if (args.length < 1) { plugin.sendWarning(player, "Invalid Argument Length"); return; }
+				if (args.length < 1) { invalidArgLength(player, command); return; }
 				try { admin.force(player, args[0], args[1]); } catch (IndexOutOfBoundsException e) { admin.force(player, args[0], plugin.getChannel(player).getName()); }
 				break;
 				
@@ -256,12 +259,12 @@ public class TitanChatCommandHandler {
 				break;
 				
 			case INVITE:
-				if (args.length < 0) { plugin.sendWarning(player, "Invalid Argument Length"); return; }
+				if (args.length < 0) { invalidArgLength(player, command); return; }
 				try { invite.invite(player, args[0], args[1]); } catch (IndexOutOfBoundsException e) { invite.invite(player, args[0], plugin.getChannel(player).getName()); }
 				break;
 				
 			case JOIN:
-				if (args.length < 0) { plugin.sendWarning(player, "Invalid Argument Length"); return; }
+				if (args.length < 0) { invalidArgLength(player, command); return; }
 				
 				if (plugin.channelExist(args[0])) {
 					Channel channel = plugin.getChannel(args[0]);
@@ -340,7 +343,7 @@ public class TitanChatCommandHandler {
 				break;
 				
 			case KICK:
-				if (args.length < 0) { plugin.sendWarning(player, "Invalid Argument Length"); return; }
+				if (args.length < 0) { invalidArgLength(player, command); return; }
 				try { admin.kick(player, args[0], args[1]); } catch (IndexOutOfBoundsException e) { admin.kick(player, args[0], plugin.getChannel(player).getName()); }
 				break;
 				
@@ -356,22 +359,22 @@ public class TitanChatCommandHandler {
 				break;
 				
 			case MUTE:
-				if (args.length < 0) { plugin.sendWarning(player, "Invalid Argument Length"); return; }
+				if (args.length < 0) { invalidArgLength(player, command); return; }
 				try { admin.mute(player, args[0], args[1]); } catch (IndexOutOfBoundsException e) { admin.mute(player, args[0], plugin.getChannel(player).getName()); }
 				break;
 				
 			case NCOLOUR:
-				if (args.length < 0) { plugin.sendWarning(player, "Invalid Argument Length"); return; }
+				if (args.length < 0) { invalidArgLength(player, command); return; }
 				try { chSettings.nameColour(player, args[0], args[1]); } catch (IndexOutOfBoundsException e) { chSettings.nameColour(player, args[0], plugin.getChannel(player).getName()); }
 				break;
 				
 			case PASSWORD:
-				if (args.length < 0) { plugin.sendWarning(player, "Invalid Argument Length"); return; }
+				if (args.length < 0) { invalidArgLength(player, command); return; }
 				try { chSettings.password(player, args[0], args[1]); } catch (IndexOutOfBoundsException e) { chSettings.password(player, args[0], plugin.getChannel(player).getName()); }
 				break;
 				
 			case PROMOTE:
-				if (args.length < 0) { plugin.sendWarning(player, "Invalid Argument Length"); return; }
+				if (args.length < 0) { invalidArgLength(player, command); return; }
 				try { admin.promote(player, args[0], args[1]); } catch (IndexOutOfBoundsException e) { admin.promote(player, args[0], plugin.getChannel(player).getName()); }
 				break;
 			
@@ -413,26 +416,26 @@ public class TitanChatCommandHandler {
 				break;
 				
 			case TAG:
-				if (args.length < 0) { plugin.sendWarning(player, "Invalid Argument Length"); return; }
+				if (args.length < 0) { invalidArgLength(player, command); return; }
 				try { chSettings.tag(player, args[0], args[1]); } catch (IndexOutOfBoundsException e) { chSettings.tag(player, args[0], plugin.getChannel(player).getName()); }
 				break;
 				
 			case TYPE:
-				if (args.length < 0) { plugin.sendWarning(player, "Invalid Argument Length"); return; }
+				if (args.length < 0) { invalidArgLength(player, command); return; }
 				try { chSettings.type(player, args[0], args[1]); } catch (IndexOutOfBoundsException e) { chSettings.type(player, args[0], plugin.getChannel(player).getName()); }
 				break;
 				
 			case UNBAN:
-				if (args.length < 0) { plugin.sendWarning(player, "Invalid Argument Length"); return; }
+				if (args.length < 0) { invalidArgLength(player, command); return; }
 				try { admin.unban(player, args[0], args[1]); } catch (IndexOutOfBoundsException e) { admin.unban(player, args[0], plugin.getChannel(player).getName()); }
 				break;
 				
 			case UNFOLLOW:
-				try { chSettings.unfollow(player, args[0]); } catch (IndexOutOfBoundsException e) { plugin.sendWarning(player, "Invalid Argument Length"); }
+				try { chSettings.unfollow(player, args[0]); } catch (IndexOutOfBoundsException e) { invalidArgLength(player, command); }
 				break;
 				
 			case UNMUTE:
-				if (args.length < 0) { plugin.sendWarning(player, "Invalid Argument Length"); return; }
+				if (args.length < 0) { invalidArgLength(player, command); return; }
 				try { admin.unmute(player, args[0], args[1]); } catch (IndexOutOfBoundsException e) { admin.unmute(player, args[0], plugin.getChannel(player).getName()); }
 				break;
 			}
@@ -440,9 +443,10 @@ public class TitanChatCommandHandler {
 		} else {
 			if (runCommands(player, cmd, args))
 				return;
-			
-			plugin.sendWarning(player, "Invalid Command");
 		}
+		
+		plugin.sendWarning(player, "Invalid Command");
+		plugin.sendInfo(player, "'/titanchat commands [page]' for command list");
 	}
 	
 	public boolean runCommands(Player player, String cmd, String[] args) {
