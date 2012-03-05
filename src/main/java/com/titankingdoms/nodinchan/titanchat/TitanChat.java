@@ -464,7 +464,7 @@ public class TitanChat extends JavaPlugin {
 			str.append(arg);
 		}
 		
-		return str.toString().split(" ");
+		return (str.toString().equals("")) ? new String[] {} : str.toString().split(" ");
 	}
 	
 	public void prepareChannels() throws Exception {

@@ -89,56 +89,32 @@ public class TitanChatCommandHandler {
 			case COMMANDS:
 				try {
 					int page = Integer.parseInt(args[0]);
+					int numPages = Commands.values().length / 5;
+					int start = page * 5;
+					int end = start + 5;
 					
-					try {
-						int numPages = Commands.values().length / 5;
-						int start = page * 5;
-						int end = start + 5;
-						
-						if (Commands.values().length % 5 != 0)
-							numPages++;
-						
-						if (numPages == 0)
-							numPages++;
-						
-						if (end > Commands.values().length)
-							end = Commands.values().length;
-						
-						if (page > 0 || page < numPages) {
-							player.sendMessage(ChatColor.AQUA + "=== TitanChat Command List (" + page + "/" + numPages + ") ===");
-							for (int cmdNum = start; cmdNum < end; cmdNum++) {
-								Commands command = Commands.values()[cmdNum];
-								player.sendMessage(ChatColor.AQUA + command.toString().toLowerCase());
-							}
-							player.sendMessage(ChatColor.AQUA + "'/titanchat commands [command]' for more info");
-							
-						} else {
-							player.sendMessage(ChatColor.AQUA + "TitanChat Commands");
-							player.sendMessage(ChatColor.AQUA + "Command: /titanchat [command] [arguments]");
-							player.sendMessage(ChatColor.AQUA + "Alias: /tc command [arguments]");
-							player.sendMessage(ChatColor.AQUA + "/titanchat commands [page]");
+					if (Commands.values().length % 5 != 0)
+						numPages++;
+					
+					if (numPages == 0)
+						numPages++;
+					
+					if (end > Commands.values().length)
+						end = Commands.values().length;
+					
+					if (page > 0 || page < numPages) {
+						player.sendMessage(ChatColor.AQUA + "=== TitanChat Command List (" + page + "/" + numPages + ") ===");
+						for (int cmdNum = start; cmdNum < end; cmdNum++) {
+							Commands command = Commands.values()[cmdNum];
+							player.sendMessage(ChatColor.AQUA + command.toString().toLowerCase());
 						}
+						player.sendMessage(ChatColor.AQUA + "'/titanchat commands [command]' for more info");
 						
-					} catch (NumberFormatException e) {
-						if (Commands.fromName(args[0]) == null) {
-							plugin.sendWarning(player, "No info on command");
-							return;
-						}
-						
-						player.sendMessage(ChatColor.AQUA + "=== " + Commands.fromName(args[0]).getName() + " Command ===");
-						player.sendMessage(ChatColor.AQUA + "Description: " + Commands.fromName(args[0]).getDescription());
-						
-						StringBuilder cmdStr = new StringBuilder();
-						
-						for (String alias : Commands.fromName(args[0]).getAliases()) {
-							if (cmdStr.length() > 0)
-								cmdStr.append(", ");
-							
-							cmdStr.append(alias);
-						}
-						
-						player.sendMessage(ChatColor.AQUA + "Aliases: " + cmdStr.toString());
-						player.sendMessage(ChatColor.AQUA + "Usage: " + Commands.fromName(args[0]).getUsage());
+					} else {
+						player.sendMessage(ChatColor.AQUA + "TitanChat Commands");
+						player.sendMessage(ChatColor.AQUA + "Command: /titanchat [command] [arguments]");
+						player.sendMessage(ChatColor.AQUA + "Alias: /tc command [arguments]");
+						player.sendMessage(ChatColor.AQUA + "/titanchat commands [page]");
 					}
 					
 				} catch (IndexOutOfBoundsException e) {
@@ -146,6 +122,27 @@ public class TitanChatCommandHandler {
 					player.sendMessage(ChatColor.AQUA + "Command: /titanchat [command] [arguments]");
 					player.sendMessage(ChatColor.AQUA + "Alias: /tc command [arguments]");
 					player.sendMessage(ChatColor.AQUA + "/titanchat commands [page]");
+					
+				} catch (NumberFormatException e) {
+					if (Commands.fromName(args[0]) == null) {
+						plugin.sendWarning(player, "No info on command");
+						return;
+					}
+					
+					player.sendMessage(ChatColor.AQUA + "=== " + Commands.fromName(args[0]).getName() + " Command ===");
+					player.sendMessage(ChatColor.AQUA + "Description: " + Commands.fromName(args[0]).getDescription());
+					
+					StringBuilder cmdStr = new StringBuilder();
+					
+					for (String alias : Commands.fromName(args[0]).getAliases()) {
+						if (cmdStr.length() > 0)
+							cmdStr.append(", ");
+						
+						cmdStr.append(alias);
+					}
+					
+					player.sendMessage(ChatColor.AQUA + "Aliases: " + cmdStr.toString());
+					player.sendMessage(ChatColor.AQUA + "Usage: " + Commands.fromName(args[0]).getUsage());
 				}
 				break;
 				
@@ -238,10 +235,15 @@ public class TitanChatCommandHandler {
 				try {
 					Channel channel = plugin.getChannel(args[0]);
 					
-					if (channel.canAccess(player)) {
-						player.sendMessage(ChatColor.AQUA + "=== " + channel.getName() + " ===");
-						player.sendMessage(ChatColor.AQUA + "Participants: " + plugin.createList(channel.getParticipants()));
-						player.sendMessage(ChatColor.AQUA + "Followers: " + plugin.createList(channel.getFollowers()));
+					if (channel != null) {
+						if (channel.canAccess(player)) {
+							player.sendMessage(ChatColor.AQUA + "=== " + channel.getName() + " ===");
+							player.sendMessage(ChatColor.AQUA + "Participants: " + plugin.createList(channel.getParticipants()));
+							player.sendMessage(ChatColor.AQUA + "Followers: " + plugin.createList(channel.getFollowers()));
+						}
+						
+					} else {
+						plugin.sendWarning(player, "No such channel");
 					}
 					
 				} catch (IndexOutOfBoundsException e) {
@@ -445,8 +447,10 @@ public class TitanChatCommandHandler {
 	
 	public boolean runCommands(Player player, String cmd, String[] args) {
 		for (Command command : plugin.getCommands()) {
-			if (command.execute(player, cmd, args))
-				return true;
+			if (command.getAliases().contains(cmd)) {
+				if (command.execute(player, command, args))
+					return true;
+			}
 		}
 		
 		return false;

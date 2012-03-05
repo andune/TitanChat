@@ -57,10 +57,11 @@ TitanChat, a chat management and formatting plugin for Bukkit.
 * 17.02.12 - New managing code and permissions
 * 18.02.12 - Fixed config files not generating
 * 29.02.12 - Custom channels? Sure.
-* 01.03.12 - Fix for empty channel.yml
-* 02.03.12 - Fix for broken commands
-* 03.03.12 - Fix for fail CREATE command
+* 01.03.12 - Fixed empty channel.yml
+* 02.03.12 - Fixed broken commands
+* 03.03.12 - Fixed fail CREATE command
 * 04.03.12 - Rewrote the command handler
+* 05.03.12 - Fixed commands
 
 -----------------------------------------------------------------------------------------------------------------------
 
