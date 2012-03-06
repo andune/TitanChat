@@ -7,11 +7,11 @@ import org.bukkit.entity.Player;
 
 public abstract class Command {
 	
-	private String name;
+	private String command;
 	private String[] aliases;
 	
-	public Command(String name) {
-		this.name = name;
+	public Command(String command) {
+		this.command = command;
 		this.aliases = new String[] {};
 	}
 	
@@ -27,8 +27,8 @@ public abstract class Command {
 		return aliases;
 	}
 	
-	public String getName() {
-		return name;
+	public String getCommand() {
+		return command;
 	}
 	
 	public Command register() {

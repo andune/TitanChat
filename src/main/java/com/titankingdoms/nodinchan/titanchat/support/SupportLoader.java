@@ -123,7 +123,7 @@ public class SupportLoader {
 				
 			} catch (Exception e) {
 				e.printStackTrace();
-				plugin.log(Level.INFO, "The custom channel " + file.getName() + " failed to load");
+				plugin.log(Level.WARNING, "The custom channel " + file.getName() + " failed to load");
 			}
 		}
 		
@@ -176,7 +176,7 @@ public class SupportLoader {
 				
 			} catch (Exception e) {
 				e.printStackTrace();
-				plugin.log(Level.INFO, "The plugin support " + file.getName() + " failed to load");
+				plugin.log(Level.WARNING, "The plugin support " + file.getName() + " failed to load");
 			}
 		}
 		

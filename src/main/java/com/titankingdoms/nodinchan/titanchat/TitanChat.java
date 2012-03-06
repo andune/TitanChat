@@ -22,7 +22,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel.Type;
-import com.titankingdoms.nodinchan.titanchat.commands.TitanChatCommandHandler;
+import com.titankingdoms.nodinchan.titanchat.command.TitanChatCommandHandler;
 import com.titankingdoms.nodinchan.titanchat.support.CustomChannel;
 import com.titankingdoms.nodinchan.titanchat.support.Support;
 import com.titankingdoms.nodinchan.titanchat.support.SupportLoader;
@@ -249,7 +249,7 @@ public class TitanChat extends JavaPlugin {
 		}
 		
 		for (Channel channel : channels) {
-			if (has(player, "TitanChat.spawn." + channel.getName()) && !has(player, "TitanChat.forced." + channel.getName()) && !channel.canAccess(player))
+			if (has(player, "TitanChat.spawn." + channel.getName()) && !has(player, "TitanChat.forced." + channel.getName()) && channel.canAccess(player))
 				return channel;
 		}
 		
@@ -380,7 +380,7 @@ public class TitanChat extends JavaPlugin {
 		log(Level.INFO, "Checking for Vault...");
 		
 		if (pm.getPlugin("Vault") == null) {
-			log(Level.WARNING, "Vault not found!");
+			log(Level.SEVERE, "Vault not found!");
 			pm.disablePlugin(this);
 			return;
 		}
