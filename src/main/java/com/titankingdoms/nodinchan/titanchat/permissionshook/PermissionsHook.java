@@ -26,7 +26,7 @@ public class PermissionsHook implements Listener {
 	
 	private Plugin permissionsPlugin;
 	
-	private String name;
+	private String name = "SuperPerms";
 	
 	public PermissionsHook(TitanChat plugin) {
 		this.plugin = plugin;
@@ -183,9 +183,9 @@ public class PermissionsHook implements Listener {
 				permissionsPlugin = perms;
 				name = permissionsPlugin.getName();
 				
-			} else { name = "SuperPerms"; }
-			
-			if (!plugin.vaultSetup()) { plugin.log(Level.INFO, name + " detected and hooked"); }
+				if (!plugin.vaultSetup()) { plugin.log(Level.INFO, name + " detected and hooked"); }
+				
+			}
 		}
 	}
 }
