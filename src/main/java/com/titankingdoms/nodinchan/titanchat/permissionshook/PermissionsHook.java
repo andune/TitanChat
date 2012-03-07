@@ -182,12 +182,10 @@ public class PermissionsHook implements Listener {
 			if (perms != null && perms.isEnabled()) {
 				permissionsPlugin = perms;
 				name = permissionsPlugin.getName();
-				plugin.log(Level.INFO, name + " detected and hooked");
 				
-			} else {
-				name = "SuperPerms";
-				plugin.log(Level.INFO, "No permissions system found - Hooking SuperPerms...");
-			}
+			} else { name = "SuperPerms"; }
+			
+			if (!plugin.vaultSetup()) { plugin.log(Level.INFO, name + " detected and hooked"); }
 		}
 	}
 }

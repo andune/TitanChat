@@ -31,7 +31,7 @@ import com.titankingdoms.nodinchan.titanchat.util.ConfigManager;
 import com.titankingdoms.nodinchan.titanchat.util.Format;
 
 /*
- *     TitanChat 2.1.4
+ *     TitanChat 2.1.5
  *     Copyright (C) 2012  Nodin Chan <nodinchan@nodinchan.net>
  *     
  *     This program is free software: you can redistribute it and/or modify
@@ -65,6 +65,7 @@ public class TitanChat extends JavaPlugin {
 	private Channel staffChannel = null;
 	
 	private boolean silenced = false;
+	private boolean vaultSetup = false;
 	
 	private List<Channel> channels;
 	private List<com.titankingdoms.nodinchan.titanchat.support.Command> cmds;
@@ -423,13 +424,9 @@ public class TitanChat extends JavaPlugin {
 		
 		PluginManager pm = getServer().getPluginManager();
 		
-		if (pm.getPlugin("Vault") != null) {
-			setupPermission();
-			setupChat();
-			
-		} else {
-			pm.registerEvents(permHook, this);
-		}
+		vaultSetup = setupVault();
+		
+		pm.registerEvents(permHook, this);
 		
 		try { supports.addAll(loader.loadSupports()); } catch (Exception e) {}
 		
@@ -561,7 +558,7 @@ public class TitanChat extends JavaPlugin {
 		return chat != null;
 	}
 	
-	public boolean setupPermission() {
+	public boolean setupPermissions() {
 		RegisteredServiceProvider<Permission> permissionProvider = getServer().getServicesManager().getRegistration(Permission.class);
 		
 		if (permissionProvider != null)
@@ -570,8 +567,22 @@ public class TitanChat extends JavaPlugin {
 		return perm != null;
 	}
 	
+	public boolean setupVault() {
+		if (getServer().getPluginManager().getPlugin("Vault") != null) {
+			setupChat();
+			setupPermissions();
+			return true;
+		}
+		
+		return false;
+	}
+	
 	public boolean useDefaultFormat() {
 		return getConfig().getBoolean("formatting.use-built-in");
+	}
+	
+	public boolean vaultSetup() {
+		return vaultSetup;
 	}
 	
 	public void whitelistMember(Player player, String channelName) {
