@@ -152,7 +152,7 @@ public class PermissionsHook implements Listener {
 		if (permissionsPlugin != null) {
 			if (event.getPlugin().getName().equals(name)) {
 				permissionsPlugin = null;
-				plugin.log(Level.INFO, name + " unhooked");
+				if (plugin.vaultSetup()) { plugin.log(Level.INFO, name + " unhooked"); }
 			}
 		}
 	}
