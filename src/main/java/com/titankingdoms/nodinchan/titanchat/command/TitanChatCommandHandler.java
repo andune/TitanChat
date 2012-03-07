@@ -111,6 +111,7 @@ public class TitanChatCommandHandler {
 						for (int cmdNum = start; cmdNum < end; cmdNum++) {
 							player.sendMessage(ChatColor.AQUA + Commands.values()[cmdNum].toString().toLowerCase());
 						}
+						plugin.sendInfo(player, "Arguments: [NECESSARY] <OPTIONAL>");
 						plugin.sendInfo(player, "'/titanchat commands [command]' for more info");
 						
 					} else {
@@ -439,6 +440,8 @@ public class TitanChatCommandHandler {
 				try { admin.unmute(player, args[0], args[1]); } catch (IndexOutOfBoundsException e) { admin.unmute(player, args[0], plugin.getChannel(player).getName()); }
 				break;
 			}
+			
+			return;
 			
 		} else {
 			if (runCommands(player, cmd, args))

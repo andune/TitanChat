@@ -23,6 +23,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel.Type;
 import com.titankingdoms.nodinchan.titanchat.command.TitanChatCommandHandler;
+import com.titankingdoms.nodinchan.titanchat.permissionshook.PermissionsHook;
 import com.titankingdoms.nodinchan.titanchat.support.CustomChannel;
 import com.titankingdoms.nodinchan.titanchat.support.Support;
 import com.titankingdoms.nodinchan.titanchat.support.SupportLoader;
@@ -54,6 +55,7 @@ public class TitanChat extends JavaPlugin {
 	private TitanChatCommandHandler cmdHandler;
 	private ConfigManager configManager;
 	private Format format;
+	private PermissionsHook permHook;
 	private SupportLoader loader;
 	
 	private File channelConfigFile = null;
@@ -213,21 +215,21 @@ public class TitanChat extends JavaPlugin {
 	}
 	
 	public String getGroupPrefix(Player player) {
-		String prefix = chat.getGroupPrefix(player.getWorld(), perm.getPrimaryGroup(player));
+		if (chat != null) {
+			String prefix = chat.getGroupPrefix(player.getWorld(), perm.getPrimaryGroup(player));
+			return (prefix != null) ? prefix : "";
+		}
 		
-		if (prefix == null)
-			return "";
-		
-		return prefix;
+		return permHook.getGroupPrefix(player);
 	}
 	
 	public String getGroupSuffix(Player player) {
-		String suffix = chat.getGroupSuffix(player.getWorld(), perm.getPrimaryGroup(player));
+		if (chat != null) {
+			String suffix = chat.getGroupSuffix(player.getWorld(), perm.getPrimaryGroup(player));
+			return (suffix != null) ? suffix : "";
+		}
 		
-		if (suffix == null)
-			return "";
-		
-		return suffix;
+		return permHook.getGroupSuffix(player);
 	}
 	
 	public Player getPlayer(String name) {
@@ -235,11 +237,21 @@ public class TitanChat extends JavaPlugin {
 	}
 	
 	public String getPlayerPrefix(Player player) {
-		return (chat.getPlayerPrefix(player) == null) ? "" : chat.getPlayerPrefix(player);
+		if (chat != null) {
+			String prefix = chat.getPlayerPrefix(player.getWorld(), player.getName());
+			return (prefix != null) ? prefix : "";
+		}
+		
+		return permHook.getPlayerPrefix(player);
 	}
 	
 	public String getPlayerSuffix(Player player) {
-		return (chat.getPlayerSuffix(player) == null) ? "" : chat.getPlayerSuffix(player);
+		if (chat != null) {
+			String suffix = chat.getPlayerSuffix(player.getWorld(), player.getName());
+			return (suffix != null) ? suffix : "";
+		}
+		
+		return permHook.getPlayerSuffix(player);
 	}
 	
 	public Channel getSpawnChannel(Player player) {
@@ -285,7 +297,7 @@ public class TitanChat extends JavaPlugin {
 		if (perm != null)
 			return perm.has(player, permission);
 		
-		return player.hasPermission(permission);
+		return permHook.has(player, permission);
 	}
 	
 	public boolean hasVoice(Player player) {
@@ -375,29 +387,6 @@ public class TitanChat extends JavaPlugin {
 	public void onEnable() {
 		log(Level.INFO, "is now enabling...");
 		
-		PluginManager pm = getServer().getPluginManager();
-		
-		log(Level.INFO, "Checking for Vault...");
-		
-		if (pm.getPlugin("Vault") == null) {
-			log(Level.SEVERE, "Vault not found!");
-			pm.disablePlugin(this);
-			return;
-		}
-		
-		setupPermission();
-		setupChat();
-		log(Level.INFO, "Vault hooked");
-		
-		cmdHandler = new TitanChatCommandHandler(this);
-		configManager = new ConfigManager(this);
-		format = new Format(this);
-		
-		channels = new ArrayList<Channel>();
-		cmds = new ArrayList<com.titankingdoms.nodinchan.titanchat.support.Command>();
-		customChannels = new ArrayList<CustomChannel>();
-		supports = new ArrayList<Support>();
-		
 		File config = new File(getDataFolder(), "config.yml");
 		File channelConfig = new File(getDataFolder(), "channel.yml");
 		
@@ -421,7 +410,26 @@ public class TitanChat extends JavaPlugin {
 		if (getSupportsFolder().mkdir())
 			log(Level.INFO, "Loading supports folder...");
 		
+		cmdHandler = new TitanChatCommandHandler(this);
+		configManager = new ConfigManager(this);
+		format = new Format(this);
 		loader = new SupportLoader(this);
+		permHook = new PermissionsHook(this);
+		
+		channels = new ArrayList<Channel>();
+		cmds = new ArrayList<com.titankingdoms.nodinchan.titanchat.support.Command>();
+		customChannels = new ArrayList<CustomChannel>();
+		supports = new ArrayList<Support>();
+		
+		PluginManager pm = getServer().getPluginManager();
+		
+		if (pm.getPlugin("Vault") != null) {
+			setupPermission();
+			setupChat();
+			
+		} else {
+			pm.registerEvents(permHook, this);
+		}
 		
 		try { supports.addAll(loader.loadSupports()); } catch (Exception e) {}
 		

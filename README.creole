@@ -26,7 +26,10 @@ TitanChat, a chat management and formatting plugin for Bukkit.
 
 === Dependecies
 
-* CraftBukkit 1.1-R6
+* CraftBukkit 1.1-R7
+
+==== Optional
+
 * Vault
 
 -----------------------------------------------------------------------------------------------------------------------
@@ -62,6 +65,7 @@ TitanChat, a chat management and formatting plugin for Bukkit.
 * 03.03.12 - Fixed fail CREATE command
 * 04.03.12 - Rewrote the command handler
 * 05.03.12 - Fixed commands
+* 07.03.12 - Fixed warning even though nothing is wrong and made Vault optional
 
 -----------------------------------------------------------------------------------------------------------------------
 
