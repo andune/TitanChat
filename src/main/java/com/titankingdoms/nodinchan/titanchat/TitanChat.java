@@ -21,6 +21,7 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
+import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
 import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel.Type;
 import com.titankingdoms.nodinchan.titanchat.command.TitanChatCommandHandler;
@@ -53,6 +54,7 @@ public class TitanChat extends JavaPlugin {
 	protected static Logger log = Logger.getLogger("TitanLog");
 	
 	private TitanChatCommandHandler cmdHandler;
+	private ChannelManager chManager;
 	private ConfigManager configManager;
 	private Format format;
 	private PermissionsHook permHook;
@@ -158,6 +160,10 @@ public class TitanChat extends JavaPlugin {
 		}
 		
 		return channelConfig;
+	}
+	
+	public ChannelManager getChannelManager() {
+		return chManager;
 	}
 	
 	public File getChannelsFolder() {
@@ -333,7 +339,7 @@ public class TitanChat extends JavaPlugin {
 				
 				channels.clear();
 				
-				try { prepareChannels(); } catch (Exception e) {}
+				try { chManager.loadChannels(); } catch (Exception e) {}
 				
 				log(Level.INFO, "Configs reloaded");
 				return true;
@@ -414,6 +420,7 @@ public class TitanChat extends JavaPlugin {
 			log(Level.INFO, "Loading supports folder...");
 		
 		cmdHandler = new TitanChatCommandHandler(this);
+		chManager = new ChannelManager(this);
 		configManager = new ConfigManager(this);
 		format = new Format(this);
 		loader = new SupportLoader(this);
@@ -432,7 +439,7 @@ public class TitanChat extends JavaPlugin {
 		
 		try { supports.addAll(loader.loadSupports()); } catch (Exception e) {}
 		
-		try { prepareChannels(); } catch (Exception e) {}
+		try { chManager.loadChannels(); } catch (Exception e) {}
 		
 		if (getDefaultChannel() == null) {
 			log(Level.WARNING, "Default channel not defined");
@@ -466,54 +473,6 @@ public class TitanChat extends JavaPlugin {
 		}
 		
 		return (str.toString().equals("")) ? new String[] {} : str.toString().split(" ");
-	}
-	
-	public void prepareChannels() throws Exception {
-		List<String> globalChannels = new ArrayList<String>();
-		customChannels = loader.loadChannels();
-		
-		for (CustomChannel customChannel : customChannels) {
-			Channel channel = new Channel(this, customChannel.getName(), customChannel.getType());
-			channel = customChannel.load(channel);
-			channel.setType("custom");
-			channels.add(channel);
-		}
-		
-		for (String name : getConfig().getConfigurationSection("channels").getKeys(false)) {
-			if (getChannel(name) != null)
-				continue;
-			
-			Channel channel = new Channel(this, name, Type.fromName(getConfig().getString("channels." + name + ".type")));
-			
-			if (getChannelConfig().getStringList("channels." + channel.getName() + ".admins") != null)
-				channel.getAdminList().addAll(getChannelConfig().getStringList("channels." + channel.getName() + ".admins"));
-			
-			if (getChannelConfig().getStringList("channels." + channel.getName() + ".whitelist") != null)
-				channel.getWhiteList().addAll(getChannelConfig().getStringList("channels." + channel.getName() + ".whitelist"));
-			
-			if (getChannelConfig().getStringList("channels." + channel.getName() + ".blacklist") != null)
-				channel.getBlackList().addAll(getChannelConfig().getStringList("channels." + channel.getName() + ".blacklist"));
-			
-			if (getChannelConfig().getStringList("channels." + channel.getName() + ".followers") != null)
-				channel.getFollowers().addAll(getChannelConfig().getStringList("channels." + channel.getName() + ".followers"));
-			
-			if (channel.getType().equals(Type.PASSWORD))
-				channel.setPassword(getConfig().getString("channels." + channel.getName() + ".password"));
-			
-			if (getConfig().get("channels." + channel.getName() + ".global") != null) {
-				if (getConfig().getBoolean("channels." + name + ".global")) {
-					channel.setGlobal(true);
-					globalChannels.add(name);
-				}
-			}
-			
-			channels.add(channel);
-		}
-		
-		log(Level.INFO, "No. of channels: " + getChannelAmount());
-		log(Level.INFO, "No. of global broadcasting channels: " + globalChannels.size());
-		log(Level.INFO, "No. of custom channels: " + customChannels.size());
-		log(Level.INFO, "TitanChat Channels Loaded");
 	}
 	
 	public void registerCommand(com.titankingdoms.nodinchan.titanchat.support.Command cmd) {

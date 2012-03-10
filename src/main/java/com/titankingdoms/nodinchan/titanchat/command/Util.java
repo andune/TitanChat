@@ -24,7 +24,7 @@ public class Util {
 			
 			plugin.getChannels().clear();
 			
-			try { plugin.prepareChannels(); } catch (Exception e) {}
+			try { plugin.getChannelManager().loadChannels(); } catch (Exception e) {}
 			
 			plugin.log(Level.INFO, "Configs reloaded");
 			plugin.sendInfo(player, "Configs reloaded");
