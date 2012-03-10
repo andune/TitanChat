@@ -17,6 +17,7 @@ import java.util.jar.JarFile;
 import java.util.logging.Level;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
+import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
 
 public class SupportLoader {
 	

@@ -4,7 +4,7 @@
 # &6 (gold), &7 (silver), &8 (grey),
 # &9 (blue), &a (light green), &b (light blue),
 # &c (light red), &d (pink), &e (yellow),
-# &f (white)
+# &f (white), &k (magical)
 
 channel-limit: -1
 broadcast:

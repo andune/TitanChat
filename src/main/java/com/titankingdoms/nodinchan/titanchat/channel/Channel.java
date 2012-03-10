@@ -29,11 +29,11 @@ public class Channel {
 	private List<String> participants;
 	private List<String> whitelist;
 	
-	public Channel(TitanChat plugin, String channelName) {
+	public Channel(TitanChat plugin, String channelName, Type type) {
 		this.plugin = plugin;
 		this.name = channelName;
 		this.password = "";
-		this.type = Type.UNKNOWN;
+		this.type = type;
 		this.global = false;
 		this.silenced = false;
 		this.adminlist = new ArrayList<String>();

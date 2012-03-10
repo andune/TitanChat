@@ -21,10 +21,10 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
+import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel.Type;
 import com.titankingdoms.nodinchan.titanchat.command.TitanChatCommandHandler;
 import com.titankingdoms.nodinchan.titanchat.permissionshook.PermissionsHook;
-import com.titankingdoms.nodinchan.titanchat.support.CustomChannel;
 import com.titankingdoms.nodinchan.titanchat.support.Support;
 import com.titankingdoms.nodinchan.titanchat.support.SupportLoader;
 import com.titankingdoms.nodinchan.titanchat.util.ConfigManager;
@@ -80,13 +80,8 @@ public class TitanChat extends JavaPlugin {
 		sendInfo(player, "You are now an Admin of " + channel.getName());
 	}
 	
-	public boolean channelExist(String channelName) {
-		for (Channel channel : channels) {
-			if (channel.getName().equalsIgnoreCase(channelName))
-				return true;
-		}
-		
-		return false;
+	public boolean channelExist(String name) {
+		return getChannel(name) != null;
 	}
 	
 	public void channelSwitch(Player player, Channel oldCh, Channel newCh) {
@@ -98,9 +93,8 @@ public class TitanChat extends JavaPlugin {
 		return channel.getPassword().equals(password);
 	}
 	
-	public void createChannel(Player player, String channelName) {
-		Channel channel = new Channel(this, channelName);
-		channel.setType("public");
+	public void createChannel(Player player, String name) {
+		Channel channel = new Channel(this, name, Type.PUBLIC);
 		channels.add(channel);
 		
 		assignAdmin(player, channel);
@@ -130,6 +124,10 @@ public class TitanChat extends JavaPlugin {
 		}
 		
 		channels.remove(channel);
+	}
+	
+	public File getAddonDir() {
+		return new File(getDataFolder(), "addons");
 	}
 	
 	public Channel getChannel(String channelName) {
@@ -185,6 +183,10 @@ public class TitanChat extends JavaPlugin {
 		}
 		
 		return null;
+	}
+	
+	public List<CustomChannel> getCustomChannels() {
+		return customChannels;
 	}
 	
 	public Channel getDefaultChannel() {
@@ -471,17 +473,17 @@ public class TitanChat extends JavaPlugin {
 		customChannels = loader.loadChannels();
 		
 		for (CustomChannel customChannel : customChannels) {
-			Channel channel = new Channel(this, customChannel.getName());
+			Channel channel = new Channel(this, customChannel.getName(), customChannel.getType());
 			channel = customChannel.load(channel);
 			channel.setType("custom");
 			channels.add(channel);
 		}
 		
-		for (String channelName : getConfig().getConfigurationSection("channels").getKeys(false)) {
-			if (getChannel(channelName) != null)
+		for (String name : getConfig().getConfigurationSection("channels").getKeys(false)) {
+			if (getChannel(name) != null)
 				continue;
 			
-			Channel channel = new Channel(this, channelName);
+			Channel channel = new Channel(this, name, Type.fromName(getConfig().getString("channels." + name + ".type")));
 			
 			if (getChannelConfig().getStringList("channels." + channel.getName() + ".admins") != null)
 				channel.getAdminList().addAll(getChannelConfig().getStringList("channels." + channel.getName() + ".admins"));
@@ -495,15 +497,13 @@ public class TitanChat extends JavaPlugin {
 			if (getChannelConfig().getStringList("channels." + channel.getName() + ".followers") != null)
 				channel.getFollowers().addAll(getChannelConfig().getStringList("channels." + channel.getName() + ".followers"));
 			
-			channel.setType(getConfig().getString("channels." + channel.getName() + ".type"));
-			
 			if (channel.getType().equals(Type.PASSWORD))
 				channel.setPassword(getConfig().getString("channels." + channel.getName() + ".password"));
 			
 			if (getConfig().get("channels." + channel.getName() + ".global") != null) {
-				if (getConfig().getBoolean("channels." + channelName + ".global")) {
+				if (getConfig().getBoolean("channels." + name + ".global")) {
 					channel.setGlobal(true);
-					globalChannels.add(channelName);
+					globalChannels.add(name);
 				}
 			}
 			
@@ -512,6 +512,7 @@ public class TitanChat extends JavaPlugin {
 		
 		log(Level.INFO, "No. of channels: " + getChannelAmount());
 		log(Level.INFO, "No. of global broadcasting channels: " + globalChannels.size());
+		log(Level.INFO, "No. of custom channels: " + customChannels.size());
 		log(Level.INFO, "TitanChat Channels Loaded");
 	}
 	

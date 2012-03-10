@@ -6,11 +6,10 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
+import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel.Type;
-import com.titankingdoms.nodinchan.titanchat.support.CustomChannel;
 import com.titankingdoms.nodinchan.titanchat.support.Support;
 
 public class TitanChatListener implements Listener {
@@ -21,11 +20,8 @@ public class TitanChatListener implements Listener {
 		this.plugin = plugin;
 	}
 	
-	@EventHandler(priority = EventPriority.HIGHEST)
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onPlayerChat(PlayerChatEvent event) {
-		if (event.isCancelled())
-			return;
-		
 		event.setCancelled(true);
 
 		Player player = event.getPlayer();
@@ -56,8 +52,11 @@ public class TitanChatListener implements Listener {
 		}
 	}
 	
-	@EventHandler(priority = EventPriority.HIGHEST)
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onPlayerJoin(PlayerJoinEvent event) {
+		if (plugin.getChannel(event.getPlayer()) != null)
+			return;
+		
 		Channel channel = plugin.getSpawnChannel(event.getPlayer());
 		channel.join(event.getPlayer());
 		
@@ -65,11 +64,5 @@ public class TitanChatListener implements Listener {
 			plugin.sendWarning(event.getPlayer(), "All channels are silenced");
 		else if (channel.isSilenced())
 			plugin.sendWarning(event.getPlayer(), channel.getName() + " is silenced");
-	}
-	
-	@EventHandler(priority = EventPriority.HIGHEST)
-	public void onPlayerQuit(PlayerQuitEvent event) {
-		Channel channel = plugin.getChannel(event.getPlayer());
-		channel.leave(event.getPlayer());
 	}
 }

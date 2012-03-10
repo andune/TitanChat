@@ -26,15 +26,15 @@ public class Format {
 		return message;
 	}
 	
+	public String colourise(String message) {
+		return message.replaceAll("(&([a-f0-9A-F|kK]))", "\u00A7$2");
+	}
+	
 	public boolean colours(String channelName) {
 		if (plugin.getStaffChannel().equals(channelName))
 			return true;
 		
 		return plugin.getConfig().getBoolean("channels." + channelName + ".colour-code");
-	}
-	
-	public String colourise(String message) {
-		return message.replaceAll("(&([a-f0-9A-F|kK]))", "\u00A7$2");
 	}
 	
 	public String decolourise(String message) {

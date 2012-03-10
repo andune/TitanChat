@@ -78,19 +78,33 @@ public class TitanChatCommandHandler {
 				if (args.length < 1) { invalidArgLength(player, command); return; }
 				try { chSettings.channelColour(player, args[0], args[1]); } catch (IndexOutOfBoundsException e) { chSettings.channelColour(player, args[0], plugin.getChannel(player).getName()); }
 				break;
-			
-			case CONVERT:
-				String channelName = "";
 				
-				try { channelName = plugin.getExactName(args[0]); } catch (IndexOutOfBoundsException e) { channelName = plugin.getChannel(player).getName(); }
+			case COLOURCODES:
+				String black = plugin.getFormat().colourise("&0") + "&0";
+				String darkblue = plugin.getFormat().colourise("&1") + "&1";
+				String green = plugin.getFormat().colourise("&2") + "&2";
+				String darkaqua = plugin.getFormat().colourise("&3") + "&3";
+				String red = plugin.getFormat().colourise("&4") + "&4";
+				String purple = plugin.getFormat().colourise("&5") + "&5";
+				String gold = plugin.getFormat().colourise("&6") + "&6";
+				String silver = plugin.getFormat().colourise("&7") + "&7";
+				String grey = plugin.getFormat().colourise("&8") + "&8";
+				String blue = plugin.getFormat().colourise("&9") + "&9";
+				String lightgreen = plugin.getFormat().colourise("&a") + "&a";
+				String aqua = plugin.getFormat().colourise("&b") + "&b";
+				String lightred = plugin.getFormat().colourise("&c") + "&c";
+				String lightpurple = plugin.getFormat().colourise("&d") + "&d";
+				String yellow = plugin.getFormat().colourise("&e") + "&e";
+				String white = plugin.getFormat().colourise("&f") + "&f";
+				String magical = plugin.getFormat().colourise("&kMagical");
+				String comma = ChatColor.WHITE + ",";
 				
-				if (plugin.isStaff(player)) {
-					plugin.getConfigManager().setConvertColours(channelName, (plugin.getFormat().colours(channelName)) ? false : true);
-					plugin.sendInfo(player, "The channel now " + ((plugin.getFormat().colours(channelName)) ? "converts" : "ignores") + " colour codes");
-					
-				} else {
-					plugin.sendWarning(player, "You do not have permission");
-				}
+				player.sendMessage(ChatColor.AQUA + "=== Colour Codes ===");
+				player.sendMessage(black + comma + darkblue + comma + green + comma + darkaqua + comma);
+				player.sendMessage(red + comma + purple + comma + gold + comma + silver + comma);
+				player.sendMessage(grey + comma + blue + comma + lightgreen + comma + aqua + comma);
+				player.sendMessage(lightred + comma + lightpurple + comma + yellow + comma + white + comma);
+				player.sendMessage("And also the Magical &k (" + magical + ChatColor.WHITE + ")");
 				break;
 			
 			case COMMANDS:
@@ -147,6 +161,20 @@ public class TitanChatCommandHandler {
 					
 					player.sendMessage(ChatColor.AQUA + "Aliases: " + cmdStr.toString());
 					player.sendMessage(ChatColor.AQUA + "Usage: " + Commands.fromName(args[0]).getUsage());
+				}
+				break;
+				
+			case CONVERT:
+				String channelName = "";
+				
+				try { channelName = plugin.getExactName(args[0]); } catch (IndexOutOfBoundsException e) { channelName = plugin.getChannel(player).getName(); }
+				
+				if (plugin.isStaff(player)) {
+					plugin.getConfigManager().setConvertColours(channelName, (plugin.getFormat().colours(channelName)) ? false : true);
+					plugin.sendInfo(player, "The channel now " + ((plugin.getFormat().colours(channelName)) ? "converts" : "ignores") + " colour codes");
+					
+				} else {
+					plugin.sendWarning(player, "You do not have permission");
 				}
 				break;
 				
@@ -469,8 +497,9 @@ public class TitanChatCommandHandler {
 		BAN("Ban", new String[] { "ban" }, "Bans the player from the channel", "ban [player] <channel>"),
 		BROADCAST("Broadcast", new String[] { "broadcast" }, "Broadcasts the message globally", "broadcast [message]"),
 		CHCOLOUR("ChColour", new String[] { "chcolour", "chcolor" }, "Changes the chat display colour of the channel", "chcolour [colourcode] <channel>"),
-		CONVERT("Convert", new String[] { "convert" }, "Toggles colour code converting", "convert <channel>"),
+		COLOURCODES("ColourCodes", new String[] { "colourcodes", "colorcodes", "colours", "colors", "codes" }, "Lists out avalable colour codes and respective colours", "colourcodes"),
 		COMMANDS("Commands", new String[] { "commands" }, "Shows the Command List", "commands <page/command>"),
+		CONVERT("Convert", new String[] { "convert" }, "Toggles colour code converting", "convert <channel>"),
 		CREATE("Create", new String[] { "create" }, "Creates a new channel", "create [channel]"),
 		DECLINE("Decline", new String[] { "decline" }, "Declines the channel join invitation", "decline [channel]"),
 		DELETE("Delete", new String[] { "delete" }, "Deletes the channel", "delete [channel]"),
