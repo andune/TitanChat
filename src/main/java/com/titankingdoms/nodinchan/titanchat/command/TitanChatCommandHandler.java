@@ -228,9 +228,8 @@ public class TitanChatCommandHandler {
 					if (plugin.has(player, "TitanChat.delete")) {
 						if (plugin.channelExist(args[0])) {
 							if (plugin.getDefaultChannel().getName() != args[0] && plugin.getStaffChannel().getName() != args[0]) {
-								plugin.deleteChannel(player, plugin.getChannel(args[0]));
 								cfgManager.deleteChannel(args[0]);
-								plugin.sendInfo(player, "You have deleted " + args[0]);
+								plugin.deleteChannel(player, plugin.getChannel(args[0]));								plugin.sendInfo(player, "You have deleted " + args[0]);
 								
 							} else {
 								plugin.sendWarning(player, "You cannot delete this channel");
