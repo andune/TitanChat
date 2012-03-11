@@ -44,12 +44,12 @@ public class Administrate {
 					channel.getWhiteList().remove(targetPlayer.getName());
 					channel.getBlackList().add(targetPlayer.getName());
 					
-					plugin.channelSwitch(targetPlayer, channel, plugin.getSpawnChannel(player));
+					plugin.channelSwitch(targetPlayer, channel, plugin.getSpawnChannel(targetPlayer));
 					plugin.sendWarning(targetPlayer, "You have been banned from " + channel.getName());
 					
 					for (String participant : plugin.getChannel(player).getParticipants()) {
 						if (plugin.getPlayer(participant) != null)
-							plugin.getPlayer(participant).sendMessage(targetPlayer.getDisplayName() + " has been banned from the channel");
+							plugin.sendInfo(plugin.getPlayer(participant), targetPlayer.getDisplayName() + " has been banned from the channel");
 					}
 					
 				} else {
@@ -74,6 +74,7 @@ public class Administrate {
 					if (plugin.getChannel(channelName).getAdminList().contains(targetPlayer.getName())) {
 						Channel channel = plugin.getChannel(channelName);
 						channel.getAdminList().remove(targetPlayer.getName());
+						channel.getWhiteList().add(targetPlayer.getName());
 						plugin.sendInfo(targetPlayer, "You have been demoted in " + channel.getName());
 						plugin.sendInfo(player, "You have demoted " + targetPlayer.getDisplayName());
 						
@@ -128,7 +129,7 @@ public class Administrate {
 					
 					for (String participant : channel.getParticipants()) {
 						if (plugin.getPlayer(participant) != null)
-							plugin.getPlayer(participant).sendMessage(targetPlayer.getDisplayName() + " has been kicked from the channel");
+							plugin.sendInfo(plugin.getPlayer(participant), targetPlayer.getDisplayName() + " has been kicked from the channel");
 					}
 					
 				} else {
@@ -155,7 +156,7 @@ public class Administrate {
 					
 					for (String participant : plugin.getChannel(channelName).getParticipants()) {
 						if (plugin.getPlayer(participant) != null)
-							plugin.getPlayer(participant).sendMessage(targetPlayer.getDisplayName() + " has been muted");
+							plugin.sendInfo(plugin.getPlayer(participant), targetPlayer.getDisplayName() + " has been muted");
 					}
 					
 				} else {
@@ -213,6 +214,11 @@ public class Administrate {
 						plugin.whitelistMember(targetPlayer, channelName);
 						plugin.sendInfo(targetPlayer, "You have been unbanned from " + channel.getName());
 						plugin.sendInfo(player, "You have unbanned " + targetPlayer.getDisplayName());
+					
+					for (String participant : plugin.getChannel(player).getParticipants()) {
+						if (plugin.getPlayer(participant) != null)
+							plugin.sendInfo(plugin.getPlayer(participant), targetPlayer.getDisplayName() + " has been unbanned from the channel");
+					}
 						
 					} else {
 						plugin.sendWarning(player, targetPlayer.getDisplayName() + " is not banned");
@@ -244,7 +250,7 @@ public class Administrate {
 						
 						for (String participant : plugin.getChannel(channelName).getParticipants()) {
 							if (plugin.getPlayer(participant) != null)
-								plugin.getPlayer(participant).sendMessage(targetPlayer.getDisplayName() + " has been unmuted");
+								plugin.sendInfo(plugin.getPlayer(participant), targetPlayer.getDisplayName() + " has been unmuted");	
 						}
 					}
 					
