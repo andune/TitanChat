@@ -118,11 +118,17 @@ public class TitanChat extends JavaPlugin {
 	}
 	
 	public void deleteChannel(Player player, Channel channel) {
+		List<String> kicklist = new ArrayList<String>();
+		
 		for (String participant : channel.getParticipants()) {
 			if (getPlayer(participant) != null) {
-				channelSwitch(player, channel, getSpawnChannel(player));
+				kicklist.add(participant);
 				sendWarning(getPlayer(participant), channel.getName() + " has been deleted");
 			}
+		}
+
+		for (String kick : kicklist) {
+			channelSwitch(getPlayer(kick), channel, getSpawnChannel(getPlayer(kick)));
 		}
 		
 		channels.remove(channel);
