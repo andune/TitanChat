@@ -215,10 +215,10 @@ public class Administrate {
 						plugin.sendInfo(targetPlayer, "You have been unbanned from " + channel.getName());
 						plugin.sendInfo(player, "You have unbanned " + targetPlayer.getDisplayName());
 					
-					for (String participant : plugin.getChannel(player).getParticipants()) {
-						if (plugin.getPlayer(participant) != null)
-							plugin.sendInfo(plugin.getPlayer(participant), targetPlayer.getDisplayName() + " has been unbanned from the channel");
-					}
+						for (String participant : plugin.getChannel(player).getParticipants()) {
+							if (plugin.getPlayer(participant) != null)
+								plugin.sendInfo(plugin.getPlayer(participant), targetPlayer.getDisplayName() + " has been unbanned from the channel");
+						}
 						
 					} else {
 						plugin.sendWarning(player, targetPlayer.getDisplayName() + " is not banned");
