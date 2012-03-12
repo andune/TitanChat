@@ -1,57 +1,25 @@
-# Available colour codes:
-# &0 (black), &1 (dark blue), &2 (green),
-# &3 (sea green), &4 (red), &5 (purple),
-# &6 (gold), &7 (silver), &8 (grey),
-# &9 (blue), &a (light green), &b (light blue),
-# &c (light red), &d (pink), &e (yellow),
-# &f (white), &k (magical)
+#==============================================================#
+#                         COLOUR CODES                         #
+# &0 (black), &1 (dark blue), &2 (green), &3 (dark aqua),      #
+# &4 (red), &5 (purple), &6 (gold), &7 (silver),               #
+# &8 (grey), &9 (blue), &a (light green), &b (aqua),           #
+# &c (light red), &d (light purple), &e (yellow), &f (white),  #
+# &k (magical)                                                 #
+#==============================================================#
 
-channel-limit: -1
-broadcast:
-    chat-display-colour: ''
-    tag: '[Broadcast]'
 channels:
-    Default:
-        tag: '[D]'
-        chat-display-colour: ''
-        name-display-colour: ''
-        type: default
-        global: true
-    HerpChan:
-        tag: '[HC]'
-        chat-display-colour: '&6'
-        name-display-colour: '&6'
-        type: private
-        colour-code: true
-    DerpChan:
-        tag: '[DC]'
-        chat-display-colour: '&7'
-        name-display-colour: '&7'
-        type: public
-        colour-code: false
-    MemeChan:
-        tag: '[MC]'
-        chat-display-colour: '&4'
-        name-display-colour: '&4'
-        type: password
-        password: pass
-        global: true
-        colour-code: true
-    Donators:
-        tag: '$'
-        chat-display-colour: '&2'
-        name-display-colour: '&2'
-        type: private
-        colour-code: true
-        format: '&f[&2%tag&f] %gprefix%player%gsuffix: %message'
-    Staff:
-        tag: '&f[&4S&f]'
-        chat-display-colour: '&4'
-        name-display-colour: '&4'
-        type: staff
+    enable-channels: true
+    chat-display-colour: '&f'
+    channel-limit: -1
+    messages:
+        join: true
+        leave: true
+broadcast:
+    player: '[&cBroadcast&f] %player: %message'
+    server: '<&4Server&f> %message'
+emote:
+    player: '* %player %action'
+    server: '* &4Server &f%action'
 formatting:
     use-built-in: true
     format: "%tag %pprefix%player%psuffix: %message"
-channel-messages:
-    join: true
-    leave: true

@@ -12,7 +12,6 @@ import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.permission.Permission;
 
 import org.bukkit.ChatColor;
-import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -22,17 +21,15 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
-import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
-import com.titankingdoms.nodinchan.titanchat.channel.Channel.Type;
 import com.titankingdoms.nodinchan.titanchat.command.TitanChatCommandHandler;
-import com.titankingdoms.nodinchan.titanchat.permissionshook.PermissionsHook;
-import com.titankingdoms.nodinchan.titanchat.support.Support;
-import com.titankingdoms.nodinchan.titanchat.support.SupportLoader;
-import com.titankingdoms.nodinchan.titanchat.util.ConfigManager;
+import com.titankingdoms.nodinchan.titanchat.permissions.MiniPerms;
+import com.titankingdoms.nodinchan.titanchat.permissions.hook.PermissionsHook;
+import com.titankingdoms.nodinchan.titanchat.support.Addon;
+import com.titankingdoms.nodinchan.titanchat.support.Loader;
 import com.titankingdoms.nodinchan.titanchat.util.Format;
 
 /*
- *     TitanChat 2.1.5
+ *     TitanChat 2.2
  *     Copyright (C) 2012  Nodin Chan <nodinchan@nodinchan.net>
  *     
  *     This program is free software: you can redistribute it and/or modify
@@ -55,53 +52,30 @@ public class TitanChat extends JavaPlugin {
 	
 	private TitanChatCommandHandler cmdHandler;
 	private ChannelManager chManager;
-	private ConfigManager configManager;
 	private Format format;
+	private MiniPerms miniPerms;
 	private PermissionsHook permHook;
-	private SupportLoader loader;
-	
-	private File channelConfigFile = null;
-	private FileConfiguration channelConfig = null;
-	
-	private Channel defaultChannel = null;
-	private Channel staffChannel = null;
+	private Loader loader;
 	
 	private boolean silenced = false;
-	private boolean vaultSetup = false;
 	
-	private List<Channel> channels;
-	private List<com.titankingdoms.nodinchan.titanchat.support.Command> cmds;
-	private List<CustomChannel> customChannels;
-	private List<Support> supports;
+	private List<Addon> addons;
+	
+	private File permissionsFile = null;
+	private FileConfiguration permissions = null;
 	
 	private Permission perm;
 	private Chat chat;
 	
 	public void assignAdmin(Player player, Channel channel) {
 		channel.getAdminList().add(player.getName());
+		channel.save();
 		sendInfo(player, "You are now an Admin of " + channel.getName());
-	}
-	
-	public boolean channelExist(String name) {
-		return getChannel(name) != null;
 	}
 	
 	public void channelSwitch(Player player, Channel oldCh, Channel newCh) {
 		oldCh.leave(player);
 		newCh.join(player);
-	}
-	
-	public boolean correctPass(Channel channel, String password) {
-		return channel.getPassword().equals(password);
-	}
-	
-	public void createChannel(Player player, String name) {
-		Channel channel = new Channel(this, name, Type.PUBLIC);
-		channels.add(channel);
-		
-		assignAdmin(player, channel);
-		channelSwitch(player, getChannel(player), channel);
-		sendInfo(player, "You have created " + channel.getName() + " channel");
 	}
 	
 	public String createList(List<String> list) {
@@ -117,110 +91,40 @@ public class TitanChat extends JavaPlugin {
 		return str.toString();
 	}
 	
-	public void deleteChannel(Player player, Channel channel) {
-		for (String participant : channel.getParticipants()) {
-			if (getPlayer(participant) != null) {
-				channelSwitch(player, channel, getSpawnChannel(player));
-				sendWarning(getPlayer(participant), channel.getName() + " has been deleted");
-			}
-		}
-		
-		channels.remove(channel);
+	public boolean enableChannels() {
+		return getConfig().getBoolean("chManager.getChannels().enable-channels");
+	}
+	
+	public boolean enableJoinMessage() {
+		return getConfig().getBoolean("chManager.getChannels().channel-messages.join");
+	}
+	
+	public boolean enableLeaveMessage() {
+		return getConfig().getBoolean("chManager.getChannels().channel-messages.leave");
 	}
 	
 	public File getAddonDir() {
 		return new File(getDataFolder(), "addons");
 	}
 	
-	public Channel getChannel(String channelName) {
-		for (Channel channel : channels) {
-			if (channel.getName().equalsIgnoreCase(channelName))
-				return channel;
-		}
-		
-		return null;
+	public List<Addon> getAddons() {
+		return addons;
 	}
 	
-	public Channel getChannel(Player player) {
-		for (Channel channel : channels) {
-			if (channel.getParticipants().contains(player.getName()))
-				return channel;
-		}
-		
-		return null;
-	}
-	
-	public int getChannelAmount() {
-		return channels.size() - customChannels.size();
-	}
-	
-	public FileConfiguration getChannelConfig() {
-		if (channelConfig == null) {
-			reloadChannelConfig();
-		}
-		
-		return channelConfig;
+	public File getChannelDir() {
+		return new File(getDataFolder(), "channels");
 	}
 	
 	public ChannelManager getChannelManager() {
 		return chManager;
 	}
 	
-	public File getChannelsFolder() {
-		return new File(getDataFolder(), "channels");
-	}
-	
-	public List<com.titankingdoms.nodinchan.titanchat.support.Command> getCommands() {
-		return cmds;
-	}
-	
-	public ConfigManager getConfigManager() {
-		return configManager;
-	}
-	
-	public List<Channel> getChannels() {
-		return channels;
-	}
-	
-	public CustomChannel getCustomChannel(Channel channel) {
-		for (CustomChannel customChannel : customChannels) {
-			if (customChannel.getName().equals(channel.getName()))
-				return customChannel;
-		}
-		
-		return null;
-	}
-	
-	public List<CustomChannel> getCustomChannels() {
-		return customChannels;
-	}
-	
-	public Channel getDefaultChannel() {
-		if (defaultChannel == null) {
-			for (Channel channel : channels) {
-				if (channel.getType().equals(Type.DEFAULT)) {
-					defaultChannel = channel;
-					break;
-				}
-			}
-		}
-		
-		return defaultChannel;
-	}
-	
-	public String getExactName(String channelName) {
-		return getChannel(channelName).getName();
+	public File getCustomChannelDir() {
+		return new File(getAddonDir(), "channels");
 	}
 	
 	public Format getFormat() {
 		return format;
-	}
-	
-	public String getFormat(String channelName) {
-		if (getConfig().get("channels." + getExactName(channelName) + ".format") != null && !getConfig().getString("channels." + getExactName(channelName) + ".format").equalsIgnoreCase(""))
-			return getConfig().getString("channels." + getExactName(channelName) + ".format");
-		
-		return getConfig().getString("formatting.format");
 	}
 	
 	public String getGroupPrefix(Player player) {
@@ -239,6 +143,19 @@ public class TitanChat extends JavaPlugin {
 		}
 		
 		return permHook.getGroupSuffix(player);
+	}
+	
+	public Loader getLoader() {
+		return loader;
+	}
+	
+	public MiniPerms getMiniPerms() {
+		return miniPerms;
+	}
+	
+	public FileConfiguration getPermissions() {
+		if (permissions == null) { reloadPermissions(); }
+		return permissions;
 	}
 	
 	public Player getPlayer(String name) {
@@ -263,45 +180,6 @@ public class TitanChat extends JavaPlugin {
 		return permHook.getPlayerSuffix(player);
 	}
 	
-	public Channel getSpawnChannel(Player player) {
-		if (has(player, "TitanChat.admin") && has(player, "TitanChat.adminspawn")) {
-			if (staffChannel != null)
-				return staffChannel;
-		}
-		
-		for (Channel channel : channels) {
-			if (has(player, "TitanChat.spawn." + channel.getName()) && !has(player, "TitanChat.forced." + channel.getName()) && channel.canAccess(player))
-				return channel;
-		}
-		
-		return defaultChannel;
-	}
-	
-	public Channel getStaffChannel() {
-		if (staffChannel == null) {
-			for (Channel channel : channels) {
-				if (channel.getType().equals(Type.STAFF)) {
-					staffChannel = channel;
-					break;
-				}
-			}
-		}
-		
-		return staffChannel;
-	}
-	
-	public SupportLoader getSupportLoader() {
-		return loader;
-	}
-	
-	public List<Support> getSupports() {
-		return supports;
-	}
-	
-	public File getSupportsFolder() {
-		return new File(getDataFolder(), "supports");
-	}
-	
 	public boolean has(Player player, String permission) {
 		if (perm != null)
 			return perm.has(player, permission);
@@ -318,55 +196,11 @@ public class TitanChat extends JavaPlugin {
 	}
 	
 	public boolean isStaff(Player player) {
-		if (has(player, "TitanChat.admin"))
-			return true;
-		
-		return false;
+		return has(player, "TitanChat.admin");
 	}
 	
 	public void log(Level level, String msg) {
 		log.log(level, "[" + this + "] " + msg);
-	}
-	
-	@Override
-	public boolean onCommand(CommandSender sender, org.bukkit.command.Command cmd, String label, String[] args) {
-		if (!(sender instanceof Player)) {
-			if (args[0].equalsIgnoreCase("reload")) {
-				log(Level.INFO, "Reloading configs...");
-				
-				reloadConfig();
-				reloadChannelConfig();
-				
-				channels.clear();
-				
-				try { chManager.loadChannels(); } catch (Exception e) {}
-				
-				log(Level.INFO, "Configs reloaded");
-				return true;
-			}
-			
-			log(Level.INFO, "Please use commands in-game");
-			return true;
-		}
-		
-		String[] arguments = parseCommand(args);
-		
-		Player player = (Player) sender;
-		
-		if (args.length < 1) {
-			player.sendMessage(ChatColor.AQUA + "TitanChat Commands");
-			player.sendMessage(ChatColor.AQUA + "Command: /titanchat [command] [arguments]");
-			player.sendMessage(ChatColor.AQUA + "Alias: /tc [command] [arguments]");
-			sendInfo(player, "'/titanchat commands [page]' for command list");
-			return true;
-		}
-		
-		if (cmd.getName().equalsIgnoreCase("titanchat")) {
-			cmdHandler.onCommand(player, args[0], arguments);
-			return true;
-		}
-		
-		return false;
 	}
 	
 	@Override
@@ -375,19 +209,14 @@ public class TitanChat extends JavaPlugin {
 		
 		log(Level.INFO, "Saving channel information...");
 		
-		for (Channel channel : channels) {
-			if (channel.getType().equals(Type.CUSTOM))
-				getCustomChannel(channel).unload();
-			else
-				channel.unload();
+		for (Channel channel : chManager.getChannels()) {
+			channel.save();
 		}
 		
-		log(Level.INFO, "Clearing useless data...");
+		log(Level.INFO, "Clearing ...");
 		
-		channels.clear();
-		cmds.clear();
-		customChannels.clear();
-		supports.clear();
+		chManager.getChannels().clear();
+		addons.clear();
 		
 		log(Level.INFO, "is now disabled");
 	}
@@ -396,105 +225,94 @@ public class TitanChat extends JavaPlugin {
 	public void onEnable() {
 		log(Level.INFO, "is now enabling...");
 		
+		cmdHandler = new TitanChatCommandHandler(this);
+		chManager = new ChannelManager(this);
+		format = new Format(this);
+		miniPerms = new MiniPerms(this);
+		permHook = new PermissionsHook(this);
+		
+		addons = new ArrayList<Addon>();
+		
 		File config = new File(getDataFolder(), "config.yml");
-		File channelConfig = new File(getDataFolder(), "channel.yml");
+		File permissions = new File(getDataFolder(), "miniperms.yml");
 		
 		if (!config.exists()) {
 			log(Level.INFO, "Loading default config");
-			getConfig().options().copyHeader(true);
-			getConfig().options().copyDefaults(true);
-			saveConfig();
+			saveResource("config.yml", false);
 		}
 		
-		if (!channelConfig.exists()) {
-			log(Level.INFO, "Loading default channel players config");
-			getChannelConfig().options().copyHeader(true);
-			getChannelConfig().options().copyDefaults(true);
-			saveChannelConfig();
+		if (!permissions.exists()) {
+			log(Level.INFO, "Generating easy to use TitanChat MiniPerms...");
+			saveResource("miniperms.yml", false);
 		}
 		
-		if (getChannelsFolder().mkdir())
-			log(Level.INFO, "Loading channels folder...");
+		if (getAddonDir().mkdir())
+			log(Level.INFO, "Creating addon directory...");
 		
-		if (getSupportsFolder().mkdir())
-			log(Level.INFO, "Loading supports folder...");
+		if (getCustomChannelDir().mkdir())
+			log(Level.INFO, "Creating custom channel directory...");
 		
-		cmdHandler = new TitanChatCommandHandler(this);
-		chManager = new ChannelManager(this);
-		configManager = new ConfigManager(this);
-		format = new Format(this);
-		loader = new SupportLoader(this);
-		permHook = new PermissionsHook(this);
+		if (getChannelDir().mkdir()) {
+			log(Level.INFO, "Creating channel directory...");
+			saveResource("channels/Default.yml", false);
+			saveResource("channels/Password.yml", false);
+			saveResource("channels/Private.yml", false);
+			saveResource("channels/Public.yml", false);
+			saveResource("channels/README.yml", false);
+			saveResource("channels/Staff.yml", false);
+		}
 		
-		channels = new ArrayList<Channel>();
-		cmds = new ArrayList<com.titankingdoms.nodinchan.titanchat.support.Command>();
-		customChannels = new ArrayList<CustomChannel>();
-		supports = new ArrayList<Support>();
+		loader = new Loader(this);
 		
 		PluginManager pm = getServer().getPluginManager();
 		
-		vaultSetup = setupVault();
+		if (pm.getPlugin("Vault") != null) {
+			setupChatService();
+			setupPermissionService();
+		}
+		
+		miniPerms.load();
 		
 		pm.registerEvents(permHook, this);
+		pm.registerEvents(new TitanChatListener(this), this);
 		
-		try { supports.addAll(loader.loadSupports()); } catch (Exception e) {}
+		getCommand("titanchat").setExecutor(cmdHandler);
+		getCommand("broadcast").setExecutor(cmdHandler);
+		getCommand("me").setExecutor(cmdHandler);
+		
+		try { addons.addAll(loader.loadAddons()); } catch (Exception e) {}
 		
 		try { chManager.loadChannels(); } catch (Exception e) {}
 		
-		if (getDefaultChannel() == null) {
-			log(Level.WARNING, "Default channel not defined");
+		if (chManager.getDefaultChannel() == null) {
+			log(Level.SEVERE, "A default channel not defined");
 			pm.disablePlugin(this);
 			return;
 		}
 		
-		log(Level.INFO, "Default Channel is " + getDefaultChannel().getName());
-		log(Level.INFO, "Staff Channel is " + getStaffChannel().getName());
-		
-		pm.registerEvents(new TitanChatListener(this), this);
-		
 		for (Player player : getServer().getOnlinePlayers()) {
-			getSpawnChannel(player).join(player);
+			chManager.getSpawnChannel(player).join(player);
 		}
 		
 		log(Level.INFO, "is now enabled");
 	}
 	
-	public String[] parseCommand(String[] args) {
-		StringBuilder str = new StringBuilder();
+	public void reloadPermissions() {
+		if (permissionsFile == null) { permissionsFile = new File(getDataFolder(), "miniperms.yml"); }
 		
-		for (String arg : args) {
-			if (str.length() > 0)
-				str.append(" ");
-			
-			if (arg.equals(args[0]))
-				continue;
-			
-			str.append(arg);
-		}
+		permissions = YamlConfiguration.loadConfiguration(permissionsFile);
 		
-		return (str.toString().equals("")) ? new String[] {} : str.toString().split(" ");
-	}
-	
-	public void registerCommand(com.titankingdoms.nodinchan.titanchat.support.Command cmd) {
-		cmds.add(cmd);
-	}
-	
-	public void reloadChannelConfig() {
-		if (channelConfigFile == null) { channelConfigFile = new File(getDataFolder(), "channel.yml"); }
-		
-		channelConfig = YamlConfiguration.loadConfiguration(channelConfigFile);
-		
-		InputStream defConfigStream = getResource("channel.yml");
+		InputStream defConfigStream = getResource("miniperms.yml");
 		
 		if (defConfigStream != null) {
 			YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
-			channelConfig.setDefaults(defConfig);
+			permissions.setDefaults(defConfig);
 		}
 	}
 	
-	public void saveChannelConfig() {
-		if (channelConfig == null || channelConfigFile == null) { return; }
-		try { channelConfig.save(channelConfigFile); } catch (IOException e) { log(Level.SEVERE, "Could not save config to " + channelConfigFile); }
+	public void savePermissions() {
+		if (permissionsFile == null || permissions == null) { return; }
+		try { permissions.save(permissionsFile); } catch (IOException e) { log(Level.SEVERE, "Could not save to " + permissionsFile); }
 	}
 	
 	public void sendInfo(Player player, String info) {
@@ -509,7 +327,7 @@ public class TitanChat extends JavaPlugin {
 		this.silenced = silenced;
 	}
 	
-	public boolean setupChat() {
+	public boolean setupChatService() {
 		RegisteredServiceProvider<Chat> chatProvider = getServer().getServicesManager().getRegistration(Chat.class);
 		
 		if (chatProvider != null)
@@ -518,7 +336,7 @@ public class TitanChat extends JavaPlugin {
 		return chat != null;
 	}
 	
-	public boolean setupPermissions() {
+	public boolean setupPermissionService() {
 		RegisteredServiceProvider<Permission> permissionProvider = getServer().getServicesManager().getRegistration(Permission.class);
 		
 		if (permissionProvider != null)
@@ -527,27 +345,17 @@ public class TitanChat extends JavaPlugin {
 		return perm != null;
 	}
 	
-	public boolean setupVault() {
-		if (getServer().getPluginManager().getPlugin("Vault") != null) {
-			setupChat();
-			setupPermissions();
-			return true;
-		}
-		
-		return false;
-	}
-	
 	public boolean useDefaultFormat() {
 		return getConfig().getBoolean("formatting.use-built-in");
 	}
 	
-	public boolean vaultSetup() {
-		return vaultSetup;
+	public boolean usingVault() {
+		return perm != null;
 	}
 	
-	public void whitelistMember(Player player, String channelName) {
-		Channel channel = getChannel(channelName);
+	public void whitelistMember(Player player, Channel channel) {
 		channel.getWhiteList().add(player.getName());
+		channel.save();
 		sendInfo(player, "You are now a Member of " + channel.getName());
 	}
 }

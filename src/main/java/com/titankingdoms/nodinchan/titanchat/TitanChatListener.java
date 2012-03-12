@@ -9,8 +9,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
-import com.titankingdoms.nodinchan.titanchat.channel.Channel.Type;
-import com.titankingdoms.nodinchan.titanchat.support.Support;
+import com.titankingdoms.nodinchan.titanchat.support.Addon;
 
 public class TitanChatListener implements Listener {
 	
@@ -22,42 +21,43 @@ public class TitanChatListener implements Listener {
 	
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onPlayerChat(PlayerChatEvent event) {
-		event.setCancelled(true);
-
 		Player player = event.getPlayer();
-		
 		String msg = event.getMessage();
-		Channel channel = plugin.getChannel(player);
 		
-		if (plugin.isSilenced() || channel.isSilenced() || channel.getMuteList().contains(player.getName())) {
-			if (!plugin.hasVoice(player))
+		if (plugin.enableChannels()) {
+			event.setCancelled(true);
+			
+			Channel channel = plugin.getChannelManager().getChannel(player);
+			
+			if (plugin.isSilenced() || channel.isSilenced() || channel.getMuteList().contains(player.getName())) {
+				if (!plugin.hasVoice(player))
+					return;
+			}
+			
+			if (channel instanceof CustomChannel) {
+				((CustomChannel) channel).sendMessage(((CustomChannel) channel).format(player, msg));
 				return;
-		}
-		
-		if (channel.getType().equals(Type.CUSTOM)) {
-			CustomChannel customChannel = plugin.getCustomChannel(channel);
-			customChannel.sendMessage(player, customChannel.format(player, msg));
-			return;
-		}
+			}
 
-		String message = plugin.getFormat().format(player, channel.getName(), msg);
-		
-		if (channel.isGlobal())
-			channel.sendGlobalMessage(message);
-		else
+			String message = plugin.getFormat().format(player, channel.getName(), msg);
 			channel.sendMessage(message);
+			
+		} else {
+			event.setFormat(plugin.getFormat().format(player));
+			event.setMessage(plugin.getFormat().colourise(msg));
+		}
 		
-		for (Support support : plugin.getSupports()) {
-			support.chatMade(player.getName(), msg);
+		for (Addon addon : plugin.getAddons()) {
+			addon.chatMade(player.getName(), msg);
 		}
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onPlayerJoin(PlayerJoinEvent event) {
-		if (plugin.getChannel(event.getPlayer()) != null)
+		if (plugin.getChannelManager().getChannel(event.getPlayer()) != null)
 			return;
 		
-		Channel channel = plugin.getSpawnChannel(event.getPlayer());
+		Channel channel = plugin.getChannelManager().getSpawnChannel(event.getPlayer());
 		channel.join(event.getPlayer());
 		
 		if (plugin.isSilenced())

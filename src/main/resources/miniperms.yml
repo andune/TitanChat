@@ -1,0 +1,41 @@
+#==============================================================#
+#                       TITANCHAT MINIPERMS                    #
+#--------------------------------------------------------------#
+#         THIS FILE IS STRICTLY USED FOR TITANCHAT ONLY        #
+#==============================================================#
+
+groups:
+    Admins:
+        prefix: '[&4Admin&f]'
+        permissions:
+        - admin
+        - force.Staff
+        users:
+        - NodinChan
+        - gwinans
+    Mods:
+        prefix: '[&9Mode&f]'
+        permissions:
+        - mod
+        - spawn.Default
+        users:
+        - slipcor
+    Donors:
+        prefix: '[&2$&f]'
+        permissions:
+        - voice
+        - spawn.Default
+        users:
+        - Famoosh
+    Members:
+        permissions:
+        - spawn.Default
+        users:
+        - chrisward
+users:
+    slipcor:
+        permissions:
+        - '-spawn.Default'
+        - spawn.Staff
+    chrisward:
+        prefix: '[&3CGW&f]'

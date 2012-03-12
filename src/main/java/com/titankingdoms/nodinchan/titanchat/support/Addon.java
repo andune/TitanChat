@@ -1,4 +1,4 @@
-package com.titankingdoms.nodinchan.titanchat.channel;
+package com.titankingdoms.nodinchan.titanchat.support;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,44 +13,34 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
-import com.titankingdoms.nodinchan.titanchat.enums.Type;
 
-public class CustomChannel extends Channel implements CustomChannelInterface {
-
+public class Addon implements AddonInterface {
+	
 	protected TitanChat plugin;
 	
-	private Logger log = Logger.getLogger("TitanLog");
+	private static Logger log = Logger.getLogger("TitanLog");
+	
+	private String name;
 	
 	private File configFile = null;
 	private FileConfiguration config = null;
 	
-	public CustomChannel(TitanChat plugin, String name) {
-		super(plugin, name, Type.CUSTOM);
+	public Addon(TitanChat plugin, String name) {
 		this.plugin = plugin;
+		this.name = name;
 	}
 	
-	public String colourise(String message) {
-		return message.replaceAll("(&([a-f0-9A-F|kK]))", "\u00A7$2");
-	}
+	public void chatMade(String name, String message) {}
 	
-	public String decolourise(String message) {
-		return message.replaceAll("(&([a-f0-9A-F|kK]))", "");
-	}
+	public String chatMade(Player player, String message) { return message; }
 	
-	public String format(Player player, String message) {
-		return "<" + player.getDisplayName() + "> " + message;
-	}
-	
-	@Override
 	public FileConfiguration getConfig() {
-		if (config == null)
-			reloadConfig();
-		
+		if (config == null) { reloadConfig(); }
 		return config;
 	}
 	
 	public File getDataFolder() {
-		File dir = new File(plugin.getChannelDir(), getName());
+		File dir = new File(plugin.getAddonDir(), name);
 		dir.mkdir();
 		return dir;
 	}
@@ -60,9 +50,15 @@ public class CustomChannel extends Channel implements CustomChannelInterface {
 		return log;
 	}
 	
+	public String getName() {
+		return name;
+	}
+	
 	public InputStream getResource(String fileName) {
+		File file = new File(plugin.getAddonDir(), plugin.getLoader().getPluginAddonJar(name));
+		
 		try {
-			JarFile jarFile = new JarFile(new File(plugin.getChannelDir(), plugin.getLoader().getCustomChannelJar(getName())));
+			JarFile jarFile = new JarFile(file);
 			Enumeration<JarEntry> entries = jarFile.entries();
 			
 			while (entries.hasMoreElements()) {
@@ -81,9 +77,8 @@ public class CustomChannel extends Channel implements CustomChannelInterface {
 	
 	public boolean onCommand(Player player, String cmd, String[] args) { return false; }
 	
-	@Override
 	public void reloadConfig() {
-		if (configFile == null) { configFile = new File(getDataFolder(), "config.yml"); }
+		if (configFile == null) { configFile = new File(new File(plugin.getAddonDir(), name), "config.yml"); }
 		
 		config = YamlConfiguration.loadConfiguration(configFile);
 		
@@ -95,11 +90,8 @@ public class CustomChannel extends Channel implements CustomChannelInterface {
 		}
 	}
 	
-	@Override
 	public void saveConfig() {
-		if (config == null || configFile == null)
-			return;
-		
+		if (config == null || configFile == null) { return; }
 		try { config.save(configFile); } catch (IOException e) {}
 	}
 }

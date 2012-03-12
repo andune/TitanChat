@@ -1,0 +1,11 @@
+tag: '[Priv]'
+chat-display-colour: '&b'
+name-display-colour: '&b'
+type: private
+global: false
+colour-code: false
+password: ''
+format: ''
+messages:
+    join: true
+    leave: true
