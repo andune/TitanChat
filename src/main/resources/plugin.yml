@@ -42,7 +42,6 @@ permissions:
     TitanChat.broadcast:
         description: Access to broadcast command
         default: op
-        children:
     TitanChat.emote.server:
         description: Access to server-wide emote broadcast
         default: op
