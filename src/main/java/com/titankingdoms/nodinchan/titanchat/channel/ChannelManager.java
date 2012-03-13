@@ -2,13 +2,14 @@ package com.titankingdoms.nodinchan.titanchat.channel;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 
 import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
-import com.titankingdoms.nodinchan.titanchat.enums.Type;
 
 public class ChannelManager {
 	
@@ -19,9 +20,12 @@ public class ChannelManager {
 	
 	private List<Channel> channels;
 	
+	private Map<Channel, Map<String, List<String>>> channelInvitors;
+	
 	public ChannelManager(TitanChat plugin) {
 		this.plugin = plugin;
 		this.channels = new ArrayList<Channel>();
+		this.channelInvitors = new HashMap<Channel, Map<String, List<String>>>();
 	}
 	
 	public void createChannel(Player player, String name) {
@@ -190,5 +194,29 @@ public class ChannelManager {
 		
 		variables.setNameColour(channel.getConfig().getString("name-display-colour"));
 		variables.setTag(channel.getConfig().getString("tag"));
+	}
+	
+	public void onInvite(Channel channel, Player invitor, Player invitee) {
+		Map<String, List<String>> invitors = channelInvitors.get(channel);
+		List<String> invitorlist = (invitors.get(invitee.getName()) != null) ? invitors.get(invitee.getName()) : new ArrayList<String>();
+		invitorlist.add(invitor.getName());
+		invitors.put(invitee.getName(), invitorlist);
+		channelInvitors.put(channel, invitors);
+	}
+	
+	public void onInviteRespond(Channel channel, Player invitee, boolean accept) {
+		Map<String, List<String>> invitors = channelInvitors.get(channel);
+		
+		for (String invitor : invitors.get(invitee.getName())) {
+			if (plugin.getPlayer(invitor) != null) {
+				if (accept)
+					plugin.sendInfo(plugin.getPlayer(invitor), invitee.getDisplayName() + " has accepted your invitation");
+				else
+					plugin.sendInfo(plugin.getPlayer(invitor), invitee.getDisplayName() + " has declined your invitation");
+			}
+		}
+		
+		invitors.remove(invitee.getName());
+		channelInvitors.put(channel, invitors);
 	}
 }

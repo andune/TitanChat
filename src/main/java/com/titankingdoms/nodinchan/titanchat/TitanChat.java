@@ -21,6 +21,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
+import com.titankingdoms.nodinchan.titanchat.command.CommandManager;
 import com.titankingdoms.nodinchan.titanchat.command.TitanChatCommandHandler;
 import com.titankingdoms.nodinchan.titanchat.permissions.MiniPerms;
 import com.titankingdoms.nodinchan.titanchat.permissions.hook.PermissionsHook;
@@ -29,7 +30,7 @@ import com.titankingdoms.nodinchan.titanchat.support.Loader;
 import com.titankingdoms.nodinchan.titanchat.util.Format;
 
 /*
- *     TitanChat 2.2
+ *     TitanChat 3.0
  *     Copyright (C) 2012  Nodin Chan <nodinchan@nodinchan.net>
  *     
  *     This program is free software: you can redistribute it and/or modify
@@ -52,6 +53,7 @@ public class TitanChat extends JavaPlugin {
 	
 	private TitanChatCommandHandler cmdHandler;
 	private ChannelManager chManager;
+	private CommandManager cmdManager;
 	private Format format;
 	private MiniPerms miniPerms;
 	private PermissionsHook permHook;
@@ -117,6 +119,10 @@ public class TitanChat extends JavaPlugin {
 	
 	public ChannelManager getChannelManager() {
 		return chManager;
+	}
+	
+	public CommandManager getCommandManager() {
+		return cmdManager;
 	}
 	
 	public File getCustomChannelDir() {
@@ -227,6 +233,7 @@ public class TitanChat extends JavaPlugin {
 		
 		cmdHandler = new TitanChatCommandHandler(this);
 		chManager = new ChannelManager(this);
+		cmdManager = new CommandManager(this);
 		format = new Format(this);
 		miniPerms = new MiniPerms(this);
 		permHook = new PermissionsHook(this);
@@ -283,6 +290,8 @@ public class TitanChat extends JavaPlugin {
 		try { addons.addAll(loader.loadAddons()); } catch (Exception e) {}
 		
 		try { chManager.loadChannels(); } catch (Exception e) {}
+		
+		cmdManager.load();
 		
 		if (chManager.getDefaultChannel() == null) {
 			log(Level.SEVERE, "A default channel not defined");

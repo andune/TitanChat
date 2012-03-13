@@ -9,60 +9,22 @@ import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
-import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
 import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
-import com.titankingdoms.nodinchan.titanchat.enums.Commands;
 import com.titankingdoms.nodinchan.titanchat.support.Addon;
 
 public class TitanChatCommandHandler implements CommandExecutor {
 	
 	private TitanChat plugin;
 	
-	private ChannelManager cm;
+	private CommandManager cm;
 	
 	public TitanChatCommandHandler(TitanChat plugin) {
 		this.plugin = plugin;
-		this.cm = plugin.getChannelManager();
-	}
-	
-	public void onCommand(Player player, String cmd, String[] args) {
-		if (Commands.fromName(cmd) != null) {
-			try { new com.titankingdoms.nodinchan.titanchat.command.commands.Command(Commands.fromName(cmd), plugin, cm).execute(player, args); } catch (Exception e) {}
-			return;
-			
-		} else {
-			if (runCommands(player, cmd, args))
-				return;
-		}
-		
-		plugin.sendWarning(player, "Invalid Command");
-		plugin.sendInfo(player, "'/titanchat commands [page]' for command list");
+		this.cm = plugin.getCommandManager();
 	}
 
 	public boolean onCommand(CommandSender sender, org.bukkit.command.Command cmd, String label, String[] args) {
 		if (cmd.getName().equals("titanchat")) {
-			if (!(sender instanceof Player)) {
-				if (args[0].equalsIgnoreCase("reload")) {
-					plugin.log(Level.INFO, "Reloading configs...");
-					
-					plugin.reloadConfig();
-					
-					for (Channel channel : cm.getChannels()) {
-						channel.reloadConfig();
-					}
-					
-					cm.getChannels().clear();
-					
-					try { cm.loadChannels(); } catch (Exception e) {}
-					
-					plugin.log(Level.INFO, "Configs reloaded");
-					return true;
-				}
-				
-				plugin.log(Level.INFO, "Please use commands in-game");
-				return true;
-			}
-			
 			if (args.length < 1) {
 				sender.sendMessage(ChatColor.AQUA + "TitanChat Commands");
 				sender.sendMessage(ChatColor.AQUA + "Command: /titanchat [command] [arguments]");
@@ -71,8 +33,22 @@ public class TitanChatCommandHandler implements CommandExecutor {
 				return true;
 			}
 			
+			if (!(sender instanceof Player)) {
+				if (args[0].equalsIgnoreCase("reload")) {
+					plugin.log(Level.INFO, "Reloading configs...");
+					plugin.reloadConfig();
+					for (Channel channel : plugin.getChannelManager().getChannels()) { channel.reloadConfig(); }
+					plugin.getChannelManager().getChannels().clear();
+					try { plugin.getChannelManager().loadChannels(); } catch (Exception e) {}
+					plugin.log(Level.INFO, "Configs reloaded");
+					return true;
+				}
+				
+				plugin.log(Level.INFO, "Please use commands in-game"); return true;
+			}
+			
 			if (cmd.getName().equalsIgnoreCase("titanchat")) {
-				onCommand((Player) sender, args[0], parseCommand(args));
+				cm.execute((Player) sender, args[0], parseCommand(args));
 				return true;
 			}
 		}
@@ -98,7 +74,7 @@ public class TitanChatCommandHandler implements CommandExecutor {
 			}
 			
 			if (plugin.has((Player) sender, "TitanChat.broadcast"))
-				try { new com.titankingdoms.nodinchan.titanchat.command.commands.Command(Commands.BROADCAST, plugin, cm).execute((Player) sender, args); } catch (Exception e) {}
+				try { cm.execute((Player) sender, "broadcast", args); } catch (Exception e) {}
 			else
 				plugin.sendWarning((Player) sender, "You do not have permission");
 			
@@ -125,7 +101,7 @@ public class TitanChatCommandHandler implements CommandExecutor {
 			}
 			
 			if (plugin.has((Player) sender, "TitanChat.emote.server"))
-				try { new com.titankingdoms.nodinchan.titanchat.command.commands.Command(Commands.EMOTE, plugin, cm).execute((Player) sender, args); } catch (Exception e) {}
+				try { cm.execute((Player) sender, "me", args); } catch (Exception e) {}
 			else
 				plugin.sendWarning((Player) sender, "You do not have permission");
 			

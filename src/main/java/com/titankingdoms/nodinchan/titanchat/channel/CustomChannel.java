@@ -13,9 +13,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
-import com.titankingdoms.nodinchan.titanchat.enums.Type;
 
-public class CustomChannel extends Channel implements CustomChannelInterface {
+public class CustomChannel extends Channel {
 
 	protected TitanChat plugin;
 	

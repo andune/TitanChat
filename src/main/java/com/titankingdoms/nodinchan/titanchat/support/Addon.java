@@ -16,18 +16,18 @@ import com.titankingdoms.nodinchan.titanchat.TitanChat;
 
 public class Addon implements AddonInterface {
 	
-	protected TitanChat plugin;
+	protected static TitanChat plugin;
 	
 	private static Logger log = Logger.getLogger("TitanLog");
 	
-	private String name;
+	private static String name;
 	
-	private File configFile = null;
-	private FileConfiguration config = null;
+	private static File configFile = null;
+	private static FileConfiguration config = null;
 	
 	public Addon(TitanChat plugin, String name) {
-		this.plugin = plugin;
-		this.name = name;
+		Addon.plugin = plugin;
+		Addon.name = name;
 	}
 	
 	public void chatMade(String name, String message) {}
@@ -54,7 +54,7 @@ public class Addon implements AddonInterface {
 		return name;
 	}
 	
-	public InputStream getResource(String fileName) {
+	public static InputStream getResource(String fileName) {
 		File file = new File(plugin.getAddonDir(), plugin.getLoader().getPluginAddonJar(name));
 		
 		try {
@@ -77,7 +77,7 @@ public class Addon implements AddonInterface {
 	
 	public boolean onCommand(Player player, String cmd, String[] args) { return false; }
 	
-	public void reloadConfig() {
+	public static void reloadConfig() {
 		if (configFile == null) { configFile = new File(new File(plugin.getAddonDir(), name), "config.yml"); }
 		
 		config = YamlConfiguration.loadConfiguration(configFile);
@@ -90,7 +90,7 @@ public class Addon implements AddonInterface {
 		}
 	}
 	
-	public void saveConfig() {
+	public static void saveConfig() {
 		if (config == null || configFile == null) { return; }
 		try { config.save(configFile); } catch (IOException e) {}
 	}
