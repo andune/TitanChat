@@ -13,19 +13,23 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
+import com.titankingdoms.nodinchan.titanchat.command.Command;
 
 public class CustomChannel extends Channel {
 
-	protected TitanChat plugin;
+	protected static TitanChat plugin;
+	
+	private static String name;
 	
 	private Logger log = Logger.getLogger("TitanLog");
 	
-	private File configFile = null;
-	private FileConfiguration config = null;
+	private static File configFile = null;
+	private static FileConfiguration config = null;
 	
 	public CustomChannel(TitanChat plugin, String name) {
 		super(plugin, name, Type.CUSTOM);
-		this.plugin = plugin;
+		CustomChannel.plugin = plugin;
+		CustomChannel.name = super.getName();
 	}
 	
 	public String colourise(String message) {
@@ -48,8 +52,8 @@ public class CustomChannel extends Channel {
 		return config;
 	}
 	
-	public File getDataFolder() {
-		File dir = new File(plugin.getChannelDir(), getName());
+	public static File getDataFolder() {
+		File dir = new File(plugin.getChannelDir(), name);
 		dir.mkdir();
 		return dir;
 	}
@@ -59,9 +63,13 @@ public class CustomChannel extends Channel {
 		return log;
 	}
 	
-	public InputStream getResource(String fileName) {
+	public TitanChat getPlugin() {
+		return plugin;
+	}
+	
+	public static InputStream getResource(String fileName) {
 		try {
-			JarFile jarFile = new JarFile(new File(plugin.getChannelDir(), plugin.getLoader().getCustomChannelJar(getName())));
+			JarFile jarFile = new JarFile(new File(plugin.getChannelDir(), plugin.getLoader().getCustomChannelJar(name)));
 			Enumeration<JarEntry> entries = jarFile.entries();
 			
 			while (entries.hasMoreElements()) {
@@ -80,8 +88,11 @@ public class CustomChannel extends Channel {
 	
 	public boolean onCommand(Player player, String cmd, String[] args) { return false; }
 	
-	@Override
-	public void reloadConfig() {
+	public static void register(Command command) {
+		plugin.getCommandManager().register(command);
+	}
+	
+	public static void reloadCustomConfig() {
 		if (configFile == null) { configFile = new File(getDataFolder(), "config.yml"); }
 		
 		config = YamlConfiguration.loadConfiguration(configFile);
@@ -94,8 +105,7 @@ public class CustomChannel extends Channel {
 		}
 	}
 	
-	@Override
-	public void saveConfig() {
+	public static void saveCustomConfig() {
 		if (config == null || configFile == null)
 			return;
 		

@@ -12,6 +12,8 @@ import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.permission.Permission;
 
 import org.bukkit.ChatColor;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -22,7 +24,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
 import com.titankingdoms.nodinchan.titanchat.command.CommandManager;
-import com.titankingdoms.nodinchan.titanchat.command.TitanChatCommandHandler;
 import com.titankingdoms.nodinchan.titanchat.permissions.MiniPerms;
 import com.titankingdoms.nodinchan.titanchat.permissions.hook.PermissionsHook;
 import com.titankingdoms.nodinchan.titanchat.support.Addon;
@@ -51,7 +52,6 @@ public class TitanChat extends JavaPlugin {
 	
 	protected static Logger log = Logger.getLogger("TitanLog");
 	
-	private TitanChatCommandHandler cmdHandler;
 	private ChannelManager chManager;
 	private CommandManager cmdManager;
 	private Format format;
@@ -62,6 +62,7 @@ public class TitanChat extends JavaPlugin {
 	private boolean silenced = false;
 	
 	private List<Addon> addons;
+	private List<String> muted;
 	
 	private File permissionsFile = null;
 	private FileConfiguration permissions = null;
@@ -94,15 +95,15 @@ public class TitanChat extends JavaPlugin {
 	}
 	
 	public boolean enableChannels() {
-		return getConfig().getBoolean("chManager.getChannels().enable-channels");
+		return getConfig().getBoolean("channels.enable-channels");
 	}
 	
 	public boolean enableJoinMessage() {
-		return getConfig().getBoolean("chManager.getChannels().channel-messages.join");
+		return getConfig().getBoolean("channels.messages.join");
 	}
 	
 	public boolean enableLeaveMessage() {
-		return getConfig().getBoolean("chManager.getChannels().channel-messages.leave");
+		return getConfig().getBoolean("channels.messages.leave");
 	}
 	
 	public File getAddonDir() {
@@ -121,6 +122,10 @@ public class TitanChat extends JavaPlugin {
 		return chManager;
 	}
 	
+	public File getCommandDir() {
+		return new File(getAddonDir(), "commands");
+	}
+	
 	public CommandManager getCommandManager() {
 		return cmdManager;
 	}
@@ -128,7 +133,7 @@ public class TitanChat extends JavaPlugin {
 	public File getCustomChannelDir() {
 		return new File(getAddonDir(), "channels");
 	}
-	
+
 	public Format getFormat() {
 		return format;
 	}
@@ -209,6 +214,108 @@ public class TitanChat extends JavaPlugin {
 		log.log(level, "[" + this + "] " + msg);
 	}
 	
+	public void mute(Player player, boolean mute) {
+		if (mute)
+			muted.add(player.getName());
+		else
+			muted.remove(player.getName());
+	}
+	
+	public boolean muted(Player player) {
+		return muted.contains(player.getName());
+	}
+	
+	@Override
+	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+		if (cmd.getName().equals("titanchat")) {
+			if (args.length < 1) {
+				sender.sendMessage(ChatColor.AQUA + "TitanChat Commands");
+				sender.sendMessage(ChatColor.AQUA + "Command: /titanchat [command] [arguments]");
+				sender.sendMessage(ChatColor.AQUA + "Alias: /tc [command] [arguments]");
+				sendInfo((Player) sender, "'/titanchat commands [page]' for command list");
+				return true;
+			}
+			
+			if (!(sender instanceof Player)) {
+				if (args[0].equalsIgnoreCase("reload")) {
+					log(Level.INFO, "Reloading configs...");
+					reloadConfig();
+					for (Channel channel : getChannelManager().getChannels()) { channel.reloadConfig(); }
+					getChannelManager().getChannels().clear();
+					try { getChannelManager().loadChannels(); } catch (Exception e) {}
+					log(Level.INFO, "Configs reloaded");
+					return true;
+				}
+				
+				log(Level.INFO, "Please use commands in-game"); return true;
+			}
+			
+			if (!enableChannels()) {
+				sendInfo((Player) sender, "Commands are disabled");
+			}
+			
+			cmdManager.execute((Player) sender, args[0], parseCommand(args));
+			return true;
+		}
+		
+		if (cmd.getName().equalsIgnoreCase("broadcast")) {
+			if (!(sender instanceof Player)) {
+				String message = getConfig().getString("broadcast.server");
+				
+				StringBuilder str = new StringBuilder();
+				
+				for (String word : args) {
+					if (str.length() > 0)
+						str.append(" ");
+					
+					str.append(word);
+				}
+				
+				message = message.replace("%message", str.toString());
+				
+				getServer().broadcastMessage(getFormat().colourise(message));
+				getLogger().info("<Server> " + getFormat().decolourise(str.toString()));
+				return true;
+			}
+			
+			if (has((Player) sender, "TitanChat.broadcast"))
+				try { cmdManager.execute((Player) sender, "broadcast", args); } catch (Exception e) {}
+			else
+				sendWarning((Player) sender, "You do not have permission");
+			
+			return true;
+		}
+		
+		if (cmd.getName().equalsIgnoreCase("me")) {
+			if (!(sender instanceof Player)) {
+				String message = getConfig().getString("emote.server");
+				
+				StringBuilder str = new StringBuilder();
+				
+				for (String word : args) {
+					if (str.length() > 0)
+						str.append(" ");
+					
+					str.append(word);
+				}
+				
+				message = message.replace("%action", str.toString());
+				getServer().broadcastMessage(getFormat().colourise(message));
+				getLogger().info("* Server " + getFormat().decolourise(str.toString()));
+				return true;
+			}
+			
+			if (has((Player) sender, "TitanChat.emote.server"))
+				try { cmdManager.execute((Player) sender, "me", args); } catch (Exception e) {}
+			else
+				sendWarning((Player) sender, "You do not have permission");
+			
+			return true;
+		}
+		
+		return false;
+	}
+	
 	@Override
 	public void onDisable() {
 		log(Level.INFO, "is now disabling...");
@@ -231,7 +338,6 @@ public class TitanChat extends JavaPlugin {
 	public void onEnable() {
 		log(Level.INFO, "is now enabling...");
 		
-		cmdHandler = new TitanChatCommandHandler(this);
 		chManager = new ChannelManager(this);
 		cmdManager = new CommandManager(this);
 		format = new Format(this);
@@ -283,10 +389,6 @@ public class TitanChat extends JavaPlugin {
 		pm.registerEvents(permHook, this);
 		pm.registerEvents(new TitanChatListener(this), this);
 		
-		getCommand("titanchat").setExecutor(cmdHandler);
-		getCommand("broadcast").setExecutor(cmdHandler);
-		getCommand("me").setExecutor(cmdHandler);
-		
 		try { addons.addAll(loader.loadAddons()); } catch (Exception e) {}
 		
 		try { chManager.loadChannels(); } catch (Exception e) {}
@@ -304,6 +406,22 @@ public class TitanChat extends JavaPlugin {
 		}
 		
 		log(Level.INFO, "is now enabled");
+	}
+	
+	public String[] parseCommand(String[] args) {
+		StringBuilder str = new StringBuilder();
+		
+		for (String arg : args) {
+			if (str.length() > 0)
+				str.append(" ");
+			
+			if (arg.equals(args[0]))
+				continue;
+			
+			str.append(arg);
+		}
+		
+		return (str.toString().equals("")) ? new String[] {} : str.toString().split(" ");
 	}
 	
 	public void reloadPermissions() {
@@ -328,8 +446,22 @@ public class TitanChat extends JavaPlugin {
 		player.sendMessage("[TitanChat] " + ChatColor.GOLD + info);
 	}
 	
+	public void sendInfo(List<String> players, String info) {
+		for (String player : players) {
+			if (getPlayer(player) != null)
+				sendInfo(getPlayer(player), info);
+		}
+	}
+	
 	public void sendWarning(Player player, String warning) {
 		player.sendMessage("[TitanChat] " + ChatColor.RED + warning);
+	}
+	
+	public void sendWarning(List<String> players, String warning) {
+		for (String player : players) {
+			if (getPlayer(player) != null)
+				sendWarning(getPlayer(player), warning);
+		}
 	}
 	
 	public void setSilenced(boolean silenced) {

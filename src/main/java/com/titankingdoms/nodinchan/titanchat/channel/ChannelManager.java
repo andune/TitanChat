@@ -44,17 +44,15 @@ public class ChannelManager {
 		Channel channel = getChannel(name);
 		channels.remove(channel);
 		
-		List<Player> playerlist = new ArrayList<Player>();
+		List<String> pastParticipants = new ArrayList<String>();
+		pastParticipants.addAll(channel.getParticipants());
 		
-		for (String participant : channel.getParticipants()) {
+		for (String participant : pastParticipants) {
 			if (plugin.getPlayer(participant) != null)
-				playerlist.add(plugin.getPlayer(participant));
+				plugin.channelSwitch(plugin.getPlayer(participant), channel, getSpawnChannel(player));
 		}
 		
-		for (Player kick : playerlist) {
-			plugin.channelSwitch(kick, channel, getSpawnChannel(player));
-			plugin.sendWarning(kick, channel.getName() + " has been deleted");
-		}
+		plugin.sendWarning(pastParticipants, channel.getName() + " has been deleted");
 		
 		File file = new File(plugin.getChannelDir(), name + ".yml");
 		file.delete();
@@ -77,12 +75,12 @@ public class ChannelManager {
 	
 	public Channel getSpawnChannel(Player player) {
 		if (getStaffChannel() != null) {
-			if (plugin.has(player, "TitanChat.admin") && !plugin.has(player, "TitanChat.force." + getStaffChannel().getName()))
+			if (plugin.has(player, "TitanChat.admin") && !plugin.has(player, "TitanChat.forcejoin." + getStaffChannel().getName()))
 				return getStaffChannel();
 		}
 		
 		for (Channel channel : channels) {
-			if (plugin.has(player, "TitanChat.spawn." + channel.getName()) && !plugin.has(player, "TitanChat.force." + channel.getName()) && channel.canAccess(player))
+			if (plugin.has(player, "TitanChat.spawn." + channel.getName()) && !plugin.has(player, "TitanChat.forcejoin." + channel.getName()) && channel.canAccess(player))
 				return channel;
 		}
 		
@@ -160,8 +158,6 @@ public class ChannelManager {
 		channels.addAll(plugin.getLoader().loadChannels());
 		customChAmount = channels.size();
 		
-		List<Channel> channels = new ArrayList<Channel>();
-		
 		for (String fileName : plugin.getChannelDir().list()) {
 			if (exists(fileName.replace(".yml", "")) || fileName.equals("README.yml"))
 				continue;
@@ -176,7 +172,6 @@ public class ChannelManager {
 			channels.add(channel);
 		}
 		
-		channels.addAll(channels);
 		channelAmount = channels.size() - customChAmount;
 		
 		plugin.log(Level.INFO, "No. of channels: " + channelAmount);

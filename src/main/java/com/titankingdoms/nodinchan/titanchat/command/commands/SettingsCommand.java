@@ -24,7 +24,7 @@ public class SettingsCommand extends Command {
 		this.cm = plugin.getChannelManager();
 	}
 	
-	@CommandID(name = "Set", triggers = { "set" })
+	@CommandID(name = "Set", triggers = "set")
 	@CommandInfo(description = "Sets the channel settings", usage = "set [setting] [value/channel> <channel>")
 	public void set(Player player, String[] args) {
 		if (args.length < 1) { invalidArgLength(player, "Set"); return; }
@@ -43,13 +43,9 @@ public class SettingsCommand extends Command {
 						
 						plugin.sendInfo(player, "You have changed the colour to " + args[1]);
 						
-					} else {
-						plugin.sendWarning(player, "You do not have permission");
-					}
+					} else { plugin.sendWarning(player, "You do not have permission"); }
 					
-				} else {
-					plugin.sendWarning(player, "No such channel");
-				}
+				} else { plugin.sendWarning(player, "No such channel"); }
 				
 			} catch (IndexOutOfBoundsException e) {
 				if (cm.getChannel(player).getAdminList().contains(player.getName()) || plugin.isStaff(player)) {
@@ -58,9 +54,7 @@ public class SettingsCommand extends Command {
 					
 					plugin.sendInfo(player, "You have changed the colour to " + args[1]);
 					
-				} else {
-					plugin.sendWarning(player, "You do not have permission");
-				}
+				} else { plugin.sendWarning(player, "You do not have permission"); }
 			}
 			break;
 			
@@ -73,13 +67,9 @@ public class SettingsCommand extends Command {
 						
 						plugin.sendInfo(player, "The channel now " + ((cm.getChannel(args[1]).getVariables().convert()) ? "converts" : "ignores") + " colour codes");
 						
-					} else {
-						plugin.sendWarning(player, "You do not have permission");
-					}
+					} else { plugin.sendWarning(player, "You do not have permission"); }
 					
-				} else {
-					plugin.sendWarning(player, "No such channel");
-				}
+				} else { plugin.sendWarning(player, "No such channel"); }
 				
 			} catch (IndexOutOfBoundsException e) {
 				if (plugin.isStaff(player)) {
@@ -88,9 +78,7 @@ public class SettingsCommand extends Command {
 					
 					plugin.sendInfo(player, "The channel now " + ((cm.getChannel(player).getVariables().convert()) ? "converts" : "ignores") + " colour codes");
 					
-				} else {
-					plugin.sendWarning(player, "You do not have permission");
-				}
+				} else { plugin.sendWarning(player, "You do not have permission"); }
 			}
 			break;
 			
@@ -105,13 +93,9 @@ public class SettingsCommand extends Command {
 						
 						plugin.sendInfo(player, "You have changed the colour to " + args[1]);
 						
-					} else {
-						plugin.sendWarning(player, "You do not have permission");
-					}
+					} else { plugin.sendWarning(player, "You do not have permission"); }
 					
-				} else {
-					plugin.sendWarning(player, "No such channel");
-				}
+				} else { plugin.sendWarning(player, "No such channel"); }
 				
 			} catch (IndexOutOfBoundsException e) {
 				if (cm.getChannel(player).getAdminList().contains(player.getName()) || plugin.isStaff(player)) {
@@ -120,9 +104,7 @@ public class SettingsCommand extends Command {
 					
 					plugin.sendInfo(player, "You have changed the colour to " + args[1]);
 					
-				} else {
-					plugin.sendWarning(player, "You do not have permission");
-				}
+				} else { plugin.sendWarning(player, "You do not have permission"); }
 			}
 			break;
 			
@@ -137,13 +119,9 @@ public class SettingsCommand extends Command {
 						
 						plugin.sendInfo(player, "You have changed the password of " + cm.getChannel(player).getName() + " to " + args[1]);
 						
-					} else {
-						plugin.sendWarning(player, "You do not have permission");
-					}
+					} else { plugin.sendWarning(player, "You do not have permission"); }
 					
-				} else {
-					plugin.sendWarning(player, "No such channel");
-				}
+				} else { plugin.sendWarning(player, "No such channel"); }
 				
 			} catch (IndexOutOfBoundsException e) {
 				if (cm.getChannel(player).getAdminList().contains(player.getName()) || plugin.isStaff(player)) {
@@ -152,9 +130,7 @@ public class SettingsCommand extends Command {
 					
 					plugin.sendInfo(player, "You have changed the password of " + cm.getChannel(player).getName() + " to " + args[1]);
 					
-				} else {
-					plugin.sendWarning(player, "You do not have permission");
-				}
+				} else { plugin.sendWarning(player, "You do not have permission"); }
 			}
 			break;
 			
@@ -169,13 +145,9 @@ public class SettingsCommand extends Command {
 						
 						plugin.sendInfo(player, "You have changed the settings");
 						
-					} else {
-						plugin.sendWarning(player, "You do not have permission");
-					}
+					} else { plugin.sendWarning(player, "You do not have permission"); }
 					
-				} else {
-					plugin.sendWarning(player, "No such channel");
-				}
+				} else { plugin.sendWarning(player, "No such channel"); }
 				
 			} catch (IndexOutOfBoundsException e) {
 				if (cm.getChannel(player).getAdminList().contains(player.getName()) || plugin.isStaff(player)) {
@@ -184,9 +156,7 @@ public class SettingsCommand extends Command {
 					
 					plugin.sendInfo(player, "You have changed the settings");
 					
-				} else {
-					plugin.sendWarning(player, "You do not have permission");
-				}
+				} else { plugin.sendWarning(player, "You do not have permission"); }
 			}
 			break;
 			
@@ -213,9 +183,7 @@ public class SettingsCommand extends Command {
 									
 									plugin.sendInfo(player, "The channel is now " + Type.fromName(args[1]).getName());
 									
-								} else {
-									plugin.sendWarning(player, "You do not have permission");
-								}
+								} else { plugin.sendWarning(player, "You do not have permission"); }
 								break;
 								
 							case PASSWORD:
@@ -227,6 +195,10 @@ public class SettingsCommand extends Command {
 								channel.save();
 								
 								plugin.sendInfo(player, "The channel is now " + Type.fromName(args[1]).getName());
+								break;
+								
+							case UNKNOWN:
+								plugin.sendWarning(player, "This type is unknown");
 								break;
 							}
 							
@@ -245,13 +217,9 @@ public class SettingsCommand extends Command {
 							plugin.sendInfo(player, "Available types: " + str.toString());
 						}
 						
-					} else {
-						plugin.sendWarning(player, "You do not have permission");
-					}
+					} else { plugin.sendWarning(player, "You do not have permission"); }
 					
-				} else {
-					plugin.sendWarning(player, "No such channel");
-				}
+				} else { plugin.sendWarning(player, "No such channel"); }
 			} catch (IndexOutOfBoundsException e) {
 				if (cm.getChannel(player).getAdminList().contains(player.getName()) || plugin.isStaff(player)) {
 					if (Type.fromName(args[1]) != null) {
@@ -272,9 +240,7 @@ public class SettingsCommand extends Command {
 								
 								plugin.sendInfo(player, "The channel is now " + Type.fromName(args[1]).getName());
 								
-							} else {
-								plugin.sendWarning(player, "You do not have permission");
-							}
+							} else { plugin.sendWarning(player, "You do not have permission"); }
 							break;
 							
 						case PASSWORD:
@@ -287,6 +253,10 @@ public class SettingsCommand extends Command {
 							channel.save();
 							
 							plugin.sendInfo(player, "The channel is now " + Type.fromName(args[1]).getName());
+							break;
+							
+						case UNKNOWN:
+							plugin.sendWarning(player, "This type is unknown");
 							break;
 						}
 						
@@ -305,9 +275,7 @@ public class SettingsCommand extends Command {
 						plugin.sendInfo(player, "Available types: " + str.toString());
 					}
 					
-				} else {
-					plugin.sendWarning(player, "You do not have permission");
-				}
+				} else { plugin.sendWarning(player, "You do not have permission"); }
 			}
 			break;
 		}
@@ -369,7 +337,7 @@ public class SettingsCommand extends Command {
 		
 		public void invalidArgLength(Player player) {
 			player.sendMessage("[TitanChat] " + ChatColor.RED + "Invalid Argument Length");
-			player.sendMessage("[TitanChat] " + ChatColor.GOLD + "Usage: " + usage);
+			player.sendMessage("[TitanChat] " + ChatColor.GOLD + "Usage: /tc set " + usage);
 		}
 	}
 }

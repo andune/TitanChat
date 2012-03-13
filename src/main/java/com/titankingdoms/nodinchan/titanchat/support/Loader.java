@@ -18,52 +18,47 @@ import java.util.logging.Level;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
+import com.titankingdoms.nodinchan.titanchat.command.Command;
 
 public class Loader {
 	
 	private TitanChat plugin;
 	
-	private File channelDir;
 	private File addonDir;
-
+	private File channelDir;
+	private File commandDir;
+	
 	private ClassLoader addonLoader;
 	private ClassLoader channelLoader;
-
+	private ClassLoader commandLoader;
+	
 	private List<File> addonFiles;
 	private List<File> channelFiles;
+	private List<File> commandFiles;
 	private List<Addon> addons;
 	private List<CustomChannel> channels;
-
+	private List<Command> commands;
+	
 	private Map<String, String> paJarNames;
 	private Map<String, String> ccJarNames;
 	
 	public Loader(TitanChat plugin) {
 		this.plugin = plugin;
-		channelFiles = new ArrayList<File>();
 		addonFiles = new ArrayList<File>();
+		channelFiles = new ArrayList<File>();
+		commandFiles = new ArrayList<File>();
 		addons = new ArrayList<Addon>();
 		channels = new ArrayList<CustomChannel>();
+		commands = new ArrayList<Command>();
 		addonDir = plugin.getAddonDir();
 		channelDir = plugin.getCustomChannelDir();
+		commandDir = plugin.getCommandDir();
 		paJarNames = new HashMap<String, String>();
 		ccJarNames = new HashMap<String, String>();
 
 		List<URL> addonUrls = new ArrayList<URL>();
 		List<URL> channelUrls = new ArrayList<URL>();
-		
-		for (String channelFile : channelDir.list()) {
-			if (channelFile.endsWith(".jar")) {
-				File file = new File(channelDir, channelFile);
-				
-				channelFiles.add(file);
-				try {
-					channelUrls.add(file.toURI().toURL());
-					
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
-			}
-		}
+		List<URL> commandUrls = new ArrayList<URL>();
 		
 		for (String addonFile : addonDir.list()) {
 			if (addonFile.endsWith(".jar")) {
@@ -79,8 +74,37 @@ public class Loader {
 			}
 		}
 		
-		channelLoader = URLClassLoader.newInstance(channelUrls.toArray(new URL[channelUrls.size()]), plugin.getClass().getClassLoader());
+		for (String channelFile : channelDir.list()) {
+			if (channelFile.endsWith(".jar")) {
+				File file = new File(channelDir, channelFile);
+				
+				channelFiles.add(file);
+				try {
+					channelUrls.add(file.toURI().toURL());
+					
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		for (String commandFile : commandDir.list()) {
+			if (commandFile.endsWith(".jar")) {
+				File file = new File(commandDir, commandFile);
+				
+				commandFiles.add(file);
+				try {
+					commandUrls.add(file.toURI().toURL());
+					
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
 		addonLoader = URLClassLoader.newInstance(addonUrls.toArray(new URL[addonUrls.size()]), plugin.getClass().getClassLoader());
+		channelLoader = URLClassLoader.newInstance(channelUrls.toArray(new URL[channelUrls.size()]), plugin.getClass().getClassLoader());
+		commandLoader = URLClassLoader.newInstance(commandUrls.toArray(new URL[commandUrls.size()]), plugin.getClass().getClassLoader());
 	}
 	
 	public String getCustomChannelJar(String name) {
@@ -195,5 +219,44 @@ public class Loader {
 		}
 		
 		return channels;
+	}
+	
+	public List<Command> loadCommands() throws Exception {
+		for (File file : commandFiles) {
+			try {
+				JarFile jarFile = new JarFile(file);
+				Enumeration<JarEntry> entries = jarFile.entries();
+				
+				String mainClass = null;
+				
+				while (entries.hasMoreElements()) {
+					JarEntry element = entries.nextElement();
+					
+					if (element.getName().equalsIgnoreCase("path.yml")) {
+						BufferedReader reader = new BufferedReader(new InputStreamReader(jarFile.getInputStream(element)));
+						mainClass = reader.readLine().substring(12);
+						break;
+					}
+				}
+				
+				if (mainClass != null) {
+					Class<?> clazz = Class.forName(mainClass, true, commandLoader);
+					Class<? extends Command> commandClass = clazz.asSubclass(Command.class);
+					Constructor<? extends Command> ctor = commandClass.getConstructor(plugin.getClass());
+					Command command = ctor.newInstance(plugin);
+					command.init();
+					commands.add(command);
+					
+				} else {
+					throw new Exception();
+				}
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+				plugin.log(Level.WARNING, "The command " + file.getName() + " failed to load");
+			}
+		}
+		
+		return commands;
 	}
 }

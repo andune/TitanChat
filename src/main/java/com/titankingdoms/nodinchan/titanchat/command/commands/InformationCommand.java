@@ -24,7 +24,7 @@ public class InformationCommand extends Command {
 		this.cm = plugin.getChannelManager();
 	}
 	
-	@CommandID(name = "ColourCodes", triggers = { "colourcodes", "colorcodes", "colours", "colors", "codes" })
+	@CommandID(name = "ColourCodes", triggers = { "colourcodes", "colorcodes", "colours", "colors", "codes" }, requireChannel = false)
 	@CommandInfo(description = "Lists out avalable colour codes and respective colours", usage = "colourcodes")
 	public void colourcodes(Player player, String[] args) {
 		String black = plugin.getFormat().colourise("&0") + "&0";
@@ -54,7 +54,7 @@ public class InformationCommand extends Command {
 		player.sendMessage("And also the Magical &k (" + magical + ChatColor.WHITE + ")");
 	}
 	
-	@CommandID(name = "Commands", triggers = { "commands" })
+	@CommandID(name = "Commands", triggers = "commands", requireChannel = false)
 	@CommandInfo(description = "Shows the command list", usage = "commands <page/command>")
 	public void commands(Player player, String[] args) {
 		CommandManager cm = plugin.getCommandManager();
@@ -121,7 +121,7 @@ public class InformationCommand extends Command {
 		}
 	}
 	
-	@CommandID(name = "Info", triggers = { "info" })
+	@CommandID(name = "Info", triggers = "info")
 	@CommandInfo(description = "Gets the participants and followers of the channel", usage = "info <channel>")
 	public void info(Player player, String[] args) {
 		try {
@@ -134,9 +134,7 @@ public class InformationCommand extends Command {
 					player.sendMessage(ChatColor.AQUA + "Followers: " + plugin.createList(channel.getFollowerList()));
 				}
 				
-			} else {
-				plugin.sendWarning(player, "No such channel");
-			}
+			} else { plugin.sendWarning(player, "No such channel"); }
 			
 		} catch (IndexOutOfBoundsException e) {
 			Channel channel = cm.getChannel(player);
@@ -147,7 +145,7 @@ public class InformationCommand extends Command {
 		}
 	}
 	
-	@CommandID(name = "List", triggers = { "list" })
+	@CommandID(name = "List", triggers = "list")
 	@CommandInfo(description = "Lists all channels you have access to", usage = "list")
 	public void list(Player player, String[] args) {
 		List<String> channels = new ArrayList<String>();

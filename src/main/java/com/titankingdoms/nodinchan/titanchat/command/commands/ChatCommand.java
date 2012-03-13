@@ -1,5 +1,6 @@
 package com.titankingdoms.nodinchan.titanchat.command.commands;
 
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
@@ -18,7 +19,7 @@ public class ChatCommand extends Command {
 		this.cm = plugin.getChannelManager();
 	}
 	
-	@CommandID(name = "Broadcast", triggers = { "broadcast" })
+	@CommandID(name = "Broadcast", triggers = "broadcast", requireChannel = false)
 	@CommandInfo(description = "Broadcasts the message globally", usage = "broadcast [message]")
 	public void broadcast(Player player, String[] args) {
 		if (args.length < 1 || !plugin.has(player, "TitanChat.broadcast")) { return; }
@@ -37,7 +38,7 @@ public class ChatCommand extends Command {
 	}
 	
 	@CommandID(name = "Emote", triggers = { "me", "em" })
-	@CommandInfo(description = "Action emote", usage = "me [action]")
+	@CommandInfo(description = "Action emote shown in channel", usage = "me [action]")
 	public void emote(Player player, String[] args) {
 		if (args.length < 1 || !plugin.has(player, "TitanChat.me")) { return; }
 		
@@ -54,10 +55,21 @@ public class ChatCommand extends Command {
 		plugin.getLogger().info("* " + player.getName() + " " + meStr.toString());
 	}
 	
-	@CommandID(name = "Silence", triggers = "silence")
+	@CommandID(name = "Silence", triggers = "silence", requireChannel = false)
 	@CommandInfo(description = "Silences the channel/server", usage = "silence [channel]")
-	public void execute(Player player, String[] args) {
+	public void silence(Player player, String[] args) {
 		if (plugin.has(player, "TitanChat.silence")) {
+			if (!plugin.enableChannels()) {
+				plugin.setSilenced((plugin.isSilenced()) ? false : true);
+				
+				if (plugin.isSilenced())
+					plugin.getServer().broadcastMessage("[TitanChat] " + ChatColor.RED + "All channels have been silenced");
+				else
+					plugin.getServer().broadcastMessage("[TitanChat] " + ChatColor.GOLD + "Channels are no longer silenced");
+				
+				return;
+			}
+			
 			try {
 				if (cm.exists(args[0])) {
 					Channel channel = cm.getChannel(args[0]);
@@ -68,7 +80,7 @@ public class ChatCommand extends Command {
 							if (channel.isSilenced())
 								plugin.sendWarning(plugin.getPlayer(participant), "The channel has been silenced");
 							else
-								plugin.sendInfo(player, "The channel is no longer silenced");
+								plugin.sendInfo(plugin.getPlayer(participant), "The channel is no longer silenced");
 						}
 					}
 					
@@ -77,13 +89,13 @@ public class ChatCommand extends Command {
 				}
 				
 			} catch (IndexOutOfBoundsException e) {
-				plugin.setSilenced((plugin.isSilenced()) ? false : true);
-				
-				for (Player receiver : plugin.getServer().getOnlinePlayers()) {
+				if (plugin.has(player, "TitanChat.silence.server")) {
+					plugin.setSilenced((plugin.isSilenced()) ? false : true);
+					
 					if (plugin.isSilenced())
-						plugin.sendWarning(receiver, "All channels have been silenced");
+						plugin.getServer().broadcastMessage("[TitanChat] " + ChatColor.RED + "All channels have been silenced");
 					else
-						plugin.sendInfo(receiver, "Channels are no longer silenced");
+						plugin.getServer().broadcastMessage("[TitanChat] " + ChatColor.GOLD + "Channels are no longer silenced");
 				}
 			}
 		}

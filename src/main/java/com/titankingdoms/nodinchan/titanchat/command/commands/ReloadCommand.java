@@ -26,7 +26,6 @@ public class ReloadCommand extends Command {
 		if (plugin.isStaff(player)) {
 			plugin.log(Level.INFO, "Reloading configs...");
 			plugin.sendInfo(player, "Reloading configs...");
-			
 			plugin.reloadConfig();
 			
 			for (Channel channel : cm.getChannels()) {
@@ -34,14 +33,10 @@ public class ReloadCommand extends Command {
 			}
 			
 			cm.getChannels().clear();
-			
 			try { cm.loadChannels(); } catch (Exception e) {}
-			
 			plugin.log(Level.INFO, "Configs reloaded");
 			plugin.sendInfo(player, "Configs reloaded");
 			
-		} else {
-			plugin.sendWarning(player, "You do not have permission");
-		}
+		} else { plugin.sendWarning(player, "You do not have permission"); }
 	}
 }

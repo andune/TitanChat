@@ -13,8 +13,9 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
+import com.titankingdoms.nodinchan.titanchat.command.Command;
 
-public class Addon implements AddonInterface {
+public class Addon {
 	
 	protected static TitanChat plugin;
 	
@@ -54,6 +55,10 @@ public class Addon implements AddonInterface {
 		return name;
 	}
 	
+	public TitanChat getPlugin() {
+		return plugin;
+	}
+	
 	public static InputStream getResource(String fileName) {
 		File file = new File(plugin.getAddonDir(), plugin.getLoader().getPluginAddonJar(name));
 		
@@ -76,6 +81,10 @@ public class Addon implements AddonInterface {
 	public void init() {}
 	
 	public boolean onCommand(Player player, String cmd, String[] args) { return false; }
+	
+	public static void register(Command command) {
+		plugin.getCommandManager().register(command);
+	}
 	
 	public static void reloadConfig() {
 		if (configFile == null) { configFile = new File(new File(plugin.getAddonDir(), name), "config.yml"); }

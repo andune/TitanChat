@@ -24,6 +24,11 @@ public class CommandManager {
 	
 	public void execute(Player player, String command, String[] args) {
 		for (CommandExecutor executor : executors) {
+			if (executor.getMethod().getAnnotation(CommandID.class).requireChannel() && !plugin.enableChannels()) {
+				plugin.sendWarning(player, "This command requires channels to be enabled");
+				return;
+			}
+			
 			for (String trigger : executor.getMethod().getAnnotation(CommandID.class).triggers()) {
 				if (trigger.equalsIgnoreCase(command))
 					try { executor.execute(player, args); return; } catch (IllegalAccessException e) {} catch (IllegalArgumentException e) {} catch (InvocationTargetException e) {}
@@ -60,6 +65,9 @@ public class CommandManager {
 		register(new RankingCommand(plugin));
 		register(new ReloadCommand(plugin));
 		register(new SettingsCommand(plugin));
+		
+		try { for (Command command : plugin.getLoader().loadCommands()) { register(command); } } catch (Exception e) {}
+		
 		sortCommands();
 	}
 	

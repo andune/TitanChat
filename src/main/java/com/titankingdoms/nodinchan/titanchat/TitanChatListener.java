@@ -29,7 +29,7 @@ public class TitanChatListener implements Listener {
 			
 			Channel channel = plugin.getChannelManager().getChannel(player);
 			
-			if (plugin.isSilenced() || channel.isSilenced() || channel.getMuteList().contains(player.getName())) {
+			if (plugin.isSilenced() || channel.isSilenced() || channel.getMuteList().contains(player.getName()) || plugin.muted(player)) {
 				if (!plugin.hasVoice(player))
 					return;
 			}

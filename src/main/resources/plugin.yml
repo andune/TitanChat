@@ -27,7 +27,7 @@ permissions:
             TitanChat.delete: true
             TitanChat.broadcast: true
             TitanChat.emote.server: true
-            TitanChat.silence: true
+            TitanChat.silence.server: true
             TitanChat.force: true
             TitanChat.access.*: true
             TitanChat.mod: true
@@ -50,8 +50,13 @@ permissions:
     TitanChat.emote:
         description: Access to channel emote broadcast
         default: op
+    TitanChat.silence.server:
+        description: Access to server silence
+        default: op
+        children:
+            TitanChat.silence: true
     TitanChat.silence:
-        description: Access to silence
+        description: Access to channel silence
         default: op
         children:
             TitanChat.mute: true

@@ -9,4 +9,6 @@ public @interface CommandID {
 	String name();
 	
 	String[] triggers();
+	
+	boolean requireChannel() default true;
 }
