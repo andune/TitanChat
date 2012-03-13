@@ -7,9 +7,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 
+import com.titankingdoms.nodinchan.titanchat.addon.Addon;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
-import com.titankingdoms.nodinchan.titanchat.support.Addon;
 
 public class TitanChatListener implements Listener {
 	
@@ -29,9 +29,11 @@ public class TitanChatListener implements Listener {
 			
 			Channel channel = plugin.getChannelManager().getChannel(player);
 			
-			if (plugin.isSilenced() || channel.isSilenced() || channel.getMuteList().contains(player.getName()) || plugin.muted(player)) {
-				if (!plugin.hasVoice(player))
-					return;
+			if (!plugin.hasVoice(player)) {
+				if (plugin.isSilenced()) { plugin.sendWarning(player, "The server is silenced"); return; }
+				if (channel.isSilenced()) { plugin.sendWarning(player, "The channel is silenced"); return; }
+				if (channel.getMuteList().contains(player.getName())) { plugin.sendWarning(player, "You have been muted"); return; }
+				if (plugin.muted(player)) { plugin.sendWarning(player, "You have been muted"); return; }
 			}
 			
 			if (channel instanceof CustomChannel) {

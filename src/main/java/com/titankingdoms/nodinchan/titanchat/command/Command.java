@@ -5,8 +5,6 @@ import java.lang.reflect.Method;
 import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
-import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
-import com.titankingdoms.nodinchan.titanchat.support.Addon;
 
 public class Command {
 	
@@ -14,14 +12,6 @@ public class Command {
 	
 	public Command(TitanChat plugin) {
 		Command.plugin = plugin;
-	}
-	
-	public Command(Addon addon) {
-		Command.plugin = addon.getPlugin();
-	}
-	
-	public Command(CustomChannel customChannel) {
-		Command.plugin = customChannel.getPlugin();
 	}
 	
 	public void init() {}

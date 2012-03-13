@@ -1,4 +1,4 @@
-package com.titankingdoms.nodinchan.titanchat.permissions.hook;
+package com.titankingdoms.nodinchan.titanchat.permissions;
 
 import java.util.logging.Level;
 
@@ -57,9 +57,6 @@ public class PermissionsHook implements Listener {
 			}
 		}
 		
-		if (prefix.equals(""))
-			prefix = plugin.getMiniPerms().getGroupPrefix(player.getName());
-		
 		return prefix;
 	}
 	
@@ -83,9 +80,6 @@ public class PermissionsHook implements Listener {
 			}
 		}
 		
-		if (suffix.equals(""))
-			suffix = plugin.getMiniPerms().getGroupSuffix(player.getName());
-		
 		return suffix;
 	}
 	
@@ -106,9 +100,6 @@ public class PermissionsHook implements Listener {
 				prefix = ((GroupManager) permissionsPlugin).getWorldsHolder().getWorldPermissions(player).getUserPrefix(player.getName());
 			}
 		}
-		
-		if (prefix.equals(""))
-			prefix = plugin.getMiniPerms().getUserPrefix(player.getName());
 		
 		return prefix;
 	}
@@ -131,9 +122,6 @@ public class PermissionsHook implements Listener {
 			}
 		}
 		
-		if (suffix.equals(""))
-			suffix = plugin.getMiniPerms().getUserSuffix(player.getName());
-		
 		return suffix;
 	}
 	
@@ -148,9 +136,6 @@ public class PermissionsHook implements Listener {
 			else if (permissionsPlugin instanceof GroupManager)
 				return ((GroupManager) permissionsPlugin).getWorldsHolder().getWorldPermissions(player.getWorld().getName()).permission(player, permission);
 		}
-		
-		if (permission.startsWith("TitanChat.") && plugin.getMiniPerms().has(player, permission))
-			return plugin.getMiniPerms().has(player, permission);
 		
 		return player.hasPermission(permission);
 	}

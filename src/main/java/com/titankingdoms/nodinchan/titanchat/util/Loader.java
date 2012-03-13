@@ -1,4 +1,4 @@
-package com.titankingdoms.nodinchan.titanchat.support;
+package com.titankingdoms.nodinchan.titanchat.util;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -17,6 +17,7 @@ import java.util.jar.JarFile;
 import java.util.logging.Level;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
+import com.titankingdoms.nodinchan.titanchat.addon.Addon;
 import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
 import com.titankingdoms.nodinchan.titanchat.command.Command;
 
@@ -39,8 +40,8 @@ public class Loader {
 	private List<CustomChannel> channels;
 	private List<Command> commands;
 	
-	private Map<String, String> paJarNames;
-	private Map<String, String> ccJarNames;
+	private Map<String, File> paJAR;
+	private Map<String, File> ccJAR;
 	
 	public Loader(TitanChat plugin) {
 		this.plugin = plugin;
@@ -53,8 +54,8 @@ public class Loader {
 		addonDir = plugin.getAddonDir();
 		channelDir = plugin.getCustomChannelDir();
 		commandDir = plugin.getCommandDir();
-		paJarNames = new HashMap<String, String>();
-		ccJarNames = new HashMap<String, String>();
+		paJAR = new HashMap<String, File>();
+		ccJAR = new HashMap<String, File>();
 
 		List<URL> addonUrls = new ArrayList<URL>();
 		List<URL> channelUrls = new ArrayList<URL>();
@@ -63,42 +64,27 @@ public class Loader {
 		for (String addonFile : addonDir.list()) {
 			if (addonFile.endsWith(".jar")) {
 				File file = new File(addonDir, addonFile);
-				
 				addonFiles.add(file);
-				try {
-					addonUrls.add(file.toURI().toURL());
-					
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+				
+				try { addonUrls.add(file.toURI().toURL()); } catch (MalformedURLException e) { e.printStackTrace(); }
 			}
 		}
 		
 		for (String channelFile : channelDir.list()) {
 			if (channelFile.endsWith(".jar")) {
 				File file = new File(channelDir, channelFile);
-				
 				channelFiles.add(file);
-				try {
-					channelUrls.add(file.toURI().toURL());
-					
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+				
+				try { channelUrls.add(file.toURI().toURL()); } catch (MalformedURLException e) { e.printStackTrace(); }
 			}
 		}
 		
 		for (String commandFile : commandDir.list()) {
 			if (commandFile.endsWith(".jar")) {
 				File file = new File(commandDir, commandFile);
-				
 				commandFiles.add(file);
-				try {
-					commandUrls.add(file.toURI().toURL());
-					
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+				
+				try { commandUrls.add(file.toURI().toURL()); } catch (MalformedURLException e) { e.printStackTrace(); }
 			}
 		}
 		
@@ -107,12 +93,12 @@ public class Loader {
 		commandLoader = URLClassLoader.newInstance(commandUrls.toArray(new URL[commandUrls.size()]), plugin.getClass().getClassLoader());
 	}
 	
-	public String getCustomChannelJar(String name) {
-		return ccJarNames.get(name);
+	public File getCustomChannelJAR(String name) {
+		return ccJAR.get(name);
 	}
 	
-	public String getPluginAddonJar(String name) {
-		return paJarNames.get(name);
+	public File getPluginAddonJar(String name) {
+		return paJAR.get(name);
 	}
 	
 	public List<Addon> loadAddons() throws Exception {
@@ -138,7 +124,7 @@ public class Loader {
 					Class<? extends Addon> addonClass = clazz.asSubclass(Addon.class);
 					Constructor<? extends Addon> ctor = addonClass.getConstructor(plugin.getClass());
 					Addon addon = ctor.newInstance(plugin);
-					paJarNames.put(addon.getName(), file.getName());
+					paJAR.put(addon.getName(), file);
 					addon.init();
 					addons.add(addon);
 					
@@ -191,7 +177,7 @@ public class Loader {
 					Class<? extends CustomChannel> channelClass = clazz.asSubclass(CustomChannel.class);
 					Constructor<? extends CustomChannel> ctor = channelClass.getConstructor(plugin.getClass());
 					CustomChannel channel = ctor.newInstance(plugin);
-					ccJarNames.put(channel.getName(), file.getName());
+					ccJAR.put(channel.getName(), file);
 					channel.init();
 					channels.add(channel);
 					

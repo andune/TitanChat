@@ -3,8 +3,8 @@ package com.titankingdoms.nodinchan.titanchat.util;
 import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
+import com.titankingdoms.nodinchan.titanchat.addon.Addon;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelVariables;
-import com.titankingdoms.nodinchan.titanchat.support.Addon;
 
 public class Format {
 	

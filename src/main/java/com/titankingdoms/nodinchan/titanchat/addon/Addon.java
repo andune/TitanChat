@@ -1,4 +1,4 @@
-package com.titankingdoms.nodinchan.titanchat.support;
+package com.titankingdoms.nodinchan.titanchat.addon;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,8 +23,8 @@ public class Addon {
 	
 	private static String name;
 	
-	private static File configFile = null;
-	private static FileConfiguration config = null;
+	private File configFile = null;
+	private FileConfiguration config = null;
 	
 	public Addon(TitanChat plugin, String name) {
 		Addon.plugin = plugin;
@@ -55,15 +55,9 @@ public class Addon {
 		return name;
 	}
 	
-	public TitanChat getPlugin() {
-		return plugin;
-	}
-	
 	public static InputStream getResource(String fileName) {
-		File file = new File(plugin.getAddonDir(), plugin.getLoader().getPluginAddonJar(name));
-		
 		try {
-			JarFile jarFile = new JarFile(file);
+			JarFile jarFile = new JarFile(plugin.getLoader().getPluginAddonJar(name));
 			Enumeration<JarEntry> entries = jarFile.entries();
 			
 			while (entries.hasMoreElements()) {
@@ -86,7 +80,7 @@ public class Addon {
 		plugin.getCommandManager().register(command);
 	}
 	
-	public static void reloadConfig() {
+	public void reloadConfig() {
 		if (configFile == null) { configFile = new File(new File(plugin.getAddonDir(), name), "config.yml"); }
 		
 		config = YamlConfiguration.loadConfiguration(configFile);
@@ -99,7 +93,7 @@ public class Addon {
 		}
 	}
 	
-	public static void saveConfig() {
+	public void saveConfig() {
 		if (config == null || configFile == null) { return; }
 		try { config.save(configFile); } catch (IOException e) {}
 	}

@@ -17,19 +17,19 @@ import com.titankingdoms.nodinchan.titanchat.command.Command;
 
 public class CustomChannel extends Channel {
 
-	protected static TitanChat plugin;
+	protected TitanChat plugin;
 	
-	private static String name;
+	private String name;
 	
 	private Logger log = Logger.getLogger("TitanLog");
 	
-	private static File configFile = null;
-	private static FileConfiguration config = null;
+	private File configFile = null;
+	private FileConfiguration config = null;
 	
 	public CustomChannel(TitanChat plugin, String name) {
 		super(plugin, name, Type.CUSTOM);
-		CustomChannel.plugin = plugin;
-		CustomChannel.name = super.getName();
+		this.plugin = plugin;
+		this.name = super.getName();
 	}
 	
 	public String colourise(String message) {
@@ -52,7 +52,7 @@ public class CustomChannel extends Channel {
 		return config;
 	}
 	
-	public static File getDataFolder() {
+	public File getDataFolder() {
 		File dir = new File(plugin.getChannelDir(), name);
 		dir.mkdir();
 		return dir;
@@ -63,13 +63,9 @@ public class CustomChannel extends Channel {
 		return log;
 	}
 	
-	public TitanChat getPlugin() {
-		return plugin;
-	}
-	
-	public static InputStream getResource(String fileName) {
+	public InputStream getResource(String fileName) {
 		try {
-			JarFile jarFile = new JarFile(new File(plugin.getChannelDir(), plugin.getLoader().getCustomChannelJar(name)));
+			JarFile jarFile = new JarFile(plugin.getLoader().getCustomChannelJAR(name));
 			Enumeration<JarEntry> entries = jarFile.entries();
 			
 			while (entries.hasMoreElements()) {
@@ -88,11 +84,11 @@ public class CustomChannel extends Channel {
 	
 	public boolean onCommand(Player player, String cmd, String[] args) { return false; }
 	
-	public static void register(Command command) {
+	public void register(Command command) {
 		plugin.getCommandManager().register(command);
 	}
 	
-	public static void reloadCustomConfig() {
+	public void reloadConfig() {
 		if (configFile == null) { configFile = new File(getDataFolder(), "config.yml"); }
 		
 		config = YamlConfiguration.loadConfiguration(configFile);
@@ -105,7 +101,7 @@ public class CustomChannel extends Channel {
 		}
 	}
 	
-	public static void saveCustomConfig() {
+	public void saveConfig() {
 		if (config == null || configFile == null)
 			return;
 		

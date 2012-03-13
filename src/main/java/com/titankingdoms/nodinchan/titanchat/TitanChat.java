@@ -1,8 +1,6 @@
 package com.titankingdoms.nodinchan.titanchat;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -14,21 +12,18 @@ import net.milkbowl.vault.permission.Permission;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.titankingdoms.nodinchan.titanchat.addon.Addon;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
 import com.titankingdoms.nodinchan.titanchat.command.CommandManager;
-import com.titankingdoms.nodinchan.titanchat.permissions.MiniPerms;
-import com.titankingdoms.nodinchan.titanchat.permissions.hook.PermissionsHook;
-import com.titankingdoms.nodinchan.titanchat.support.Addon;
-import com.titankingdoms.nodinchan.titanchat.support.Loader;
+import com.titankingdoms.nodinchan.titanchat.permissions.PermissionsHook;
 import com.titankingdoms.nodinchan.titanchat.util.Format;
+import com.titankingdoms.nodinchan.titanchat.util.Loader;
 
 /*
  *     TitanChat 3.0
@@ -55,7 +50,6 @@ public class TitanChat extends JavaPlugin {
 	private ChannelManager chManager;
 	private CommandManager cmdManager;
 	private Format format;
-	private MiniPerms miniPerms;
 	private PermissionsHook permHook;
 	private Loader loader;
 	
@@ -63,9 +57,6 @@ public class TitanChat extends JavaPlugin {
 	
 	private List<Addon> addons;
 	private List<String> muted;
-	
-	private File permissionsFile = null;
-	private FileConfiguration permissions = null;
 	
 	private Permission perm;
 	private Chat chat;
@@ -158,15 +149,6 @@ public class TitanChat extends JavaPlugin {
 	
 	public Loader getLoader() {
 		return loader;
-	}
-	
-	public MiniPerms getMiniPerms() {
-		return miniPerms;
-	}
-	
-	public FileConfiguration getPermissions() {
-		if (permissions == null) { reloadPermissions(); }
-		return permissions;
 	}
 	
 	public Player getPlayer(String name) {
@@ -341,22 +323,15 @@ public class TitanChat extends JavaPlugin {
 		chManager = new ChannelManager(this);
 		cmdManager = new CommandManager(this);
 		format = new Format(this);
-		miniPerms = new MiniPerms(this);
 		permHook = new PermissionsHook(this);
 		
 		addons = new ArrayList<Addon>();
 		
 		File config = new File(getDataFolder(), "config.yml");
-		File permissions = new File(getDataFolder(), "miniperms.yml");
 		
 		if (!config.exists()) {
 			log(Level.INFO, "Loading default config");
 			saveResource("config.yml", false);
-		}
-		
-		if (!permissions.exists()) {
-			log(Level.INFO, "Generating easy to use TitanChat MiniPerms...");
-			saveResource("miniperms.yml", false);
 		}
 		
 		if (getAddonDir().mkdir())
@@ -364,6 +339,9 @@ public class TitanChat extends JavaPlugin {
 		
 		if (getCustomChannelDir().mkdir())
 			log(Level.INFO, "Creating custom channel directory...");
+		
+		if (getCommandDir().mkdir())
+			log(Level.INFO, "Creating commands directory");
 		
 		if (getChannelDir().mkdir()) {
 			log(Level.INFO, "Creating channel directory...");
@@ -383,8 +361,6 @@ public class TitanChat extends JavaPlugin {
 			setupChatService();
 			setupPermissionService();
 		}
-		
-		miniPerms.load();
 		
 		pm.registerEvents(permHook, this);
 		pm.registerEvents(new TitanChatListener(this), this);
@@ -422,24 +398,6 @@ public class TitanChat extends JavaPlugin {
 		}
 		
 		return (str.toString().equals("")) ? new String[] {} : str.toString().split(" ");
-	}
-	
-	public void reloadPermissions() {
-		if (permissionsFile == null) { permissionsFile = new File(getDataFolder(), "miniperms.yml"); }
-		
-		permissions = YamlConfiguration.loadConfiguration(permissionsFile);
-		
-		InputStream defConfigStream = getResource("miniperms.yml");
-		
-		if (defConfigStream != null) {
-			YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
-			permissions.setDefaults(defConfig);
-		}
-	}
-	
-	public void savePermissions() {
-		if (permissionsFile == null || permissions == null) { return; }
-		try { permissions.save(permissionsFile); } catch (IOException e) { log(Level.SEVERE, "Could not save to " + permissionsFile); }
 	}
 	
 	public void sendInfo(Player player, String info) {

@@ -129,6 +129,14 @@ public class Channel {
 		return this.password.equals(password);
 	}
 	
+	@Override
+	public boolean equals(Object object) {
+		if (object instanceof Channel)
+			return ((Channel) object).getName().equals(getName());
+		
+		return false;
+	}
+	
 	public List<String> getAdminList() {
 		return adminlist;
 	}
