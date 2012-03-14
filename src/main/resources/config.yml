@@ -15,11 +15,20 @@ channels:
         join: true
         leave: true
 broadcast:
-    player: '[&cBroadcast&f] %player: %message'
-    server: '<&4Server&f> %message'
+    player:
+        enable: true
+        format: '[&cBroadcast&f] %player: %message'
+    server:
+        enable: true
+        format: '<&4Server&f> %message'
 emote:
-    player: '* %player %action'
-    server: '* &4Server &f%action'
+    player:
+        enable: true
+        format: '* %player %action'
+    server:
+        enable: true
+        format'* &4Server &f%action'
 formatting:
     use-built-in: true
     format: "%tag %pprefix%player%psuffix: %message"
+debug: none

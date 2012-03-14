@@ -2,6 +2,7 @@ package com.titankingdoms.nodinchan.titanchat.channel;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,6 +70,17 @@ public final class ChannelManager {
 		plugin.sendInfo(player, "You have deleted " + channel.getName());
 	}
 	
+	public List<String> getAccessList(Player player) {
+		List<String> channels = new ArrayList<String>();
+		
+		for (Channel channel : this.channels) {
+			if (channel.canAccess(player))
+				channels.add(channel.getName());
+		}
+		
+		return channels;
+	}
+	
 	public Channel getDefaultChannel() {
 		for (Channel channel : channels) {
 			if (channel.getType().equals(Type.DEFAULT))
@@ -131,10 +143,6 @@ public final class ChannelManager {
 		return channelAmount;
 	}
 	
-	public List<Channel> getChannels() {
-		return channels;
-	}
-	
 	public Channel loadChannel(String name) throws Exception {
 		Type type = Type.fromName(new Channel(plugin, name).getConfig().getString("type"));
 		
@@ -161,7 +169,7 @@ public final class ChannelManager {
 		return channel;
 	}
 	
-	public void loadChannels() throws Exception {
+	public void load() throws Exception {
 		if (!plugin.enableChannels()) { plugin.log(Level.INFO, "Channels disabled"); return; }
 		
 		channels.addAll(plugin.getLoader().loadChannels());
@@ -182,6 +190,8 @@ public final class ChannelManager {
 		}
 		
 		channelAmount = channels.size() - customChAmount;
+		
+		sortChannels();
 		
 		plugin.log(Level.INFO, "No. of channels: " + channelAmount);
 		plugin.log(Level.INFO, "No. of custom channels: " + customChAmount);
@@ -227,6 +237,29 @@ public final class ChannelManager {
 	public void register(Channel channel) {
 		channels.add(channel);
 		plugin.log(Level.INFO, "A new channel, " + channel.getName() + ", has been registered");
+	}
+	
+	public void reload() {
+		for (Channel channel : channels) { channel.reloadConfig(); }
+		channels.clear();
+		try { load(); } catch (Exception e) {}
+	}
+	
+	public void sortChannels() {
+		List<Channel> channels = new ArrayList<Channel>();
+		List<String> names = new ArrayList<String>();
+		
+		for (Channel channel : this.channels) {
+			names.add(channel.getName());
+		}
+		
+		Collections.sort(names);
+		
+		for (String name : names) {
+			channels.add(getChannel(name));
+		}
+		
+		this.channels = channels;
 	}
 	
 	public void unload() {

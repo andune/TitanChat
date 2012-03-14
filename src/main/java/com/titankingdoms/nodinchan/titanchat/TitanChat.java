@@ -260,9 +260,7 @@ public final class TitanChat extends JavaPlugin {
 				if (args[0].equalsIgnoreCase("reload")) {
 					log(Level.INFO, "Reloading configs...");
 					reloadConfig();
-					for (Channel channel : getChannelManager().getChannels()) { channel.reloadConfig(); }
-					getChannelManager().getChannels().clear();
-					try { getChannelManager().loadChannels(); } catch (Exception e) {}
+					chManager.reload();
 					log(Level.INFO, "Configs reloaded");
 					return true;
 				}
@@ -277,7 +275,12 @@ public final class TitanChat extends JavaPlugin {
 		
 		if (cmd.getName().equalsIgnoreCase("broadcast")) {
 			if (!(sender instanceof Player)) {
-				String message = getConfig().getString("broadcast.server");
+				if (!getConfig().getBoolean("broadcast.server.enable")) {
+					log(Level.WARNING, "Command disabled");
+					return true;
+				}
+				
+				String message = getConfig().getString("broadcast.server.format");
 				
 				StringBuilder str = new StringBuilder();
 				
@@ -295,6 +298,11 @@ public final class TitanChat extends JavaPlugin {
 				return true;
 			}
 			
+			if (!getConfig().getBoolean("broadcast.player.enable")) {
+				sendWarning((Player) sender, "Command disabled");
+				return true;
+			}
+			
 			if (has((Player) sender, "TitanChat.broadcast"))
 				try { cmdManager.execute((Player) sender, "broadcast", args); } catch (Exception e) {}
 			else
@@ -305,7 +313,12 @@ public final class TitanChat extends JavaPlugin {
 		
 		if (cmd.getName().equalsIgnoreCase("me")) {
 			if (!(sender instanceof Player)) {
-				String message = getConfig().getString("emote.server");
+				if (!getConfig().getBoolean("emote.server.enable")) {
+					log(Level.WARNING, "Command disabled");
+					return true;
+				}
+				
+				String message = getConfig().getString("emote.server.format");
 				
 				StringBuilder str = new StringBuilder();
 				
@@ -319,6 +332,11 @@ public final class TitanChat extends JavaPlugin {
 				message = message.replace("%action", str.toString());
 				getServer().broadcastMessage(getFormat().colourise(message));
 				getLogger().info("* Server " + getFormat().decolourise(str.toString()));
+				return true;
+			}
+			
+			if (!getConfig().getBoolean("emote.player.enable")) {
+				sendWarning((Player) sender, "Command disabled");
 				return true;
 			}
 			
@@ -398,7 +416,7 @@ public final class TitanChat extends JavaPlugin {
 		pm.registerEvents(permHook, this);
 		pm.registerEvents(new TitanChatListener(this), this);
 		
-		try { chManager.loadChannels(); } catch (Exception e) {}
+		try { chManager.load(); } catch (Exception e) {}
 		
 		addonManager.load();
 		cmdManager.load();

@@ -14,7 +14,7 @@ public final class Format {
 	}
 	
 	public String broadcastFormat(Player player, String msg) {
-		String message = plugin.getConfig().getString("broadcast.player");
+		String message = plugin.getConfig().getString("broadcast.player.format");
 		
 		String playerPrefix = plugin.getPlayerPrefix(player);
 		String playerSuffix = plugin.getPlayerSuffix(player);
@@ -61,7 +61,7 @@ public final class Format {
 	}
 	
 	public String emoteFormat(Player player, String msg) {
-		String message = plugin.getConfig().getString("emote.player");
+		String message = plugin.getConfig().getString("emote.player.format");
 		
 		String playerPrefix = plugin.getPlayerPrefix(player);
 		String playerSuffix = plugin.getPlayerSuffix(player);

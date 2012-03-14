@@ -102,6 +102,7 @@ public class Debugger {
 	
 	public static void load(TitanChat instance) {
 		String debugs = instance.getConfig().getString("debug", "none");
+		
 		if (!debugs.equals("none")) {
 			if (debugs.equals("all") || debugs.equals("full")) {
 				Debugger.check.add(666);
@@ -125,6 +126,19 @@ public class Debugger {
 				}
 			}
 		}
+	}
+	
+	public static void enable(int debug) {
+		level = (byte) debug;
+	}
+	
+	public static void enableAll() {
+		Debugger.check.add(666);
+	}
+	
+	public static void disable() {
+		Debugger.override = false;
+		check.clear();
 	}
 }
 

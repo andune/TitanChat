@@ -65,8 +65,8 @@ public final class CommandManager {
 		register(new ChatCommand(plugin));
 		register(new InformationCommand(plugin));
 		register(new InvitationCommand(plugin));
+		register(new PluginCommand(plugin));
 		register(new RankingCommand(plugin));
-		register(new ReloadCommand(plugin));
 		register(new SettingsCommand(plugin));
 		
 		try { for (Command command : plugin.getLoader().loadCommands()) { register(command); } } catch (Exception e) {}

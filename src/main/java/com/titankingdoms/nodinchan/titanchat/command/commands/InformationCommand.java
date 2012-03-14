@@ -1,8 +1,6 @@
 package com.titankingdoms.nodinchan.titanchat.command.commands;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -148,13 +146,6 @@ public class InformationCommand extends Command {
 	@CommandID(name = "List", triggers = "list")
 	@CommandInfo(description = "Lists all channels you have access to", usage = "list")
 	public void list(Player player, String[] args) {
-		List<String> channels = new ArrayList<String>();
-		
-		for (Channel channel : cm.getChannels()) {
-			if (channel.canAccess(player))
-				channels.add(channel.getName());
-		}
-		
-		player.sendMessage(ChatColor.AQUA + "Channels: " + plugin.createList(channels));
+		player.sendMessage(ChatColor.AQUA + "Channels: " + plugin.createList(cm.getAccessList(player)));
 	}
 }
