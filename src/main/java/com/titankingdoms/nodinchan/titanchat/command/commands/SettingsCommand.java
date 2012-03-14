@@ -15,7 +15,7 @@ import com.titankingdoms.nodinchan.titanchat.command.CommandID;
 import com.titankingdoms.nodinchan.titanchat.command.CommandInfo;
 
 public class SettingsCommand extends Command {
-	
+
 	private ChannelManager cm;
 	
 	public SettingsCommand(TitanChat plugin) {

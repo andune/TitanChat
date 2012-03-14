@@ -22,7 +22,7 @@ import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
 import com.titankingdoms.nodinchan.titanchat.command.Command;
 
 public final class Loader {
-	
+
 	private final TitanChat plugin;
 	
 	private final File addonDir;

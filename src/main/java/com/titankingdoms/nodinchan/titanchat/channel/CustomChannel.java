@@ -11,7 +11,7 @@ import com.titankingdoms.nodinchan.titanchat.command.Command;
 public class CustomChannel extends Channel {
 
 	protected final TitanChat plugin;
-	
+
 	private Logger log = Logger.getLogger("TitanLog");
 	
 	public CustomChannel(TitanChat plugin, String name) {

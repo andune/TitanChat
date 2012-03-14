@@ -10,7 +10,7 @@ import com.titankingdoms.nodinchan.titanchat.command.CommandID;
 import com.titankingdoms.nodinchan.titanchat.command.CommandInfo;
 
 public class InvitationCommand extends Command {
-	
+
 	private ChannelManager cm;
 	
 	public InvitationCommand(TitanChat plugin) {

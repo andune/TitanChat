@@ -11,7 +11,7 @@ import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
 
 public final class TitanChatListener implements Listener {
-	
+
 	private TitanChat plugin;
 	
 	public TitanChatListener(TitanChat plugin) {

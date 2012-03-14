@@ -10,9 +10,11 @@ import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.command.commands.*;
+import com.titankingdoms.nodinchan.titanchat.debug.Debugger;
 
 public final class CommandManager {
-	
+
+	private final static Debugger db = new Debugger(4);
 	private final TitanChat plugin;
 	
 	private List<CommandExecutor> executors;
@@ -72,8 +74,10 @@ public final class CommandManager {
 	}
 	
 	public void register(Command command) {
+		db.i("try to register command " + command.toString());
 		for (Method method : command.getClass().getMethods()) {
 			if (method.getAnnotation(CommandID.class) != null) {
+				db.i("adding new executor!");
 				executors.add(new CommandExecutor(method, command, method.getAnnotation(CommandID.class).name()));
 			}
 		}

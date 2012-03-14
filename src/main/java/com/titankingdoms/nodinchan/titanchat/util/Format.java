@@ -6,7 +6,7 @@ import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelVariables;
 
 public final class Format {
-	
+
 	private final TitanChat plugin;
 	
 	public Format(TitanChat plugin) {
