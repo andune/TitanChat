@@ -99,7 +99,7 @@ public class Debugger {
 	}
 
 	public static void load(TitanChat instance) {
-		String debugs = instance.getConfig().getString("debug");
+		String debugs = instance.getConfig().getString("debug", "none");
 		if (!debugs.equals("none")) {
 			if (debugs.equals("all") || debugs.equals("full")) {
 				Debugger.check.add(666);
