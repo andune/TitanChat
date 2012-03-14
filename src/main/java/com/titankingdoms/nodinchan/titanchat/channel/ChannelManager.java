@@ -13,9 +13,10 @@ import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.debug.Debugger;
 
 public final class ChannelManager {
-
-	private final static Debugger db = new Debugger(3);
+	
 	private final TitanChat plugin;
+	
+	private static final Debugger db = new Debugger(3);
 	
 	private int channelAmount = 0;
 	private int customChAmount = 0;
@@ -31,8 +32,9 @@ public final class ChannelManager {
 	}
 	
 	public void createChannel(Player player, String name) {
-		db.i("player " + player.getName() +
+		db.i("Player " + player.getName() +
 				" is creating channel " + name);
+		
 		Channel channel = new Channel(plugin, name, Type.PUBLIC);
 		channels.add(channel);
 		
@@ -45,8 +47,9 @@ public final class ChannelManager {
 	}
 	
 	public void deleteChannel(Player player, String name) {
-		db.i("player " + player.getName() +
+		db.i("Player " + player.getName() +
 				" is deleting channel " + name);
+		
 		Channel channel = getChannel(name);
 		channels.remove(channel);
 		

@@ -23,9 +23,10 @@ import de.bananaco.bpermissions.api.util.CalculableType;
 import de.bananaco.bpermissions.imp.Permissions;
 
 public final class PermissionsHook implements Listener {
-
-	private final static Debugger db = new Debugger(5);
+	
 	private final TitanChat plugin;
+	
+	private static final Debugger db = new Debugger(5);
 	
 	private Plugin permissionsPlugin;
 	
@@ -47,7 +48,7 @@ public final class PermissionsHook implements Listener {
 				String[] groups = PermissionsEx.getPermissionManager().getUser(player).getGroupsNames();
 				String group = (groups != null && groups.length > 0) ? groups[0] : "";
 				prefix = PermissionsEx.getPermissionManager().getGroup(group).getPrefix(player.getWorld().getName());
-				db.i("PEX returned group prefix: " + prefix);
+				db.i("PermissionsEx returned group prefix: " + prefix);
 				
 			} else if (permissionsPlugin instanceof Permissions) {
 				String[] groups = ApiLayer.getGroups(player.getWorld().getName(), CalculableType.USER, player.getName());
@@ -73,7 +74,7 @@ public final class PermissionsHook implements Listener {
 				String[] groups = PermissionsEx.getPermissionManager().getUser(player).getGroupsNames();
 				String group = (groups != null && groups.length > 0) ? groups[0] : "";
 				suffix = (!group.equals("")) ? PermissionsEx.getPermissionManager().getGroup(group).getSuffix(player.getWorld().getName()) : "";
-				db.i("PEX returned group suffix: " + suffix);
+				db.i("PermissionsEx returned group suffix: " + suffix);
 				
 			} else if (permissionsPlugin instanceof Permissions) {
 				String[] groups = ApiLayer.getGroups(player.getWorld().getName(), CalculableType.USER, player.getName());
@@ -98,7 +99,7 @@ public final class PermissionsHook implements Listener {
 			if (permissionsPlugin instanceof PermissionsEx) {
 				PermissionUser user = PermissionsEx.getPermissionManager().getUser(player);
 				prefix = (user != null) ? user.getPrefix() : "";
-				db.i("PEX returned player prefix: " + prefix);
+				db.i("PermissionsEx returned player prefix: " + prefix);
 				
 			} else if (permissionsPlugin instanceof Permissions) {
 				String[] groups = ApiLayer.getGroups(player.getWorld().getName(), CalculableType.USER, player.getName());
@@ -122,7 +123,7 @@ public final class PermissionsHook implements Listener {
 			if (permissionsPlugin instanceof PermissionsEx) {
 				PermissionUser user = PermissionsEx.getPermissionManager().getUser(player);
 				suffix = (user != null) ? user.getSuffix() : "";
-				db.i("PEX returned player suffix: " + suffix);
+				db.i("PermissionsEx returned player suffix: " + suffix);
 				
 			} else if (permissionsPlugin instanceof Permissions) {
 				String[] groups = ApiLayer.getGroups(player.getWorld().getName(), CalculableType.USER, player.getName());
@@ -159,7 +160,7 @@ public final class PermissionsHook implements Listener {
 		if (permissionsPlugin != null) {
 			if (event.getPlugin().getName().equals(name)) {
 				permissionsPlugin = null;
-				if (plugin.usingVault()) { plugin.log(Level.INFO, name + " unhooked"); }
+				if (!plugin.usingVault()) { plugin.log(Level.INFO, name + " unhooked"); }
 			}
 		}
 	}

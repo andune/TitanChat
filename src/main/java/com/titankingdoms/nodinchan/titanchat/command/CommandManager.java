@@ -13,9 +13,10 @@ import com.titankingdoms.nodinchan.titanchat.command.commands.*;
 import com.titankingdoms.nodinchan.titanchat.debug.Debugger;
 
 public final class CommandManager {
-
-	private final static Debugger db = new Debugger(4);
+	
 	private final TitanChat plugin;
+	
+	private static final Debugger db = new Debugger(4);
 	
 	private List<CommandExecutor> executors;
 	
@@ -74,10 +75,11 @@ public final class CommandManager {
 	}
 	
 	public void register(Command command) {
-		db.i("try to register command " + command.toString());
+		db.i("Try to register command " + command.toString());
+		
 		for (Method method : command.getClass().getMethods()) {
 			if (method.getAnnotation(CommandID.class) != null) {
-				db.i("adding new executor!");
+				db.i("Adding new executor: " + method.getAnnotation(CommandID.class).name());
 				executors.add(new CommandExecutor(method, command, method.getAnnotation(CommandID.class).name()));
 			}
 		}

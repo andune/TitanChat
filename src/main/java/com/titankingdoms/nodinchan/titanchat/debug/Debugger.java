@@ -7,25 +7,27 @@ import org.bukkit.Bukkit;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 
 /**
- * debugger class
+ * Debugger Class
  * 
  * -
  * 
- * provides methods for logging when in debug mode
+ * Provides methods for logging when in debug mode
  * 
  * @author slipcor
  * 
  */
 
 public class Debugger {
-	public static boolean override = false;
-
-	private static String prefix = "[TC-debug] ";
-	private static HashSet<Integer> check = new HashSet<Integer>();
-	private static byte level = 3;
-
+	
 	private int id = 0;
-
+	private static byte level = 3;
+	
+	private static String prefix = "[TC-Debug] ";
+	
+	public static boolean override = false;
+	
+	private static HashSet<Integer> check = new HashSet<Integer>();
+	
 	/**
 	 * Debug constructor
 	 * 
@@ -35,7 +37,7 @@ public class Debugger {
 	public Debugger(int i) {
 		id = i;
 	}
-
+	
 	/**
 	 * does this class debug?
 	 * 
@@ -44,7 +46,7 @@ public class Debugger {
 	private boolean debugs() {
 		return override || check.contains(id) || check.contains(666);
 	}
-
+	
 	/**
 	 * log a message as prefixed INFO
 	 * 
@@ -56,7 +58,7 @@ public class Debugger {
 			return;
 		Bukkit.getLogger().info(prefix + s);
 	}
-
+	
 	/**
 	 * log a message as prefixed WARNING
 	 * 
@@ -68,7 +70,7 @@ public class Debugger {
 			return;
 		Bukkit.getLogger().warning(prefix + s);
 	}
-
+	
 	/**
 	 * log a message as prefixed SEVERE
 	 * 
@@ -80,7 +82,7 @@ public class Debugger {
 			return;
 		Bukkit.getLogger().severe(prefix + s);
 	}
-
+	
 	/**
 	 * read a string array and return a readable string
 	 * 
@@ -97,21 +99,21 @@ public class Debugger {
 		}
 		return result;
 	}
-
+	
 	public static void load(TitanChat instance) {
 		String debugs = instance.getConfig().getString("debug", "none");
 		if (!debugs.equals("none")) {
 			if (debugs.equals("all") || debugs.equals("full")) {
 				Debugger.check.add(666);
-				System.out.print("debugging EVERYTHING");
+				System.out.print("Debugging EVERYTHING");
 			} else {
 				String[] sIds = debugs.split(",");
 				for (String s : sIds) {
 					try {
 						Debugger.check.add(Integer.valueOf(s));
-						System.out.print("debugging: " + s);
+						System.out.print("Debugging: " + s);
 					} catch (Exception e) {
-						System.out.print("debug load error: " + s);
+						System.out.print("Debug load error: " + s);
 					}
 					if (s.equals("i")) {
 						level = (byte) 1;
@@ -132,5 +134,4 @@ public class Debugger {
 // 3 - .channel
 // 4 - .command
 // 5 - .permissions
-
 

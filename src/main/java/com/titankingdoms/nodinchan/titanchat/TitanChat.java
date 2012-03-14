@@ -46,8 +46,8 @@ import com.titankingdoms.nodinchan.titanchat.util.Loader;
 
 public final class TitanChat extends JavaPlugin {
 	
-	protected static final Logger log = Logger.getLogger("TitanLog");
-	private final static Debugger db = new Debugger(1);
+	private static final Logger log = Logger.getLogger("TitanLog");
+	private static final Debugger db = new Debugger(1);
 	
 	private AddonManager addonManager;
 	private ChannelManager chManager;
@@ -64,23 +64,26 @@ public final class TitanChat extends JavaPlugin {
 	private Chat chat;
 	
 	public void assignAdmin(Player player, Channel channel) {
-		db.i("assigning player " + player.getName() + 
-				" admin of channel " + channel.getName());
+		db.i("Assigning player " + player.getName() +
+				" as admin of channel " + channel.getName());
+		
 		channel.getAdminList().add(player.getName());
 		channel.save();
 		sendInfo(player, "You are now an Admin of " + channel.getName());
 	}
 	
 	public void channelSwitch(Player player, Channel oldCh, Channel newCh) {
-		db.i("channel switch of player " + player.getName() + 
-				" from channel " + oldCh.getName() + 
+		db.i("Channel switch of player " + player.getName() +
+				" from channel " + oldCh.getName() +
 				" to channel " + newCh.getName());
+		
 		oldCh.leave(player);
 		newCh.join(player);
 	}
 	
 	public String createList(List<String> list) {
-		db.i("creating string out of stringlist: " + list.toString());
+		db.i("Creating string out of stringlist: " + list.toString());
+		
 		StringBuilder str = new StringBuilder();
 		
 		for (String item : list) {
@@ -138,26 +141,28 @@ public final class TitanChat extends JavaPlugin {
 	}
 	
 	public String getGroupPrefix(Player player) {
-		db.i("getting group prefix of player " + player.getName());
+		db.i("Getting group prefix of player " + player.getName());
+		
 		if (chat != null) {
 			String prefix = chat.getGroupPrefix(player.getWorld(), perm.getPrimaryGroup(player));
-			db.i("returning :" + prefix);
+			db.i("Returning: " + prefix);
 			return (prefix != null) ? prefix : "";
 		}
 
-		db.i("returning permhook group prefix");
+		db.i("Returning PermissionsHook group prefix");
 		return permHook.getGroupPrefix(player);
 	}
 	
 	public String getGroupSuffix(Player player) {
-		db.i("getting group suffix of player " + player.getName());
+		db.i("Getting group suffix of player " + player.getName());
+		
 		if (chat != null) {
 			String suffix = chat.getGroupSuffix(player.getWorld(), perm.getPrimaryGroup(player));
-			db.i("returning :" + suffix);
+			db.i("Returning: " + suffix);
 			return (suffix != null) ? suffix : "";
 		}
 		
-		db.i("returning permhook group suffix");
+		db.i("Returning PermissionsHook group suffix");
 		return permHook.getGroupSuffix(player);
 	}
 	
@@ -170,26 +175,28 @@ public final class TitanChat extends JavaPlugin {
 	}
 	
 	public String getPlayerPrefix(Player player) {
-		db.i("getting prefix of player: " + player.getName());
+		db.i("Getting prefix of player: " + player.getName());
+		
 		if (chat != null) {
 			String prefix = chat.getPlayerPrefix(player.getWorld(), player.getName());
-			db.i("returning: " + prefix);
+			db.i("Returning: " + prefix);
 			return (prefix != null) ? prefix : "";
 		}
 		
-		db.i("returning permhook player prefix");
+		db.i("Returning PermissionsHook player prefix");
 		return permHook.getPlayerPrefix(player);
 	}
 	
 	public String getPlayerSuffix(Player player) {
-		db.i("getting suffix of player: " + player.getName());
+		db.i("Getting suffix of player: " + player.getName());
+		
 		if (chat != null) {
 			String suffix = chat.getPlayerSuffix(player.getWorld(), player.getName());
-			db.i("returning: " + suffix);
+			db.i("Returning: " + suffix);
 			return (suffix != null) ? suffix : "";
 		}
 		
-		db.i("returning permhook player suffix");
+		db.i("Returning PermissionsHook player suffix");
 		return permHook.getPlayerSuffix(player);
 	}
 	
@@ -217,7 +224,8 @@ public final class TitanChat extends JavaPlugin {
 	}
 	
 	public void mute(Player player, boolean mute) {
-		db.i( (mute?"":"un") + "muting player");
+		db.i((mute ? "" : "un") + "muting player");
+		
 		if (mute)
 			muted.add(player.getName());
 		else
@@ -231,14 +239,20 @@ public final class TitanChat extends JavaPlugin {
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		db.i("onCommand: " + cmd.getName());
+		
 		if (cmd.getName().equals("titanchat")) {
 			if (args.length < 1) {
-				db.i("onCommand: no args!");
+				db.i("onCommand: No arguments!");
+				
 				sender.sendMessage(ChatColor.AQUA + "TitanChat Commands");
 				sender.sendMessage(ChatColor.AQUA + "Command: /titanchat [command] [arguments]");
 				sender.sendMessage(ChatColor.AQUA + "Alias: /tc [command] [arguments]");
+				
 				if (sender instanceof Player)
 					sendInfo((Player) sender, "'/titanchat commands [page]' for command list");
+				else
+					log(Level.INFO, "'/titanchat commands [page]' for command list");
+				
 				return true;
 			}
 			
@@ -254,10 +268,6 @@ public final class TitanChat extends JavaPlugin {
 				}
 				
 				log(Level.INFO, "Please use commands in-game"); return true;
-			}
-			
-			if (!enableChannels()) {
-				sendInfo((Player) sender, "Commands are disabled");
 			}
 
 			db.i("CommandManager executing command:");
@@ -407,7 +417,7 @@ public final class TitanChat extends JavaPlugin {
 	}
 	
 	public String[] parseCommand(String[] args) {
-		db.i("parsing command");
+		db.i("Parsing command");
 		StringBuilder str = new StringBuilder();
 		
 		for (String arg : args) {
@@ -419,13 +429,14 @@ public final class TitanChat extends JavaPlugin {
 			
 			str.append(arg);
 		}
-		db.i("command args: " + str.toString());
+		db.i("Command arguments: " + str.toString());
 		
 		return (str.toString().equals("")) ? new String[] {} : str.toString().split(" ");
 	}
 	
 	public void sendInfo(Player player, String info) {
 		db.i("@" + player.getName() + ": " + info);
+		
 		player.sendMessage("[TitanChat] " + ChatColor.GOLD + info);
 	}
 	
@@ -437,7 +448,8 @@ public final class TitanChat extends JavaPlugin {
 	}
 	
 	public void sendWarning(Player player, String warning) {
-		db.i("warning @" + player.getName() + ": " + warning);
+		db.i("Warning @" + player.getName() + ": " + warning);
+		
 		player.sendMessage("[TitanChat] " + ChatColor.RED + warning);
 	}
 	
@@ -449,7 +461,7 @@ public final class TitanChat extends JavaPlugin {
 	}
 	
 	public void setSilenced(boolean silenced) {
-		db.i("setting silenced to " + String.valueOf(silenced));
+		db.i("Setting silenced to " + silenced);
 		this.silenced = silenced;
 	}
 	
@@ -459,7 +471,7 @@ public final class TitanChat extends JavaPlugin {
 		if (chatProvider != null)
 			chat = chatProvider.getProvider();
 
-		db.i("chat service is set up: " + String.valueOf(chat != null));
+		db.i("Vault Chat Service is set up: " + (chat != null));
 		return chat != null;
 	}
 	
@@ -469,7 +481,7 @@ public final class TitanChat extends JavaPlugin {
 		if (permissionProvider != null)
 			perm = permissionProvider.getProvider();
 		
-		db.i("permission service is set up: " + String.valueOf(perm != null));
+		db.i("Vault Permission Service is set up: " + (perm != null));
 		return perm != null;
 	}
 	
@@ -478,12 +490,12 @@ public final class TitanChat extends JavaPlugin {
 	}
 	
 	public boolean usingVault() {
-		db.i("using vault: " + String.valueOf(perm != null));
+		db.i("Using Vault: " + (perm != null));
 		return perm != null;
 	}
 	
 	public void whitelistMember(Player player, Channel channel) {
-		db.i("adding player " + player.getName() +
+		db.i("Adding player " + player.getName() +
 				" to whitelist of channel " + channel.getName());
 		channel.getWhiteList().add(player.getName());
 		channel.save();
