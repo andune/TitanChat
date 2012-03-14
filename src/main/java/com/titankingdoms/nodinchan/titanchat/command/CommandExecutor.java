@@ -6,7 +6,7 @@ import java.lang.reflect.Method;
 import org.bukkit.entity.Player;
 
 public final class CommandExecutor {
-	
+
 	private final Method method;
 	
 	private final Command command;

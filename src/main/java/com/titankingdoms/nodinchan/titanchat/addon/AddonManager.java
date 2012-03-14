@@ -7,10 +7,12 @@ import java.util.List;
 import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
+import com.titankingdoms.nodinchan.titanchat.debug.Debugger;
 
 public final class AddonManager {
 	
 	private final TitanChat plugin;
+	private final static Debugger db = new Debugger(2);
 	
 	private final List<Addon> addons;
 	
@@ -43,6 +45,7 @@ public final class AddonManager {
 	}
 	
 	public void register(Addon addon) {
+		db.i("registering addon: " + addon.getName());
 		addons.add(addon);
 	}
 	

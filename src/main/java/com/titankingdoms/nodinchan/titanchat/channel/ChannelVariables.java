@@ -5,7 +5,7 @@ import org.bukkit.entity.Player;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 
 public class ChannelVariables {
-	
+
 	private final TitanChat plugin;
 	
 	private final Channel channel;

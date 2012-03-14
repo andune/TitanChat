@@ -16,7 +16,7 @@ import com.titankingdoms.nodinchan.titanchat.command.CommandInfo;
 import com.titankingdoms.nodinchan.titanchat.command.CommandManager;
 
 public class InformationCommand extends Command {
-	
+
 	private ChannelManager cm;
 	
 	public InformationCommand(TitanChat plugin) {

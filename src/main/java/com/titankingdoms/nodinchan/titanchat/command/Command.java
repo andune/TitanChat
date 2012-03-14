@@ -9,7 +9,7 @@ import com.titankingdoms.nodinchan.titanchat.addon.Addon;
 import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
 
 public class Command {
-	
+
 	protected final TitanChat plugin;
 	
 	public Command(TitanChat plugin) {
