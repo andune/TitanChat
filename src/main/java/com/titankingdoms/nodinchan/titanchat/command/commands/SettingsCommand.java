@@ -8,7 +8,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
-import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
 import com.titankingdoms.nodinchan.titanchat.channel.Type;
 import com.titankingdoms.nodinchan.titanchat.command.Command;
@@ -176,10 +175,8 @@ public class SettingsCommand extends Command {
 							case DEFAULT:
 							case STAFF:
 								if (plugin.isStaff(player)) {
-									Channel channel = new Channel(cm.getChannel(args[2]), Type.fromName(args[1]));
-									plugin.getChannelManager().getChannels().remove(cm.getChannel(args[2]));
-									plugin.getChannelManager().getChannels().add(channel);
-									channel.save();
+									cm.getChannel(args[2]).setType(args[1]);
+									cm.getChannel(args[2]).save();
 									
 									plugin.sendInfo(player, "The channel is now " + Type.fromName(args[1]).getName());
 									
@@ -189,10 +186,8 @@ public class SettingsCommand extends Command {
 							case PASSWORD:
 							case PRIVATE:
 							case PUBLIC:
-								Channel channel = new Channel(cm.getChannel(args[2]), Type.fromName(args[1]));
-								plugin.getChannelManager().getChannels().remove(cm.getChannel(args[1]));
-								plugin.getChannelManager().getChannels().add(channel);
-								channel.save();
+								cm.getChannel(args[2]).setType(args[1]);
+								cm.getChannel(args[2]).save();
 								
 								plugin.sendInfo(player, "The channel is now " + Type.fromName(args[1]).getName());
 								break;
@@ -220,6 +215,7 @@ public class SettingsCommand extends Command {
 					} else { plugin.sendWarning(player, "You do not have permission"); }
 					
 				} else { plugin.sendWarning(player, "No such channel"); }
+				
 			} catch (IndexOutOfBoundsException e) {
 				if (cm.getChannel(player).getAdminList().contains(player.getName()) || plugin.isStaff(player)) {
 					if (Type.fromName(args[1]) != null) {
@@ -232,11 +228,8 @@ public class SettingsCommand extends Command {
 						case DEFAULT:
 						case STAFF:
 							if (plugin.isStaff(player)) {
-								Channel oldType = cm.getChannel(player);
-								Channel channel = new Channel(oldType, Type.fromName(args[1]));
-								plugin.getChannelManager().getChannels().remove(oldType);
-								plugin.getChannelManager().getChannels().add(channel);
-								channel.save();
+								cm.getChannel(player).setType(args[1]);
+								cm.getChannel(player).save();
 								
 								plugin.sendInfo(player, "The channel is now " + Type.fromName(args[1]).getName());
 								
@@ -246,11 +239,8 @@ public class SettingsCommand extends Command {
 						case PASSWORD:
 						case PRIVATE:
 						case PUBLIC:
-							Channel oldType = cm.getChannel(player);
-							Channel channel = new Channel(oldType, Type.fromName(args[1]));
-							plugin.getChannelManager().getChannels().remove(oldType);
-							plugin.getChannelManager().getChannels().add(channel);
-							channel.save();
+							cm.getChannel(player).setType(args[1]);
+							cm.getChannel(player).save();
 							
 							plugin.sendInfo(player, "The channel is now " + Type.fromName(args[1]).getName());
 							break;

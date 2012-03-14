@@ -7,11 +7,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 
-import com.titankingdoms.nodinchan.titanchat.addon.Addon;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
 
-public class TitanChatListener implements Listener {
+public final class TitanChatListener implements Listener {
 	
 	private TitanChat plugin;
 	
@@ -49,9 +48,7 @@ public class TitanChatListener implements Listener {
 			event.setMessage(plugin.getFormat().colourise(msg));
 		}
 		
-		for (Addon addon : plugin.getAddons()) {
-			addon.chatMade(player.getName(), msg);
-		}
+		plugin.getAddonManager().chatMade(player.getName(), msg);
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

@@ -11,9 +11,9 @@ import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 
-public class ChannelManager {
+public final class ChannelManager {
 	
-	private TitanChat plugin;
+	private final TitanChat plugin;
 	
 	private int channelAmount = 0;
 	private int customChAmount = 0;
@@ -213,5 +213,15 @@ public class ChannelManager {
 		
 		invitors.remove(invitee.getName());
 		channelInvitors.put(channel, invitors);
+	}
+	
+	public void register(Channel channel) {
+		channels.add(channel);
+		plugin.log(Level.INFO, "A new channel, " + channel.getName() + ", has been registered");
+	}
+	
+	public void unload() {
+		for (Channel channel : channels) { channel.save(); }
+		channels.clear();
 	}
 }

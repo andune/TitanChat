@@ -21,9 +21,9 @@ import de.bananaco.bpermissions.api.ApiLayer;
 import de.bananaco.bpermissions.api.util.CalculableType;
 import de.bananaco.bpermissions.imp.Permissions;
 
-public class PermissionsHook implements Listener {
+public final class PermissionsHook implements Listener {
 	
-	private TitanChat plugin;
+	private final TitanChat plugin;
 	
 	private Plugin permissionsPlugin;
 	

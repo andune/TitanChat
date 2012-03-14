@@ -11,9 +11,9 @@ import org.bukkit.entity.Player;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.command.commands.*;
 
-public class CommandManager {
+public final class CommandManager {
 	
-	private TitanChat plugin;
+	private final TitanChat plugin;
 	
 	private List<CommandExecutor> executors;
 	
@@ -79,7 +79,7 @@ public class CommandManager {
 		}
 	}
 	
-	public List<CommandExecutor> sortCommands() {
+	public void sortCommands() {
 		List<CommandExecutor> executors = new ArrayList<CommandExecutor>();
 		List<String> names = new ArrayList<String>();
 		
@@ -93,6 +93,10 @@ public class CommandManager {
 			executors.add(getCommandExecutor(name));
 		}
 		
-		return executors;
+		this.executors = executors;
+	}
+	
+	public void unload() {
+		executors.clear();
 	}
 }

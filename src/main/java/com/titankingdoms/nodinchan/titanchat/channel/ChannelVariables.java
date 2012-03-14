@@ -6,9 +6,9 @@ import com.titankingdoms.nodinchan.titanchat.TitanChat;
 
 public class ChannelVariables {
 	
-	private TitanChat plugin;
+	private final TitanChat plugin;
 	
-	private Channel channel;
+	private final Channel channel;
 
 	private String chatColour;
 	private String format;
@@ -29,74 +29,74 @@ public class ChannelVariables {
 		this.convert = false;
 	}
 	
-	public boolean convert() {
+	public final boolean convert() {
 		return convert;
 	}
 	
-	public boolean enableJoinMessages() {
+	public final boolean enableJoinMessages() {
 		return joinMessage;
 	}
 	
-	public boolean enableLeaveMessages() {
+	public final boolean enableLeaveMessages() {
 		return leaveMessage;
 	}
 	
-	public Channel getChannel() {
+	public final Channel getChannel() {
 		return channel;
 	}
 	
-	public String getChatColour() {
+	public final String getChatColour() {
 		return chatColour;
 	}
 	
-	public String getFormat() {
+	public final String getFormat() {
 		if (!format.equals(""))
 			return format;
 		
 		return plugin.getConfig().getString("formatting.format");
 	}
 	
-	public String getGroupPrefix(Player player) {
+	public final String getGroupPrefix(Player player) {
 		return plugin.getGroupPrefix(player);
 	}
 	
-	public String getGroupSuffix(Player player) {
+	public final String getGroupSuffix(Player player) {
 		return plugin.getGroupSuffix(player);
 	}
 	
-	public String getNameColour() {
+	public final String getNameColour() {
 		return nameColour;
 	}
 	
-	public String getPlayerPrefix(Player player) {
+	public final String getPlayerPrefix(Player player) {
 		return plugin.getPlayerPrefix(player);
 	}
 	
-	public String getPlayerSuffix(Player player) {
+	public final String getPlayerSuffix(Player player) {
 		return plugin.getPlayerSuffix(player);
 	}
 	
-	public String getTag() {
+	public final String getTag() {
 		return tag;
 	}
 	
-	public void setChatColour(String chatColour) {
+	public final void setChatColour(String chatColour) {
 		this.chatColour = chatColour;
 	}
 	
-	public void setConvert(boolean convert) {
+	public final void setConvert(boolean convert) {
 		this.convert = convert;
 	}
 	
-	public void setFormat(String format) {
+	public final void setFormat(String format) {
 		this.format = format;
 	}
 	
-	public void setNameColour(String nameColour) {
+	public final void setNameColour(String nameColour) {
 		this.nameColour = nameColour;
 	}
 	
-	public void setTag(String tag) {
+	public final void setTag(String tag) {
 		this.tag = tag;
 	}
 }

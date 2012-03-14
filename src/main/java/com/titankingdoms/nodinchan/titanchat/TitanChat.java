@@ -17,7 +17,7 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.titankingdoms.nodinchan.titanchat.addon.Addon;
+import com.titankingdoms.nodinchan.titanchat.addon.AddonManager;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
 import com.titankingdoms.nodinchan.titanchat.command.CommandManager;
@@ -43,10 +43,11 @@ import com.titankingdoms.nodinchan.titanchat.util.Loader;
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-public class TitanChat extends JavaPlugin {
+public final class TitanChat extends JavaPlugin {
 	
-	protected static Logger log = Logger.getLogger("TitanLog");
+	protected static final Logger log = Logger.getLogger("TitanLog");
 	
+	private AddonManager addonManager;
 	private ChannelManager chManager;
 	private CommandManager cmdManager;
 	private Format format;
@@ -55,7 +56,6 @@ public class TitanChat extends JavaPlugin {
 	
 	private boolean silenced = false;
 	
-	private List<Addon> addons;
 	private List<String> muted;
 	
 	private Permission perm;
@@ -101,8 +101,8 @@ public class TitanChat extends JavaPlugin {
 		return new File(getDataFolder(), "addons");
 	}
 	
-	public List<Addon> getAddons() {
-		return addons;
+	public AddonManager getAddonManager() {
+		return addonManager;
 	}
 	
 	public File getChannelDir() {
@@ -302,16 +302,11 @@ public class TitanChat extends JavaPlugin {
 	public void onDisable() {
 		log(Level.INFO, "is now disabling...");
 		
-		log(Level.INFO, "Saving channel information...");
-		
-		for (Channel channel : chManager.getChannels()) {
-			channel.save();
-		}
-		
-		log(Level.INFO, "Clearing ...");
-		
-		chManager.getChannels().clear();
-		addons.clear();
+		log(Level.INFO, "Unloading managers...");
+
+		addonManager.unload();
+		chManager.unload();
+		cmdManager.unload();
 		
 		log(Level.INFO, "is now disabled");
 	}
@@ -320,12 +315,13 @@ public class TitanChat extends JavaPlugin {
 	public void onEnable() {
 		log(Level.INFO, "is now enabling...");
 		
+		muted = new ArrayList<String>();
+		
+		addonManager = new AddonManager(this);
 		chManager = new ChannelManager(this);
 		cmdManager = new CommandManager(this);
 		format = new Format(this);
 		permHook = new PermissionsHook(this);
-		
-		addons = new ArrayList<Addon>();
 		
 		File config = new File(getDataFolder(), "config.yml");
 		
@@ -365,10 +361,9 @@ public class TitanChat extends JavaPlugin {
 		pm.registerEvents(permHook, this);
 		pm.registerEvents(new TitanChatListener(this), this);
 		
-		try { addons.addAll(loader.loadAddons()); } catch (Exception e) {}
-		
 		try { chManager.loadChannels(); } catch (Exception e) {}
 		
+		addonManager.load();
 		cmdManager.load();
 		
 		if (chManager.getDefaultChannel() == null) {

@@ -5,15 +5,16 @@ import java.lang.reflect.Method;
 
 import org.bukkit.entity.Player;
 
-public class CommandExecutor {
+public final class CommandExecutor {
 	
-	private Method method;
+	private final Method method;
 	
-	private Command command;
+	private final Command command;
 	
-	private String name;
+	private final String name;
 
 	public CommandExecutor(Method method, Command command, String name) {
+		this.method = method;
 		this.command = command;
 		this.name = name;
 	}

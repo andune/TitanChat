@@ -13,49 +13,50 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
+import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
 import com.titankingdoms.nodinchan.titanchat.command.Command;
 
 public class Addon {
 	
-	protected static TitanChat plugin;
+	protected TitanChat plugin;
 	
-	private static Logger log = Logger.getLogger("TitanLog");
+	private Logger log = Logger.getLogger("TitanLog");
 	
-	private static String name;
+	private final String name;
 	
 	private File configFile = null;
 	private FileConfiguration config = null;
 	
 	public Addon(TitanChat plugin, String name) {
-		Addon.plugin = plugin;
-		Addon.name = name;
+		this.plugin = plugin;
+		this.name = name;
 	}
 	
 	public void chatMade(String name, String message) {}
 	
-	public String chatMade(Player player, String message) { return message; }
+	public String format(Player player, String message) { return message; }
 	
-	public FileConfiguration getConfig() {
+	public final FileConfiguration getConfig() {
 		if (config == null) { reloadConfig(); }
 		return config;
 	}
 	
-	public File getDataFolder() {
+	public final File getDataFolder() {
 		File dir = new File(plugin.getAddonDir(), name);
 		dir.mkdir();
 		return dir;
 	}
 	
-	public Logger getLogger(String name) {
+	public final Logger getLogger(String name) {
 		if (log.equals(Logger.getLogger("TitanLog"))) { log = Logger.getLogger(name); }
 		return log;
 	}
 	
-	public String getName() {
+	public final String getName() {
 		return name;
 	}
 	
-	public static InputStream getResource(String fileName) {
+	public final InputStream getResource(String fileName) {
 		try {
 			JarFile jarFile = new JarFile(plugin.getLoader().getPluginAddonJar(name));
 			Enumeration<JarEntry> entries = jarFile.entries();
@@ -74,13 +75,19 @@ public class Addon {
 	
 	public void init() {}
 	
-	public boolean onCommand(Player player, String cmd, String[] args) { return false; }
+	public final void register(Addon addon) {
+		plugin.getAddonManager().register(addon);
+	}
 	
-	public static void register(Command command) {
+	public final void register(CustomChannel channel) {
+		plugin.getChannelManager().register(channel);
+	}
+	
+	public void register(Command command) {
 		plugin.getCommandManager().register(command);
 	}
 	
-	public void reloadConfig() {
+	public final void reloadConfig() {
 		if (configFile == null) { configFile = new File(new File(plugin.getAddonDir(), name), "config.yml"); }
 		
 		config = YamlConfiguration.loadConfiguration(configFile);
@@ -93,7 +100,7 @@ public class Addon {
 		}
 	}
 	
-	public void saveConfig() {
+	public final void saveConfig() {
 		if (config == null || configFile == null) { return; }
 		try { config.save(configFile); } catch (IOException e) {}
 	}

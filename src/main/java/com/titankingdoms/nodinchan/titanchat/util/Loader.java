@@ -21,27 +21,27 @@ import com.titankingdoms.nodinchan.titanchat.addon.Addon;
 import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
 import com.titankingdoms.nodinchan.titanchat.command.Command;
 
-public class Loader {
+public final class Loader {
 	
-	private TitanChat plugin;
+	private final TitanChat plugin;
 	
-	private File addonDir;
-	private File channelDir;
-	private File commandDir;
+	private final File addonDir;
+	private final File channelDir;
+	private final File commandDir;
 	
-	private ClassLoader addonLoader;
-	private ClassLoader channelLoader;
-	private ClassLoader commandLoader;
+	private final ClassLoader addonLoader;
+	private final ClassLoader channelLoader;
+	private final ClassLoader commandLoader;
 	
-	private List<File> addonFiles;
-	private List<File> channelFiles;
-	private List<File> commandFiles;
-	private List<Addon> addons;
-	private List<CustomChannel> channels;
-	private List<Command> commands;
+	private final List<File> addonFiles;
+	private final List<File> channelFiles;
+	private final List<File> commandFiles;
+	private final List<Addon> addons;
+	private final List<CustomChannel> channels;
+	private final List<Command> commands;
 	
-	private Map<String, File> paJAR;
-	private Map<String, File> ccJAR;
+	private final Map<String, File> paJAR;
+	private final Map<String, File> ccJAR;
 	
 	public Loader(TitanChat plugin) {
 		this.plugin = plugin;

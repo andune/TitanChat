@@ -65,11 +65,12 @@ TitanChat, a chat management and formatting plugin for Bukkit.
 * 03.03.12 - Fixed fail CREATE command
 * 04.03.12 - Rewrote the command handler
 * 05.03.12 - Fixed commands
-* 07.03.12 - Fixed warning even though nothing is wrong and made Vault optional
+* 07.03.12 - Fixed TitanChat sending warnings to players when nothing is wrong and made Vault optional
 * 10.03.12 - Rewrite begins
 * 11.03.12 - Minor changes in all classes
 * 12.03.12 - Swapped out enums and used annotations
 * 13.03.12 - Proofread code, 99% corrected, 1% unknown
+* 14.03.12 - Waiting for SLiPCoR to add stuff
 
 -----------------------------------------------------------------------------------------------------------------------
 

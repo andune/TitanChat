@@ -15,11 +15,11 @@ import com.titankingdoms.nodinchan.titanchat.TitanChat;
 
 public class Channel {
 	
-	protected TitanChat plugin;
+	protected final TitanChat plugin;
 	
 	private ChannelVariables variables;
 	
-	private String name;
+	private final String name;
 	private String password;
 	
 	private Type type;
@@ -59,21 +59,21 @@ public class Channel {
 		this.whitelist = new ArrayList<String>();
 	}
 	
-	public Channel(Channel channel, Type type) {
-		this.plugin = channel.plugin;
-		this.variables = channel.getVariables();
-		this.name = channel.getName();
-		this.password = channel.getPassword();
-		this.type = type;
-		this.global = channel.isGlobal();
-		this.silenced = channel.isSilenced();
-		this.adminlist = channel.getAdminList();
-		this.blacklist = channel.getBlackList();
-		this.followerlist = channel.getFollowerList();
-		this.invitelist = channel.getInviteList();
-		this.mutelist = channel.getMuteList();
-		this.participants = channel.getParticipants();
-		this.whitelist = channel.getWhiteList();
+	public Channel(TitanChat plugin, String name, ChannelVariables variables) {
+		this.plugin = plugin;
+		this.variables = variables;
+		this.name = name;
+		this.password = "";
+		this.type = Type.CUSTOM;
+		this.global = false;
+		this.silenced = false;
+		this.adminlist = new ArrayList<String>();
+		this.blacklist = new ArrayList<String>();
+		this.followerlist = new ArrayList<String>();
+		this.invitelist = new ArrayList<String>();
+		this.mutelist = new ArrayList<String>();
+		this.participants = new ArrayList<String>();
+		this.whitelist = new ArrayList<String>();
 	}
 	
 	public boolean canAccess(Player player) {
@@ -130,7 +130,7 @@ public class Channel {
 	}
 	
 	@Override
-	public boolean equals(Object object) {
+	public final boolean equals(Object object) {
 		if (object instanceof Channel)
 			return ((Channel) object).getName().equals(getName());
 		
@@ -145,7 +145,7 @@ public class Channel {
 		return blacklist;
 	}
 	
-	public FileConfiguration getConfig() {
+	public final FileConfiguration getConfig() {
 		if (config == null) { reloadConfig(); }
 		return config;
 	}
@@ -162,7 +162,7 @@ public class Channel {
 		return mutelist;
 	}
 	
-	public String getName() {
+	public final String getName() {
 		return name;
 	}
 	
@@ -170,11 +170,11 @@ public class Channel {
 		return password;
 	}
 	
-	public Type getType() {
+	public final Type getType() {
 		return type;
 	}
 	
-	public ChannelVariables getVariables() {
+	public final ChannelVariables getVariables() {
 		return variables;
 	}
 	
@@ -216,7 +216,7 @@ public class Channel {
 		}
 	}
 	
-	public void reloadConfig() {
+	public final void reloadConfig() {
 		if (configFile == null) { configFile = new File(plugin.getChannelDir(), name + ".yml"); }
 		
 		config = YamlConfiguration.loadConfiguration(configFile);
@@ -245,7 +245,7 @@ public class Channel {
 		saveConfig();
 	}
 	
-	public void saveConfig() {
+	public final void saveConfig() {
 		if (configFile == null || config == null) { return; }
 		try { config.save(configFile); } catch (IOException e) { plugin.log(Level.SEVERE, "Could not save config to " + configFile); }
 	}
@@ -277,5 +277,9 @@ public class Channel {
 	
 	public void setSilenced(boolean silenced) {
 		this.silenced = silenced;
+	}
+	
+	public void setType(String type) {
+		this.type = Type.fromName(type);
 	}
 }

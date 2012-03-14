@@ -3,12 +3,11 @@ package com.titankingdoms.nodinchan.titanchat.util;
 import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
-import com.titankingdoms.nodinchan.titanchat.addon.Addon;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelVariables;
 
-public class Format {
+public final class Format {
 	
-	private TitanChat plugin;
+	private final TitanChat plugin;
 	
 	public Format(TitanChat plugin) {
 		this.plugin = plugin;
@@ -21,14 +20,14 @@ public class Format {
 		String playerSuffix = plugin.getPlayerSuffix(player);
 		String groupPrefix = plugin.getGroupPrefix(player);
 		String groupSuffix = plugin.getGroupSuffix(player);
-
+		
 		message = message.replace("%pprefix", playerPrefix);
 		message = message.replace("%gprefix", groupPrefix);
 		message = message.replace("%player", player.getDisplayName());
 		message = message.replace("%psuffix", playerSuffix);
 		message = message.replace("%gsuffix", groupSuffix);
 		
-		message = runSupports(player, message);
+		message = plugin.getAddonManager().executeFormat(player, message);
 		
 		StringBuilder str = new StringBuilder();
 		
@@ -75,7 +74,7 @@ public class Format {
 		message = message.replace("%psuffix", playerSuffix);
 		message = message.replace("%gsuffix", groupSuffix);
 		
-		message = runSupports(player, message);
+		message = plugin.getAddonManager().executeFormat(player, message);
 		
 		StringBuilder str = new StringBuilder();
 		
@@ -114,7 +113,7 @@ public class Format {
 			message = message.replace("%psuffix", playerSuffix);
 			message = message.replace("%gsuffix", groupSuffix);
 			
-			message = runSupports(player, message);
+			message = plugin.getAddonManager().executeFormat(player, message);
 			
 			StringBuilder str = new StringBuilder();
 			
@@ -163,7 +162,7 @@ public class Format {
 			message = message.replace("%psuffix", playerSuffix);
 			message = message.replace("%gsuffix", groupSuffix);
 			
-			message = runSupports(player, message);
+			message = plugin.getAddonManager().executeFormat(player, message);
 			
 			StringBuilder str = new StringBuilder();
 			
@@ -183,15 +182,5 @@ public class Format {
 		}
 		
 		return message;
-	}
-	
-	public String runSupports(Player player, String message) {
-		String msg = message;
-		
-		for (Addon addon : plugin.getAddons()) {
-			msg = addon.chatMade(player, message);
-		}
-		
-		return msg;
 	}
 }
