@@ -2,19 +2,23 @@ package com.titankingdoms.nodinchan.titanchat.command.commands;
 
 import org.bukkit.entity.Player;
 
-import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
 import com.titankingdoms.nodinchan.titanchat.command.Command;
 import com.titankingdoms.nodinchan.titanchat.command.CommandID;
 import com.titankingdoms.nodinchan.titanchat.command.CommandInfo;
 
+/**
+ * RankingCommand - Command for promotion, demotion and whitelisting on Channels
+ * 
+ * @author NodinChan
+ *
+ */
 public class RankingCommand extends Command {
 
 	private ChannelManager cm;
 	
-	public RankingCommand(TitanChat plugin) {
-		super(plugin);
+	public RankingCommand() {
 		this.cm = plugin.getChannelManager();
 	}
 	

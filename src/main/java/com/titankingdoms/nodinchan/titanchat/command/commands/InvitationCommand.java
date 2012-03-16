@@ -2,19 +2,23 @@ package com.titankingdoms.nodinchan.titanchat.command.commands;
 
 import org.bukkit.entity.Player;
 
-import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
 import com.titankingdoms.nodinchan.titanchat.command.Command;
 import com.titankingdoms.nodinchan.titanchat.command.CommandID;
 import com.titankingdoms.nodinchan.titanchat.command.CommandInfo;
 
+/**
+ * InvitationCommand - Commands for invitations
+ * 
+ * @author NodinChan
+ *
+ */
 public class InvitationCommand extends Command {
 
 	private ChannelManager cm;
 	
-	public InvitationCommand(TitanChat plugin) {
-		super(plugin);
+	public InvitationCommand() {
 		this.cm = plugin.getChannelManager();
 	}
 	
@@ -29,7 +33,7 @@ public class InvitationCommand extends Command {
 					channel.getInviteList().remove(player.getName());
 					cm.onInviteRespond(channel, player, true);
 					
-					plugin.channelSwitch(player, cm.getChannel(player), channel);
+					plugin.channelSwitch(player, channel);
 					plugin.sendInfo(player, "You have accepted the invitation");
 					
 				} else { plugin.sendWarning(player, "You did not receive any invitations from this channel"); }

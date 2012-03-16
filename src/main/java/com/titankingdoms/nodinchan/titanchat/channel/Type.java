@@ -6,6 +6,12 @@ import java.util.Map;
 
 import com.titankingdoms.nodinchan.titanchat.debug.Debugger;
 
+/**
+ * Type - Types of Channels
+ * 
+ * @author NodinChan
+ *
+ */
 public enum Type {
 	CUSTOM("custom"),
 	DEFAULT("default"),
@@ -26,7 +32,7 @@ public enum Type {
 	
 	static {
 		for (Type type : EnumSet.allOf(Type.class)) {
-			db.i("adding Type: " + type.name);
+			db.i("Adding Type: " + type.name);
 			NAME_MAP.put(type.name, type);
 		}
 	}

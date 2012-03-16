@@ -13,6 +13,12 @@ import org.bukkit.entity.Player;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.debug.Debugger;
 
+/**
+ * ChannelManager - Manages Channels
+ * 
+ * @author NodinChan
+ *
+ */
 public final class ChannelManager {
 	
 	private final TitanChat plugin;
@@ -32,37 +38,51 @@ public final class ChannelManager {
 		this.channelInvitors = new HashMap<Channel, Map<String, List<String>>>();
 	}
 	
+	/**
+	 * Creates a new Channel with the given name
+	 * 
+	 * @param player The Channel creator
+	 * 
+	 * @param name The Channel name
+	 */
 	public void createChannel(Player player, String name) {
 		db.i("Player " + player.getName() +
 				" is creating channel " + name);
 		
-		Channel channel = new Channel(plugin, name, Type.PUBLIC);
+		Channel channel = new Channel(name, Type.PUBLIC);
 		channels.add(channel);
 		
 		plugin.assignAdmin(player, channel);
-		plugin.channelSwitch(player, getChannel(player), channel);
+		plugin.channelSwitch(player, channel);
 		
 		channel.save();
 		
 		plugin.sendInfo(player, "You have created " + channel.getName());
 	}
 	
+	/**
+	 * Deletes the Channel with the given name
+	 * 
+	 * @param player The Channel deleter
+	 * 
+	 * @param name The Channel name
+	 */
 	public void deleteChannel(Player player, String name) {
 		db.i("Player " + player.getName() +
 				" is deleting channel " + name);
 		
 		Channel channel = getChannel(name);
-		channels.remove(channel);
 		
-		List<String> pastParticipants = new ArrayList<String>();
-		pastParticipants.addAll(channel.getParticipants());
+		List<String> participants = channel.getParticipants();
 		
-		for (String participant : pastParticipants) {
+		for (String participant : participants) {
 			if (plugin.getPlayer(participant) != null)
-				plugin.channelSwitch(plugin.getPlayer(participant), channel, getSpawnChannel(player));
+				plugin.channelSwitch(plugin.getPlayer(participant), getSpawnChannel(player));
 		}
 		
-		plugin.sendWarning(pastParticipants, channel.getName() + " has been deleted");
+		channels.remove(channel);
+		
+		plugin.sendWarning(participants, channel.getName() + " has been deleted");
 		
 		File file = new File(plugin.getChannelDir(), name + ".yml");
 		file.delete();
@@ -70,6 +90,13 @@ public final class ChannelManager {
 		plugin.sendInfo(player, "You have deleted " + channel.getName());
 	}
 	
+	/**
+	 * Creates a list of Channels that can be accessed by the Player
+	 * 
+	 * @param player The Player to check
+	 * 
+	 * @return The list of accessible Channels of the Player
+	 */
 	public List<String> getAccessList(Player player) {
 		List<String> channels = new ArrayList<String>();
 		
@@ -81,6 +108,11 @@ public final class ChannelManager {
 		return channels;
 	}
 	
+	/**
+	 * Gets the Default Channel of the Server
+	 * 
+	 * @return The Default Channel
+	 */
 	public Channel getDefaultChannel() {
 		for (Channel channel : channels) {
 			if (channel.getType().equals(Type.DEFAULT))
@@ -90,10 +122,24 @@ public final class ChannelManager {
 		return null;
 	}
 	
+	/**
+	 * Gets the exact name of the Channel of the given name
+	 * 
+	 * @param name The Channel name
+	 * 
+	 * @return The exact name of the Channel
+	 */
 	public String getExact(String name) {
 		return getChannel(name).getName();
 	}
 	
+	/**
+	 * Gets the Spawn Channel of the Player
+	 * 
+	 * @param player The Player to check
+	 * 
+	 * @return The Spawn Channel
+	 */
 	public Channel getSpawnChannel(Player player) {
 		if (getStaffChannel() != null) {
 			if (plugin.has(player, "TitanChat.admin") && !plugin.has(player, "TitanChat.forcejoin." + getStaffChannel().getName()))
@@ -108,6 +154,11 @@ public final class ChannelManager {
 		return getDefaultChannel();
 	}
 	
+	/**
+	 * Gets the Staff Channel
+	 * 
+	 * @return The Staff Channel
+	 */
 	public Channel getStaffChannel() {
 		for (Channel channel : channels) {
 			if (channel.getType().equals(Type.STAFF))
@@ -117,10 +168,24 @@ public final class ChannelManager {
 		return null;
 	}
 	
+	/**
+	 * Check if a Channel by that name exists
+	 * 
+	 * @param name The Channel name
+	 * 
+	 * @return True if the Channel exists
+	 */
 	public boolean exists(String name) {
 		return getChannel(name) != null;
 	}
 	
+	/**
+	 * Gets the Channel of the given name
+	 * 
+	 * @param name The Channel name
+	 * 
+	 * @return The Channel if it exists, otherwise null
+	 */
 	public Channel getChannel(String name) {
 		for (Channel channel : channels) {
 			if (channel.getName().equalsIgnoreCase(name))
@@ -130,6 +195,13 @@ public final class ChannelManager {
 		return null;
 	}
 	
+	/**
+	 * Gets the Channel of the Player
+	 * 
+	 * @param player The Player to check
+	 * 
+	 * @return The Channel if it exists, otherwise null
+	 */
 	public Channel getChannel(Player player) {
 		for (Channel channel : channels) {
 			if (channel.getParticipants().contains(player.getName()))
@@ -139,14 +211,26 @@ public final class ChannelManager {
 		return null;
 	}
 	
+	/**
+	 * Gets the number of loaded Channels
+	 * 
+	 * @return The number of loaded Channels
+	 */
 	public int getChannelAmount() {
 		return channelAmount;
 	}
 	
-	public Channel loadChannel(String name) throws Exception {
-		Type type = Type.fromName(new Channel(plugin, name).getConfig().getString("type"));
+	/**
+	 * Loads the Channel of the given name
+	 * 
+	 * @param name The Channel name
+	 * 
+	 * @return The loaded Channel
+	 */
+	public Channel loadChannel(String name) {
+		Type type = Type.fromName(new Channel(name).getConfig().getString("type"));
 		
-		Channel channel = new Channel(plugin, name, type);
+		Channel channel = new Channel(name, type);
 		
 		channel.setGlobal(channel.getConfig().getBoolean("global"));
 		
@@ -169,6 +253,11 @@ public final class ChannelManager {
 		return channel;
 	}
 	
+	/**
+	 * Loads all channels
+	 * 
+	 * @throws Exception
+	 */
 	public void load() throws Exception {
 		if (!plugin.enableChannels()) { plugin.log(Level.INFO, "Channels disabled"); return; }
 		
@@ -198,6 +287,11 @@ public final class ChannelManager {
 		plugin.log(Level.INFO, "Channels loaded");
 	}
 	
+	/**
+	 * Loads the ChannelVariables of the Channel
+	 * 
+	 * @param channel The Channel to load
+	 */
 	public void loadChannelVariables(Channel channel) {
 		ChannelVariables variables = channel.getVariables();
 		variables.setChatColour(channel.getConfig().getString("chat-display-colour"));
@@ -210,6 +304,15 @@ public final class ChannelManager {
 		variables.setTag(channel.getConfig().getString("tag"));
 	}
 	
+	/**
+	 * Called when a Player is invited to join a Channel
+	 * 
+	 * @param channel The Channel invited into
+	 * 
+	 * @param invitor The one who invited
+	 * 
+	 * @param invitee The one who was invited
+	 */
 	public void onInvite(Channel channel, Player invitor, Player invitee) {
 		Map<String, List<String>> invitors = channelInvitors.get(channel);
 		List<String> invitorlist = (invitors.get(invitee.getName()) != null) ? invitors.get(invitee.getName()) : new ArrayList<String>();
@@ -218,6 +321,15 @@ public final class ChannelManager {
 		channelInvitors.put(channel, invitors);
 	}
 	
+	/**
+	 * Called when a Player responds to an invitation
+	 * 
+	 * @param channel The Channel invited into
+	 * 
+	 * @param invitee The one who was invited
+	 * 
+	 * @param accept True if the Player accepts the invitation
+	 */
 	public void onInviteRespond(Channel channel, Player invitee, boolean accept) {
 		Map<String, List<String>> invitors = channelInvitors.get(channel);
 		
@@ -234,17 +346,28 @@ public final class ChannelManager {
 		channelInvitors.put(channel, invitors);
 	}
 	
+	/**
+	 * Registers the Custom Channel
+	 * 
+	 * @param channel The Custom Channel to be registered
+	 */
 	public void register(Channel channel) {
 		channels.add(channel);
 		plugin.log(Level.INFO, "A new channel, " + channel.getName() + ", has been registered");
 	}
 	
+	/**
+	 * Reloads all Channels
+	 */
 	public void reload() {
 		for (Channel channel : channels) { channel.reloadConfig(); }
 		channels.clear();
 		try { load(); } catch (Exception e) {}
 	}
 	
+	/**
+	 * Sorts the Channels
+	 */
 	public void sortChannels() {
 		List<Channel> channels = new ArrayList<Channel>();
 		List<String> names = new ArrayList<String>();
@@ -262,6 +385,9 @@ public final class ChannelManager {
 		this.channels = channels;
 	}
 	
+	/**
+	 * Unloads the Channels
+	 */
 	public void unload() {
 		for (Channel channel : channels) { channel.save(); }
 		channels.clear();

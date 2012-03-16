@@ -30,5 +30,5 @@ emote:
         format: '* &4Server &f%action'
 formatting:
     use-built-in: true
-    format: "%tag %pprefix%player%psuffix: %message"
+    format: "%tag %prefix%player%suffix: %message"
 debug: none

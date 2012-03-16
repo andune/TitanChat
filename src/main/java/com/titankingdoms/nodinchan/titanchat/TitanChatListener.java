@@ -10,6 +10,12 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
 
+/**
+ * TitanChatListener - Listeners
+ * 
+ * @author NodinChan
+ *
+ */
 public final class TitanChatListener implements Listener {
 
 	private TitanChat plugin;
@@ -18,6 +24,11 @@ public final class TitanChatListener implements Listener {
 		this.plugin = plugin;
 	}
 	
+	/**
+	 * Listens to the PlayerChatEvent
+	 * 
+	 * @param event PlayerChatEvent
+	 */
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onPlayerChat(PlayerChatEvent event) {
 		Player player = event.getPlayer();
@@ -40,17 +51,22 @@ public final class TitanChatListener implements Listener {
 				return;
 			}
 
-			String message = plugin.getFormat().format(player, channel.getName(), msg);
+			String message = plugin.getFormatHandler().format(player, channel.getName(), msg);
 			channel.sendMessage(message);
 			
 		} else {
-			event.setFormat(plugin.getFormat().format(player));
-			event.setMessage(plugin.getFormat().colourise(msg));
+			event.setFormat(plugin.getFormatHandler().format(player));
+			event.setMessage(plugin.getFormatHandler().colourise(msg));
 		}
 		
 		plugin.getAddonManager().chatMade(player.getName(), msg);
 	}
 	
+	/**
+	 * Listens to the PlayerJoinEvent
+	 * 
+	 * @param event PlayerJoinEvent
+	 */
 	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		if (plugin.getChannelManager().getChannel(event.getPlayer()) != null)

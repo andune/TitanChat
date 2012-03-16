@@ -3,19 +3,23 @@ package com.titankingdoms.nodinchan.titanchat.command.commands;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
 import com.titankingdoms.nodinchan.titanchat.command.Command;
 import com.titankingdoms.nodinchan.titanchat.command.CommandID;
 import com.titankingdoms.nodinchan.titanchat.command.CommandInfo;
 
+/**
+ * AdministrateCommand - Commands for Channel administration
+ * 
+ * @author NodinChan
+ *
+ */
 public class AdministrateCommand extends Command {
 
 	private ChannelManager cm;
 	
-	public AdministrateCommand(TitanChat plugin) {
-		super(plugin);
+	public AdministrateCommand() {
 		this.cm = plugin.getChannelManager();
 	}
 	
@@ -38,7 +42,9 @@ public class AdministrateCommand extends Command {
 							channel.getBlackList().add(targetPlayer.getName());
 							channel.save();
 							
-							plugin.channelSwitch(targetPlayer, channel, cm.getSpawnChannel(player));
+							if (channel.equals(cm.getChannel(targetPlayer)))
+								plugin.channelSwitch(targetPlayer, cm.getSpawnChannel(player));
+							
 							plugin.sendWarning(targetPlayer, "You have been banned from " + channel.getName());
 							plugin.sendInfo(channel.getParticipants(), targetPlayer.getDisplayName() + " has been banned");
 							
@@ -53,7 +59,7 @@ public class AdministrateCommand extends Command {
 		} catch (IndexOutOfBoundsException e) {
 			Channel channel = cm.getChannel(player);
 			
-			if (channel.canBan(player)) {
+			if (cm.getChannel(player).canBan(player)) {
 				if (plugin.getPlayer(args[0]) != null) {
 					Player targetPlayer = plugin.getPlayer(args[0]);
 					
@@ -63,7 +69,9 @@ public class AdministrateCommand extends Command {
 						channel.getBlackList().add(targetPlayer.getName());
 						channel.save();
 						
-						plugin.channelSwitch(targetPlayer, channel, cm.getSpawnChannel(player));
+						if (channel.equals(cm.getChannel(targetPlayer)))
+							plugin.channelSwitch(targetPlayer, cm.getSpawnChannel(player));
+						
 						plugin.sendWarning(targetPlayer, "You have been banned from " + channel.getName());
 						plugin.sendInfo(channel.getParticipants(), targetPlayer.getDisplayName() + " has been banned");
 						
@@ -88,7 +96,7 @@ public class AdministrateCommand extends Command {
 						Channel channel = cm.getChannel(args[1]);
 						
 						if (!cm.getChannel(targetPlayer).equals(channel)) {
-							plugin.channelSwitch(targetPlayer, cm.getChannel(targetPlayer), channel);
+							plugin.channelSwitch(targetPlayer, channel);
 							plugin.sendInfo(player, "You have forced " + targetPlayer.getDisplayName() + " to join the channel");
 							plugin.sendInfo(targetPlayer, "You have been forced to join " + channel.getName());
 							
@@ -107,7 +115,7 @@ public class AdministrateCommand extends Command {
 					Channel channel = cm.getChannel(player);
 					
 					if (!cm.getChannel(targetPlayer).equals(channel)) {
-						plugin.channelSwitch(targetPlayer, cm.getChannel(targetPlayer), channel);
+						plugin.channelSwitch(targetPlayer, channel);
 						plugin.sendInfo(player, "You have forced " + targetPlayer.getDisplayName() + " to join the channel");
 						plugin.sendInfo(targetPlayer, "You have been forced to join " + channel.getName());
 						
@@ -133,7 +141,7 @@ public class AdministrateCommand extends Command {
 						Player targetPlayer = plugin.getPlayer(args[0]);
 						
 						if (channel.getParticipants().contains(targetPlayer.getName())) {
-							plugin.channelSwitch(targetPlayer, channel, cm.getSpawnChannel(targetPlayer));
+							plugin.channelSwitch(targetPlayer, cm.getSpawnChannel(targetPlayer));
 							plugin.sendWarning(targetPlayer, "You have been kicked from " + channel.getName());
 							plugin.sendInfo(channel.getParticipants(), targetPlayer.getDisplayName() + " has been kicked");
 							
@@ -153,7 +161,7 @@ public class AdministrateCommand extends Command {
 					Player targetPlayer = plugin.getPlayer(args[0]);
 					
 					if (channel.getParticipants().contains(targetPlayer.getName())) {
-						plugin.channelSwitch(targetPlayer, channel, cm.getSpawnChannel(targetPlayer));
+						plugin.channelSwitch(targetPlayer, cm.getSpawnChannel(targetPlayer));
 						plugin.sendWarning(targetPlayer, "You have been kicked from " + channel.getName());
 						plugin.sendInfo(channel.getParticipants(), targetPlayer.getDisplayName() + " has been kicked");
 						

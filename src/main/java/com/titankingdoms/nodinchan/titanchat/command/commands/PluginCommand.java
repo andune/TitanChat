@@ -4,47 +4,46 @@ import java.util.logging.Level;
 
 import org.bukkit.entity.Player;
 
-import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
 import com.titankingdoms.nodinchan.titanchat.command.Command;
 import com.titankingdoms.nodinchan.titanchat.command.CommandID;
 import com.titankingdoms.nodinchan.titanchat.command.CommandInfo;
 import com.titankingdoms.nodinchan.titanchat.debug.Debugger;
 
+/**
+ * PluginCommand - Plugin maintenance commands
+ * 
+ * @author NodinChan
+ *
+ */
 public class PluginCommand extends Command {
 	
 	private ChannelManager cm;
 	
-	public PluginCommand(TitanChat plugin) {
-		super(plugin);
+	public PluginCommand() {
 		this.cm = plugin.getChannelManager();
 	}
 	
 	@CommandID(name = "Debug", triggers = "debug")
 	@CommandInfo(description = "Toggles the debug", usage = "debug [type]")
 	public void debug(Player player, String[] args) {
-		if (plugin.isStaff(player)) {
-			if (args[0].equalsIgnoreCase("none")) {
-				Debugger.disable();
-				
-			} else if (args[0].equalsIgnoreCase("all") || args[0].equalsIgnoreCase("full")) {
-				Debugger.enableAll();
-				
-			} else {
-				try {
-					int debug = Integer.parseInt(args[0]);
+		try {
+			if (plugin.isStaff(player)) {
+				if (args[0].equalsIgnoreCase("none")) {
+					Debugger.disable();
 					
-					if (debug > 5 || debug < 1) {
-						plugin.sendWarning(player, "Debug must be larger than 0 and smaller than 6");
-						return;
+				} else if (args[0].equalsIgnoreCase("all") || args[0].equalsIgnoreCase("full")) {
+					Debugger.enableAll();
+					
+				} else {
+					for (String id : args[0].split(",")) {
+						Debugger.enable(id);
 					}
-					
-					Debugger.enable(debug);
-					
-				} catch (NumberFormatException e) { plugin.sendWarning(player, "Invalid debug argument"); }
-			}
+				}
+				
+			} else { plugin.sendWarning(player, "You do not have permission"); }
 			
-		} else { plugin.sendWarning(player, "You do not have permission"); }
+		} catch (IndexOutOfBoundsException e) { invalidArgLength(player, "Debug"); }
 	}
 	
 	@CommandID(name = "Reload", triggers = "reload")

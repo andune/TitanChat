@@ -3,19 +3,23 @@ package com.titankingdoms.nodinchan.titanchat.command.commands;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
 import com.titankingdoms.nodinchan.titanchat.command.Command;
 import com.titankingdoms.nodinchan.titanchat.command.CommandID;
 import com.titankingdoms.nodinchan.titanchat.command.CommandInfo;
 
+/**
+ * ChatCommand - Chat related commands
+ * 
+ * @author NodinChan
+ *
+ */
 public class ChatCommand extends Command {
 
 	private ChannelManager cm;
 	
-	public ChatCommand(TitanChat plugin) {
-		super(plugin);
+	public ChatCommand() {
 		this.cm = plugin.getChannelManager();
 	}
 	
@@ -33,7 +37,7 @@ public class ChatCommand extends Command {
 			broadcastStr.append(word);
 		}
 		
-		plugin.getServer().broadcastMessage(plugin.getFormat().broadcastFormat(player, broadcastStr.toString()));
+		plugin.getServer().broadcastMessage(plugin.getFormatHandler().broadcastFormat(player, broadcastStr.toString()));
 		plugin.getLogger().info("<" + player.getName() + "> " + broadcastStr.toString());
 	}
 	
@@ -51,7 +55,7 @@ public class ChatCommand extends Command {
 			meStr.append(word);
 		}
 		
-		cm.getChannel(player).sendMessage(plugin.getFormat().emoteFormat(player, meStr.toString()));
+		cm.getChannel(player).sendMessage(plugin.getFormatHandler().emoteFormat(player, meStr.toString()));
 		plugin.getLogger().info("* " + player.getName() + " " + meStr.toString());
 	}
 	

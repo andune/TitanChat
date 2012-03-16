@@ -78,6 +78,7 @@ TitanChat, a chat management and formatting plugin for Bukkit.
 * 12.03.12 - Swapped out enums and used annotations
 * 13.03.12 - Proofread code, 99% corrected, 1% unknown
 * 14.03.12 - Welcome, SLiPCoR!: Added debugging
+* 15.03.12 - Documented
 
 -----------------------------------------------------------------------------------------------------------------------
 

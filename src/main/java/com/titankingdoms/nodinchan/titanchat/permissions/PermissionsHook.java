@@ -22,6 +22,12 @@ import de.bananaco.bpermissions.api.ApiLayer;
 import de.bananaco.bpermissions.api.util.CalculableType;
 import de.bananaco.bpermissions.imp.Permissions;
 
+/**
+ * PermissionsHook - For hooking into permissions plugins
+ * 
+ * @author NodinChan
+ *
+ */
 public final class PermissionsHook implements Listener {
 	
 	private final TitanChat plugin;
@@ -36,10 +42,24 @@ public final class PermissionsHook implements Listener {
 		this.plugin = plugin;
 	}
 	
+	/**
+	 * Check if a package exists
+	 * 
+	 * @param packages The file path
+	 * 
+	 * @return true if the package exists
+	 */
 	public boolean exists(String...packages) {
 		try { for (String pkg : packages) { Class.forName(pkg); } return true; } catch (Exception e) { return false; }
 	}
 	
+	/**
+	 * Gets the group prefix of the Player
+	 * 
+	 * @param player The Player to check
+	 * 
+	 * @return The group prefix of the Player
+	 */
 	public String getGroupPrefix(Player player) {
 		String prefix = "";
 		
@@ -63,9 +83,16 @@ public final class PermissionsHook implements Listener {
 			}
 		}
 		
-		return prefix;
+		return (prefix == null) ? "" : prefix;
 	}
 	
+	/**
+	 * Gets the group suffix of the Player
+	 * 
+	 * @param player The Player to check
+	 * 
+	 * @return The group suffix of the Player
+	 */
 	public String getGroupSuffix(Player player) {
 		String suffix = "";
 		
@@ -89,9 +116,16 @@ public final class PermissionsHook implements Listener {
 			}
 		}
 		
-		return suffix;
+		return (suffix == null) ? "" : suffix;
 	}
 	
+	/**
+	 * Gets the Player prefix
+	 * 
+	 * @param player The Player to check
+	 * 
+	 * @return The Player prefix
+	 */
 	public String getPlayerPrefix(Player player) {
 		String prefix = "";
 		
@@ -113,9 +147,16 @@ public final class PermissionsHook implements Listener {
 			}
 		}
 		
-		return prefix;
+		return (prefix.equals("") || prefix == null) ? getGroupPrefix(player) : prefix;
 	}
 	
+	/**
+	 * Gest the Player suffix
+	 * 
+	 * @param player The Player to check
+	 * 
+	 * @return The Player prefix
+	 */
 	public String getPlayerSuffix(Player player) {
 		String suffix = "";
 		
@@ -137,9 +178,18 @@ public final class PermissionsHook implements Listener {
 			}
 		}
 		
-		return suffix;
+		return (suffix.equals("") || suffix == null) ? getGroupSuffix(player) : suffix;
 	}
 	
+	/**
+	 * Check if a Player has a permission
+	 * 
+	 * @param player The Player to be checked
+	 * 
+	 * @param permission The permission to be checked
+	 * 
+	 * @return True if the Player has the permission
+	 */
 	public boolean has(Player player, String permission) {
 		if (permissionsPlugin != null) {
 			if (permissionsPlugin instanceof PermissionsEx)
@@ -155,6 +205,11 @@ public final class PermissionsHook implements Listener {
 		return player.hasPermission(permission);
 	}
 	
+	/**
+	 * Listens to the PluginDisableEvent
+	 * 
+	 * @param event PlayerDisableEvent
+	 */
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onPluginDisable(PluginDisableEvent event) {
 		if (permissionsPlugin != null) {
@@ -165,6 +220,11 @@ public final class PermissionsHook implements Listener {
 		}
 	}
 	
+	/**
+	 * Listens to the PluginEnableEvent
+	 * 
+	 * @param event PluginEnableEvent
+	 */
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onPluginEnable(PluginEnableEvent event) {
 		if (permissionsPlugin == null) {

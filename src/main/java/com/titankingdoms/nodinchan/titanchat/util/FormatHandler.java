@@ -5,14 +5,29 @@ import org.bukkit.entity.Player;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelVariables;
 
-public final class Format {
-
+/**
+ * FormatHandler - Handles formatting
+ * 
+ * @author NodinChan
+ *
+ */
+public final class FormatHandler {
+	
 	private final TitanChat plugin;
 	
-	public Format(TitanChat plugin) {
+	public FormatHandler(TitanChat plugin) {
 		this.plugin = plugin;
 	}
 	
+	/**
+	 * Gets the broadcast format and format the message
+	 * 
+	 * @param player The sender
+	 * 
+	 * @param msg The message
+	 * 
+	 * @return The formatted message
+	 */
 	public String broadcastFormat(Player player, String msg) {
 		String message = plugin.getConfig().getString("broadcast.player.format");
 		
@@ -21,10 +36,10 @@ public final class Format {
 		String groupPrefix = plugin.getGroupPrefix(player);
 		String groupSuffix = plugin.getGroupSuffix(player);
 		
-		message = message.replace("%pprefix", playerPrefix);
+		message = message.replace("%prefix", playerPrefix);
 		message = message.replace("%gprefix", groupPrefix);
 		message = message.replace("%player", player.getDisplayName());
-		message = message.replace("%psuffix", playerSuffix);
+		message = message.replace("%suffix", playerSuffix);
 		message = message.replace("%gsuffix", groupSuffix);
 		
 		message = plugin.getAddonManager().executeFormat(player, message);
@@ -45,10 +60,23 @@ public final class Format {
 		return message;
 	}
 	
-	public String colourise(String message) {
-		return message.replaceAll("(&([a-f0-9A-F|kK]))", "\u00A7$2");
+	/**
+	 * Colourises the message
+	 * 
+	 * @param text The message
+	 * 
+	 * @return The colourised text
+	 */
+	public String colourise(String text) {
+		return text.replaceAll("(&([a-f0-9A-F|kK]))", "\u00A7$2");
 	}
 	
+	/**
+	 * Check if Channel convert colours
+	 * 
+	 * @param name
+	 * @return
+	 */
 	public boolean colours(String name) {
 		if (plugin.getChannelManager().getStaffChannel().equals(plugin.getChannelManager().getChannel(name)))
 			return true;
@@ -56,10 +84,24 @@ public final class Format {
 		return plugin.getChannelManager().getChannel(name).getVariables().convert();
 	}
 	
+	/**
+	 * Decolourises the message
+	 * 
+	 * @param message The message
+	 * 
+	 * @return The decolourised text
+	 */
 	public String decolourise(String message) {
 		return message.replaceAll("(&([a-f0-9A-F|kK]))", "");
 	}
 	
+	/**
+	 * Gets the Arena
+	 * 
+	 * @param player
+	 * @param msg
+	 * @return
+	 */
 	public String emoteFormat(Player player, String msg) {
 		String message = plugin.getConfig().getString("emote.player.format");
 		
@@ -68,10 +110,10 @@ public final class Format {
 		String groupPrefix = plugin.getGroupPrefix(player);
 		String groupSuffix = plugin.getGroupSuffix(player);
 
-		message = message.replace("%pprefix", playerPrefix);
+		message = message.replace("%prefix", playerPrefix);
 		message = message.replace("%gprefix", groupPrefix);
 		message = message.replace("%player", player.getDisplayName());
-		message = message.replace("%psuffix", playerSuffix);
+		message = message.replace("%suffix", playerSuffix);
 		message = message.replace("%gsuffix", groupSuffix);
 		
 		message = plugin.getAddonManager().executeFormat(player, message);
@@ -107,10 +149,10 @@ public final class Format {
 		} else {
 			message = plugin.getConfig().getString("formatting.format");
 
-			message = message.replace("%pprefix", playerPrefix);
+			message = message.replace("%prefix", playerPrefix);
 			message = message.replace("%gprefix", groupPrefix);
 			message = message.replace("%player", "%1$s");
-			message = message.replace("%psuffix", playerSuffix);
+			message = message.replace("%suffix", playerSuffix);
 			message = message.replace("%gsuffix", groupSuffix);
 			
 			message = plugin.getAddonManager().executeFormat(player, message);
@@ -156,10 +198,10 @@ public final class Format {
 			message = variables.getFormat();
 			
 			message = message.replace("%tag", tag);
-			message = message.replace("%pprefix", playerPrefix);
+			message = message.replace("%prefix", playerPrefix);
 			message = message.replace("%gprefix", groupPrefix);
 			message = message.replace("%player", nameColour + name);
-			message = message.replace("%psuffix", playerSuffix);
+			message = message.replace("%suffix", playerSuffix);
 			message = message.replace("%gsuffix", groupSuffix);
 			
 			message = plugin.getAddonManager().executeFormat(player, message);

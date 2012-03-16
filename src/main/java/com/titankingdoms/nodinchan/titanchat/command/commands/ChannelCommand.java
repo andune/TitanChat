@@ -2,7 +2,6 @@ package com.titankingdoms.nodinchan.titanchat.command.commands;
 
 import org.bukkit.entity.Player;
 
-import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
 import com.titankingdoms.nodinchan.titanchat.channel.Type;
@@ -10,12 +9,17 @@ import com.titankingdoms.nodinchan.titanchat.command.Command;
 import com.titankingdoms.nodinchan.titanchat.command.CommandID;
 import com.titankingdoms.nodinchan.titanchat.command.CommandInfo;
 
+/**
+ * ChannelCommand - Commands for Channel modification
+ * 
+ * @author NodinChan
+ *
+ */
 public class ChannelCommand extends Command {
 
 	private ChannelManager cm;
 	
-	public ChannelCommand(TitanChat plugin) {
-		super(plugin);
+	public ChannelCommand() {
 		this.cm = plugin.getChannelManager();
 	}
 	
@@ -105,14 +109,14 @@ public class ChannelCommand extends Command {
 			
 			case CUSTOM:
 				if (channel.canAccess(player)) {
-					plugin.channelSwitch(player, cm.getChannel(player), channel);
+					plugin.channelSwitch(player, channel);
 					plugin.sendInfo(player, "You have switched channels");
 					
 				} else { plugin.sendWarning(player, "You do not have permission to join " + channel.getName()); }
 				break;
 			
 			case DEFAULT:
-				plugin.channelSwitch(player, cm.getChannel(player), channel);
+				plugin.channelSwitch(player, channel);
 				plugin.sendInfo(player, "You have switched channels");
 				break;
 				
@@ -120,7 +124,7 @@ public class ChannelCommand extends Command {
 				if (!password.equals("")) {
 					if (channel.correctPassword(password)) {
 						if (channel.canAccess(player)) {
-							plugin.channelSwitch(player, cm.getChannel(player), channel);
+							plugin.channelSwitch(player, channel);
 							plugin.sendInfo(player, "You have switched channels");
 							
 						} else { plugin.sendWarning(player, "You are banned on this channel"); }
@@ -132,7 +136,7 @@ public class ChannelCommand extends Command {
 				
 			case PRIVATE:
 				if (channel.canAccess(player)) {
-					plugin.channelSwitch(player, cm.getChannel(player), channel);
+					plugin.channelSwitch(player, channel);
 					plugin.sendInfo(player, "You have switched channels");
 					
 				} else { plugin.sendWarning(player, "You are not on the whitelist"); }
@@ -140,7 +144,7 @@ public class ChannelCommand extends Command {
 				
 			case PUBLIC:
 				if (channel.canAccess(player)) {
-					plugin.channelSwitch(player, cm.getChannel(player), channel);
+					plugin.channelSwitch(player, channel);
 					plugin.sendInfo(player, "You have switched channels");
 					
 				} else { plugin.sendWarning(player, "You are banned on this channel"); }
@@ -148,7 +152,7 @@ public class ChannelCommand extends Command {
 				
 			case STAFF:
 				if (plugin.isStaff(player)) {
-					plugin.channelSwitch(player, cm.getChannel(player), channel);
+					plugin.channelSwitch(player, channel);
 					plugin.sendInfo(player, "You have switched channels");
 					
 				} else { plugin.sendWarning(player, "You do not have permission to join " + channel.getName()); }

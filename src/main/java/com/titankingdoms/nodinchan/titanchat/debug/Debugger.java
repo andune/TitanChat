@@ -7,11 +7,7 @@ import org.bukkit.Bukkit;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 
 /**
- * Debugger Class
- * 
- * -
- * 
- * Provides methods for logging when in debug mode
+ * Debugger - Provides methods for logging when in debug mode
  * 
  * @author slipcor
  * 
@@ -130,8 +126,19 @@ public class Debugger {
 		}
 	}
 	
-	public static void enable(int debug) {
-		level = (byte) debug;
+	public static void enable(String debug) {
+		try {
+			check.add(Integer.valueOf(debug));
+			System.out.println("Debugging: " + debug);
+		} catch (NumberFormatException e) {
+			System.out.println("Debug load error: " + debug);
+		}
+		if (debug.equals("i"))
+			level = (byte) 1;
+		else if (debug.equals("w"))
+			level = (byte) 2;
+		else if (debug.equals("s"))
+			level = (byte) 3;
 	}
 	
 	public static void enableAll() {

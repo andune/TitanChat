@@ -23,7 +23,7 @@ import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
 import com.titankingdoms.nodinchan.titanchat.command.CommandManager;
 import com.titankingdoms.nodinchan.titanchat.debug.Debugger;
 import com.titankingdoms.nodinchan.titanchat.permissions.PermissionsHook;
-import com.titankingdoms.nodinchan.titanchat.util.Format;
+import com.titankingdoms.nodinchan.titanchat.util.FormatHandler;
 import com.titankingdoms.nodinchan.titanchat.util.Loader;
 
 /*
@@ -44,7 +44,15 @@ import com.titankingdoms.nodinchan.titanchat.util.Loader;
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * TitanChat - Main Class
+ * 
+ * @author NodinChan
+ *
+ */
 public final class TitanChat extends JavaPlugin {
+	
+	private static TitanChat instance;
 	
 	private static final Logger log = Logger.getLogger("TitanLog");
 	private static final Debugger db = new Debugger(1);
@@ -52,7 +60,7 @@ public final class TitanChat extends JavaPlugin {
 	private AddonManager addonManager;
 	private ChannelManager chManager;
 	private CommandManager cmdManager;
-	private Format format;
+	private FormatHandler format;
 	private PermissionsHook permHook;
 	private Loader loader;
 	
@@ -63,6 +71,13 @@ public final class TitanChat extends JavaPlugin {
 	private Permission perm;
 	private Chat chat;
 	
+	/**
+	 * Assigns the Player as an admin of the Channel
+	 * 
+	 * @param player The Player to be assigned admin
+	 * 
+	 * @param channel The Channel to assign the Player to
+	 */
 	public void assignAdmin(Player player, Channel channel) {
 		db.i("Assigning player " + player.getName() +
 				" as admin of channel " + channel.getName());
@@ -72,15 +87,29 @@ public final class TitanChat extends JavaPlugin {
 		sendInfo(player, "You are now an Admin of " + channel.getName());
 	}
 	
-	public void channelSwitch(Player player, Channel oldCh, Channel newCh) {
+	/**
+	 * Switching the Player from a Channel to another
+	 * 
+	 * @param player The Player to switch
+	 * 
+	 * @param channel The Channel to join
+	 */
+	public void channelSwitch(Player player, Channel channel) {
 		db.i("Channel switch of player " + player.getName() +
-				" from channel " + oldCh.getName() +
-				" to channel " + newCh.getName());
+				" from channel " + chManager.getChannel(player).getName() +
+				" to channel " + channel.getName());
 		
-		oldCh.leave(player);
-		newCh.join(player);
+		chManager.getChannel(player).leave(player);
+		channel.join(player);
 	}
 	
+	/**
+	 * Creates a new list with items seperated with commas
+	 * 
+	 * @param list The string list to create a list from
+	 * 
+	 * @return The created list of items
+	 */
 	public String createList(List<String> list) {
 		db.i("Creating string out of stringlist: " + list.toString());
 		
@@ -96,50 +125,112 @@ public final class TitanChat extends JavaPlugin {
 		return str.toString();
 	}
 	
+	/**
+	 * Check if Channels are enabled
+	 * 
+	 * @return True if Channels are enabled
+	 */
 	public boolean enableChannels() {
 		return getConfig().getBoolean("channels.enable-channels");
 	}
 	
+	/**
+	 * Check if join messages are enabled
+	 * 
+	 * @return True if join messages are enabled
+	 */
 	public boolean enableJoinMessage() {
 		return getConfig().getBoolean("channels.messages.join");
 	}
 	
+	/**
+	 * Check if leave messages are enabled
+	 * 
+	 * @return True if leave messages are enabled
+	 */
 	public boolean enableLeaveMessage() {
 		return getConfig().getBoolean("channels.messages.leave");
 	}
 	
+	/**
+	 * Get the Addon directory
+	 * 
+	 * @return The Addon directory
+	 */
 	public File getAddonDir() {
 		return new File(getDataFolder(), "addons");
 	}
 	
+	/**
+	 * Get the AddonManager
+	 * 
+	 * @return The AddonManager
+	 */
 	public AddonManager getAddonManager() {
 		return addonManager;
 	}
 	
+	/**
+	 * Get the Channel directory
+	 * 
+	 * @return The Channel directory
+	 */
 	public File getChannelDir() {
 		return new File(getDataFolder(), "channels");
 	}
 	
+	/**
+	 * Get the ChannelManager
+	 * 
+	 * @return The ChannelManager
+	 */
 	public ChannelManager getChannelManager() {
 		return chManager;
 	}
 	
+	/**
+	 * Get the Command directory
+	 * 
+	 * @return The Command directory
+	 */
 	public File getCommandDir() {
 		return new File(getAddonDir(), "commands");
 	}
 	
+	/**
+	 * Get the CommandManager
+	 * 
+	 * @return The CommandManager
+	 */
 	public CommandManager getCommandManager() {
 		return cmdManager;
 	}
 	
+	/**
+	 * Get the Custom Channel directory
+	 * 
+	 * @return The Custom Channel directory
+	 */
 	public File getCustomChannelDir() {
 		return new File(getAddonDir(), "channels");
 	}
-
-	public Format getFormat() {
+	
+	/**
+	 * Get the FormatHandler
+	 * 
+	 * @return The FormatHandler
+	 */
+	public FormatHandler getFormatHandler() {
 		return format;
 	}
 	
+	/**
+	 * Get the group prefix of the Player
+	 * 
+	 * @param player The Player to find for
+	 * 
+	 * @return The group prefix
+	 */
 	public String getGroupPrefix(Player player) {
 		db.i("Getting group prefix of player " + player.getName());
 		
@@ -153,6 +244,13 @@ public final class TitanChat extends JavaPlugin {
 		return permHook.getGroupPrefix(player);
 	}
 	
+	/**
+	 * Get the group suffix
+	 * 
+	 * @param player The Player to find for
+	 * 
+	 * @return the group suffix
+	 */
 	public String getGroupSuffix(Player player) {
 		db.i("Getting group suffix of player " + player.getName());
 		
@@ -166,27 +264,62 @@ public final class TitanChat extends JavaPlugin {
 		return permHook.getGroupSuffix(player);
 	}
 	
+	/**
+	 * Get an instance of this
+	 * 
+	 * @return TitanChat instance
+	 */
+	public static TitanChat getInstance() {
+		return instance;
+	}
+	
+	/**
+	 * Get the Loader
+	 * 
+	 * @return The Loader
+	 */
 	public Loader getLoader() {
 		return loader;
 	}
 	
+	/**
+	 * Get Player by name
+	 * 
+	 * @param name The name of the Player
+	 * 
+	 * @return The Player with the name
+	 */
 	public Player getPlayer(String name) {
 		return getServer().getPlayer(name);
 	}
 	
+	/**
+	 * Get the prefix of the Player
+	 * 
+	 * @param player The Player to get the prefix from
+	 * 
+	 * @return The prefix of the Player
+	 */
 	public String getPlayerPrefix(Player player) {
 		db.i("Getting prefix of player: " + player.getName());
 		
 		if (chat != null) {
 			String prefix = chat.getPlayerPrefix(player.getWorld(), player.getName());
 			db.i("Returning: " + prefix);
-			return (prefix != null) ? prefix : "";
+			return (prefix != null) ? prefix : getGroupPrefix(player);
 		}
 		
 		db.i("Returning PermissionsHook player prefix");
 		return permHook.getPlayerPrefix(player);
 	}
 	
+	/**
+	 * Get the suffix of the Player
+	 * 
+	 * @param player The Player to get the suffix from
+	 * 
+	 * @return The suffix of the player
+	 */
 	public String getPlayerSuffix(Player player) {
 		db.i("Getting suffix of player: " + player.getName());
 		
@@ -199,7 +332,15 @@ public final class TitanChat extends JavaPlugin {
 		db.i("Returning PermissionsHook player suffix");
 		return permHook.getPlayerSuffix(player);
 	}
-	
+	/**
+	 * Check if the Player has the permission
+	 * 
+	 * @param player The Player to check
+	 * 
+	 * @param permission The permission
+	 * 
+	 * @return true if the Player has the permission
+	 */
 	public boolean has(Player player, String permission) {
 		if (perm != null)
 			return perm.has(player, permission);
@@ -207,22 +348,55 @@ public final class TitanChat extends JavaPlugin {
 		return permHook.has(player, permission);
 	}
 	
+	/**
+	 * Check if the Player has voice
+	 * 
+	 * @param player The Player to check
+	 * 
+	 * @return true if the Player has TitanChat.voice
+	 */
 	public boolean hasVoice(Player player) {
 		return has(player, "TitanChat.voice");
 	}
 	
+	/**
+	 * Check if the Server is silenced
+	 * 
+	 * @return true if the Server is silenced
+	 */
 	public boolean isSilenced() {
 		return silenced;
 	}
 	
+	/**
+	 * Check if the Player is staff
+	 * 
+	 * @param player The Player to check
+	 * 
+	 * @return true if the Player has TitanChat.admin
+	 */
 	public boolean isStaff(Player player) {
 		return has(player, "TitanChat.admin");
 	}
 	
+	/**
+	 * Sends the message to the log
+	 * 
+	 * @param level Level of the announcement
+	 * 
+	 * @param msg The message to send
+	 */
 	public void log(Level level, String msg) {
 		log.log(level, "[" + this + "] " + msg);
 	}
 	
+	/**
+	 * Mute/Unmute the Player
+	 * 
+	 * @param player The Player to mute/unmute
+	 * 
+	 * @param mute Whether to mute or unmute
+	 */
 	public void mute(Player player, boolean mute) {
 		db.i((mute ? "" : "un") + "muting player");
 		
@@ -232,10 +406,30 @@ public final class TitanChat extends JavaPlugin {
 			muted.remove(player.getName());
 	}
 	
+	/**
+	 * Check if player is muted
+	 * 
+	 * @param player The Player to check
+	 * 
+	 * @return true if the Player is muted
+	 */
 	public boolean muted(Player player) {
 		return muted.contains(player.getName());
 	}
 	
+	/**
+	 * Called when a Player uses a command
+	 * 
+	 * @param sender The sender who sent the command
+	 * 
+	 * @param cmd The Command used
+	 * 
+	 * @param label The exact word the Player used
+	 * 
+	 * @param args The list of words that follows
+	 * 
+	 * @return true if the Command is executed
+	 */
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		db.i("onCommand: " + cmd.getName());
@@ -249,9 +443,9 @@ public final class TitanChat extends JavaPlugin {
 				sender.sendMessage(ChatColor.AQUA + "Alias: /tc [command] [arguments]");
 				
 				if (sender instanceof Player)
-					sendInfo((Player) sender, "'/titanchat commands [page]' for command list");
+					sendInfo((Player) sender, "\"/titanchat commands [page]\" for command list");
 				else
-					log(Level.INFO, "'/titanchat commands [page]' for command list");
+					log(Level.INFO, "\"/titanchat commands [page]\" for command list");
 				
 				return true;
 			}
@@ -293,8 +487,8 @@ public final class TitanChat extends JavaPlugin {
 				
 				message = message.replace("%message", str.toString());
 				
-				getServer().broadcastMessage(getFormat().colourise(message));
-				getLogger().info("<Server> " + getFormat().decolourise(str.toString()));
+				getServer().broadcastMessage(getFormatHandler().colourise(message));
+				getLogger().info("<Server> " + getFormatHandler().decolourise(str.toString()));
 				return true;
 			}
 			
@@ -330,8 +524,8 @@ public final class TitanChat extends JavaPlugin {
 				}
 				
 				message = message.replace("%action", str.toString());
-				getServer().broadcastMessage(getFormat().colourise(message));
-				getLogger().info("* Server " + getFormat().decolourise(str.toString()));
+				getServer().broadcastMessage(getFormatHandler().colourise(message));
+				getLogger().info("* Server " + getFormatHandler().decolourise(str.toString()));
 				return true;
 			}
 			
@@ -351,6 +545,9 @@ public final class TitanChat extends JavaPlugin {
 		return false;
 	}
 	
+	/**
+	 * Called when the Plugin disables
+	 */
 	@Override
 	public void onDisable() {
 		log(Level.INFO, "is now disabling...");
@@ -364,16 +561,20 @@ public final class TitanChat extends JavaPlugin {
 		log(Level.INFO, "is now disabled");
 	}
 	
+	/**
+	 * Called when the Plugin enables
+	 */
 	@Override
 	public void onEnable() {
 		log(Level.INFO, "is now enabling...");
+		instance = this;
 		
 		muted = new ArrayList<String>();
 		
 		addonManager = new AddonManager(this);
 		chManager = new ChannelManager(this);
 		cmdManager = new CommandManager(this);
-		format = new Format(this);
+		format = new FormatHandler(this);
 		permHook = new PermissionsHook(this);
 		
 		File config = new File(getDataFolder(), "config.yml");
@@ -434,6 +635,13 @@ public final class TitanChat extends JavaPlugin {
 		log(Level.INFO, "is now enabled");
 	}
 	
+	/**
+	 * Parses the command arguments
+	 * 
+	 * @param args Arguments to parse
+	 * 
+	 * @return The parsed arguments
+	 */
 	public String[] parseCommand(String[] args) {
 		db.i("Parsing command");
 		StringBuilder str = new StringBuilder();
@@ -452,12 +660,26 @@ public final class TitanChat extends JavaPlugin {
 		return (str.toString().equals("")) ? new String[] {} : str.toString().split(" ");
 	}
 	
+	/**
+	 * Sends an info to the Player
+	 * 
+	 * @param player The Player to send to
+	 * 
+	 * @param info The message
+	 */
 	public void sendInfo(Player player, String info) {
 		db.i("@" + player.getName() + ": " + info);
 		
 		player.sendMessage("[TitanChat] " + ChatColor.GOLD + info);
 	}
 	
+	/**
+	 * Sends an info to all the Players within the list
+	 * 
+	 * @param players String list of Players to send to
+	 * 
+	 * @param info The message
+	 */
 	public void sendInfo(List<String> players, String info) {
 		for (String player : players) {
 			if (getPlayer(player) != null)
@@ -465,12 +687,26 @@ public final class TitanChat extends JavaPlugin {
 		}
 	}
 	
+	/**
+	 * Sends a warning to the Player
+	 * 
+	 * @param player The Player to send to
+	 * 
+	 * @param warning The message
+	 */
 	public void sendWarning(Player player, String warning) {
 		db.i("Warning @" + player.getName() + ": " + warning);
 		
 		player.sendMessage("[TitanChat] " + ChatColor.RED + warning);
 	}
 	
+	/**
+	 * Sends a warning to all the Players within the list
+	 * 
+	 * @param players String list of Players to send to
+	 * 
+	 * @param warning The message
+	 */
 	public void sendWarning(List<String> players, String warning) {
 		for (String player : players) {
 			if (getPlayer(player) != null)
@@ -478,11 +714,21 @@ public final class TitanChat extends JavaPlugin {
 		}
 	}
 	
+	/**
+	 * Sets whether the Server is silenced
+	 * 
+	 * @param silenced True if setting the Server to silenced
+	 */
 	public void setSilenced(boolean silenced) {
 		db.i("Setting silenced to " + silenced);
 		this.silenced = silenced;
 	}
 	
+	/**
+	 * Sets up the Chat Service of Vault
+	 * 
+	 * @return True if a Chat Service is present
+	 */
 	public boolean setupChatService() {
 		RegisteredServiceProvider<Chat> chatProvider = getServer().getServicesManager().getRegistration(Chat.class);
 		
@@ -493,6 +739,11 @@ public final class TitanChat extends JavaPlugin {
 		return chat != null;
 	}
 	
+	/**
+	 * Sets up the Permission Service of Vault
+	 * 
+	 * @return True if a Permission Service is present
+	 */
 	public boolean setupPermissionService() {
 		RegisteredServiceProvider<Permission> permissionProvider = getServer().getServicesManager().getRegistration(Permission.class);
 		
@@ -503,15 +754,32 @@ public final class TitanChat extends JavaPlugin {
 		return perm != null;
 	}
 	
+	/**
+	 * Check if default formatting should be used
+	 * 
+	 * @return True if default formatting should be used
+	 */
 	public boolean useDefaultFormat() {
 		return getConfig().getBoolean("formatting.use-built-in");
 	}
 	
+	/**
+	 * Check if Vault is used
+	 * 
+	 * @return True if Vault is used
+	 */
 	public boolean usingVault() {
 		db.i("Using Vault: " + (perm != null));
 		return perm != null;
 	}
 	
+	/**
+	 * Whitelists the Player to the Channel
+	 * 
+	 * @param player The Player to whitelist
+	 * 
+	 * @param channel The Channel to whitelist the Player to
+	 */
 	public void whitelistMember(Player player, Channel channel) {
 		db.i("Adding player " + player.getName() +
 				" to whitelist of channel " + channel.getName());

@@ -21,6 +21,12 @@ import com.titankingdoms.nodinchan.titanchat.addon.Addon;
 import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
 import com.titankingdoms.nodinchan.titanchat.command.Command;
 
+/**
+ * Loader - ClassLoader for Addons, Custom Channels and Commands
+ * 
+ * @author NodinChan
+ *
+ */
 public final class Loader {
 
 	private final TitanChat plugin;
@@ -122,8 +128,8 @@ public final class Loader {
 				if (mainClass != null) {
 					Class<?> clazz = Class.forName(mainClass, true, addonLoader);
 					Class<? extends Addon> addonClass = clazz.asSubclass(Addon.class);
-					Constructor<? extends Addon> ctor = addonClass.getConstructor(plugin.getClass());
-					Addon addon = ctor.newInstance(plugin);
+					Constructor<? extends Addon> ctor = addonClass.getConstructor();
+					Addon addon = ctor.newInstance();
 					paJAR.put(addon.getName(), file);
 					addon.init();
 					addons.add(addon);

@@ -16,6 +16,12 @@ import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
 import com.titankingdoms.nodinchan.titanchat.command.Command;
 
+/**
+ * Addon - Addon base
+ * 
+ * @author NodinChan
+ *
+ */
 public class Addon {
 	
 	protected TitanChat plugin;
@@ -27,35 +33,80 @@ public class Addon {
 	private File configFile = null;
 	private FileConfiguration config = null;
 	
-	public Addon(TitanChat plugin, String name) {
-		this.plugin = plugin;
+	public Addon(String name) {
+		this.plugin = TitanChat.getInstance();
 		this.name = name;
 	}
 	
+	/**
+	 * Called after a chat message is sent
+	 * 
+	 * @param name The name of the Player
+	 * 
+	 * @param message The message sent
+	 */
 	public void chatMade(String name, String message) {}
 	
+	/**
+	 * Called before a chat message is sent
+	 * 
+	 * @param player The message sender
+	 * 
+	 * @param message The message
+	 * 
+	 * @return The formatted message
+	 */
 	public String format(Player player, String message) { return message; }
 	
+	/**
+	 * Gets the config
+	 * 
+	 * @return The config
+	 */
 	public final FileConfiguration getConfig() {
 		if (config == null) { reloadConfig(); }
 		return config;
 	}
 	
+	/**
+	 * Gets the data folder
+	 * 
+	 * @return The data folder
+	 */
 	public final File getDataFolder() {
 		File dir = new File(plugin.getAddonDir(), name);
 		dir.mkdir();
 		return dir;
 	}
 	
+	/**
+	 * Gets the Logger
+	 * 
+	 * @param name The name of the Logger
+	 * 
+	 * @return The logger
+	 */
 	public final Logger getLogger(String name) {
 		if (log.equals(Logger.getLogger("TitanLog"))) { log = Logger.getLogger(name); }
 		return log;
 	}
 	
+	/**
+	 * Gets the name of the Addon
+	 * 
+	 * @return The name of the Addon
+	 */
 	public final String getName() {
 		return name;
 	}
 	
+	/**
+	 * Gets the file from the JAR file
+	 * 
+	 * @param fileName The name of the file
+	 * 
+	 * @return The file if found, otherwise null
+	 */
 	public final InputStream getResource(String fileName) {
 		try {
 			JarFile jarFile = new JarFile(plugin.getLoader().getPluginAddonJar(name));
@@ -73,20 +124,41 @@ public class Addon {
 		return null;
 	}
 	
+	/**
+	 * Called when the Addon is loaded by the Loader
+	 */
 	public void init() {}
 	
+	/**
+	 * Registers the Addon
+	 * 
+	 * @param addon The Addon to register
+	 */
 	public final void register(Addon addon) {
 		plugin.getAddonManager().register(addon);
 	}
 	
+	/**
+	 * Registers the Command
+	 * 
+	 * @param command The Command to register
+	 */
+	public final void register(Command command) {
+		plugin.getCommandManager().register(command);
+	}
+	
+	/**
+	 * Registers the Custom Channel
+	 * 
+	 * @param channel The Custom Channel to register
+	 */
 	public final void register(CustomChannel channel) {
 		plugin.getChannelManager().register(channel);
 	}
 	
-	public void register(Command command) {
-		plugin.getCommandManager().register(command);
-	}
-	
+	/**
+	 * Reloads the config
+	 */
 	public final void reloadConfig() {
 		if (configFile == null) { configFile = new File(new File(plugin.getAddonDir(), name), "config.yml"); }
 		
@@ -100,6 +172,9 @@ public class Addon {
 		}
 	}
 	
+	/**
+	 * Saves the config
+	 */
 	public final void saveConfig() {
 		if (config == null || configFile == null) { return; }
 		try { config.save(configFile); } catch (IOException e) {}

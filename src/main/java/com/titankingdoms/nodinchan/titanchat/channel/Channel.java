@@ -13,8 +13,14 @@ import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 
+/**
+ * Channel - Channel base
+ * 
+ * @author NodinChan
+ *
+ */
 public class Channel {
-
+	
 	protected final TitanChat plugin;
 	
 	private ChannelVariables variables;
@@ -38,13 +44,13 @@ public class Channel {
 	private File configFile = null;
 	private FileConfiguration config = null;
 	
-	public Channel(TitanChat plugin, String name) {
-		this(plugin, name, Type.UNKNOWN);
+	public Channel(String name) {
+		this(name, Type.UNKNOWN);
 	}
 	
-	public Channel(TitanChat plugin, String name, Type type) {
-		this.plugin = plugin;
-		this.variables = new ChannelVariables(plugin, this);
+	public Channel(String name, Type type) {
+		this.plugin = TitanChat.getInstance();
+		this.variables = new ChannelVariables(this);
 		this.name = name;
 		this.password = "";
 		this.type = type;
@@ -59,8 +65,8 @@ public class Channel {
 		this.whitelist = new ArrayList<String>();
 	}
 	
-	public Channel(TitanChat plugin, String name, ChannelVariables variables) {
-		this.plugin = plugin;
+	public Channel(String name, ChannelVariables variables) {
+		this.plugin = TitanChat.getInstance();
 		this.variables = variables;
 		this.name = name;
 		this.password = "";
@@ -76,6 +82,13 @@ public class Channel {
 		this.whitelist = new ArrayList<String>();
 	}
 	
+	/**
+	 * Check if the Player has access
+	 * 
+	 * @param player The Player to check
+	 * 
+	 * @return True if the Player has access
+	 */
 	public boolean canAccess(Player player) {
 		if (plugin.has(player, "TitanChat.access.*") || plugin.has(player, "TitanChat.access." + name))
 			return true;
@@ -89,6 +102,13 @@ public class Channel {
 		return false;
 	}
 	
+	/**
+	 * Check if the Player can ban
+	 * 
+	 * @param player The Player to check
+	 * 
+	 * @return True if the Player can ban
+	 */
 	public boolean canBan(Player player) {
 		if (plugin.has(player, "TitanChat.ban.*") || plugin.has(player, "TitanChat.ban." + name))
 			return true;
@@ -98,6 +118,13 @@ public class Channel {
 		return false;
 	}
 	
+	/**
+	 * Check if the Player can kick
+	 * 
+	 * @param player The Player to check
+	 * 
+	 * @return True if the Player can kick
+	 */
 	public boolean canKick(Player player) {
 		if (plugin.has(player, "TitanChat.kick.*") || plugin.has(player, "TitanChat.kick." + name))
 			return true;
@@ -107,6 +134,13 @@ public class Channel {
 		return false;
 	}
 	
+	/**
+	 * Check if the Player can mute
+	 * 
+	 * @param player The Player to check
+	 * 
+	 * @return True if the Player can mute
+	 */
 	public boolean canMute(Player player) {
 		if (plugin.has(player, "TitanChat.silence") || plugin.has(player, "TitanChat.mute"))
 			return true;
@@ -116,6 +150,13 @@ public class Channel {
 		return false;
 	}
 	
+	/**
+	 * Check if the Player can rank
+	 * 
+	 * @param player The Player to check
+	 * 
+	 * @return True if the Player can rank
+	 */
 	public boolean canRank(Player player) {
 		if (plugin.has(player, "TitanChat.rank.*") || plugin.has(player, "TitanChat.rank." + name))
 			return true;
@@ -125,10 +166,20 @@ public class Channel {
 		return false;
 	}
 	
+	/**
+	 * Check if the password is correct
+	 * 
+	 * @param password The password entered
+	 * 
+	 * @return True if password matches
+	 */
 	public boolean correctPassword(String password) {
 		return this.password.equals(password);
 	}
 	
+	/**
+	 * Check if a Channel equals another
+	 */
 	@Override
 	public final boolean equals(Object object) {
 		if (object instanceof Channel)
@@ -137,14 +188,29 @@ public class Channel {
 		return false;
 	}
 	
+	/**
+	 * Get the admin list
+	 * 
+	 * @return The admin list
+	 */
 	public List<String> getAdminList() {
 		return adminlist;
 	}
 	
+	/**
+	 * Get the blacklist
+	 * 
+	 * @return The blacklist
+	 */
 	public List<String> getBlackList() {
 		return blacklist;
 	}
 	
+	/**
+	 * Get the config
+	 * 
+	 * @return The config
+	 */
 	public final FileConfiguration getConfig() {
 		if (config == null) { reloadConfig(); }
 		return config;

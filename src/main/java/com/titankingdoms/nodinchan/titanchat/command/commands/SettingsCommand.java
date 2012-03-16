@@ -7,19 +7,23 @@ import java.util.Map;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
 import com.titankingdoms.nodinchan.titanchat.channel.Type;
 import com.titankingdoms.nodinchan.titanchat.command.Command;
 import com.titankingdoms.nodinchan.titanchat.command.CommandID;
 import com.titankingdoms.nodinchan.titanchat.command.CommandInfo;
 
+/**
+ * SettingsCommand - Commands for config modification
+ * 
+ * @author NodinChan
+ *
+ */
 public class SettingsCommand extends Command {
 
 	private ChannelManager cm;
 	
-	public SettingsCommand(TitanChat plugin) {
-		super(plugin);
+	public SettingsCommand() {
 		this.cm = plugin.getChannelManager();
 	}
 	
