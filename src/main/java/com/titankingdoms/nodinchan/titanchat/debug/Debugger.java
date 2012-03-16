@@ -20,6 +20,7 @@ import com.titankingdoms.nodinchan.titanchat.TitanChat;
 public class Debugger {
 	
 	private int id = 0;
+	
 	private static byte level = 3;
 	
 	private static String prefix = "[TC-Debug] ";
@@ -39,16 +40,16 @@ public class Debugger {
 	}
 	
 	/**
-	 * does this class debug?
+	 * Check if debugging enabled
 	 * 
-	 * @return true if debugs, false otherwise
+	 * @return true if debug is enabled
 	 */
 	private boolean debugs() {
 		return override || check.contains(id) || check.contains(666);
 	}
 	
 	/**
-	 * log a message as prefixed INFO
+	 * Log a message prefixed with INFO
 	 * 
 	 * @param s
 	 *            the message
@@ -60,7 +61,7 @@ public class Debugger {
 	}
 	
 	/**
-	 * log a message as prefixed WARNING
+	 * Log a message prefixed with WARNING
 	 * 
 	 * @param s
 	 *            the message
@@ -72,7 +73,7 @@ public class Debugger {
 	}
 	
 	/**
-	 * log a message as prefixed SEVERE
+	 * Log a message prefixed with SEVERE
 	 * 
 	 * @param s
 	 *            the message
@@ -84,10 +85,11 @@ public class Debugger {
 	}
 	
 	/**
-	 * read a string array and return a readable string
+	 * Read a string array and return a readable string
 	 * 
 	 * @param s
 	 *            the string array
+	 *            
 	 * @return a string, the array elements joined with comma
 	 */
 	public String formatStringArray(String[] s) {

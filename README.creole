@@ -6,21 +6,28 @@ TitanChat, a chat management and formatting plugin for Bukkit.
 
 === Features
 
-* Edit settings in game with commands without editing config
-* Create or delete channels
-* Ban, unban, kick, mute or unmute players
-* Admins, whitelists and blacklists for better administration
-* Follow channels and receive their chat
-* Use colour codes on channels
-* Supports prefixes and suffixes
-* All can be done with simple commands
+* Settings
+** Can be edited in game with commands
+** Can be edited in the config and reload to apply
+* Channels
+** Create or delete channels with ease
+** Administrate with ban, kick and mute commands
+** Follow channels to receive their chat without having them see yours
+* Supports
+** Colour codes
+** Prefixes and suffixes
+** All kinds of plugins if addons are provided
+* Addons
+** New chat variables from other plugins
+** Custom channels with their own unique features
+** External commands
 
 -----------------------------------------------------------------------------------------------------------------------
 
 === Functions
 
 * Chat management
-* Chat formating
+* Chat formatting
 
 -----------------------------------------------------------------------------------------------------------------------
 
@@ -70,7 +77,7 @@ TitanChat, a chat management and formatting plugin for Bukkit.
 * 11.03.12 - Minor changes in all classes
 * 12.03.12 - Swapped out enums and used annotations
 * 13.03.12 - Proofread code, 99% corrected, 1% unknown
-* 14.03.12 - SLiPCoR added debugging
+* 14.03.12 - Welcome, SLiPCoR!: Added debugging
 
 -----------------------------------------------------------------------------------------------------------------------
 
