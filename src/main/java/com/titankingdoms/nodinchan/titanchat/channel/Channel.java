@@ -110,6 +110,8 @@ public class Channel {
 	 * @return True if the Player can ban
 	 */
 	public boolean canBan(Player player) {
+		if (type.equals(Type.DEFAULT) || type.equals(Type.STAFF))
+			return false;
 		if (plugin.has(player, "TitanChat.ban.*") || plugin.has(player, "TitanChat.ban." + name))
 			return true;
 		if (adminlist.contains(player.getName()))
@@ -316,7 +318,7 @@ public class Channel {
 		try { config.save(configFile); } catch (IOException e) { plugin.log(Level.SEVERE, "Could not save config to " + configFile); }
 	}
 	
-	public void sendMessage(String message) {
+	public void sendMessage(Player player, String message) {
 		if (global)
 			plugin.getServer().broadcastMessage(message);
 		

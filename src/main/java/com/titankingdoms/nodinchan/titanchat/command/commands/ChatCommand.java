@@ -55,7 +55,7 @@ public class ChatCommand extends Command {
 			meStr.append(word);
 		}
 		
-		cm.getChannel(player).sendMessage(plugin.getFormatHandler().emoteFormat(player, meStr.toString()));
+		cm.getChannel(player).sendMessage(player, plugin.getFormatHandler().emoteFormat(player, meStr.toString()));
 		plugin.getLogger().info("* " + player.getName() + " " + meStr.toString());
 	}
 	

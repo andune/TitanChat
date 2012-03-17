@@ -33,6 +33,8 @@ public final class PermissionsHook implements Listener {
 	
 	private final TitanChat plugin;
 	
+	private final WildcardNodes wildcard;
+	
 	private static final Debugger db = new Debugger(5);
 	
 	private Plugin permissionsPlugin;
@@ -41,6 +43,7 @@ public final class PermissionsHook implements Listener {
 	
 	public PermissionsHook(TitanChat plugin) {
 		this.plugin = plugin;
+		this.wildcard = new WildcardNodes(permissionsPlugin);
 	}
 	
 	/**
@@ -220,6 +223,15 @@ public final class PermissionsHook implements Listener {
 		}
 		
 		return (suffix.equals("") || suffix == null) ? getGroupSuffix(player) : suffix;
+	}
+	
+	/**
+	 * Gets the Wildcard avoider
+	 * 
+	 * @return The Wildcard avoider
+	 */
+	public WildcardNodes getWildcardAvoider() {
+		return wildcard;
 	}
 	
 	/**

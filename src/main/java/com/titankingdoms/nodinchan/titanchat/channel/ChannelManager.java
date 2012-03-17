@@ -141,14 +141,14 @@ public final class ChannelManager {
 	 * @return The Spawn Channel
 	 */
 	public Channel getSpawnChannel(Player player) {
-		if (getStaffChannel() != null) {
-			if (plugin.has(player, "TitanChat.admin") && !plugin.has(player, "TitanChat.forcejoin." + getStaffChannel().getName()))
-				return getStaffChannel();
+		for (Channel channel : channels) {
+			if (plugin.getWildcardAvoider().has(player, "TitanChat.spawn." + channel.getName()) && channel.canAccess(player))
+				return channel;
 		}
 		
-		for (Channel channel : channels) {
-			if (plugin.has(player, "TitanChat.spawn." + channel.getName()) && !plugin.has(player, "TitanChat.forcejoin." + channel.getName()) && channel.canAccess(player))
-				return channel;
+		if (getStaffChannel() != null) {
+			if (plugin.has(player, "TitanChat.admin"))
+				return getStaffChannel();
 		}
 		
 		return getDefaultChannel();

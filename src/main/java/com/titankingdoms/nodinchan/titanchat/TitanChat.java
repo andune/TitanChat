@@ -23,6 +23,7 @@ import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
 import com.titankingdoms.nodinchan.titanchat.command.CommandManager;
 import com.titankingdoms.nodinchan.titanchat.debug.Debugger;
 import com.titankingdoms.nodinchan.titanchat.permissions.PermissionsHook;
+import com.titankingdoms.nodinchan.titanchat.permissions.WildcardNodes;
 import com.titankingdoms.nodinchan.titanchat.util.FormatHandler;
 import com.titankingdoms.nodinchan.titanchat.util.Loader;
 
@@ -332,6 +333,16 @@ public final class TitanChat extends JavaPlugin {
 		db.i("Returning PermissionsHook player suffix");
 		return permHook.getPlayerSuffix(player);
 	}
+	
+	/**
+	 * Gets the Wildcard avoider
+	 * 
+	 * @return The Wildcard avoider
+	 */
+	public WildcardNodes getWildcardAvoider() {
+		return permHook.getWildcardAvoider();
+	}
+	
 	/**
 	 * Check if the Player has the permission
 	 * 

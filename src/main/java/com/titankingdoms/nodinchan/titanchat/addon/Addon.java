@@ -48,7 +48,7 @@ public class Addon {
 	public void chatMade(String name, String message) {}
 	
 	/**
-	 * Called before a chat message is sent
+	 * Called when a message is being formatted
 	 * 
 	 * @param player The message sender
 	 * 

@@ -47,12 +47,12 @@ public final class TitanChatListener implements Listener {
 			}
 			
 			if (channel instanceof CustomChannel) {
-				((CustomChannel) channel).sendMessage(((CustomChannel) channel).format(player, msg));
+				((CustomChannel) channel).sendMessage(player, ((CustomChannel) channel).format(player, msg));
 				return;
 			}
 
 			String message = plugin.getFormatHandler().format(player, channel.getName(), msg);
-			channel.sendMessage(message);
+			channel.sendMessage(player, message);
 			
 		} else {
 			event.setFormat(plugin.getFormatHandler().format(player));
