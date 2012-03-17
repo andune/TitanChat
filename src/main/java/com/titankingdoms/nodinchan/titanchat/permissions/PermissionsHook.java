@@ -9,6 +9,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.event.server.PluginEnableEvent;
+import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.plugin.Plugin;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
@@ -47,7 +48,7 @@ public final class PermissionsHook implements Listener {
 	 * 
 	 * @param packages The file path
 	 * 
-	 * @return true if the package exists
+	 * @return True if the package exists
 	 */
 	public boolean exists(String...packages) {
 		try { for (String pkg : packages) { Class.forName(pkg); } return true; } catch (Exception e) { return false; }
@@ -83,7 +84,17 @@ public final class PermissionsHook implements Listener {
 			}
 		}
 		
-		return (prefix == null) ? "" : prefix;
+		if (prefix.equals("") || prefix == null) {
+			for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
+				if (!(permInfo.getPermission().startsWith("TitanChat.g.prefix.")) || !(permInfo.getValue()))
+					continue;
+				
+				prefix = permInfo.getPermission().substring(19);
+				break;
+			}
+		}
+		
+		return (prefix.equals("") || prefix == null) ? "" : prefix;
 	}
 	
 	/**
@@ -116,7 +127,17 @@ public final class PermissionsHook implements Listener {
 			}
 		}
 		
-		return (suffix == null) ? "" : suffix;
+		if (suffix.equals("") || suffix == null) {
+			for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
+				if (!(permInfo.getPermission().startsWith("TitanChat.g.suffix.")) || !(permInfo.getValue()))
+					continue;
+				
+				suffix = permInfo.getPermission().substring(19);
+				break;
+			}
+		}
+		
+		return (suffix.equals("") || suffix == null) ? "" : suffix;
 	}
 	
 	/**
@@ -144,6 +165,16 @@ public final class PermissionsHook implements Listener {
 			} else if (permissionsPlugin instanceof GroupManager) {
 				prefix = ((GroupManager) permissionsPlugin).getWorldsHolder().getWorldPermissions(player).getUserPrefix(player.getName());
 				db.i("GroupManager returned player prefix: " + prefix);
+			}
+		}
+		
+		if (prefix.equals("") || prefix == null) {
+			for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
+				if (!(permInfo.getPermission().startsWith("TitanChat.p.prefix.")) || !(permInfo.getValue()))
+					continue;
+				
+				prefix = permInfo.getPermission().substring(19);
+				break;
 			}
 		}
 		
@@ -175,6 +206,16 @@ public final class PermissionsHook implements Listener {
 			} else if (permissionsPlugin instanceof GroupManager) {
 				suffix = ((GroupManager) permissionsPlugin).getWorldsHolder().getWorldPermissions(player).getUserSuffix(player.getName());
 				db.i("GroupManager returned player suffix: " + suffix);
+			}
+		}
+		
+		if (suffix.equals("") || suffix == null) {
+			for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
+				if (!(permInfo.getPermission().startsWith("TitanChat.p.suffix.")) || !(permInfo.getValue()))
+					continue;
+				
+				suffix = permInfo.getPermission().substring(19);
+				break;
 			}
 		}
 		
@@ -247,13 +288,13 @@ public final class PermissionsHook implements Listener {
 					perms = plugin.getServer().getPluginManager().getPlugin("zPermissions");
 			}
 			
-			if (perms != null && perms.isEnabled()) {
-				permissionsPlugin = perms;
-				name = permissionsPlugin.getName();
+			if (perms != null) {
+				if (perms.isEnabled()) {
+					permissionsPlugin = perms;
+					name = permissionsPlugin.getName();
+				}
 				
-				if (!plugin.usingVault()) { plugin.log(Level.INFO, name + " detected and hooked"); }
-				
-			}
+			} else { if (!plugin.usingVault()) { plugin.log(Level.INFO, name + " detected and hooked"); } }
 		}
 	}
 }

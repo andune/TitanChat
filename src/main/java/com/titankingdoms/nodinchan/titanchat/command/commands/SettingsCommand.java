@@ -64,7 +64,7 @@ public class SettingsCommand extends Command {
 		case CONVERT:
 			try {
 				if (cm.exists(args[1])) {
-					if (plugin.isStaff(player)) {
+					if (plugin.has(player, "TitanChat.convert")) {
 						cm.getChannel(args[1]).getVariables().setConvert((cm.getChannel(args[1]).getVariables().convert()) ? false : true);
 						cm.getChannel(args[1]).save();
 						
@@ -75,7 +75,7 @@ public class SettingsCommand extends Command {
 				} else { plugin.sendWarning(player, "No such channel"); }
 				
 			} catch (IndexOutOfBoundsException e) {
-				if (plugin.isStaff(player)) {
+				if (plugin.has(player, "TitanChat.convert")) {
 					cm.getChannel(player).getVariables().setConvert((cm.getChannel(player).getVariables().convert()) ? false : true);
 					cm.getChannel(player).save();
 					

@@ -28,27 +28,25 @@ public class Debugger {
 	/**
 	 * Debug constructor
 	 * 
-	 * @param i
-	 *            the debug id to check
+	 * @param i The debug id to check
 	 */
-	public Debugger(int i) {
-		id = i;
+	public Debugger(int id) {
+		this.id = id;
 	}
 	
 	/**
 	 * Check if debugging enabled
 	 * 
-	 * @return true if debug is enabled
+	 * @return True if debug is enabled
 	 */
 	private boolean debugs() {
 		return override || check.contains(id) || check.contains(666);
 	}
 	
 	/**
-	 * Log a message prefixed with INFO
+	 * Logs a message prefixed with INFO
 	 * 
-	 * @param s
-	 *            the message
+	 * @param s The message
 	 */
 	public void i(String s) {
 		if (!debugs() || level < 1)
@@ -57,10 +55,9 @@ public class Debugger {
 	}
 	
 	/**
-	 * Log a message prefixed with WARNING
+	 * Logs a message prefixed with WARNING
 	 * 
-	 * @param s
-	 *            the message
+	 * @param s The message
 	 */
 	public void w(String s) {
 		if (!debugs() || level < 2)
@@ -69,10 +66,9 @@ public class Debugger {
 	}
 	
 	/**
-	 * Log a message prefixed with SEVERE
+	 * Logs a message prefixed with SEVERE
 	 * 
-	 * @param s
-	 *            the message
+	 * @param s The message
 	 */
 	public void s(String s) {
 		if (!debugs() || level < 3)
@@ -81,12 +77,11 @@ public class Debugger {
 	}
 	
 	/**
-	 * Read a string array and return a readable string
+	 * Reads a string array and return a readable string
 	 * 
-	 * @param s
-	 *            the string array
+	 * @param s The string array
 	 *            
-	 * @return a string, the array elements joined with comma
+	 * @return A string, the array elements joined with comma
 	 */
 	public String formatStringArray(String[] s) {
 		if (s == null)
@@ -98,6 +93,11 @@ public class Debugger {
 		return result;
 	}
 	
+	/**
+	 * Loads the Debugger
+	 * 
+	 * @param instance TitanChat
+	 */
 	public static void load(TitanChat instance) {
 		String debugs = instance.getConfig().getString("debug", "none");
 		
@@ -133,6 +133,7 @@ public class Debugger {
 		} catch (NumberFormatException e) {
 			System.out.println("Debug load error: " + debug);
 		}
+		
 		if (debug.equals("i"))
 			level = (byte) 1;
 		else if (debug.equals("w"))

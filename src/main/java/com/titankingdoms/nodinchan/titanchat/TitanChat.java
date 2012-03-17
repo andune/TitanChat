@@ -623,7 +623,7 @@ public final class TitanChat extends JavaPlugin {
 		cmdManager.load();
 		
 		if (chManager.getDefaultChannel() == null) {
-			log(Level.SEVERE, "A default channel not defined");
+			log(Level.SEVERE, "A default channel is not defined");
 			pm.disablePlugin(this);
 			return;
 		}
@@ -644,6 +644,7 @@ public final class TitanChat extends JavaPlugin {
 	 */
 	public String[] parseCommand(String[] args) {
 		db.i("Parsing command");
+		
 		StringBuilder str = new StringBuilder();
 		
 		for (String arg : args) {
@@ -655,6 +656,7 @@ public final class TitanChat extends JavaPlugin {
 			
 			str.append(arg);
 		}
+		
 		db.i("Command arguments: " + str.toString());
 		
 		return (str.toString().equals("")) ? new String[] {} : str.toString().split(" ");

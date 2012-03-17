@@ -134,9 +134,7 @@ public final class Loader {
 					addon.init();
 					addons.add(addon);
 					
-				} else {
-					throw new Exception();
-				}
+				} else { throw new Exception(); }
 				
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -181,15 +179,13 @@ public final class Loader {
 				if (mainClass != null) {
 					Class<?> clazz = Class.forName(mainClass, true, channelLoader);
 					Class<? extends CustomChannel> channelClass = clazz.asSubclass(CustomChannel.class);
-					Constructor<? extends CustomChannel> ctor = channelClass.getConstructor(plugin.getClass());
-					CustomChannel channel = ctor.newInstance(plugin);
+					Constructor<? extends CustomChannel> ctor = channelClass.getConstructor();
+					CustomChannel channel = ctor.newInstance();
 					ccJAR.put(channel.getName(), file);
 					channel.init();
 					channels.add(channel);
 					
-				} else {
-					throw new Exception();
-				}
+				} else { throw new Exception(); }
 				
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -234,14 +230,12 @@ public final class Loader {
 				if (mainClass != null) {
 					Class<?> clazz = Class.forName(mainClass, true, commandLoader);
 					Class<? extends Command> commandClass = clazz.asSubclass(Command.class);
-					Constructor<? extends Command> ctor = commandClass.getConstructor(plugin.getClass());
-					Command command = ctor.newInstance(plugin);
+					Constructor<? extends Command> ctor = commandClass.getConstructor();
+					Command command = ctor.newInstance();
 					command.init();
 					commands.add(command);
 					
-				} else {
-					throw new Exception();
-				}
+				} else { throw new Exception(); }
 				
 			} catch (Exception e) {
 				e.printStackTrace();
