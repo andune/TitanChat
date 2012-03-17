@@ -250,7 +250,7 @@ public final class TitanChat extends JavaPlugin {
 	 * 
 	 * @param player The Player to find for
 	 * 
-	 * @return the group suffix
+	 * @return The group suffix
 	 */
 	public String getGroupSuffix(Player player) {
 		db.i("Getting group suffix of player " + player.getName());
@@ -350,7 +350,7 @@ public final class TitanChat extends JavaPlugin {
 	 * 
 	 * @param permission The permission
 	 * 
-	 * @return true if the Player has the permission
+	 * @return True if the Player has the permission
 	 */
 	public boolean has(Player player, String permission) {
 		if (perm != null)
@@ -364,7 +364,7 @@ public final class TitanChat extends JavaPlugin {
 	 * 
 	 * @param player The Player to check
 	 * 
-	 * @return true if the Player has TitanChat.voice
+	 * @return True if the Player has TitanChat.voice
 	 */
 	public boolean hasVoice(Player player) {
 		return has(player, "TitanChat.voice");
@@ -373,7 +373,7 @@ public final class TitanChat extends JavaPlugin {
 	/**
 	 * Check if the Server is silenced
 	 * 
-	 * @return true if the Server is silenced
+	 * @return True if the Server is silenced
 	 */
 	public boolean isSilenced() {
 		return silenced;
@@ -384,7 +384,7 @@ public final class TitanChat extends JavaPlugin {
 	 * 
 	 * @param player The Player to check
 	 * 
-	 * @return true if the Player has TitanChat.admin
+	 * @return True if the Player has TitanChat.admin
 	 */
 	public boolean isStaff(Player player) {
 		return has(player, "TitanChat.admin");
@@ -422,7 +422,7 @@ public final class TitanChat extends JavaPlugin {
 	 * 
 	 * @param player The Player to check
 	 * 
-	 * @return true if the Player is muted
+	 * @return True if the Player is muted
 	 */
 	public boolean muted(Player player) {
 		return muted.contains(player.getName());
@@ -439,7 +439,7 @@ public final class TitanChat extends JavaPlugin {
 	 * 
 	 * @param args The list of words that follows
 	 * 
-	 * @return true if the Command is executed
+	 * @return True if the Command is executed
 	 */
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {

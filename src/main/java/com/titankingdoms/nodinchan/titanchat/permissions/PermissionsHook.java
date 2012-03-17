@@ -9,7 +9,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.event.server.PluginEnableEvent;
-import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.plugin.Plugin;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
@@ -87,15 +86,8 @@ public final class PermissionsHook implements Listener {
 			}
 		}
 		
-		if (prefix.equals("") || prefix == null) {
-			for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
-				if (!(permInfo.getPermission().startsWith("TitanChat.g.prefix.")) || !(permInfo.getValue()))
-					continue;
-				
-				prefix = permInfo.getPermission().substring(19);
-				break;
-			}
-		}
+		if (prefix.equals("") || prefix == null)
+			prefix = wildcard.getGroupPrefix(player);
 		
 		return (prefix.equals("") || prefix == null) ? "" : prefix;
 	}
@@ -130,15 +122,8 @@ public final class PermissionsHook implements Listener {
 			}
 		}
 		
-		if (suffix.equals("") || suffix == null) {
-			for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
-				if (!(permInfo.getPermission().startsWith("TitanChat.g.suffix.")) || !(permInfo.getValue()))
-					continue;
-				
-				suffix = permInfo.getPermission().substring(19);
-				break;
-			}
-		}
+		if (suffix.equals("") || suffix == null)
+			suffix = wildcard.getGroupSuffix(player);
 		
 		return (suffix.equals("") || suffix == null) ? "" : suffix;
 	}
@@ -171,21 +156,14 @@ public final class PermissionsHook implements Listener {
 			}
 		}
 		
-		if (prefix.equals("") || prefix == null) {
-			for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
-				if (!(permInfo.getPermission().startsWith("TitanChat.p.prefix.")) || !(permInfo.getValue()))
-					continue;
-				
-				prefix = permInfo.getPermission().substring(19);
-				break;
-			}
-		}
+		if (prefix.equals("") || prefix == null)
+			prefix = wildcard.getPlayerPrefix(player);
 		
 		return (prefix.equals("") || prefix == null) ? getGroupPrefix(player) : prefix;
 	}
 	
 	/**
-	 * Gest the Player suffix
+	 * Gets the Player suffix
 	 * 
 	 * @param player The Player to check
 	 * 
@@ -212,15 +190,8 @@ public final class PermissionsHook implements Listener {
 			}
 		}
 		
-		if (suffix.equals("") || suffix == null) {
-			for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
-				if (!(permInfo.getPermission().startsWith("TitanChat.p.suffix.")) || !(permInfo.getValue()))
-					continue;
-				
-				suffix = permInfo.getPermission().substring(19);
-				break;
-			}
-		}
+		if (suffix.equals("") || suffix == null)
+			suffix = wildcard.getPlayerSuffix(player);
 		
 		return (suffix.equals("") || suffix == null) ? getGroupSuffix(player) : suffix;
 	}
