@@ -81,6 +81,7 @@ TitanChat, a chat management and formatting plugin for Bukkit.
 * 15.03.12 - Documented
 * 16.03.12 - Added permissions for prefixes and suffixes
 * 17.03.12 - Created a Wildcard avoider that checks if a permission node is listed exactly instead of a '*'
+* 18.03.12 - TitanChat v3 officially released
 
 -----------------------------------------------------------------------------------------------------------------------
 

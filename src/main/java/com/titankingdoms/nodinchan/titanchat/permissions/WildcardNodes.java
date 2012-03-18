@@ -4,6 +4,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.plugin.Plugin;
 
+import com.titankingdoms.nodinchan.titanchat.debug.Debugger;
+
 import ru.tehkode.permissions.PermissionGroup;
 import ru.tehkode.permissions.PermissionUser;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
@@ -17,6 +19,8 @@ import ru.tehkode.permissions.bukkit.PermissionsEx;
 public class WildcardNodes {
 	
 	private Plugin plugin;
+	
+	private static final Debugger db = new Debugger(5);
 	
 	public WildcardNodes(Plugin plugin) {
 		this.plugin = plugin;
@@ -55,6 +59,8 @@ public class WildcardNodes {
 		String prefix = "";
 		
 		for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
+			db.i("Checking if " + permInfo.getPermission() + " is a prefix permission");
+			
 			if (!(permInfo.getPermission().startsWith("TitanChat.g.prefix.")) || !(permInfo.getValue()))
 				continue;
 			
@@ -64,12 +70,18 @@ public class WildcardNodes {
 		
 		if (prefix.equals("")) {
 			if (plugin instanceof PermissionsEx) {
+				db.i("Prefix not found with permission attachments, checking PermissionsEx");
+				
 				PermissionGroup[] groups = PermissionsEx.getPermissionManager().getUser(player).getGroups(player.getWorld().getName());
 				
 				if (groups != null && groups.length > 0) {
 					for (String perm : groups[0].getPermissions(player.getWorld().getName())) {
-						if (perm.startsWith("TitanChat.g.prefix."))
+						db.i("Checking if " + perm + " is a prefix permission");
+						
+						if (perm.startsWith("TitanChat.g.prefix.")) {
 							prefix = perm.substring(19);
+							db.i("PermissionsEx permissions returned prefix: " + prefix);
+						}
 					}
 				}
 			}
@@ -89,6 +101,8 @@ public class WildcardNodes {
 		String suffix = "";
 		
 		for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
+			db.i("Checking if " + permInfo.getPermission() + " is a suffix permission");
+			
 			if (!(permInfo.getPermission().startsWith("TitanChat.g.suffix.")) || !(permInfo.getValue()))
 				continue;
 			
@@ -98,12 +112,16 @@ public class WildcardNodes {
 		
 		if (suffix.equals("")) {
 			if (plugin instanceof PermissionsEx) {
+				db.i("Suffix not found with permission attachments, checking PermissionsEx");
+				
 				PermissionGroup[] groups = PermissionsEx.getPermissionManager().getUser(player).getGroups(player.getWorld().getName());
 				
 				if (groups != null && groups.length > 0) {
 					for (String perm : groups[0].getPermissions(player.getWorld().getName())) {
-						if (perm.startsWith("TitanChat.g.suffix."))
+						if (perm.startsWith("TitanChat.g.suffix.")) {
 							suffix = perm.substring(19);
+							db.i("PermissionsEx permissions returned suffix: " + suffix);
+						}
 					}
 				}
 			}
@@ -123,6 +141,8 @@ public class WildcardNodes {
 		String prefix = "";
 		
 		for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
+			db.i("Checking if " + permInfo.getPermission() + " is a prefix permission");
+			
 			if (!(permInfo.getPermission().startsWith("TitanChat.p.prefix.")) || !(permInfo.getValue()))
 				continue;
 			
@@ -132,10 +152,14 @@ public class WildcardNodes {
 		
 		if (prefix.equals("")) {
 			if (plugin instanceof PermissionsEx) {
+				db.i("Prefix not found with permission attachments, checking PermissionsEx");
+				
 				PermissionUser user = PermissionsEx.getPermissionManager().getUser(player);
 				for (String perm : user.getPermissions(player.getWorld().getName())) {
-					if (perm.startsWith("TitanChat.p.prefix."))
+					if (perm.startsWith("TitanChat.p.prefix.")) {
 						prefix = perm.substring(19);
+						db.i("PermissionsEx permissions returned prefix: " + prefix);
+					}
 				}
 			}
 		}
@@ -154,6 +178,8 @@ public class WildcardNodes {
 		String suffix = "";
 		
 		for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
+			db.i("Checking if " + permInfo.getPermission() + " is a suffix permission");
+			
 			if (!(permInfo.getPermission().startsWith("TitanChat.p.suffix.")) || !(permInfo.getValue()))
 				continue;
 			
@@ -163,10 +189,14 @@ public class WildcardNodes {
 		
 		if (suffix.equals("")) {
 			if (plugin instanceof PermissionsEx) {
+				db.i("Suffix not found with permission attachments, checking PermissionsEx");
+				
 				PermissionUser user = PermissionsEx.getPermissionManager().getUser(player);
 				for (String perm : user.getPermissions(player.getWorld().getName())) {
-					if (perm.startsWith("TitanChat.p.suffix."))
+					if (perm.startsWith("TitanChat.p.suffix.")) {
 						suffix = perm.substring(19);
+						db.i("PermissionsEx permissions returned suffix: " + suffix);
+					}
 				}
 			}
 		}

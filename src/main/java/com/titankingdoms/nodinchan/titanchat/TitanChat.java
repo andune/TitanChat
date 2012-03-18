@@ -640,7 +640,8 @@ public final class TitanChat extends JavaPlugin {
 		}
 		
 		for (Player player : getServer().getOnlinePlayers()) {
-			chManager.getSpawnChannel(player).join(player);
+			if (chManager.getChannel(player) == null)
+				chManager.getSpawnChannel(player).join(player);
 		}
 		
 		log(Level.INFO, "is now enabled");

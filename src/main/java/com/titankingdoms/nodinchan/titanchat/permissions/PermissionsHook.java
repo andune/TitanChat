@@ -32,7 +32,7 @@ public final class PermissionsHook implements Listener {
 	
 	private final TitanChat plugin;
 	
-	private final WildcardNodes wildcard;
+	private WildcardNodes wildcard;
 	
 	private static final Debugger db = new Debugger(5);
 	
@@ -42,7 +42,6 @@ public final class PermissionsHook implements Listener {
 	
 	public PermissionsHook(TitanChat plugin) {
 		this.plugin = plugin;
-		this.wildcard = new WildcardNodes(permissionsPlugin);
 	}
 	
 	/**
@@ -86,8 +85,10 @@ public final class PermissionsHook implements Listener {
 			}
 		}
 		
-		if (prefix.equals("") || prefix == null)
+		if (prefix.equals("") || prefix == null) {
+			db.i("Permissions plugins did not return any prefix, checking permissions...");
 			prefix = wildcard.getGroupPrefix(player);
+		}
 		
 		return (prefix.equals("") || prefix == null) ? "" : prefix;
 	}
@@ -122,8 +123,10 @@ public final class PermissionsHook implements Listener {
 			}
 		}
 		
-		if (suffix.equals("") || suffix == null)
+		if (suffix.equals("") || suffix == null) {
+			db.i("Permissions plugins did not return any suffix, checking permissions...");
 			suffix = wildcard.getGroupSuffix(player);
+		}
 		
 		return (suffix.equals("") || suffix == null) ? "" : suffix;
 	}
@@ -156,8 +159,10 @@ public final class PermissionsHook implements Listener {
 			}
 		}
 		
-		if (prefix.equals("") || prefix == null)
+		if (prefix.equals("") || prefix == null) {
+			db.i("Permissions plugins did not return any prefix, checking permissions...");
 			prefix = wildcard.getPlayerPrefix(player);
+		}
 		
 		return (prefix.equals("") || prefix == null) ? getGroupPrefix(player) : prefix;
 	}
@@ -190,8 +195,10 @@ public final class PermissionsHook implements Listener {
 			}
 		}
 		
-		if (suffix.equals("") || suffix == null)
+		if (suffix.equals("") || suffix == null) {
+			db.i("Permissions plugins did not return any suffix, checking permissions...");
 			suffix = wildcard.getPlayerSuffix(player);
+		}
 		
 		return (suffix.equals("") || suffix == null) ? getGroupSuffix(player) : suffix;
 	}
@@ -275,6 +282,7 @@ public final class PermissionsHook implements Listener {
 				if (perms.isEnabled()) {
 					permissionsPlugin = perms;
 					name = permissionsPlugin.getName();
+					this.wildcard = new WildcardNodes(permissionsPlugin);
 				}
 				
 			} else { if (!plugin.usingVault()) { plugin.log(Level.INFO, name + " detected and hooked"); } }
