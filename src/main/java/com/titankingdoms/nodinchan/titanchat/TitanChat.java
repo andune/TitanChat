@@ -126,6 +126,7 @@ public final class TitanChat extends JavaPlugin {
 		return str.toString();
 	}
 	
+<<<<<<< HEAD
 	/**
 	 * Check if Channels are enabled
 	 * 
@@ -133,6 +134,23 @@ public final class TitanChat extends JavaPlugin {
 	 */
 	public boolean enableChannels() {
 		return getConfig().getBoolean("channels.enable-channels");
+=======
+	public void deleteChannel(Player player, Channel channel) {
+		List<String> kicklist = new ArrayList<String>();
+		
+		for (String participant : channel.getParticipants()) {
+			if (getPlayer(participant) != null) {
+				kicklist.add(participant);
+				sendWarning(getPlayer(participant), channel.getName() + " has been deleted");
+			}
+		}
+
+		for (String kick : kicklist) {
+			channelSwitch(getPlayer(kick), channel, getSpawnChannel(getPlayer(kick)));
+		}
+		
+		channels.remove(channel);
+>>>>>>> e5b01df0557da67e4091b27d21a18696c0bf99fd
 	}
 	
 	/**
