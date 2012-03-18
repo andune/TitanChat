@@ -95,4 +95,10 @@ TitanChat, a chat management and formatting plugin for Bukkit.
 
 * Author: NodinChan
 
+==== Thank you
+
+* Thanks to SLiPCoR for adding the debugger and testing TitanChat with and for me
+* Thanks to gwinans for making such a good suggestion
+* Thanks to chrisward for providing me with a Jenkins even though it went wild lately
+
 -----------------------------------------------------------------------------------------------------------------------
