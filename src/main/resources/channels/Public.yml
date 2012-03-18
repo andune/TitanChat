@@ -1,0 +1,11 @@
+tag: '[Pub]'
+chat-display-colour: '&a'
+name-display-colour: '&a'
+type: public
+global: false
+colour-code: false
+password: ''
+format: ''
+messages:
+    join: true
+    leave: true

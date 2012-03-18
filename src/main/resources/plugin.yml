@@ -1,0 +1,82 @@
+name: TitanChat
+version: 3.0
+author: NodinChan
+main: com.titankingdoms.nodinchan.titanchat.TitanChat
+softdepend: [Vault]
+commands:
+    titanchat:
+        description: TitanChat Commands
+        aliases: tc
+        usage: /<command> [action] [argument]
+    broadcast:
+        description: Broadcast Command
+        aliases: bc
+        permission: TitanChat.broadcast
+        usage: /<command> [message]
+    me:
+        description: Emote Command
+        aliases: em
+        permission: TitanChat.emote.server
+        usage: /<command> [action]
+permissions:
+    TitanChat.admin:
+        description: Access to everything
+        default: op
+        children:
+            TitanChat.create: true
+            TitanChat.delete: true
+            TitanChat.broadcast: true
+            TitanChat.emote.server: true
+            TitanChat.silence.server: true
+            TitanChat.force: true
+            TitanChat.access.*: true
+            TitanChat.mod: true
+            TitanChat.rank.*: true
+            TitanChat.convert: true
+    TitanChat.create:
+        description: Access to channel creation
+        default: op
+    TitanChat.delete:
+        description: Access to channel deletion
+        default: op
+    TitanChat.broadcast:
+        description: Access to broadcast command
+        default: op
+    TitanChat.emote.server:
+        description: Access to server-wide emote broadcast
+        default: op
+        children:
+            TitanChat.emote: true
+    TitanChat.emote:
+        description: Access to channel emote broadcast
+        default: op
+    TitanChat.silence.server:
+        description: Access to server silence
+        default: op
+        children:
+            TitanChat.silence: true
+    TitanChat.silence:
+        description: Access to channel silence
+        default: op
+        children:
+            TitanChat.mute: true
+    TitanChat.force:
+        description: Access to forcing channel joins
+        default: op
+    TitanChat.mod:
+        description: Access to moderation perms, has voice
+        default: op
+        children:
+            TitanChat.ban.*: true
+            TitanChat.kick.*: true
+            TitanChat.mute: true
+            TitanChat.voice: true
+    TitanChat.mute:
+        description: Access to mute commands
+        default: op
+    TitanChat.voice:
+        description: Access to chat at all times
+        default: op
+    TitanChat.convert:
+        description: Access to colour code conversion and its command
+        default: op

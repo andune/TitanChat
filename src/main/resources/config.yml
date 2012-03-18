@@ -1,0 +1,34 @@
+#==============================================================#
+#                         COLOUR CODES                         #
+# &0 (black), &1 (dark blue), &2 (green), &3 (dark aqua),      #
+# &4 (red), &5 (purple), &6 (gold), &7 (silver),               #
+# &8 (grey), &9 (blue), &a (light green), &b (aqua),           #
+# &c (light red), &d (light purple), &e (yellow), &f (white),  #
+# &k (magical)                                                 #
+#==============================================================#
+
+channels:
+    enable-channels: true
+    chat-display-colour: '&f'
+    channel-limit: -1
+    messages:
+        join: true
+        leave: true
+broadcast:
+    player:
+        enable: true
+        format: '[&cBroadcast&f] %player: %message'
+    server:
+        enable: true
+        format: '<&4Server&f> %message'
+emote:
+    player:
+        enable: true
+        format: '* %player %action'
+    server:
+        enable: true
+        format: '* &4Server &f%action'
+formatting:
+    use-built-in: true
+    format: "%tag %prefix%player%suffix: %message"
+debug: none
