@@ -85,7 +85,7 @@ public final class PermissionsHook implements Listener {
 			}
 		}
 		
-		if (prefix.equals("") || prefix == null) {
+		if (prefix.equals("") && usingPermissionsEx() || prefix == null && usingPermissionsEx()) {
 			db.i("Permissions plugins did not return any prefix, checking permissions...");
 			prefix = wildcard.getGroupPrefix(player);
 		}
@@ -123,7 +123,7 @@ public final class PermissionsHook implements Listener {
 			}
 		}
 		
-		if (suffix.equals("") || suffix == null) {
+		if (suffix.equals("") && usingPermissionsEx() || suffix == null && usingPermissionsEx()) {
 			db.i("Permissions plugins did not return any suffix, checking permissions...");
 			suffix = wildcard.getGroupSuffix(player);
 		}
@@ -159,7 +159,7 @@ public final class PermissionsHook implements Listener {
 			}
 		}
 		
-		if (prefix.equals("") || prefix == null) {
+		if (prefix.equals("") && usingPermissionsEx() || prefix == null && usingPermissionsEx()) {
 			db.i("Permissions plugins did not return any prefix, checking permissions...");
 			prefix = wildcard.getPlayerPrefix(player);
 		}
@@ -195,7 +195,7 @@ public final class PermissionsHook implements Listener {
 			}
 		}
 		
-		if (suffix.equals("") || suffix == null) {
+		if (suffix.equals("") && usingPermissionsEx() || suffix == null && usingPermissionsEx()) {
 			db.i("Permissions plugins did not return any suffix, checking permissions...");
 			suffix = wildcard.getPlayerSuffix(player);
 		}
@@ -287,5 +287,9 @@ public final class PermissionsHook implements Listener {
 				
 			} else { if (!plugin.usingVault()) { plugin.log(Level.INFO, name + " detected and hooked"); } }
 		}
+	}
+	
+	public boolean usingPermissionsEx() {
+		return plugin.getServer().getPluginManager().getPlugin("PermissionsEx") != null;
 	}
 }

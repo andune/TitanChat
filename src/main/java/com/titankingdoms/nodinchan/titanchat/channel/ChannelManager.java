@@ -107,6 +107,17 @@ public final class ChannelManager {
 	}
 	
 	/**
+	 * Check if a Channel by that name exists
+	 * 
+	 * @param name The Channel name
+	 * 
+	 * @return True if the Channel exists
+	 */
+	public boolean exists(String name) {
+		return getChannel(name) != null;
+	}
+	
+	/**
 	 * Creates a list of Channels that can be accessed by the Player
 	 * 
 	 * @param player The Player to check
@@ -182,17 +193,6 @@ public final class ChannelManager {
 		}
 		
 		return null;
-	}
-	
-	/**
-	 * Check if a Channel by that name exists
-	 * 
-	 * @param name The Channel name
-	 * 
-	 * @return True if the Channel exists
-	 */
-	public boolean exists(String name) {
-		return getChannel(name) != null;
 	}
 	
 	/**
