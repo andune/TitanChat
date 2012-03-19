@@ -87,4 +87,5 @@ permissions:
         description: Access to colour code conversion and its command
         default: op
     TitanChat.whisper:
-        description: Access to 
+        description: Access to whisper command
+        default: true

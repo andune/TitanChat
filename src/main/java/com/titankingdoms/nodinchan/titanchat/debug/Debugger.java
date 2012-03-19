@@ -44,38 +44,40 @@ public class Debugger {
 	}
 	
 	/**
-	 * Logs a message prefixed with INFO
-	 * 
-	 * @param s The message
+	 * Disables all debuggers
 	 */
-	public void i(String s) {
-		if (!debugs() || level < 1)
-			return;
-		Bukkit.getLogger().info(prefix + s);
+	public static void disable() {
+		Debugger.override = false;
+		check.clear();
+	}
+	/**
+	 * Enables a particular debugger
+	 * 
+	 * @param debug Debugger id
+	 */
+	public static void enable(String debug) {
+		try {
+			check.add(Integer.valueOf(debug));
+			System.out.println("Debugging: " + debug);
+		} catch (NumberFormatException e) {
+			System.out.println("Debug load error: " + debug);
+		}
+		
+		if (debug.equals("i"))
+			level = (byte) 1;
+		else if (debug.equals("w"))
+			level = (byte) 2;
+		else if (debug.equals("s"))
+			level = (byte) 3;
 	}
 	
 	/**
-	 * Logs a message prefixed with WARNING
-	 * 
-	 * @param s The message
+	 * Enables all debuggers
 	 */
-	public void w(String s) {
-		if (!debugs() || level < 2)
-			return;
-		Bukkit.getLogger().warning(prefix + s);
+	public static void enableAll() {
+		Debugger.check.add(666);
 	}
-	
-	/**
-	 * Logs a message prefixed with SEVERE
-	 * 
-	 * @param s The message
-	 */
-	public void s(String s) {
-		if (!debugs() || level < 3)
-			return;
-		Bukkit.getLogger().severe(prefix + s);
-	}
-	
+
 	/**
 	 * Reads a string array and return a readable string
 	 * 
@@ -91,6 +93,17 @@ public class Debugger {
 			result = result + (result.equals("") ? "" : ",") + s[i];
 		}
 		return result;
+	}
+
+	/**
+	 * Logs a message prefixed with INFO
+	 * 
+	 * @param s The message
+	 */
+	public void i(String s) {
+		if (!debugs() || level < 1)
+			return;
+		Bukkit.getLogger().info(prefix + s);
 	}
 	
 	/**
@@ -125,30 +138,27 @@ public class Debugger {
 			}
 		}
 	}
-	
-	public static void enable(String debug) {
-		try {
-			check.add(Integer.valueOf(debug));
-			System.out.println("Debugging: " + debug);
-		} catch (NumberFormatException e) {
-			System.out.println("Debug load error: " + debug);
-		}
-		
-		if (debug.equals("i"))
-			level = (byte) 1;
-		else if (debug.equals("w"))
-			level = (byte) 2;
-		else if (debug.equals("s"))
-			level = (byte) 3;
+
+	/**
+	 * Logs a message prefixed with SEVERE
+	 * 
+	 * @param s The message
+	 */
+	public void s(String s) {
+		if (!debugs() || level < 3)
+			return;
+		Bukkit.getLogger().severe(prefix + s);
 	}
-	
-	public static void enableAll() {
-		Debugger.check.add(666);
-	}
-	
-	public static void disable() {
-		Debugger.override = false;
-		check.clear();
+
+	/**
+	 * Logs a message prefixed with WARNING
+	 * 
+	 * @param s The message
+	 */
+	public void w(String s) {
+		if (!debugs() || level < 2)
+			return;
+		Bukkit.getLogger().warning(prefix + s);
 	}
 }
 
