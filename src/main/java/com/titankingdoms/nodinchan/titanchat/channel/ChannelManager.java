@@ -39,6 +39,22 @@ public final class ChannelManager {
 	}
 	
 	/**
+	 * Assigns the Player as an admin of the Channel
+	 * 
+	 * @param player The Player to be assigned admin
+	 * 
+	 * @param channel The Channel to assign the Player to
+	 */
+	public void assignAdmin(Player player, Channel channel) {
+		db.i("Assigning player " + player.getName() +
+				" as admin of channel " + channel.getName());
+		
+		channel.getAdminList().add(player.getName());
+		channel.save();
+		plugin.sendInfo(player, "You are now an Admin of " + channel.getName());
+	}
+	
+	/**
 	 * Creates a new Channel with the given name
 	 * 
 	 * @param player The Channel creator
@@ -52,8 +68,8 @@ public final class ChannelManager {
 		Channel channel = new Channel(name, Type.PUBLIC);
 		channels.add(channel);
 		
-		plugin.assignAdmin(player, channel);
-		plugin.channelSwitch(player, channel);
+		assignAdmin(player, channel);
+		chSwitch(player, channel);
 		
 		channel.save();
 		
@@ -77,7 +93,7 @@ public final class ChannelManager {
 		
 		for (String participant : participants) {
 			if (plugin.getPlayer(participant) != null)
-				plugin.channelSwitch(plugin.getPlayer(participant), getSpawnChannel(player));
+				chSwitch(plugin.getPlayer(participant), getSpawnChannel(player));
 		}
 		
 		channels.remove(channel);
@@ -386,10 +402,41 @@ public final class ChannelManager {
 	}
 	
 	/**
+	 * Switching the Player from a Channel to another
+	 * 
+	 * @param player The Player to switch
+	 * 
+	 * @param channel The Channel to join
+	 */
+	public void chSwitch(Player player, Channel channel) {
+		db.i("Channel switch of player " + player.getName() +
+				" from channel " + getChannel(player).getName() +
+				" to channel " + channel.getName());
+		
+		getChannel(player).leave(player);
+		channel.join(player);
+	}
+	
+	/**
 	 * Unloads the Channels
 	 */
 	public void unload() {
 		for (Channel channel : channels) { channel.save(); }
 		channels.clear();
+	}
+	
+	/**
+	 * Whitelists the Player to the Channel
+	 * 
+	 * @param player The Player to whitelist
+	 * 
+	 * @param channel The Channel to whitelist the Player to
+	 */
+	public void whitelistMember(Player player, Channel channel) {
+		db.i("Adding player " + player.getName() +
+				" to whitelist of channel " + channel.getName());
+		channel.getWhiteList().add(player.getName());
+		channel.save();
+		plugin.sendInfo(player, "You are now a Member of " + channel.getName());
 	}
 }

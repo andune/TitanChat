@@ -82,6 +82,7 @@ TitanChat, a chat management and formatting plugin for Bukkit.
 * 16.03.12 - Added permissions for prefixes and suffixes
 * 17.03.12 - Created a Wildcard avoider that checks if a permission node is listed exactly instead of a '*'
 * 18.03.12 - TitanChat v3 officially released
+* 19.03.12 - Moved remaining channel methods to ChannelManager
 
 -----------------------------------------------------------------------------------------------------------------------
 
@@ -94,11 +95,14 @@ TitanChat, a chat management and formatting plugin for Bukkit.
 === Credits
 
 * Author: NodinChan
+* Contributor: SLiPCoR
+* Tester: gwinans, SLiPCoR
 
 ==== Thank you
 
 * Thanks to SLiPCoR for adding the debugger and testing TitanChat with and for me
 * Thanks to gwinans for making such a good suggestion
 * Thanks to chrisward for providing me with a Jenkins even though it went wild lately
+* Thanks to all users who are willing to bear with the constant updates
 
 -----------------------------------------------------------------------------------------------------------------------

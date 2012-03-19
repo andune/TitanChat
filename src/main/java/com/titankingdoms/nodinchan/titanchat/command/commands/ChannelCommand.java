@@ -109,14 +109,14 @@ public class ChannelCommand extends Command {
 			
 			case CUSTOM:
 				if (channel.canAccess(player)) {
-					plugin.channelSwitch(player, channel);
+					cm.chSwitch(player, channel);
 					plugin.sendInfo(player, "You have switched channels");
 					
 				} else { plugin.sendWarning(player, "You do not have permission to join " + channel.getName()); }
 				break;
 			
 			case DEFAULT:
-				plugin.channelSwitch(player, channel);
+				cm.chSwitch(player, channel);
 				plugin.sendInfo(player, "You have switched channels");
 				break;
 				
@@ -124,7 +124,7 @@ public class ChannelCommand extends Command {
 				if (!password.equals("")) {
 					if (channel.correctPassword(password)) {
 						if (channel.canAccess(player)) {
-							plugin.channelSwitch(player, channel);
+							cm.chSwitch(player, channel);
 							plugin.sendInfo(player, "You have switched channels");
 							
 						} else { plugin.sendWarning(player, "You are banned on this channel"); }
@@ -136,7 +136,7 @@ public class ChannelCommand extends Command {
 				
 			case PRIVATE:
 				if (channel.canAccess(player)) {
-					plugin.channelSwitch(player, channel);
+					cm.chSwitch(player, channel);
 					plugin.sendInfo(player, "You have switched channels");
 					
 				} else { plugin.sendWarning(player, "You are not on the whitelist"); }
@@ -144,7 +144,7 @@ public class ChannelCommand extends Command {
 				
 			case PUBLIC:
 				if (channel.canAccess(player)) {
-					plugin.channelSwitch(player, channel);
+					cm.chSwitch(player, channel);
 					plugin.sendInfo(player, "You have switched channels");
 					
 				} else { plugin.sendWarning(player, "You are banned on this channel"); }
@@ -152,7 +152,7 @@ public class ChannelCommand extends Command {
 				
 			case STAFF:
 				if (plugin.isStaff(player)) {
-					plugin.channelSwitch(player, channel);
+					cm.chSwitch(player, channel);
 					plugin.sendInfo(player, "You have switched channels");
 					
 				} else { plugin.sendWarning(player, "You do not have permission to join " + channel.getName()); }

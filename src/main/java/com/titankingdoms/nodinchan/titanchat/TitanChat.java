@@ -18,7 +18,6 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.titankingdoms.nodinchan.titanchat.addon.AddonManager;
-import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
 import com.titankingdoms.nodinchan.titanchat.command.CommandManager;
 import com.titankingdoms.nodinchan.titanchat.debug.Debugger;
@@ -28,7 +27,7 @@ import com.titankingdoms.nodinchan.titanchat.util.FormatHandler;
 import com.titankingdoms.nodinchan.titanchat.util.Loader;
 
 /*
- *     TitanChat 3.0
+ *     TitanChat 3.1
  *     Copyright (C) 2012  Nodin Chan <nodinchan@nodinchan.net>
  *     
  *     This program is free software: you can redistribute it and/or modify
@@ -71,38 +70,6 @@ public final class TitanChat extends JavaPlugin {
 	
 	private Permission perm;
 	private Chat chat;
-	
-	/**
-	 * Assigns the Player as an admin of the Channel
-	 * 
-	 * @param player The Player to be assigned admin
-	 * 
-	 * @param channel The Channel to assign the Player to
-	 */
-	public void assignAdmin(Player player, Channel channel) {
-		db.i("Assigning player " + player.getName() +
-				" as admin of channel " + channel.getName());
-		
-		channel.getAdminList().add(player.getName());
-		channel.save();
-		sendInfo(player, "You are now an Admin of " + channel.getName());
-	}
-	
-	/**
-	 * Switching the Player from a Channel to another
-	 * 
-	 * @param player The Player to switch
-	 * 
-	 * @param channel The Channel to join
-	 */
-	public void channelSwitch(Player player, Channel channel) {
-		db.i("Channel switch of player " + player.getName() +
-				" from channel " + chManager.getChannel(player).getName() +
-				" to channel " + channel.getName());
-		
-		chManager.getChannel(player).leave(player);
-		channel.join(player);
-	}
 	
 	/**
 	 * Creates a new list with items seperated with commas
@@ -785,20 +752,5 @@ public final class TitanChat extends JavaPlugin {
 	public boolean usingVault() {
 		db.i("Using Vault: " + (perm != null));
 		return perm != null;
-	}
-	
-	/**
-	 * Whitelists the Player to the Channel
-	 * 
-	 * @param player The Player to whitelist
-	 * 
-	 * @param channel The Channel to whitelist the Player to
-	 */
-	public void whitelistMember(Player player, Channel channel) {
-		db.i("Adding player " + player.getName() +
-				" to whitelist of channel " + channel.getName());
-		channel.getWhiteList().add(player.getName());
-		channel.save();
-		sendInfo(player, "You are now a Member of " + channel.getName());
 	}
 }

@@ -33,7 +33,7 @@ public class InvitationCommand extends Command {
 					channel.getInviteList().remove(player.getName());
 					cm.onInviteRespond(channel, player, true);
 					
-					plugin.channelSwitch(player, channel);
+					cm.chSwitch(player, channel);
 					plugin.sendInfo(player, "You have accepted the invitation");
 					
 				} else { plugin.sendWarning(player, "You did not receive any invitations from this channel"); }

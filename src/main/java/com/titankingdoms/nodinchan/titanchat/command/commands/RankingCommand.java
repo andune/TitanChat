@@ -31,7 +31,7 @@ public class RankingCommand extends Command {
 			if (cm.exists(args[1])) {
 				if (cm.getChannel(args[1]).canRank(player)) {
 					if (plugin.getPlayer(args[0]) != null) {
-						plugin.whitelistMember(plugin.getPlayer(args[0]), cm.getChannel(args[1]));
+						cm.whitelistMember(plugin.getPlayer(args[0]), cm.getChannel(args[1]));
 						plugin.sendInfo(player, plugin.getPlayer(args[0]).getDisplayName() + " has been added to the Member List");
 						
 					} else { plugin.sendWarning(player, "Player not online"); }
@@ -43,7 +43,7 @@ public class RankingCommand extends Command {
 		} catch (IndexOutOfBoundsException e) {
 			if (cm.getChannel(player).canRank(player)) {
 				if (plugin.getPlayer(args[0]) != null) {
-					plugin.whitelistMember(plugin.getPlayer(args[0]), cm.getChannel(player));
+					cm.whitelistMember(plugin.getPlayer(args[0]), cm.getChannel(player));
 					plugin.sendInfo(player, plugin.getPlayer(args[0]).getDisplayName() + " has been added to the Member List");
 					
 				} else { plugin.sendWarning(player, "Player not online"); }
@@ -114,7 +114,7 @@ public class RankingCommand extends Command {
 						Player targetPlayer = plugin.getPlayer(args[1]);
 						
 						if (!cm.getChannel(args[0]).getAdminList().contains(player.getName())) {
-							plugin.assignAdmin(targetPlayer, cm.getChannel(args[0]));
+							cm.assignAdmin(targetPlayer, cm.getChannel(args[0]));
 							plugin.sendInfo(player, "You have been promoted in " + cm.getExact(args[0]));
 							plugin.sendInfo(cm.getChannel(args[0]).getParticipants(), targetPlayer.getDisplayName() + " has been promoted");
 							
@@ -133,7 +133,7 @@ public class RankingCommand extends Command {
 					Player targetPlayer = plugin.getPlayer(args[0]);
 					
 					if (!cm.getChannel(player).getAdminList().contains(player.getName())) {
-						plugin.assignAdmin(targetPlayer, cm.getChannel(player));
+						cm.assignAdmin(targetPlayer, cm.getChannel(player));
 						plugin.sendInfo(player, "You have been promoted in " + cm.getChannel(player).getName());
 						plugin.sendInfo(cm.getChannel(args[0]).getParticipants(), targetPlayer.getDisplayName() + " has been promoted");
 						

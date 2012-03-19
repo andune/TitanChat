@@ -7,7 +7,7 @@
     <groupId>com.titankingdoms.dev</groupId>
     <artifactId>TitanChat</artifactId>
     <name>TitanChat</name>
-    <version>v3.0-build${build.number}</version>
+    <version>v3.1-build${build.number}</version>
 
     <description>TitanChat, a chat management and formatting plugin.</description>
     <build>
