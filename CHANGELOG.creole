@@ -1,0 +1,35 @@
+== Changelog
+
+-----------------------------------------------------------------------------------------------------------------------
+
+=== TitanChat v1
+
+* 06.01.12 - Project Start
+* 07.01.12 - Wild NPEs appeared
+* 08.01.12 - Fixed all NPEs
+* 10.01.12 - Supports prefixes and suffixes
+* 11.01.12 - Mute and unmute commands and global channels
+* 13.01.12 - Silence, broadcast and command list commands
+* 15.01.12 - Follow, force and unfollow commands and local channel
+* 16.01.12 - Filter is now perfect, 1 month until NodinChan's Birthday
+* 17.01.12 - Public command renamed to Status, fixed global and cleaned up code
+* 18.01.12 - Chat format now customisable and huge fix to a potential problem
+* 24.01.12 - Updated for 1.1 and added commands
+* 07.02.12 - Added permission for setting default channels for players
+
+-----------------------------------------------------------------------------------------------------------------------
+
+=== TitanChat v2
+
+* 16.02.12 - Added TCSupport Loader and TCSupport
+* 17.02.12 - New managing code and permissions
+* 18.02.12 - Fixed config files not generating
+* 29.02.12 - Custom channels? Sure.
+* 01.03.12 - Fixed empty channel.yml
+* 02.03.12 - Fixed broken commands
+* 03.03.12 - Fixed fail CREATE command
+* 04.03.12 - Rewrote the command handler
+* 05.03.12 - Fixed commands
+* 07.03.12 - Fixed TitanChat sending warnings to players when nothing is wrong and made Vault optional
+
+-----------------------------------------------------------------------------------------------------------------------

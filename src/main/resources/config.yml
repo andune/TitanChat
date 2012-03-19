@@ -28,6 +28,13 @@ emote:
     server:
         enable: true
         format: '* &4Server &f%action'
+whisper:
+    player:
+        enable: true
+        format: '&5%player whispers: %message'
+    server:
+        enable: true
+        format: '&5Server whispers: %message'
 formatting:
     use-built-in: true
     format: "%tag %prefix%player%suffix: %message"

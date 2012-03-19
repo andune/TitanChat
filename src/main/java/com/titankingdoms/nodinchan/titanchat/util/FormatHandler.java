@@ -225,4 +225,36 @@ public final class FormatHandler {
 		
 		return message;
 	}
+	
+	public String whisper(Player player, String msg) {
+		String message = plugin.getConfig().getString("whisper.player.format");
+		
+		String playerPrefix = plugin.getPlayerPrefix(player);
+		String playerSuffix = plugin.getPlayerSuffix(player);
+		String groupPrefix = plugin.getGroupPrefix(player);
+		String groupSuffix = plugin.getGroupSuffix(player);
+
+		message = message.replace("%prefix", playerPrefix);
+		message = message.replace("%gprefix", groupPrefix);
+		message = message.replace("%player", player.getDisplayName());
+		message = message.replace("%suffix", playerSuffix);
+		message = message.replace("%gsuffix", groupSuffix);
+		
+		message = plugin.getAddonManager().executeFormat(player, message);
+		
+		StringBuilder str = new StringBuilder();
+		
+		for (String word : message.split(" ")) {
+			if (str.length() > 0)
+				str.append(" ");
+			
+			str.append(colourise(word));
+		}
+		
+		message = str.toString();
+		
+		message = message.replace("%message", colourise(msg));
+		
+		return message;
+	}
 }

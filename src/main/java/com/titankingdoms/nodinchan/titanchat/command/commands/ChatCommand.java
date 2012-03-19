@@ -28,17 +28,17 @@ public class ChatCommand extends Command {
 	public void broadcast(Player player, String[] args) {
 		if (args.length < 1 || !plugin.has(player, "TitanChat.broadcast")) { return; }
 		
-		StringBuilder broadcastStr = new StringBuilder();
+		StringBuilder str = new StringBuilder();
 		
 		for (String word : args) {
-			if (broadcastStr.length() > 1)
-				broadcastStr.append(" ");
+			if (str.length() > 1)
+				str.append(" ");
 			
-			broadcastStr.append(word);
+			str.append(word);
 		}
 		
-		plugin.getServer().broadcastMessage(plugin.getFormatHandler().broadcastFormat(player, broadcastStr.toString()));
-		plugin.getLogger().info("<" + player.getName() + "> " + broadcastStr.toString());
+		plugin.getServer().broadcastMessage(plugin.getFormatHandler().broadcastFormat(player, str.toString()));
+		plugin.getLogger().info("<" + player.getName() + "> " + str.toString());
 	}
 	
 	@CommandID(name = "Emote", triggers = { "me", "em" })
@@ -46,17 +46,17 @@ public class ChatCommand extends Command {
 	public void emote(Player player, String[] args) {
 		if (args.length < 1 || !plugin.has(player, "TitanChat.me")) { return; }
 		
-		StringBuilder meStr = new StringBuilder();
+		StringBuilder str = new StringBuilder();
 		
 		for (String word : args) {
-			if (meStr.length() > 1)
-				meStr.append(" ");
+			if (str.length() > 1)
+				str.append(" ");
 			
-			meStr.append(word);
+			str.append(word);
 		}
 		
-		cm.getChannel(player).sendMessage(player, plugin.getFormatHandler().emoteFormat(player, meStr.toString()));
-		plugin.getLogger().info("* " + player.getName() + " " + meStr.toString());
+		cm.getChannel(player).sendMessage(player, plugin.getFormatHandler().emoteFormat(player, str.toString()));
+		plugin.getLogger().info("* " + player.getName() + " " + str.toString());
 	}
 	
 	@CommandID(name = "Silence", triggers = "silence", requireChannel = false)
@@ -103,5 +103,35 @@ public class ChatCommand extends Command {
 				}
 			}
 		}
+	}
+	
+	@CommandID(name = "whisper", triggers = { "whisper", "w" })
+	@CommandInfo(description = "Whisper messages to players", usage = "whisper [player] [message]")
+	public void whisper(Player player, String[] args) {
+		if (args.length < 2 || !plugin.has(player, "TitanChat.whisper")) { return; }
+		
+		if (plugin.getPlayer(args[0]) == null || !args[0].equalsIgnoreCase("console")) {
+			plugin.sendWarning(player, "Player not online");
+			return;
+		}
+		
+		StringBuilder str = new StringBuilder();
+		
+		for (String word : args) {
+			if (word.equals(args[0]))
+				continue;
+			
+			if (str.length() > 1)
+				str.append(" ");
+			
+			str.append(word);
+		}
+		
+		if (!args[0].equalsIgnoreCase("console")) {
+			player.sendMessage("You whispered to " + plugin.getPlayer(args[0]).getDisplayName() + ": " + str.toString());
+			plugin.getPlayer(args[0]).sendMessage(plugin.getFormatHandler().whisper(player, str.toString()));
+			plugin.getLogger().info("[" + player.getName() + " -> " + plugin.getPlayer(args[0]).getName() + "] " + str.toString());
+			
+		} else { plugin.getLogger().info(player.getName() + " whispers: " + str.toString()); }
 	}
 }

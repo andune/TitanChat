@@ -1,5 +1,5 @@
 name: TitanChat
-version: 3.0
+version: 3.1
 author: NodinChan
 main: com.titankingdoms.nodinchan.titanchat.TitanChat
 softdepend: [Vault]
@@ -18,6 +18,11 @@ commands:
         aliases: em
         permission: TitanChat.emote.server
         usage: /<command> [action]
+    whisper:
+        description: Whisper Command
+        aliases: w
+        permission: TitanChat.whisper
+        usage: /<command> [player] [message]
 permissions:
     TitanChat.admin:
         description: Access to everything
@@ -33,6 +38,7 @@ permissions:
             TitanChat.mod: true
             TitanChat.rank.*: true
             TitanChat.convert: true
+            TitanChat.whisper: true
     TitanChat.create:
         description: Access to channel creation
         default: op
@@ -49,7 +55,7 @@ permissions:
             TitanChat.emote: true
     TitanChat.emote:
         description: Access to channel emote broadcast
-        default: op
+        default: true
     TitanChat.silence.server:
         description: Access to server silence
         default: op
@@ -80,3 +86,5 @@ permissions:
     TitanChat.convert:
         description: Access to colour code conversion and its command
         default: op
+    TitanChat.whisper:
+        description: Access to 

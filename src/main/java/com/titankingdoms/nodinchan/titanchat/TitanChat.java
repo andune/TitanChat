@@ -520,6 +520,43 @@ public final class TitanChat extends JavaPlugin {
 			return true;
 		}
 		
+		if (cmd.getName().equalsIgnoreCase("whisper")) {
+			if (!(sender instanceof Player)) {
+				if (!getConfig().getBoolean("whisper.server.enable")) {
+					log(Level.WARNING, "Command disabled");
+					return true;
+				}
+				
+				String message = getConfig().getString("whisper.server.format");
+				
+				StringBuilder str = new StringBuilder();
+				
+				for (String word : args) {
+					if (str.length() > 0)
+						str.append(" ");
+					
+					str.append(word);
+				}
+				
+				message = message.replace("%message", str.toString());
+				getServer().broadcastMessage(getFormatHandler().colourise(message));
+				getLogger().info("* Server " + getFormatHandler().decolourise(str.toString()));
+				return true;
+			}
+			
+			if (!getConfig().getBoolean("whisper.player.enable")) {
+				sendWarning((Player) sender, "Command disabled");
+				return true;
+			}
+			
+			if (has((Player) sender, "TitanChat.whisper"))
+				try { cmdManager.execute((Player) sender, "whisper", args); } catch (Exception e) {}
+			else
+				sendWarning((Player) sender, "You do not have permission");
+			
+			return true;
+		}
+		
 		return false;
 	}
 	
