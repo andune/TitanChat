@@ -37,6 +37,32 @@ public final class TitanChatListener implements Listener {
 		if (plugin.enableChannels()) {
 			event.setCancelled(true);
 			
+			if (msg.startsWith("@") && !msg.substring(1).startsWith(" ")) {
+				Channel channel = plugin.getChannelManager().getChannel(msg.split(" ")[0].substring(1));
+					
+				if (channel != null) {
+					if (!plugin.hasVoice(player)) {
+						if (plugin.isSilenced()) { plugin.sendWarning(player, "The server is silenced"); return; }
+						if (channel.isSilenced()) { plugin.sendWarning(player, "The channel is silenced"); return; }
+						if (channel.getMuteList().contains(player.getName())) { plugin.sendWarning(player, "You have been muted"); return; }
+						if (plugin.muted(player)) { plugin.sendWarning(player, "You have been muted"); return; }
+					}
+					
+					String message = msg.replace(msg.split(" ")[0] + " ", "");
+					
+					if (channel instanceof CustomChannel) {
+						((CustomChannel) channel).sendMessage(player, ((CustomChannel) channel).format(player, message));
+						return;
+					}
+					
+					message = plugin.getFormatHandler().format(player, channel.getName(), message);
+					channel.sendMessage(player, message);
+					
+				} else { plugin.sendWarning(player, "No such channel"); }
+				
+				return;
+			}
+			
 			Channel channel = plugin.getChannelManager().getChannel(player);
 			
 			if (!plugin.hasVoice(player)) {
@@ -50,7 +76,7 @@ public final class TitanChatListener implements Listener {
 				((CustomChannel) channel).sendMessage(player, ((CustomChannel) channel).format(player, msg));
 				return;
 			}
-
+			
 			String message = plugin.getFormatHandler().format(player, channel.getName(), msg);
 			channel.sendMessage(player, message);
 			
