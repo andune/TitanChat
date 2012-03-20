@@ -416,9 +416,7 @@ public final class TitanChat extends JavaPlugin {
 			if (args.length < 1) {
 				db.i("onCommand: No arguments!");
 				
-				sender.sendMessage(ChatColor.AQUA + "TitanChat Commands");
-				sender.sendMessage(ChatColor.AQUA + "Command: /titanchat [command] [arguments]");
-				sender.sendMessage(ChatColor.AQUA + "Alias: /tc [command] [arguments]");
+				sender.sendMessage(ChatColor.AQUA + "You are running " + this);
 				
 				if (sender instanceof Player)
 					sendInfo((Player) sender, "\"/titanchat commands [page]\" for command list");
@@ -527,6 +525,11 @@ public final class TitanChat extends JavaPlugin {
 					return true;
 				}
 				
+				if (getPlayer(args[0]) == null) {
+					log(Level.WARNING, "Player not online");
+					return true;
+				}
+				
 				String message = getConfig().getString("whisper.server.format");
 				
 				StringBuilder str = new StringBuilder();
@@ -538,10 +541,18 @@ public final class TitanChat extends JavaPlugin {
 					str.append(word);
 				}
 				
-				message = message.replace("%message", str.toString());
-				getServer().broadcastMessage(getFormatHandler().colourise(message));
-				getLogger().info("* Server " + getFormatHandler().decolourise(str.toString()));
-				return true;
+				if (args[0].equalsIgnoreCase("console")) {
+					log(Level.INFO, "You whispered to yourself: " + str.toString());
+					log(Level.INFO, message.replace("%message", str.toString()));
+					return true;
+				}
+				
+				if (getPlayer(args[0]) != null) {
+					log(Level.INFO, "You whispered to " + getPlayer(args[0]).getName() + ": " + str.toString());
+					getPlayer(args[0]).sendMessage(message.replace("%message", getFormatHandler().colourise(str.toString())));
+					getLogger().info("[Server -> " + getPlayer(args[0]).getName() + "] " + str.toString());
+					
+				} else { log(Level.WARNING, "Player not online"); }
 			}
 			
 			if (!getConfig().getBoolean("whisper.player.enable")) {

@@ -1,5 +1,8 @@
 package com.titankingdoms.nodinchan.titanchat.permissions;
 
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 
 import org.anjocaido.groupmanager.GroupManager;
@@ -20,7 +23,6 @@ import ru.tehkode.permissions.bukkit.PermissionsEx;
 
 import de.bananaco.bpermissions.api.ApiLayer;
 import de.bananaco.bpermissions.api.util.CalculableType;
-import de.bananaco.bpermissions.imp.Permissions;
 
 /**
  * PermissionsHook - For hooking into permissions plugins
@@ -32,7 +34,7 @@ public final class PermissionsHook implements Listener {
 	
 	private final TitanChat plugin;
 	
-	private WildcardNodes wildcard;
+	private final WildcardNodes wildcard;
 	
 	private static final Debugger db = new Debugger(5);
 	
@@ -42,6 +44,7 @@ public final class PermissionsHook implements Listener {
 	
 	public PermissionsHook(TitanChat plugin) {
 		this.plugin = plugin;
+		this.wildcard = new WildcardNodes(this);
 	}
 	
 	/**
@@ -51,8 +54,8 @@ public final class PermissionsHook implements Listener {
 	 * 
 	 * @return True if the package exists
 	 */
-	public boolean exists(String...packages) {
-		try { for (String pkg : packages) { Class.forName(pkg); } return true; } catch (Exception e) { return false; }
+	public boolean exists(String pkg) {
+		try { Class.forName(pkg); return true; } catch (Exception e) { return false; }
 	}
 	
 	/**
@@ -65,27 +68,30 @@ public final class PermissionsHook implements Listener {
 	public String getGroupPrefix(Player player) {
 		String prefix = "";
 		
-		if (permissionsPlugin != null) {
-			if (permissionsPlugin instanceof PermissionsEx) {
-				String[] groups = PermissionsEx.getPermissionManager().getUser(player).getGroupsNames();
-				String group = (groups != null && groups.length > 0) ? groups[0] : "";
-				prefix = PermissionsEx.getPermissionManager().getGroup(group).getPrefix(player.getWorld().getName());
-				db.i("PermissionsEx returned group prefix: " + prefix);
-				
-			} else if (permissionsPlugin instanceof Permissions) {
-				String[] groups = ApiLayer.getGroups(player.getWorld().getName(), CalculableType.USER, player.getName());
-				String group = (groups != null && groups.length > 0) ? groups[0] : "";
-				prefix = (!group.equals("")) ? ApiLayer.getValue(player.getWorld().getName(), CalculableType.GROUP, group, "prefix") : "";
-				db.i("bPermissions returned group prefix: " + prefix);
-				
-			} else if (permissionsPlugin instanceof GroupManager) {
-				String group = ((GroupManager) permissionsPlugin).getWorldsHolder().getWorldPermissions(player).getGroup(player.getName());
-				prefix = ((GroupManager) permissionsPlugin).getWorldsHolder().getWorldPermissions(player).getGroupPrefix(group);
-				db.i("GroupManager returned group prefix: " + prefix);
-			}
+		switch (using()) {
+		
+		case PERMISSIONSEX:
+			String[] pexGroups = PermissionsEx.getPermissionManager().getUser(player).getGroupsNames();
+			String pexGroup = (pexGroups != null && pexGroups.length > 0) ? pexGroups[0] : "";
+			prefix = PermissionsEx.getPermissionManager().getGroup(pexGroup).getPrefix(player.getWorld().getName());
+			db.i("PermissionsEx returned group prefix: " + prefix);
+			break;
+			
+		case BPERMISSIONS:
+			String[] bGroups = ApiLayer.getGroups(player.getWorld().getName(), CalculableType.USER, player.getName());
+			String bGroup = (bGroups != null && bGroups.length > 0) ? bGroups[0] : "";
+			prefix = (!bGroup.equals("")) ? ApiLayer.getValue(player.getWorld().getName(), CalculableType.GROUP, bGroup, "prefix") : "";
+			db.i("bPermissions returned group prefix: " + prefix);
+			break;
+			
+		case GROUPMANAGER:
+			String group = ((GroupManager) permissionsPlugin).getWorldsHolder().getWorldPermissions(player).getGroup(player.getName());
+			prefix = ((GroupManager) permissionsPlugin).getWorldsHolder().getWorldPermissions(player).getGroupPrefix(group);
+			db.i("GroupManager returned group prefix: " + prefix);
+			break;
 		}
 		
-		if (prefix.equals("") && usingPermissionsEx() || prefix == null && usingPermissionsEx()) {
+		if (prefix.equals("") || prefix == null) {
 			db.i("Permissions plugins did not return any prefix, checking permissions...");
 			prefix = wildcard.getGroupPrefix(player);
 		}
@@ -103,27 +109,30 @@ public final class PermissionsHook implements Listener {
 	public String getGroupSuffix(Player player) {
 		String suffix = "";
 		
-		if (permissionsPlugin != null) {
-			if (permissionsPlugin instanceof PermissionsEx) {
-				String[] groups = PermissionsEx.getPermissionManager().getUser(player).getGroupsNames();
-				String group = (groups != null && groups.length > 0) ? groups[0] : "";
-				suffix = (!group.equals("")) ? PermissionsEx.getPermissionManager().getGroup(group).getSuffix(player.getWorld().getName()) : "";
-				db.i("PermissionsEx returned group suffix: " + suffix);
-				
-			} else if (permissionsPlugin instanceof Permissions) {
-				String[] groups = ApiLayer.getGroups(player.getWorld().getName(), CalculableType.USER, player.getName());
-				String group = (groups != null && groups.length > 0) ? groups[0] : "";
-				suffix = (!group.equals("")) ? ApiLayer.getValue(player.getWorld().getName(), CalculableType.GROUP, group, "suffix") : "";
-				db.i("bPermissions returned group suffix: " + suffix);
-				
-			} else if (permissionsPlugin instanceof GroupManager) {
-				String group = ((GroupManager) permissionsPlugin).getWorldsHolder().getWorldPermissions(player).getGroup(player.getName());
-				suffix = ((GroupManager) permissionsPlugin).getWorldsHolder().getWorldPermissions(player).getGroupSuffix(group);
-				db.i("GroupManager returned group suffix: " + suffix);
-			}
+		switch (using()) {
+		
+		case PERMISSIONSEX:
+			String[] pexGroups = PermissionsEx.getPermissionManager().getUser(player).getGroupsNames();
+			String pexGroup = (pexGroups != null && pexGroups.length > 0) ? pexGroups[0] : "";
+			suffix = (!pexGroup.equals("")) ? PermissionsEx.getPermissionManager().getGroup(pexGroup).getSuffix(player.getWorld().getName()) : "";
+			db.i("PermissionsEx returned group suffix: " + suffix);
+			break;
+			
+		case BPERMISSIONS:
+			String[] bGroups = ApiLayer.getGroups(player.getWorld().getName(), CalculableType.USER, player.getName());
+			String bGroup = (bGroups != null && bGroups.length > 0) ? bGroups[0] : "";
+			suffix = (!bGroup.equals("")) ? ApiLayer.getValue(player.getWorld().getName(), CalculableType.GROUP, bGroup, "suffix") : "";
+			db.i("bPermissions returned group suffix: " + suffix);
+			break;
+			
+		case GROUPMANAGER:
+			String gmGroup = ((GroupManager) permissionsPlugin).getWorldsHolder().getWorldPermissions(player).getGroup(player.getName());
+			suffix = ((GroupManager) permissionsPlugin).getWorldsHolder().getWorldPermissions(player).getGroupSuffix(gmGroup);
+			db.i("GroupManager returned group suffix: " + suffix);
+			break;
 		}
 		
-		if (suffix.equals("") && usingPermissionsEx() || suffix == null && usingPermissionsEx()) {
+		if (suffix.equals("") || suffix == null) {
 			db.i("Permissions plugins did not return any suffix, checking permissions...");
 			suffix = wildcard.getGroupSuffix(player);
 		}
@@ -141,25 +150,28 @@ public final class PermissionsHook implements Listener {
 	public String getPlayerPrefix(Player player) {
 		String prefix = "";
 		
-		if (permissionsPlugin != null) {
-			if (permissionsPlugin instanceof PermissionsEx) {
-				PermissionUser user = PermissionsEx.getPermissionManager().getUser(player);
-				prefix = (user != null) ? user.getPrefix() : "";
-				db.i("PermissionsEx returned player prefix: " + prefix);
-				
-			} else if (permissionsPlugin instanceof Permissions) {
-				String[] groups = ApiLayer.getGroups(player.getWorld().getName(), CalculableType.USER, player.getName());
-				String group = (groups != null && groups.length > 0) ? groups[0] : "";
-				prefix = (!group.equals("")) ? ApiLayer.getValue(player.getWorld().getName(), CalculableType.USER, group, "prefix") : "";
-				db.i("bPermissions returned player prefix: " + prefix);
-				
-			} else if (permissionsPlugin instanceof GroupManager) {
-				prefix = ((GroupManager) permissionsPlugin).getWorldsHolder().getWorldPermissions(player).getUserPrefix(player.getName());
-				db.i("GroupManager returned player prefix: " + prefix);
-			}
+		switch (using()) {
+		
+		case PERMISSIONSEX:
+			PermissionUser user = PermissionsEx.getPermissionManager().getUser(player);
+			prefix = (user != null) ? user.getPrefix() : "";
+			db.i("PermissionsEx returned player prefix: " + prefix);
+			break;
+			
+		case BPERMISSIONS:
+			String[] bGroups = ApiLayer.getGroups(player.getWorld().getName(), CalculableType.USER, player.getName());
+			String bGroup = (bGroups != null && bGroups.length > 0) ? bGroups[0] : "";
+			prefix = (!bGroup.equals("")) ? ApiLayer.getValue(player.getWorld().getName(), CalculableType.USER, bGroup, "prefix") : "";
+			db.i("bPermissions returned player prefix: " + prefix);
+			break;
+			
+		case GROUPMANAGER:
+			prefix = ((GroupManager) permissionsPlugin).getWorldsHolder().getWorldPermissions(player).getUserPrefix(player.getName());
+			db.i("GroupManager returned player prefix: " + prefix);
+			break;
 		}
 		
-		if (prefix.equals("") && usingPermissionsEx() || prefix == null && usingPermissionsEx()) {
+		if (prefix.equals("") || prefix == null) {
 			db.i("Permissions plugins did not return any prefix, checking permissions...");
 			prefix = wildcard.getPlayerPrefix(player);
 		}
@@ -177,25 +189,28 @@ public final class PermissionsHook implements Listener {
 	public String getPlayerSuffix(Player player) {
 		String suffix = "";
 		
-		if (permissionsPlugin != null) {
-			if (permissionsPlugin instanceof PermissionsEx) {
-				PermissionUser user = PermissionsEx.getPermissionManager().getUser(player);
-				suffix = (user != null) ? user.getSuffix() : "";
-				db.i("PermissionsEx returned player suffix: " + suffix);
-				
-			} else if (permissionsPlugin instanceof Permissions) {
-				String[] groups = ApiLayer.getGroups(player.getWorld().getName(), CalculableType.USER, player.getName());
-				String group = (groups != null && groups.length > 0) ? groups[0] : "";
-				suffix = (!group.equals("")) ? ApiLayer.getValue(player.getWorld().getName(), CalculableType.USER, group, "suffix") : "";
-				db.i("bPermissions returned player suffix: " + suffix);
-				
-			} else if (permissionsPlugin instanceof GroupManager) {
-				suffix = ((GroupManager) permissionsPlugin).getWorldsHolder().getWorldPermissions(player).getUserSuffix(player.getName());
-				db.i("GroupManager returned player suffix: " + suffix);
-			}
+		switch (using()) {
+		
+		case PERMISSIONSEX:
+			PermissionUser user = PermissionsEx.getPermissionManager().getUser(player);
+			suffix = (user != null) ? user.getSuffix() : "";
+			db.i("PermissionsEx returned player suffix: " + suffix);
+			break;
+			
+		case BPERMISSIONS:
+			String[] bGroups = ApiLayer.getGroups(player.getWorld().getName(), CalculableType.USER, player.getName());
+			String bGroup = (bGroups != null && bGroups.length > 0) ? bGroups[0] : "";
+			suffix = (!bGroup.equals("")) ? ApiLayer.getValue(player.getWorld().getName(), CalculableType.USER, bGroup, "suffix") : "";
+			db.i("bPermissions returned player suffix: " + suffix);
+			break;
+			
+		case GROUPMANAGER:
+			suffix = ((GroupManager) permissionsPlugin).getWorldsHolder().getWorldPermissions(player).getUserSuffix(player.getName());
+			db.i("GroupManager returned player suffix: " + suffix);
+			break;
 		}
 		
-		if (suffix.equals("") && usingPermissionsEx() || suffix == null && usingPermissionsEx()) {
+		if (suffix.equals("") || suffix == null) {
 			db.i("Permissions plugins did not return any suffix, checking permissions...");
 			suffix = wildcard.getPlayerSuffix(player);
 		}
@@ -222,15 +237,16 @@ public final class PermissionsHook implements Listener {
 	 * @return True if the Player has the permission
 	 */
 	public boolean has(Player player, String permission) {
-		if (permissionsPlugin != null) {
-			if (permissionsPlugin instanceof PermissionsEx)
-				return PermissionsEx.getPermissionManager().getUser(player).has(permission, player.getWorld().getName());
+		switch (using()) {
+		
+		case PERMISSIONSEX:
+			return PermissionsEx.getPermissionManager().getUser(player).has(permission, player.getWorld().getName());
 			
-			else if (permissionsPlugin instanceof Permissions)
-				return ApiLayer.hasPermission(player.getWorld().getName(), CalculableType.USER, player.getName(), permission);
+		case BPERMISSIONS:
+			return ApiLayer.hasPermission(player.getWorld().getName(), CalculableType.USER, player.getName(), permission);
 			
-			else if (permissionsPlugin instanceof GroupManager)
-				return ((GroupManager) permissionsPlugin).getWorldsHolder().getWorldPermissions(player.getWorld().getName()).permission(player, permission);
+		case GROUPMANAGER:
+			return ((GroupManager) permissionsPlugin).getWorldsHolder().getWorldPermissions(player.getWorld().getName()).permission(player, permission);
 		}
 		
 		return player.hasPermission(permission);
@@ -241,7 +257,7 @@ public final class PermissionsHook implements Listener {
 	 * 
 	 * @param event PlayerDisableEvent
 	 */
-	@EventHandler(priority = EventPriority.HIGHEST)
+	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPluginDisable(PluginDisableEvent event) {
 		if (permissionsPlugin != null) {
 			if (event.getPlugin().getName().equals(name)) {
@@ -256,7 +272,7 @@ public final class PermissionsHook implements Listener {
 	 * 
 	 * @param event PluginEnableEvent
 	 */
-	@EventHandler(priority = EventPriority.HIGHEST)
+	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPluginEnable(PluginEnableEvent event) {
 		if (permissionsPlugin == null) {
 			Plugin perms = null;
@@ -282,14 +298,47 @@ public final class PermissionsHook implements Listener {
 				if (perms.isEnabled()) {
 					permissionsPlugin = perms;
 					name = permissionsPlugin.getName();
-					this.wildcard = new WildcardNodes(permissionsPlugin);
 				}
 				
 			} else { if (!plugin.usingVault()) { plugin.log(Level.INFO, name + " detected and hooked"); } }
 		}
 	}
 	
-	public boolean usingPermissionsEx() {
-		return plugin.getServer().getPluginManager().getPlugin("PermissionsEx") != null;
+	public PermissionsPlugin using() {
+		if (permissionsPlugin != null)
+			return PermissionsPlugin.fromName(permissionsPlugin.getName());
+		
+		return PermissionsPlugin.SUPERPERMS;
+	}
+	
+	public enum PermissionsPlugin {
+		PERMISSIONSEX("PermissionsEx"),
+		BPERMISSIONS("bPermissions"),
+		SUPERPERMS("SuperPerms"),
+		PERMISSIONSBUKKIT("PermissionsBukkit"),
+		GROUPMANAGER("GroupManager"),
+		ZPERMISSIONS("zPermissions");
+		
+		private String name;
+		
+		private static Map<String, PermissionsPlugin> NAME_MAP = new HashMap<String, PermissionsPlugin>();
+		
+		private PermissionsPlugin(String name) {
+			this.name = name;
+		}
+		
+		static {
+			for (PermissionsPlugin permission : EnumSet.allOf(PermissionsPlugin.class)) {
+				NAME_MAP.put(permission.name, permission);
+			}
+		}
+		
+		public static PermissionsPlugin fromName(String name) {
+			return NAME_MAP.get(name);
+		}
+		
+		public String getName() {
+			return name;
+		}
 	}
 }

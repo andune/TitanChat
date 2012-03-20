@@ -41,6 +41,9 @@ public final class TitanChatListener implements Listener {
 				Channel channel = plugin.getChannelManager().getChannel(msg.split(" ")[0].substring(1));
 					
 				if (channel != null) {
+					if (!channel.canAccess(player))
+						return;
+					
 					if (!plugin.hasVoice(player)) {
 						if (plugin.isSilenced()) { plugin.sendWarning(player, "The server is silenced"); return; }
 						if (channel.isSilenced()) { plugin.sendWarning(player, "The channel is silenced"); return; }

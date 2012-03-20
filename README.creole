@@ -61,6 +61,7 @@ TitanChat, a chat management and formatting plugin for Bukkit.
 * 17.03.12 - Created a Wildcard avoider that checks if a permission node is listed exactly instead of a '*'
 * 18.03.12 - TitanChat v3 officially released
 * 19.03.12 - All channel methods moved into ChannelManager, new whisper command, new channel messaging using '@'
+* 20.03.12 - Fixed PermissionsHook and WildcardNodes
 
 -----------------------------------------------------------------------------------------------------------------------
 
