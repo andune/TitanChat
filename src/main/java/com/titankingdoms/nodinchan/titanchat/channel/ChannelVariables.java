@@ -28,9 +28,9 @@ public class ChannelVariables {
 	public ChannelVariables(Channel channel) {
 		this.plugin = TitanChat.getInstance();
 		this.channel = channel;
-		this.chatColour = "&f";
+		this.chatColour = "";
 		this.format = "";
-		this.nameColour = "&f";
+		this.nameColour = "";
 		this.tag = "[]";
 		this.convert = false;
 	}

@@ -55,16 +55,16 @@ public final class CommandManager {
 						executor.execute(player, args);
 						return;
 					} catch (IllegalAccessException e) {
-						e.printStackTrace();
 						db.i("An IllegalAccessException has occured while using command: " + executor.getName());
+						db.i(e.getLocalizedMessage());
 						break;
 					} catch (IllegalArgumentException e) {
-						e.printStackTrace();
 						db.i("An IllgealArgumentException has occured while using command: " + executor.getName());
+						db.i(e.getLocalizedMessage());
 						break;
 					} catch (InvocationTargetException e) {
-						e.printStackTrace();
 						db.i("An InvocationTargetException has occured while using command: " + executor.getName());
+						db.i(e.getLocalizedMessage());
 						break;
 					}
 			}

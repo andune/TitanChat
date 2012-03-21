@@ -55,6 +55,22 @@ public final class ChannelManager {
 	}
 	
 	/**
+	 * Switching the Player from a Channel to another
+	 * 
+	 * @param player The Player to switch
+	 * 
+	 * @param channel The Channel to join
+	 */
+	public void chSwitch(Player player, Channel channel) {
+		db.i("Channel switch of player " + player.getName() +
+				" from channel " + getChannel(player).getName() +
+				" to channel " + channel.getName());
+		
+		getChannel(player).leave(player);
+		channel.join(player);
+	}
+
+	/**
 	 * Creates a new Channel with the given name
 	 * 
 	 * @param player The Channel creator
@@ -376,9 +392,12 @@ public final class ChannelManager {
 	 * Reloads all Channels
 	 */
 	public void reload() {
-		for (Channel channel : channels) { channel.reloadConfig(); }
-		channels.clear();
-		try { load(); } catch (Exception e) {}
+		for (Channel channel : channels) {
+			channel.reloadConfig();
+			loadChannelVariables(channel);
+		}
+		
+		sortChannels();
 	}
 	
 	/**
@@ -399,22 +418,6 @@ public final class ChannelManager {
 		}
 		
 		this.channels = channels;
-	}
-	
-	/**
-	 * Switching the Player from a Channel to another
-	 * 
-	 * @param player The Player to switch
-	 * 
-	 * @param channel The Channel to join
-	 */
-	public void chSwitch(Player player, Channel channel) {
-		db.i("Channel switch of player " + player.getName() +
-				" from channel " + getChannel(player).getName() +
-				" to channel " + channel.getName());
-		
-		getChannel(player).leave(player);
-		channel.join(player);
 	}
 	
 	/**
