@@ -1,6 +1,8 @@
 package com.titankingdoms.nodinchan.titanchat.command.commands;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -132,7 +134,19 @@ public class InformationCommand extends Command {
 			if (channel != null) {
 				if (channel.canAccess(player)) {
 					player.sendMessage(ChatColor.AQUA + "=== " + channel.getName() + " ===");
-					player.sendMessage(ChatColor.AQUA + "Participants: " + plugin.createList(channel.getParticipants()));
+
+					List<String> offline = new ArrayList<String>();
+					List<String> online = new ArrayList<String>();
+					
+					for (String participant : channel.getParticipants()) {
+						if (plugin.getPlayer(participant) != null)
+							online.add(participant);
+						else
+							offline.add(participant);
+					}
+					
+					player.sendMessage(ChatColor.AQUA + "Online participants: " + plugin.createList(online));
+					player.sendMessage(ChatColor.AQUA + "Offline participants: " + plugin.createList(offline));
 					player.sendMessage(ChatColor.AQUA + "Followers: " + plugin.createList(channel.getFollowerList()));
 				}
 				
