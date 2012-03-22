@@ -113,4 +113,9 @@ public class CustomChannel extends Channel {
 	public final void register(CustomChannel channel) {
 		plugin.getChannelManager().register(channel);
 	}
+	
+	/**
+	 * Called when TitanChat is reloaded
+	 */
+	public void reload() {}
 }

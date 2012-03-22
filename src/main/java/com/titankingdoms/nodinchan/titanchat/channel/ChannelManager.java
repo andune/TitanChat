@@ -259,10 +259,10 @@ public final class ChannelManager {
 	 * 
 	 * @return The loaded Channel
 	 */
-	public Channel loadChannel(String name) {
-		Type type = Type.fromName(new Channel(name).getConfig().getString("type"));
+	public StandardChannel loadChannel(String name) {
+		StandardChannel channel = new StandardChannel(name);
 		
-		Channel channel = new Channel(name, type);
+		channel.setType(channel.getConfig().getString("type"));
 		
 		channel.setGlobal(channel.getConfig().getBoolean("global"));
 		
@@ -300,7 +300,7 @@ public final class ChannelManager {
 			if (exists(fileName.replace(".yml", "")) || fileName.equals("README.yml"))
 				continue;
 			
-			Channel channel = loadChannel(fileName.replace(".yml", ""));
+			StandardChannel channel = loadChannel(fileName.replace(".yml", ""));
 			
 			if (channel == null)
 				continue;
@@ -310,11 +310,9 @@ public final class ChannelManager {
 			channels.add(channel);
 		}
 		
-		channelAmount = channels.size() - customChAmount;
-		
 		sortChannels();
 		
-		plugin.log(Level.INFO, "No. of channels: " + channelAmount);
+		plugin.log(Level.INFO, "No. of channels: " + (channelAmount = channels.size() - customChAmount));
 		plugin.log(Level.INFO, "No. of custom channels: " + customChAmount);
 		plugin.log(Level.INFO, "Channels loaded");
 	}
@@ -324,7 +322,7 @@ public final class ChannelManager {
 	 * 
 	 * @param channel The Channel to load
 	 */
-	public void loadChannelVariables(Channel channel) {
+	public void loadChannelVariables(StandardChannel channel) {
 		ChannelVariables variables = channel.getVariables();
 		variables.setChatColour(channel.getConfig().getString("chat-display-colour"));
 		variables.setConvert(channel.getConfig().getBoolean("colour-code"));
@@ -393,8 +391,14 @@ public final class ChannelManager {
 	 */
 	public void reload() {
 		for (Channel channel : channels) {
-			channel.reloadConfig();
-			loadChannelVariables(channel);
+			if (channel instanceof CustomChannel) {
+				((CustomChannel) channel).reload();
+			}
+			
+			if (channel instanceof StandardChannel) {
+				channel.reloadConfig();
+				loadChannelVariables((StandardChannel) channel);
+			}
 		}
 		
 		sortChannels();

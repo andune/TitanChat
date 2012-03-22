@@ -4,6 +4,8 @@ import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelVariables;
+import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
+import com.titankingdoms.nodinchan.titanchat.channel.StandardChannel;
 
 /**
  * FormatHandler - Handles formatting
@@ -81,7 +83,10 @@ public final class FormatHandler {
 		if (plugin.getChannelManager().getStaffChannel().equals(plugin.getChannelManager().getChannel(name)))
 			return true;
 		
-		return plugin.getChannelManager().getChannel(name).getVariables().convert();
+		if (plugin.getChannelManager().getChannel(name) instanceof CustomChannel)
+			return true;
+		
+		return ((StandardChannel) plugin.getChannelManager().getChannel(name)).getVariables().convert();
 	}
 	
 	/**
@@ -177,14 +182,14 @@ public final class FormatHandler {
 	public String format(Player player, String channel, String msg) {
 		String message = "";
 		
-		ChannelVariables variables = plugin.getChannelManager().getChannel(channel).getVariables();
+		ChannelVariables variables = ((StandardChannel) plugin.getChannelManager().getChannel(channel)).getVariables();
 		
 		String name = player.getDisplayName();
 		String tag = variables.getTag();
-		String playerPrefix = variables.getPlayerPrefix(player);
-		String playerSuffix = variables.getPlayerSuffix(player);
-		String groupPrefix = variables.getGroupPrefix(player);
-		String groupSuffix = variables.getGroupSuffix(player);
+		String playerPrefix = plugin.getPlayerPrefix(player);
+		String playerSuffix = plugin.getPlayerSuffix(player);
+		String groupPrefix = plugin.getGroupPrefix(player);
+		String groupSuffix = plugin.getGroupSuffix(player);
 		String chatColour = variables.getChatColour();
 		String nameColour = variables.getNameColour();
 		

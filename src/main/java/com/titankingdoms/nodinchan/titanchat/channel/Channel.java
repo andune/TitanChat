@@ -23,23 +23,20 @@ public class Channel {
 	
 	protected final TitanChat plugin;
 	
-	private ChannelVariables variables;
-	
 	private final String name;
-	private String password;
 	
 	private Type type;
 	
 	private boolean global;
 	private boolean silenced;
 	
-	private List<String> adminlist;
-	private List<String> blacklist;
-	private List<String> followerlist;
-	private List<String> invitelist;
-	private List<String> mutelist;
-	private List<String> participants;
-	private List<String> whitelist;
+	private final List<String> adminlist;
+	private final List<String> blacklist;
+	private final List<String> followerlist;
+	private final List<String> invitelist;
+	private final List<String> mutelist;
+	private final List<String> participants;
+	private final List<String> whitelist;
 	
 	private File configFile = null;
 	private FileConfiguration config = null;
@@ -50,9 +47,7 @@ public class Channel {
 	
 	public Channel(String name, Type type) {
 		this.plugin = TitanChat.getInstance();
-		this.variables = new ChannelVariables(this);
 		this.name = name;
-		this.password = "";
 		this.type = type;
 		this.global = false;
 		this.silenced = false;
@@ -67,9 +62,7 @@ public class Channel {
 	
 	public Channel(String name, ChannelVariables variables) {
 		this.plugin = TitanChat.getInstance();
-		this.variables = variables;
 		this.name = name;
-		this.password = "";
 		this.type = Type.CUSTOM;
 		this.global = false;
 		this.silenced = false;
@@ -169,17 +162,6 @@ public class Channel {
 	}
 	
 	/**
-	 * Check if the password is correct
-	 * 
-	 * @param password The password entered
-	 * 
-	 * @return True if password matches
-	 */
-	public boolean correctPassword(String password) {
-		return this.password.equals(password);
-	}
-	
-	/**
 	 * Check if a Channel equals another
 	 */
 	@Override
@@ -191,7 +173,7 @@ public class Channel {
 	}
 	
 	/**
-	 * Get the admin list
+	 * Gets the admin list
 	 * 
 	 * @return The admin list
 	 */
@@ -200,7 +182,7 @@ public class Channel {
 	}
 	
 	/**
-	 * Get the blacklist
+	 * Gets the blacklist
 	 * 
 	 * @return The blacklist
 	 */
@@ -218,72 +200,104 @@ public class Channel {
 		return config;
 	}
 	
+	/**
+	 * Gets the follower list
+	 * 
+	 * @return The follower list
+	 */
 	public List<String> getFollowerList() {
 		return followerlist;
 	}
 	
+	/**
+	 * Gets the invite list
+	 * 
+	 * @return The invite list
+	 */
 	public List<String> getInviteList() {
 		return invitelist;
 	}
 	
+	/**
+	 * Gets the mute list
+	 * 
+	 * @return The mute list
+	 */
 	public List<String> getMuteList() {
 		return mutelist;
 	}
 	
+	/**
+	 * Gets the channel name
+	 * 
+	 * @return Channel name
+	 */
 	public final String getName() {
 		return name;
 	}
 	
-	public String getPassword() {
-		return password;
-	}
-	
+	/**
+	 * Gets the channel type
+	 * 
+	 * @return Channel type
+	 */
 	public final Type getType() {
 		return type;
 	}
 	
-	public final ChannelVariables getVariables() {
-		return variables;
-	}
-	
+	/**
+	 * Gets the whitelist
+	 * 
+	 * @return The whitelist
+	 */
 	public List<String> getWhiteList() {
 		return whitelist;
 	}
 	
+	/**
+	 * Check if global
+	 * 
+	 * @return True if the channel is global
+	 */
 	public boolean isGlobal() {
 		return global;
 	}
 	
+	/**
+	 * Check if silenced
+	 * 
+	 * @return True if the channel is silenced
+	 */
 	public boolean isSilenced() {
 		return silenced;
 	}
 	
-	public void join(Player player) {
-		participants.add(player.getName());
-		
-		if (variables.enableJoinMessages() && plugin.enableJoinMessage()) {
-			for (String participant : participants) {
-				if (plugin.getPlayer(participant) != null && !plugin.getPlayer(participant).equals(player))
-					plugin.sendInfo(plugin.getPlayer(participant), player.getDisplayName() + " has joined the channel");
-			}
-		}
-	}
+	/**
+	 * Called when a player joins the channel
+	 * 
+	 * @param player The player joining
+	 */
+	public void join(Player player) {}
 	
+	/**
+	 * Gets the participant list
+	 * 
+	 * @return The participant list
+	 */
 	public List<String> getParticipants() {
 		return participants;
 	}
 	
-	public void leave(Player player) {
-		participants.remove(player.getName());
-		
-		if (variables.enableLeaveMessages() && plugin.enableLeaveMessage()) {
-			for (String participant : participants) {
-				if (plugin.getPlayer(participant) != null)
-					plugin.sendInfo(plugin.getPlayer(participant), player.getDisplayName() + " has left the channel");
-			}
-		}
-	}
+	/**
+	 * Called when a player leaves the channel
+	 * 
+	 * @param player The player leaving
+	 */
+	public void leave(Player player) {}
 	
+	/**
+	 * Reloads the config
+	 */
 	public final void reloadConfig() {
 		if (configFile == null) { configFile = new File(plugin.getChannelDir(), name + ".yml"); }
 		
@@ -297,56 +311,47 @@ public class Channel {
 		}
 	}
 	
-	public void save() {
-		getConfig().set("tag", variables.getTag());
-		getConfig().set("chat-display-colour", variables.getChatColour());
-		getConfig().set("name-display-colour", variables.getNameColour());
-		getConfig().set("type", type.getName());
-		getConfig().set("global", global);
-		getConfig().set("colour-code", variables.convert());
-		getConfig().set("password", "");
-		getConfig().set("format", variables.getFormat());
-		getConfig().set("admins", adminlist);
-		getConfig().set("whitelist", whitelist);
-		getConfig().set("blacklist", blacklist);
-		getConfig().set("followers", followerlist);
-		saveConfig();
-	}
+	/**
+	 * Called when TitanChat disables
+	 */
+	public void save() {}
 	
 	public final void saveConfig() {
 		if (configFile == null || config == null) { return; }
 		try { config.save(configFile); } catch (IOException e) { plugin.log(Level.SEVERE, "Could not save config to " + configFile); }
 	}
 	
-	public void sendMessage(Player player, String message) {
-		if (global)
-			plugin.getServer().broadcastMessage(message);
-		
-		else {
-			for (String name : participants) {
-				if (plugin.getPlayer(name) != null)
-					plugin.getPlayer(name).sendMessage(message);
-			}
-			
-			for (String name : followerlist) {
-				if (plugin.getPlayer(name) != null && !participants.contains(name))
-					plugin.getPlayer(name).sendMessage(message);
-			}
-		}
-	}
+	/**
+	 * Called when a message is to be sent
+	 * 
+	 * @param player
+	 * @param message
+	 */
+	public void sendMessage(Player player, String message) {}
 	
+	/**
+	 * Sets whether the channel is global
+	 * 
+	 * @param global True if channel should be global
+	 */
 	public void setGlobal(boolean global) {
 		this.global = global;
 	}
 	
-	public void setPassword(String password) {
-		this.password = password;
-	}
-	
+	/**
+	 * Sets whether the channel is silenced
+	 * 
+	 * @param silenced True if channel should be silenced
+	 */
 	public void setSilenced(boolean silenced) {
 		this.silenced = silenced;
 	}
 	
+	/**
+	 * Sets the type of the channel
+	 * 
+	 * @param type The type
+	 */
 	public void setType(String type) {
 		this.type = Type.fromName(type);
 	}

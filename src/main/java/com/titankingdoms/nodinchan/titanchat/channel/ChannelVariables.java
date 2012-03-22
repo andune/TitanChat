@@ -1,7 +1,5 @@
 package com.titankingdoms.nodinchan.titanchat.channel;
 
-import org.bukkit.entity.Player;
-
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 
 /**
@@ -10,7 +8,7 @@ import com.titankingdoms.nodinchan.titanchat.TitanChat;
  * @author NodinChan
  *
  */
-public class ChannelVariables {
+public final class ChannelVariables {
 
 	private final TitanChat plugin;
 	
@@ -93,56 +91,12 @@ public class ChannelVariables {
 	}
 	
 	/**
-	 * Get the group prefix of the Player
-	 * 
-	 * @param player The Player to check
-	 * 
-	 * @return The group prefix of the Player
-	 */
-	public final String getGroupPrefix(Player player) {
-		return plugin.getGroupPrefix(player);
-	}
-	
-	/**
-	 * Get the group suffix of the Player
-	 * 
-	 * @param player The Player to check
-	 * 
-	 * @return The group suffix of the Player
-	 */
-	public final String getGroupSuffix(Player player) {
-		return plugin.getGroupSuffix(player);
-	}
-	
-	/**
 	 * Get the name colour
 	 * 
 	 * @return The name colour
 	 */
 	public final String getNameColour() {
 		return nameColour;
-	}
-	
-	/**
-	 * Get the prefix of the Player
-	 * 
-	 * @param player The Player to check
-	 * 
-	 * @return The prefix of the Player
-	 */
-	public final String getPlayerPrefix(Player player) {
-		return plugin.getPlayerPrefix(player);
-	}
-	
-	/**
-	 * Get the suffix of the Player
-	 * 
-	 * @param player The Player to check
-	 * 
-	 * @return The suffix of the Player
-	 */
-	public final String getPlayerSuffix(Player player) {
-		return plugin.getPlayerSuffix(player);
 	}
 	
 	/**

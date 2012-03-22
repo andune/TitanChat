@@ -4,6 +4,8 @@ import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
+import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
+import com.titankingdoms.nodinchan.titanchat.channel.StandardChannel;
 import com.titankingdoms.nodinchan.titanchat.channel.Type;
 import com.titankingdoms.nodinchan.titanchat.command.Command;
 import com.titankingdoms.nodinchan.titanchat.command.CommandID;
@@ -98,22 +100,26 @@ public class ChannelCommand extends Command {
 		if (args.length < 1) { invalidArgLength(player, "Join"); return; }
 		
 		if (cm.exists(args[0])) {
-			Channel channel = cm.getChannel(args[0]);
+			Channel ch = cm.getChannel(args[0]);
 			String password = "";
 			
-			if (cm.getChannel(player).equals(channel)) { plugin.sendWarning(player, "You are already on the channel"); return; }
+			if (cm.getChannel(player).equals(ch)) { plugin.sendWarning(player, "You are already on the channel"); return; }
 			
 			try { password = args[1]; } catch (IndexOutOfBoundsException e) {}
 			
-			switch (channel.getType()) {
-			
-			case CUSTOM:
-				if (channel.canAccess(player)) {
-					cm.chSwitch(player, channel);
+			if (ch instanceof CustomChannel) {
+				if (ch.canAccess(player)) {
+					cm.chSwitch(player, ch);
 					plugin.sendInfo(player, "You have switched channels");
 					
-				} else { plugin.sendWarning(player, "You do not have permission to join " + channel.getName()); }
-				break;
+				} else { plugin.sendWarning(player, "You do not have permission to join " + ch.getName()); }
+				
+				return;
+			}
+			
+			StandardChannel channel = (StandardChannel) ch;
+			
+			switch (channel.getType()) {
 			
 			case DEFAULT:
 				cm.chSwitch(player, channel);

@@ -8,6 +8,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
+import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
+import com.titankingdoms.nodinchan.titanchat.channel.StandardChannel;
 import com.titankingdoms.nodinchan.titanchat.channel.Type;
 import com.titankingdoms.nodinchan.titanchat.command.Command;
 import com.titankingdoms.nodinchan.titanchat.command.CommandID;
@@ -40,8 +42,13 @@ public class SettingsCommand extends Command {
 			
 			try {
 				if (cm.exists(args[2])) {
+					if (cm.getChannel(args[2]) instanceof CustomChannel) {
+						plugin.sendInfo(player, "Command does not support Custom Channels");
+						return;
+					}
+					
 					if (cm.getChannel(args[2]).getAdminList().contains(player.getName()) || plugin.isStaff(player)) {
-						cm.getChannel(args[2]).getVariables().setChatColour(args[1]);
+						((StandardChannel) cm.getChannel(args[2])).getVariables().setChatColour(args[1]);
 						cm.getChannel(args[2]).save();
 						
 						plugin.sendInfo(player, "You have changed the colour to " + args[1]);
@@ -51,8 +58,13 @@ public class SettingsCommand extends Command {
 				} else { plugin.sendWarning(player, "No such channel"); }
 				
 			} catch (IndexOutOfBoundsException e) {
+				if (cm.getChannel(player) instanceof CustomChannel) {
+					plugin.sendInfo(player, "Command does not support Custom Channels");
+					return;
+				}
+				
 				if (cm.getChannel(player).getAdminList().contains(player.getName()) || plugin.isStaff(player)) {
-					cm.getChannel(player).getVariables().setChatColour(args[1]);
+					((StandardChannel) cm.getChannel(player)).getVariables().setChatColour(args[1]);
 					cm.getChannel(player).save();
 					
 					plugin.sendInfo(player, "You have changed the colour to " + args[1]);
@@ -64,22 +76,32 @@ public class SettingsCommand extends Command {
 		case CONVERT:
 			try {
 				if (cm.exists(args[1])) {
+					if (cm.getChannel(args[1]) instanceof CustomChannel) {
+						plugin.sendInfo(player, "Command does not support Custom Channels");
+						return;
+					}
+					
 					if (plugin.has(player, "TitanChat.convert")) {
-						cm.getChannel(args[1]).getVariables().setConvert((cm.getChannel(args[1]).getVariables().convert()) ? false : true);
+						((StandardChannel) cm.getChannel(args[1])).getVariables().setConvert((((StandardChannel) cm.getChannel(args[1])).getVariables().convert()) ? false : true);
 						cm.getChannel(args[1]).save();
 						
-						plugin.sendInfo(player, "The channel now " + ((cm.getChannel(args[1]).getVariables().convert()) ? "converts" : "ignores") + " colour codes");
+						plugin.sendInfo(player, "The channel now " + ((((StandardChannel) cm.getChannel(args[1])).getVariables().convert()) ? "converts" : "ignores") + " colour codes");
 						
 					} else { plugin.sendWarning(player, "You do not have permission"); }
 					
 				} else { plugin.sendWarning(player, "No such channel"); }
 				
 			} catch (IndexOutOfBoundsException e) {
+				if (cm.getChannel(player) instanceof CustomChannel) {
+					plugin.sendInfo(player, "Command does not support Custom Channels");
+					return;
+				}
+				
 				if (plugin.has(player, "TitanChat.convert")) {
-					cm.getChannel(player).getVariables().setConvert((cm.getChannel(player).getVariables().convert()) ? false : true);
+					((StandardChannel) cm.getChannel(player)).getVariables().setConvert((((StandardChannel) cm.getChannel(player)).getVariables().convert()) ? false : true);
 					cm.getChannel(player).save();
 					
-					plugin.sendInfo(player, "The channel now " + ((cm.getChannel(player).getVariables().convert()) ? "converts" : "ignores") + " colour codes");
+					plugin.sendInfo(player, "The channel now " + ((((StandardChannel) cm.getChannel(player)).getVariables().convert()) ? "converts" : "ignores") + " colour codes");
 					
 				} else { plugin.sendWarning(player, "You do not have permission"); }
 			}
@@ -90,8 +112,13 @@ public class SettingsCommand extends Command {
 			
 			try {
 				if (cm.exists(args[2])) {
+					if (cm.getChannel(args[2]) instanceof CustomChannel) {
+						plugin.sendInfo(player, "Command does not support Custom Channels");
+						return;
+					}
+					
 					if (cm.getChannel(args[2]).getAdminList().contains(player.getName()) || plugin.isStaff(player)) {
-						cm.getChannel(args[2]).getVariables().setNameColour(args[1]);
+						((StandardChannel) cm.getChannel(args[2])).getVariables().setNameColour(args[1]);
 						cm.getChannel(args[2]).save();
 						
 						plugin.sendInfo(player, "You have changed the colour to " + args[1]);
@@ -101,8 +128,13 @@ public class SettingsCommand extends Command {
 				} else { plugin.sendWarning(player, "No such channel"); }
 				
 			} catch (IndexOutOfBoundsException e) {
+				if (cm.getChannel(player) instanceof CustomChannel) {
+					plugin.sendInfo(player, "Command does not support Custom Channels");
+					return;
+				}
+				
 				if (cm.getChannel(player).getAdminList().contains(player.getName()) || plugin.isStaff(player)) {
-					cm.getChannel(player).getVariables().setNameColour(args[1]);
+					((StandardChannel) cm.getChannel(player)).getVariables().setNameColour(args[1]);
 					cm.getChannel(player).save();
 					
 					plugin.sendInfo(player, "You have changed the colour to " + args[1]);
@@ -116,8 +148,13 @@ public class SettingsCommand extends Command {
 			
 			try {
 				if (cm.exists(args[2])) {
+					if (cm.getChannel(args[2]) instanceof CustomChannel) {
+						plugin.sendInfo(player, "Command does not support Custom Channels");
+						return;
+					}
+					
 					if (cm.getChannel(args[2]).getAdminList().contains(player.getName()) || plugin.isStaff(player)) {
-						cm.getChannel(args[2]).setPassword(args[1]);
+						((StandardChannel) cm.getChannel(args[2])).setPassword(args[1]);
 						cm.getChannel(args[2]).save();
 						
 						plugin.sendInfo(player, "You have changed the password of " + cm.getChannel(player).getName() + " to " + args[1]);
@@ -127,8 +164,13 @@ public class SettingsCommand extends Command {
 				} else { plugin.sendWarning(player, "No such channel"); }
 				
 			} catch (IndexOutOfBoundsException e) {
+				if (cm.getChannel(player) instanceof CustomChannel) {
+					plugin.sendInfo(player, "Command does not support Custom Channels");
+					return;
+				}
+				
 				if (cm.getChannel(player).getAdminList().contains(player.getName()) || plugin.isStaff(player)) {
-					cm.getChannel(player).setPassword(args[1]);
+					((StandardChannel) cm.getChannel(player)).setPassword(args[1]);
 					cm.getChannel(player).save();
 					
 					plugin.sendInfo(player, "You have changed the password of " + cm.getChannel(player).getName() + " to " + args[1]);
@@ -142,8 +184,13 @@ public class SettingsCommand extends Command {
 			
 			try {
 				if (cm.exists(args[2])) {
+					if (cm.getChannel(args[2]) instanceof CustomChannel) {
+						plugin.sendInfo(player, "Command does not support Custom Channels");
+						return;
+					}
+					
 					if (cm.getChannel(args[2]).getAdminList().contains(player.getName()) || plugin.isStaff(player)) {
-						cm.getChannel(args[2]).getVariables().setTag(args[1]);
+						((StandardChannel) cm.getChannel(args[2])).getVariables().setTag(args[1]);
 						cm.getChannel(args[2]).save();
 						
 						plugin.sendInfo(player, "You have changed the settings");
@@ -154,7 +201,7 @@ public class SettingsCommand extends Command {
 				
 			} catch (IndexOutOfBoundsException e) {
 				if (cm.getChannel(player).getAdminList().contains(player.getName()) || plugin.isStaff(player)) {
-					cm.getChannel(player).getVariables().setTag(args[1]);
+					((StandardChannel) cm.getChannel(player)).getVariables().setTag(args[1]);
 					cm.getChannel(player).save();
 					
 					plugin.sendInfo(player, "You have changed the settings");

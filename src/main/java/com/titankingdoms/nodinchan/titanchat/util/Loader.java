@@ -152,7 +152,7 @@ public final class Loader {
 				str.append(support.getName());
 			}
 			
-			plugin.log(Level.INFO, "Loaded plugin supports: " + str.toString());
+			plugin.log(Level.INFO, "Loaded addons: " + str.toString());
 		}
 		
 		return addons;
