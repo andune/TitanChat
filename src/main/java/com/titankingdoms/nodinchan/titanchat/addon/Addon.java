@@ -48,6 +48,17 @@ public class Addon {
 	public void chatMade(String name, String message) {}
 	
 	/**
+	 * Check if an Addon equals another
+	 */
+	@Override
+	public boolean equals(Object object) {
+		if (object instanceof Addon)
+			return ((Addon) object).getName().equals(getName());
+		
+		return false;
+	}
+	
+	/**
 	 * Called when a message is being formatted
 	 * 
 	 * @param player The message sender
@@ -178,5 +189,13 @@ public class Addon {
 	public final void saveConfig() {
 		if (config == null || configFile == null) { return; }
 		try { config.save(configFile); } catch (IOException e) {}
+	}
+	
+	/**
+	 * Returns the Addon as a String
+	 */
+	@Override
+	public String toString() {
+		return "Addon:" + name;
 	}
 }

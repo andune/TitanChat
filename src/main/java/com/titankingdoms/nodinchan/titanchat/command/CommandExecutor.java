@@ -26,6 +26,19 @@ public final class CommandExecutor {
 	}
 	
 	/**
+	 * Check if a CommandExecutor equals another
+	 */
+	@Override
+	public boolean equals(Object object) {
+		if (object instanceof CommandExecutor)
+			if (((CommandExecutor) object).getCommand().equals(getCommand()))
+				if (((CommandExecutor) object).getMethod().equals(getMethod()))
+					return ((CommandExecutor) object).getName().equals(getName());
+		
+		return false;
+	}
+	
+	/**
 	 * Executes the command
 	 * 
 	 * @param player The command sender
@@ -65,5 +78,13 @@ public final class CommandExecutor {
 	 */
 	public String getName() {
 		return name;
+	}
+	
+	/**
+	 * Returns the CommandExecutor as a String
+	 */
+	@Override
+	public String toString() {
+		return "Command:" + name;
 	}
 }

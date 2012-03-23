@@ -48,6 +48,10 @@ public class InformationCommand extends Command {
 		String yellow = plugin.getFormatHandler().colourise("&e") + "&e";
 		String white = plugin.getFormatHandler().colourise("&f") + "&f";
 		String magical = plugin.getFormatHandler().colourise("&kMagical");
+		String bold = plugin.getFormatHandler().colourise("&lBold");
+		String striked = plugin.getFormatHandler().colourise("&mStriked");
+		String underlined = plugin.getFormatHandler().colourise("&nUnderlined");
+		String italic = plugin.getFormatHandler().colourise("&oItalic");
 		String comma = ChatColor.WHITE + ", ";
 		
 		player.sendMessage(ChatColor.AQUA + "=== Colour Codes ===");
@@ -56,6 +60,10 @@ public class InformationCommand extends Command {
 		player.sendMessage(grey + comma + blue + comma + lightgreen + comma + aqua + comma);
 		player.sendMessage(lightred + comma + lightpurple + comma + yellow + comma + white + comma);
 		player.sendMessage("And also the Magical &k (" + magical + ChatColor.WHITE + ")");
+		player.sendMessage(bold + ChatColor.WHITE + "(&l)");
+		player.sendMessage(striked + ChatColor.WHITE + "(&m)");
+		player.sendMessage(underlined + ChatColor.WHITE + "(&n)");
+		player.sendMessage(italic + ChatColor.WHITE + "(&o)");
 	}
 	
 	@CommandID(name = "Commands", triggers = "commands", requireChannel = false)

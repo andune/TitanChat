@@ -2,6 +2,12 @@ package com.titankingdoms.nodinchan.titanchat.channel;
 
 import org.bukkit.entity.Player;
 
+/**
+ * StandardChannel - Built-in channels
+ * 
+ * @author NodinChan
+ *
+ */
 public final class StandardChannel extends Channel {
 	
 	private final ChannelVariables variables;

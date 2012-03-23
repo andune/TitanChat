@@ -355,4 +355,12 @@ public class Channel {
 	public void setType(String type) {
 		this.type = Type.fromName(type);
 	}
+	
+	/**
+	 * Returns the Channel as a String
+	 */
+	@Override
+	public String toString() {
+		return "Channel:" + name + " : " + type.getName();
+	}
 }

@@ -62,6 +62,7 @@ TitanChat, a chat management and formatting plugin for Bukkit.
 * 18.03.12 - TitanChat v3 officially released
 * 19.03.12 - All channel methods moved into ChannelManager, new whisper command, new channel messaging using '@'
 * 20.03.12 - Fixed PermissionsHook and WildcardNodes
+* 23.03.12 - Added colour codes for bold, underlined, striked and italic
 
 -----------------------------------------------------------------------------------------------------------------------
 
