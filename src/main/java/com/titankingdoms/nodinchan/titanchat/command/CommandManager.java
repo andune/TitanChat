@@ -22,6 +22,8 @@ public final class CommandManager {
 	
 	private final TitanChat plugin;
 	
+	private final CommandLoader loader;
+	
 	private static final Debugger db = new Debugger(4);
 	
 	private List<CommandExecutor> executors;
@@ -29,6 +31,7 @@ public final class CommandManager {
 	public CommandManager(TitanChat plugin) {
 		this.plugin = plugin;
 		this.executors = new ArrayList<CommandExecutor>();
+		this.loader = new CommandLoader(plugin);
 	}
 	
 	/**
@@ -123,7 +126,7 @@ public final class CommandManager {
 		register(new RankingCommand());
 		register(new SettingsCommand());
 		
-		try { for (Command command : plugin.getLoader().loadCommands()) { register(command); } } catch (Exception e) {}
+		for (Command command : loader.load()) { register(command); }
 		
 		sortCommands();
 	}

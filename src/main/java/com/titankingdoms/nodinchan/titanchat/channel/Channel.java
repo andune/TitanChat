@@ -11,6 +11,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
+import com.nodinchan.loader.Loadable;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 
 /**
@@ -19,7 +20,7 @@ import com.titankingdoms.nodinchan.titanchat.TitanChat;
  * @author NodinChan
  *
  */
-public class Channel {
+public class Channel extends Loadable {
 	
 	protected final TitanChat plugin;
 	
@@ -46,6 +47,7 @@ public class Channel {
 	}
 	
 	public Channel(String name, Type type) {
+		super(name);
 		this.plugin = TitanChat.getInstance();
 		this.name = name;
 		this.type = type;
@@ -61,6 +63,7 @@ public class Channel {
 	}
 	
 	public Channel(String name, ChannelVariables variables) {
+		super(name);
 		this.plugin = TitanChat.getInstance();
 		this.name = name;
 		this.type = Type.CUSTOM;
@@ -195,7 +198,7 @@ public class Channel {
 	 * 
 	 * @return The config
 	 */
-	public final FileConfiguration getConfig() {
+	public FileConfiguration getConfig() {
 		if (config == null) { reloadConfig(); }
 		return config;
 	}
@@ -298,7 +301,7 @@ public class Channel {
 	/**
 	 * Reloads the config
 	 */
-	public final void reloadConfig() {
+	public void reloadConfig() {
 		if (configFile == null) { configFile = new File(plugin.getChannelDir(), name + ".yml"); }
 		
 		config = YamlConfiguration.loadConfiguration(configFile);
@@ -316,7 +319,7 @@ public class Channel {
 	 */
 	public void save() {}
 	
-	public final void saveConfig() {
+	public void saveConfig() {
 		if (configFile == null || config == null) { return; }
 		try { config.save(configFile); } catch (IOException e) { plugin.log(Level.SEVERE, "Could not save config to " + configFile); }
 	}

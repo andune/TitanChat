@@ -42,6 +42,8 @@ public final class PermissionsHook implements Listener {
 	
 	private String name = "SuperPerms";
 	
+	private boolean checked = false;
+	
 	public PermissionsHook(TitanChat plugin) {
 		this.plugin = plugin;
 		this.wildcard = new WildcardNodes(this);
@@ -300,7 +302,7 @@ public final class PermissionsHook implements Listener {
 					name = permissionsPlugin.getName();
 				}
 				
-			} else { if (!plugin.usingVault()) { plugin.log(Level.INFO, name + " detected and hooked"); } }
+			} else { if (!plugin.usingVault() && !checked) { plugin.log(Level.INFO, name + " detected and hooked"); checked = true; } }
 		}
 	}
 	

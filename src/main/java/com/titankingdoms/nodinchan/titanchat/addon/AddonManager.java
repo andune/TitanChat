@@ -1,8 +1,15 @@
 package com.titankingdoms.nodinchan.titanchat.addon;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 import org.bukkit.entity.Player;
 
@@ -17,15 +24,18 @@ import com.titankingdoms.nodinchan.titanchat.debug.Debugger;
  */
 public final class AddonManager {
 	
-	private final TitanChat plugin;
+	private final AddonLoader loader;
 	
 	private static final Debugger db = new Debugger(2);
 	
 	private final List<Addon> addons;
 	
+	private final Map<Addon, JarFile> jarFiles;
+	
 	public AddonManager(TitanChat plugin) {
-		this.plugin = plugin;
 		this.addons = new ArrayList<Addon>();
+		this.jarFiles = new HashMap<Addon, JarFile>();
+		this.loader = new AddonLoader(plugin);
 	}
 	
 	/**
@@ -70,10 +80,36 @@ public final class AddonManager {
 	}
 	
 	/**
+	 * Gets resource out of the JAR file of an Addon
+	 * 
+	 * @param addon The Addon 
+	 * 
+	 * @param fileName The file to look for
+	 * 
+	 * @return The file if found, otherwise null
+	 */
+	public InputStream getResource(Addon addon, String fileName) {
+		try {
+			JarFile jarFile = jarFiles.get(addon);
+			Enumeration<JarEntry> entries = jarFile.entries();
+			
+			while (entries.hasMoreElements()) {
+				JarEntry element = entries.nextElement();
+				
+				if (element.getName().equalsIgnoreCase(fileName))
+					return jarFile.getInputStream(element);
+			}
+			
+		} catch (IOException e) {}
+		
+		return null;
+	}
+	
+	/**
 	 * Loads the Addons
 	 */
 	public void load() {
-		try { for (Addon addon : plugin.getLoader().loadAddons()) { register(addon); } } catch (Exception e) {}
+		for (Addon addon : loader.load()) { register(addon); }
 		sortAddons();
 	}
 	
@@ -85,6 +121,17 @@ public final class AddonManager {
 	public void register(Addon addon) {
 		db.i("Registering addon: " + addon.getName());
 		addons.add(addon);
+	}
+	
+	/**
+	 * Saves the JAR files of the Addons for future use
+	 * 
+	 * @param addon The Addon
+	 * 
+	 * @param jarFile The JAR file of the Addon
+	 */
+	protected void setJarFile(Addon addon, JarFile jarFile) {
+		jarFiles.put(addon, jarFile);
 	}
 	
 	/**

@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 
 import org.bukkit.entity.Player;
 
+import com.nodinchan.loader.Loadable;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.addon.Addon;
 import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
@@ -14,18 +15,14 @@ import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
  * @author NodinChan
  *
  */
-public class Command {
+public class Command extends Loadable {
 
 	protected final TitanChat plugin;
 	
 	public Command() {
+		super("");
 		this.plugin = TitanChat.getInstance();
 	}
-	
-	/**
-	 * Called when it is loaded as an external command
-	 */
-	public void init() {}
 	
 	/**
 	 * Sends a warning for invalid argument length

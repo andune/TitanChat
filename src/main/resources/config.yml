@@ -5,6 +5,7 @@
 # &8 (grey), &9 (blue), &a (light green), &b (aqua),           #
 # &c (light red), &d (light purple), &e (yellow), &f (white),  #
 # &k (magical)                                                 #
+# &l (bold), &m (underlined), &n (striked), &o (italic)        #
 #==============================================================#
 
 channels:

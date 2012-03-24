@@ -1,7 +1,12 @@
 package com.titankingdoms.nodinchan.titanchat.channel;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.logging.Logger;
 
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
@@ -17,17 +22,24 @@ import com.titankingdoms.nodinchan.titanchat.command.Command;
 public class CustomChannel extends Channel {
 
 	protected final TitanChat plugin;
+	
+	private final ChannelManager manager;
 
 	private Logger log = Logger.getLogger("TitanLog");
+	
+	private File configFile = null;
+	private FileConfiguration config = null;
 	
 	public CustomChannel(String name) {
 		super(name, Type.CUSTOM);
 		this.plugin = TitanChat.getInstance();
+		this.manager = plugin.getChannelManager();
 	}
 	
 	public CustomChannel(String name, ChannelVariables variables) {
 		super(name, variables);
 		this.plugin = TitanChat.getInstance();
+		this.manager = plugin.getChannelManager();
 	}
 	
 	/**
@@ -66,26 +78,34 @@ public class CustomChannel extends Channel {
 	}
 	
 	/**
-	 * Get the Logger with the given name
+	 * Gets the config
 	 * 
-	 * @param name The name of the Logger
+	 * @return The config
+	 */
+	public final FileConfiguration getConfig() {
+		if (config == null) { reloadConfig(); }
+		return config;
+	}
+	
+	/**
+	 * Gets the Logger
 	 * 
 	 * @return The Logger
 	 */
-	public Logger getLogger(String name) {
-		if (log.equals(Logger.getLogger("TitanLog"))) { log = Logger.getLogger(name); }
+	public Logger getLogger() {
 		return log;
 	}
 	
 	/**
-	 * Called when the Custom Channel is loaded by the Loader
+	 * Gets the file from the JAR file
+	 * 
+	 * @param fileName The name of the file
+	 * 
+	 * @return The file if found, otherwise null
 	 */
-	public void init() {}
-	
-	/**
-	 * Load the variables
-	 */
-	public void loadVariables() {}
+	public final InputStream getResource(String fileName) {
+		return manager.getResource(this, fileName);
+	}
 	
 	/**
 	 * Registers the addon
@@ -118,4 +138,28 @@ public class CustomChannel extends Channel {
 	 * Called when TitanChat is reloaded
 	 */
 	public void reload() {}
+	
+	/**
+	 * Reloads the config
+	 */
+	public final void reloadConfig() {
+		if (configFile == null) { configFile = new File(new File(plugin.getAddonDir(), super.getName()), "config.yml"); }
+		
+		config = YamlConfiguration.loadConfiguration(configFile);
+		
+		InputStream defConfigStream = getResource("config.yml");
+		
+		if (defConfigStream != null) {
+			YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
+			config.setDefaults(defConfig);
+		}
+	}
+	
+	/**
+	 * Saves the config
+	 */
+	public final void saveConfig() {
+		if (config == null || configFile == null) { return; }
+		try { config.save(configFile); } catch (IOException e) {}
+	}
 }

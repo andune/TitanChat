@@ -3,15 +3,13 @@ package com.titankingdoms.nodinchan.titanchat.addon;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Enumeration;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 import java.util.logging.Logger;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
+import com.nodinchan.loader.Loadable;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
 import com.titankingdoms.nodinchan.titanchat.command.Command;
@@ -22,20 +20,21 @@ import com.titankingdoms.nodinchan.titanchat.command.Command;
  * @author NodinChan
  *
  */
-public class Addon {
+public class Addon extends Loadable {
 	
-	protected TitanChat plugin;
+	protected final TitanChat plugin;
+	
+	private final AddonManager manager;
 	
 	private Logger log = Logger.getLogger("TitanLog");
-	
-	private final String name;
 	
 	private File configFile = null;
 	private FileConfiguration config = null;
 	
 	public Addon(String name) {
+		super(name);
 		this.plugin = TitanChat.getInstance();
-		this.name = name;
+		this.manager = plugin.getAddonManager();
 	}
 	
 	/**
@@ -85,7 +84,7 @@ public class Addon {
 	 * @return The data folder
 	 */
 	public final File getDataFolder() {
-		File dir = new File(plugin.getAddonDir(), name);
+		File dir = new File(plugin.getAddonDir(), super.getName());
 		dir.mkdir();
 		return dir;
 	}
@@ -93,22 +92,10 @@ public class Addon {
 	/**
 	 * Gets the Logger
 	 * 
-	 * @param name The name of the Logger
-	 * 
-	 * @return The logger
+	 * @return The Logger
 	 */
-	public final Logger getLogger(String name) {
-		if (log.equals(Logger.getLogger("TitanLog"))) { log = Logger.getLogger(name); }
+	public Logger getLogger() {
 		return log;
-	}
-	
-	/**
-	 * Gets the name of the Addon
-	 * 
-	 * @return The name of the Addon
-	 */
-	public final String getName() {
-		return name;
 	}
 	
 	/**
@@ -119,26 +106,8 @@ public class Addon {
 	 * @return The file if found, otherwise null
 	 */
 	public final InputStream getResource(String fileName) {
-		try {
-			JarFile jarFile = new JarFile(plugin.getLoader().getPluginAddonJar(name));
-			Enumeration<JarEntry> entries = jarFile.entries();
-			
-			while (entries.hasMoreElements()) {
-				JarEntry element = entries.nextElement();
-				
-				if (element.getName().equalsIgnoreCase(fileName))
-					return jarFile.getInputStream(element);
-			}
-			
-		} catch (IOException e) {}
-		
-		return null;
+		return manager.getResource(this, fileName);
 	}
-	
-	/**
-	 * Called when the Addon is loaded by the Loader
-	 */
-	public void init() {}
 	
 	/**
 	 * Registers the Addon
@@ -146,7 +115,7 @@ public class Addon {
 	 * @param addon The Addon to register
 	 */
 	public final void register(Addon addon) {
-		plugin.getAddonManager().register(addon);
+		manager.register(addon);
 	}
 	
 	/**
@@ -171,7 +140,7 @@ public class Addon {
 	 * Reloads the config
 	 */
 	public final void reloadConfig() {
-		if (configFile == null) { configFile = new File(new File(plugin.getAddonDir(), name), "config.yml"); }
+		if (configFile == null) { configFile = new File(new File(plugin.getAddonDir(), super.getName()), "config.yml"); }
 		
 		config = YamlConfiguration.loadConfiguration(configFile);
 		
@@ -196,6 +165,6 @@ public class Addon {
 	 */
 	@Override
 	public String toString() {
-		return "Addon:" + name;
+		return "Addon:" + super.getName();
 	}
 }

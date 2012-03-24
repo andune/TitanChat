@@ -24,7 +24,6 @@ import com.titankingdoms.nodinchan.titanchat.debug.Debugger;
 import com.titankingdoms.nodinchan.titanchat.permissions.PermissionsHook;
 import com.titankingdoms.nodinchan.titanchat.permissions.WildcardNodes;
 import com.titankingdoms.nodinchan.titanchat.util.FormatHandler;
-import com.titankingdoms.nodinchan.titanchat.util.Loader;
 
 /*
  *     TitanChat 3.1
@@ -62,7 +61,6 @@ public final class TitanChat extends JavaPlugin {
 	private CommandManager cmdManager;
 	private FormatHandler format;
 	private PermissionsHook permHook;
-	private Loader loader;
 	
 	private boolean silenced = false;
 	
@@ -241,13 +239,9 @@ public final class TitanChat extends JavaPlugin {
 		return instance;
 	}
 	
-	/**
-	 * Get the Loader
-	 * 
-	 * @return The Loader
-	 */
-	public Loader getLoader() {
-		return loader;
+	@Override
+	public Logger getLogger() {
+		return log;
 	}
 	
 	/**
@@ -628,8 +622,6 @@ public final class TitanChat extends JavaPlugin {
 			saveResource("channels/README.yml", false);
 			saveResource("channels/Staff.yml", false);
 		}
-		
-		loader = new Loader(this);
 		
 		PluginManager pm = getServer().getPluginManager();
 		
