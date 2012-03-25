@@ -589,21 +589,6 @@ public final class TitanChat extends JavaPlugin {
 		log(Level.INFO, "is now enabling...");
 		instance = this;
 		
-		muted = new ArrayList<String>();
-		
-		addonManager = new AddonManager(this);
-		chManager = new ChannelManager(this);
-		cmdManager = new CommandManager(this);
-		format = new FormatHandler(this);
-		permHook = new PermissionsHook(this);
-		
-		File config = new File(getDataFolder(), "config.yml");
-		
-		if (!config.exists()) {
-			log(Level.INFO, "Loading default config");
-			saveResource("config.yml", false);
-		}
-		
 		if (getAddonDir().mkdir())
 			log(Level.INFO, "Creating addon directory...");
 		
@@ -621,6 +606,21 @@ public final class TitanChat extends JavaPlugin {
 			saveResource("channels/Public.yml", false);
 			saveResource("channels/README.yml", false);
 			saveResource("channels/Staff.yml", false);
+		}
+		
+		muted = new ArrayList<String>();
+		
+		addonManager = new AddonManager(this);
+		chManager = new ChannelManager(this);
+		cmdManager = new CommandManager(this);
+		format = new FormatHandler(this);
+		permHook = new PermissionsHook(this);
+		
+		File config = new File(getDataFolder(), "config.yml");
+		
+		if (!config.exists()) {
+			log(Level.INFO, "Loading default config");
+			saveResource("config.yml", false);
 		}
 		
 		PluginManager pm = getServer().getPluginManager();
