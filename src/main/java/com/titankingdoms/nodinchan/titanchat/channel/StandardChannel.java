@@ -105,7 +105,7 @@ public final class StandardChannel extends Channel {
 					plugin.getPlayer(name).sendMessage(message);
 			}
 			
-			for (String name : super.getFollowerList()) {
+			for (String name : plugin.getChannelManager().getFollowers(this)) {
 				if (plugin.getPlayer(name) != null && !super.getParticipants().contains(name))
 					plugin.getPlayer(name).sendMessage(message);
 			}

@@ -24,8 +24,6 @@ public class Channel extends Loadable {
 	
 	protected final TitanChat plugin;
 	
-	private final String name;
-	
 	private Type type;
 	
 	private boolean global;
@@ -49,7 +47,6 @@ public class Channel extends Loadable {
 	public Channel(String name, Type type) {
 		super(name);
 		this.plugin = TitanChat.getInstance();
-		this.name = name;
 		this.type = type;
 		this.global = false;
 		this.silenced = false;
@@ -65,7 +62,6 @@ public class Channel extends Loadable {
 	public Channel(String name, ChannelVariables variables) {
 		super(name);
 		this.plugin = TitanChat.getInstance();
-		this.name = name;
 		this.type = Type.CUSTOM;
 		this.global = false;
 		this.silenced = false;
@@ -86,7 +82,7 @@ public class Channel extends Loadable {
 	 * @return True if the Player has access
 	 */
 	public boolean canAccess(Player player) {
-		if (plugin.has(player, "TitanChat.access.*") || plugin.has(player, "TitanChat.access." + name))
+		if (plugin.has(player, "TitanChat.access.*") || plugin.has(player, "TitanChat.access." + super.getName()))
 			return true;
 		if (blacklist.contains(player.getName()))
 			return false;
@@ -108,7 +104,7 @@ public class Channel extends Loadable {
 	public boolean canBan(Player player) {
 		if (type.equals(Type.DEFAULT) || type.equals(Type.STAFF))
 			return false;
-		if (plugin.has(player, "TitanChat.ban.*") || plugin.has(player, "TitanChat.ban." + name))
+		if (plugin.has(player, "TitanChat.ban.*") || plugin.has(player, "TitanChat.ban." + super.getName()))
 			return true;
 		if (adminlist.contains(player.getName()))
 			return true;
@@ -124,7 +120,7 @@ public class Channel extends Loadable {
 	 * @return True if the Player can kick
 	 */
 	public boolean canKick(Player player) {
-		if (plugin.has(player, "TitanChat.kick.*") || plugin.has(player, "TitanChat.kick." + name))
+		if (plugin.has(player, "TitanChat.kick.*") || plugin.has(player, "TitanChat.kick." + super.getName()))
 			return true;
 		if (adminlist.contains(player.getName()))
 			return true;
@@ -156,7 +152,7 @@ public class Channel extends Loadable {
 	 * @return True if the Player can rank
 	 */
 	public boolean canRank(Player player) {
-		if (plugin.has(player, "TitanChat.rank.*") || plugin.has(player, "TitanChat.rank." + name))
+		if (plugin.has(player, "TitanChat.rank.*") || plugin.has(player, "TitanChat.rank." + super.getName()))
 			return true;
 		if (adminlist.contains(player.getName()))
 			return true;
@@ -231,15 +227,6 @@ public class Channel extends Loadable {
 	}
 	
 	/**
-	 * Gets the channel name
-	 * 
-	 * @return Channel name
-	 */
-	public final String getName() {
-		return name;
-	}
-	
-	/**
 	 * Gets the channel type
 	 * 
 	 * @return Channel type
@@ -302,7 +289,7 @@ public class Channel extends Loadable {
 	 * Reloads the config
 	 */
 	public void reloadConfig() {
-		if (configFile == null) { configFile = new File(plugin.getChannelDir(), name + ".yml"); }
+		if (configFile == null) { configFile = new File(plugin.getChannelDir(), super.getName() + ".yml"); }
 		
 		config = YamlConfiguration.loadConfiguration(configFile);
 		
@@ -364,6 +351,6 @@ public class Channel extends Loadable {
 	 */
 	@Override
 	public String toString() {
-		return "Channel:" + name + " : " + type.getName();
+		return "Channel:" + super.getName() + " : " + type.getName();
 	}
 }

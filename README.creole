@@ -33,7 +33,7 @@ TitanChat, a chat management and formatting plugin for Bukkit.
 
 === Dependecies
 
-* CraftBukkit 1.1-R8
+* CraftBukkit 1.2.4-R0.1-SNAPSHOT
 
 ==== Optional
 
@@ -64,6 +64,7 @@ TitanChat, a chat management and formatting plugin for Bukkit.
 * 20.03.12 - Fixed PermissionsHook and WildcardNodes
 * 23.03.12 - Added colour codes for bold, underlined, striked and italic
 * 24.03.12 - New Loaders
+* 25.03.12 - New TitanChat.follow.[channel] permission node
 
 -----------------------------------------------------------------------------------------------------------------------
 

@@ -155,7 +155,7 @@ public class InformationCommand extends Command {
 					
 					player.sendMessage(ChatColor.AQUA + "Online participants: " + plugin.createList(online));
 					player.sendMessage(ChatColor.AQUA + "Offline participants: " + plugin.createList(offline));
-					player.sendMessage(ChatColor.AQUA + "Followers: " + plugin.createList(channel.getFollowerList()));
+					player.sendMessage(ChatColor.AQUA + "Followers: " + plugin.createList(cm.getFollowers(channel)));
 				}
 				
 			} else { plugin.sendWarning(player, "No such channel"); }

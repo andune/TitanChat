@@ -288,6 +288,19 @@ public final class ChannelManager {
 		return channelAmount;
 	}
 	
+	
+	public List<String> getFollowers(Channel channel) {
+		List<String> followers = new ArrayList<String>();
+		followers.addAll(channel.getFollowerList());
+		
+		for (Player player : plugin.getServer().getOnlinePlayers()) {
+			if (plugin.getWildcardAvoider().has(player, "TitanChat.follow." + channel.getName()) && !followers.contains(player.getName()))
+				followers.add(player.getName());
+		}
+		
+		return followers;
+	}
+	
 	/**
 	 * Loads the Channel of the given name
 	 * 
