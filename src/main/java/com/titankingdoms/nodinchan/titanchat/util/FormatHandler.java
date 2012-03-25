@@ -70,7 +70,7 @@ public final class FormatHandler {
 	 * @return The colourised text
 	 */
 	public String colourise(String text) {
-		return text.replaceAll("&[a-f0-9A-Fk-oK-O]", "\u00A7$2");
+		return text.replaceAll("(&([a-f0-9A-Fk-oK-O]))", "\u00A7$2");
 	}
 	
 	/**
@@ -97,7 +97,7 @@ public final class FormatHandler {
 	 * @return The decolourised text
 	 */
 	public String decolourise(String message) {
-		return message.replaceAll("&[a-f0-9A-Fk-oK-O]", "");
+		return message.replaceAll("(&([a-f0-9A-Fk-oK-O]))", "");
 	}
 	
 	/**
