@@ -15,7 +15,7 @@ public final class ChannelLoader extends Loader<CustomChannel> {
 	
 	public ChannelLoader(TitanChat plugin) {
 		super(plugin, plugin.getCustomChannelDir(),new Object[0]);
-		this.manager = plugin.getChannelManager();
+		this.manager = ChannelManager.getInstance();
 		register(this);
 	}
 	

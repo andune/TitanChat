@@ -24,6 +24,8 @@ import com.titankingdoms.nodinchan.titanchat.debug.Debugger;
 import com.titankingdoms.nodinchan.titanchat.permissions.PermissionsHook;
 import com.titankingdoms.nodinchan.titanchat.permissions.WildcardNodes;
 import com.titankingdoms.nodinchan.titanchat.util.FormatHandler;
+import com.titankingdoms.nodinchan.titanpluginstats.ResultCheck;
+import com.titankingdoms.nodinchan.titanpluginstats.TitanPluginStats;
 
 /*
  *     TitanChat 3.1
@@ -231,7 +233,7 @@ public final class TitanChat extends JavaPlugin {
 	}
 	
 	/**
-	 * Get an instance of this
+	 * Gets an instance of this
 	 * 
 	 * @return TitanChat instance
 	 */
@@ -572,6 +574,8 @@ public final class TitanChat extends JavaPlugin {
 	public void onDisable() {
 		log(Level.INFO, "is now disabling...");
 		
+		getServer().getScheduler().cancelTasks(this);
+		
 		log(Level.INFO, "Unloading managers...");
 
 		addonManager.unload();
@@ -588,6 +592,9 @@ public final class TitanChat extends JavaPlugin {
 	public void onEnable() {
 		log(Level.INFO, "is now enabling...");
 		instance = this;
+		
+		int scheduler = getServer().getScheduler().scheduleAsyncRepeatingTask(this, new TitanPluginStats(this), 0, 108000);
+		getServer().getScheduler().scheduleAsyncRepeatingTask(this, new ResultCheck(this, scheduler), 1, 108000);
 		
 		if (getAddonDir().mkdir())
 			log(Level.INFO, "Creating addon directory...");
@@ -644,11 +651,6 @@ public final class TitanChat extends JavaPlugin {
 			log(Level.SEVERE, "A default channel is not defined");
 			pm.disablePlugin(this);
 			return;
-		}
-		
-		for (Player player : getServer().getOnlinePlayers()) {
-			if (chManager.getChannel(player) == null)
-				chManager.getSpawnChannel(player).join(player);
 		}
 		
 		log(Level.INFO, "is now enabled");
@@ -790,7 +792,6 @@ public final class TitanChat extends JavaPlugin {
 	 * @return True if Vault is used
 	 */
 	public boolean usingVault() {
-		db.i("Using Vault: " + (perm != null));
 		return perm != null;
 	}
 }

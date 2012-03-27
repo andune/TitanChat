@@ -22,6 +22,8 @@ public final class CommandManager {
 	
 	private final TitanChat plugin;
 	
+	private static CommandManager instance;
+	
 	private final CommandLoader loader;
 	
 	private static final Debugger db = new Debugger(4);
@@ -30,8 +32,9 @@ public final class CommandManager {
 	
 	public CommandManager(TitanChat plugin) {
 		this.plugin = plugin;
-		this.executors = new ArrayList<CommandExecutor>();
+		CommandManager.instance = this;
 		this.loader = new CommandLoader(plugin);
+		this.executors = new ArrayList<CommandExecutor>();
 	}
 	
 	/**
@@ -111,6 +114,15 @@ public final class CommandManager {
 	 */
 	public CommandExecutor getCommandExecutor(int exeNum) {
 		return executors.get(exeNum);
+	}
+	
+	/**
+	 * Gets an instance of this
+	 * 
+	 * @return CommandManager instance
+	 */
+	public CommandManager getInstance() {
+		return instance;
 	}
 	
 	/**

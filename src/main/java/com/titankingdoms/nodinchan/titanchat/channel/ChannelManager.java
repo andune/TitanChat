@@ -28,6 +28,8 @@ public final class ChannelManager {
 	
 	private final TitanChat plugin;
 	
+	private static ChannelManager instance;
+	
 	private final ChannelLoader loader;
 	
 	private static final Debugger db = new Debugger(3);
@@ -42,10 +44,11 @@ public final class ChannelManager {
 	
 	public ChannelManager(TitanChat plugin) {
 		this.plugin = plugin;
+		ChannelManager.instance = this;
+		this.loader = new ChannelLoader(plugin);
 		this.channels = new ArrayList<Channel>();
 		this.channelInvitors = new HashMap<Channel, Map<String, List<String>>>();
 		this.jarFiles = new HashMap<CustomChannel, JarFile>();
-		this.loader = new ChannelLoader(plugin);
 	}
 	
 	/**
@@ -184,6 +187,15 @@ public final class ChannelManager {
 	 */
 	public String getExact(String name) {
 		return getChannel(name).getName();
+	}
+	
+	/**
+	 * Gets an instance of this
+	 * 
+	 * @return ChannelManager instance
+	 */
+	public static ChannelManager getInstance() {
+		return instance;
 	}
 	
 	/**
@@ -342,7 +354,7 @@ public final class ChannelManager {
 	public void load() throws Exception {
 		if (!plugin.enableChannels()) { plugin.log(Level.INFO, "Channels disabled"); return; }
 		
-		for (CustomChannel channel : loader.load()) { register(channel); }
+		for (CustomChannel channel : loader.load()) { if (exists(channel.getName())) { continue; } register(channel); }
 		customChAmount = channels.size();
 		
 		for (String fileName : plugin.getChannelDir().list()) {
@@ -360,6 +372,11 @@ public final class ChannelManager {
 		}
 		
 		sortChannels();
+		
+		for (Player player : plugin.getServer().getOnlinePlayers()) {
+			if (getChannel(player) == null)
+				getSpawnChannel(player).join(player);
+		}
 		
 		plugin.log(Level.INFO, "No. of channels: " + (channelAmount = channels.size() - customChAmount));
 		plugin.log(Level.INFO, "No. of custom channels: " + customChAmount);
@@ -432,7 +449,6 @@ public final class ChannelManager {
 	 */
 	public void register(Channel channel) {
 		channels.add(channel);
-		plugin.log(Level.INFO, "A new channel, " + channel.getName() + ", has been registered");
 	}
 	
 	/**
@@ -450,7 +466,9 @@ public final class ChannelManager {
 			}
 		}
 		
-		sortChannels();
+		channels.clear();
+		
+		try { load(); } catch (Exception e) {}
 	}
 	
 	/**

@@ -65,6 +65,7 @@ TitanChat, a chat management and formatting plugin for Bukkit.
 * 23.03.12 - Added colour codes for bold, underlined, striked and italic
 * 24.03.12 - New Loaders
 * 25.03.12 - New TitanChat.follow.[channel] permission node
+* 27.03.12 - Added TitanPluginStats
 
 -----------------------------------------------------------------------------------------------------------------------
 

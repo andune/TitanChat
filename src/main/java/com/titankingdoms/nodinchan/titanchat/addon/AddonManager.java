@@ -24,6 +24,8 @@ import com.titankingdoms.nodinchan.titanchat.debug.Debugger;
  */
 public final class AddonManager {
 	
+	private static AddonManager instance;
+	
 	private final AddonLoader loader;
 	
 	private static final Debugger db = new Debugger(2);
@@ -33,9 +35,10 @@ public final class AddonManager {
 	private final Map<Addon, JarFile> jarFiles;
 	
 	public AddonManager(TitanChat plugin) {
+		AddonManager.instance = this;
+		this.loader = new AddonLoader(plugin);
 		this.addons = new ArrayList<Addon>();
 		this.jarFiles = new HashMap<Addon, JarFile>();
-		this.loader = new AddonLoader(plugin);
 	}
 	
 	/**
@@ -77,6 +80,15 @@ public final class AddonManager {
 		}
 		
 		return null;
+	}
+	
+	/**
+	 * Gets the instance of this
+	 * 
+	 * @return AddonManager instance
+	 */
+	public static AddonManager getInstance() {
+		return instance;
 	}
 	
 	/**

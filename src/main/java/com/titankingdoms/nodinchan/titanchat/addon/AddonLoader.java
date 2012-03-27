@@ -15,7 +15,7 @@ public final class AddonLoader extends Loader<Addon> {
 	
 	public AddonLoader(TitanChat plugin) {
 		super(plugin, plugin.getAddonDir(), new Object[0]);
-		this.manager = plugin.getAddonManager();
+		this.manager = AddonManager.getInstance();
 		register(this);
 	}
 	
