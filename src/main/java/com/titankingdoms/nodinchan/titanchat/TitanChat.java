@@ -55,7 +55,7 @@ public final class TitanChat extends JavaPlugin {
 	
 	private static TitanChat instance;
 	
-	private final String url = getDescription().getWebsite();
+	private final String url = "http://dev.bukkit.org/server-mods/titanchat/";
 	
 	private static final Logger log = Logger.getLogger("TitanLog");
 	private static final Debugger db = new Debugger(1);
@@ -600,7 +600,7 @@ public final class TitanChat extends JavaPlugin {
 		instance = this;
 		
 		int s = getServer().getScheduler().scheduleAsyncRepeatingTask(this, new TitanPluginStats(this, url), 0, 108000);
-		getServer().getScheduler().scheduleAsyncRepeatingTask(this, new ResultCheck(this, s, url), 1, 108000);
+		getServer().getScheduler().scheduleAsyncRepeatingTask(this, new ResultCheck(this, s, url), 0, 108000);
 		
 		if (getAddonDir().mkdir())
 			log(Level.INFO, "Creating addon directory...");

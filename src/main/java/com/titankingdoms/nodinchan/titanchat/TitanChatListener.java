@@ -96,7 +96,7 @@ public final class TitanChatListener implements Listener {
 	 * 
 	 * @param event PlayerJoinEvent
 	 */
-	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		if (!plugin.enableChannels())
 			return;
