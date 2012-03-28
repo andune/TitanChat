@@ -7,26 +7,20 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.bukkit.Server;
 import org.bukkit.plugin.Plugin;
 
 public class TitanPluginStats implements Runnable {
 	
-	private final String server_ip;
-	private final String server_port;
-	private final String server_name;
-	private final String plugin_name;
-	private final String plugin_version;
-	private final String cb_version;
+	private final String info;
 	
 	private Result result;
 	
-	public TitanPluginStats(Plugin plugin) {
-		this.server_ip = "server_ip=" + plugin.getServer().getIp();
-		this.server_port = "server_port=" + plugin.getServer().getPort();
-		this.server_name = "server_name=" + plugin.getServer().getServerName();
-		this.plugin_name = "plugin_name=" + plugin.getDescription().getName();
-		this.plugin_version = "plugin_version=" + plugin.getDescription().getVersion();
-		this.cb_version = "cb_version=" + plugin.getServer().getVersion();
+	public TitanPluginStats(Plugin plugin, String plugin_url) {
+		Server server = plugin.getServer();
+		String serverInfo = "server_ip=" + server.getIp() + "&" + "server_port=" + server.getPort() + "&" + server.getServerName();
+		String pluginInfo = plugin.getDescription().getName() + "&" + plugin.getDescription().getVersion();
+		this.info = serverInfo + "&" + pluginInfo + "&" + server.getVersion() + "&plugin_url=" + plugin_url;
 	}
 	
 	public Result getResult() {
@@ -35,7 +29,7 @@ public class TitanPluginStats implements Runnable {
 	
 	public void run() {
 		try {
-			URL url = new URL("http://titankingdoms.com/pstats/pluginstats.php?" + server_ip + "&" + server_port + "&" + server_name + "&" + plugin_name + "&" + plugin_version + "&" + cb_version);
+			URL url = new URL("http://titankingdoms.com/pstats/pluginstats.php?" + info);
 			HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
 			urlConnection.connect();
 			
@@ -50,7 +44,9 @@ public class TitanPluginStats implements Runnable {
 					this.result = Result.SUCCESS;
 			}
 			
-		} catch (MalformedURLException e) {} catch (IOException e) {}
+			urlConnection.disconnect();
+			
+		} catch (MalformedURLException e) { this.result = Result.FAILURE; } catch (IOException e) { this.result = Result.FAILURE; }
 	}
 	
 	public enum Result {

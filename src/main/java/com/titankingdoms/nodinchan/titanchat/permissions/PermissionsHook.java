@@ -12,6 +12,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.event.server.PluginEnableEvent;
+import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.plugin.Plugin;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
@@ -304,6 +305,18 @@ public final class PermissionsHook implements Listener {
 				
 			} else { if (!plugin.usingVault() && !checked) { plugin.log(Level.INFO, name + " detected and hooked"); checked = true; } }
 		}
+	}
+	
+	public void removePermission(Player player, String permission) {
+		for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
+			if (!permInfo.getPermission().equals(permission))
+				continue;
+			
+			permInfo.getAttachment().unsetPermission(permission);
+			return;
+		}
+		
+		wildcard.removePermission(player, permission);
 	}
 	
 	public PermissionsPlugin using() {

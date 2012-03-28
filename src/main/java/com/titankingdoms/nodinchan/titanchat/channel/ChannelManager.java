@@ -165,6 +165,47 @@ public final class ChannelManager {
 	}
 	
 	/**
+	 * Gets the Channel of the given name
+	 * 
+	 * @param name The Channel name
+	 * 
+	 * @return The Channel if it exists, otherwise null
+	 */
+	public Channel getChannel(String name) {
+		for (Channel channel : channels) {
+			if (channel.getName().equalsIgnoreCase(name))
+				return channel;
+		}
+		
+		return null;
+	}
+
+	/**
+	 * Gets the Channel of the Player
+	 * 
+	 * @param player The Player to check
+	 * 
+	 * @return The Channel if it exists, otherwise null
+	 */
+	public Channel getChannel(Player player) {
+		for (Channel channel : channels) {
+			if (channel.getParticipants().contains(player.getName()))
+				return channel;
+		}
+		
+		return null;
+	}
+
+	/**
+	 * Gets the number of loaded Channels
+	 * 
+	 * @return The number of loaded Channels
+	 */
+	public int getChannelAmount() {
+		return channelAmount;
+	}
+
+	/**
 	 * Gets the Default Channel of the Server
 	 * 
 	 * @return The Default Channel
@@ -189,6 +230,18 @@ public final class ChannelManager {
 		return getChannel(name).getName();
 	}
 	
+	public List<String> getFollowers(Channel channel) {
+		List<String> followers = new ArrayList<String>();
+		followers.addAll(channel.getFollowerList());
+		
+		for (Player player : plugin.getServer().getOnlinePlayers()) {
+			if (plugin.getWildcardAvoider().has(player, "TitanChat.follow." + channel.getName()) && !followers.contains(player.getName()))
+				followers.add(player.getName());
+		}
+		
+		return followers;
+	}
+
 	/**
 	 * Gets an instance of this
 	 * 
@@ -257,60 +310,6 @@ public final class ChannelManager {
 		}
 		
 		return null;
-	}
-	
-	/**
-	 * Gets the Channel of the given name
-	 * 
-	 * @param name The Channel name
-	 * 
-	 * @return The Channel if it exists, otherwise null
-	 */
-	public Channel getChannel(String name) {
-		for (Channel channel : channels) {
-			if (channel.getName().equalsIgnoreCase(name))
-				return channel;
-		}
-		
-		return null;
-	}
-	
-	/**
-	 * Gets the Channel of the Player
-	 * 
-	 * @param player The Player to check
-	 * 
-	 * @return The Channel if it exists, otherwise null
-	 */
-	public Channel getChannel(Player player) {
-		for (Channel channel : channels) {
-			if (channel.getParticipants().contains(player.getName()))
-				return channel;
-		}
-		
-		return null;
-	}
-	
-	/**
-	 * Gets the number of loaded Channels
-	 * 
-	 * @return The number of loaded Channels
-	 */
-	public int getChannelAmount() {
-		return channelAmount;
-	}
-	
-	
-	public List<String> getFollowers(Channel channel) {
-		List<String> followers = new ArrayList<String>();
-		followers.addAll(channel.getFollowerList());
-		
-		for (Player player : plugin.getServer().getOnlinePlayers()) {
-			if (plugin.getWildcardAvoider().has(player, "TitanChat.follow." + channel.getName()) && !followers.contains(player.getName()))
-				followers.add(player.getName());
-		}
-		
-		return followers;
 	}
 	
 	/**

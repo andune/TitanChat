@@ -10,12 +10,15 @@ public class ResultCheck implements Runnable {
 	
 	private final Plugin plugin;
 	
+	private final String plugin_url;
+	
 	private final BukkitScheduler scheduler;
 	
 	private BukkitWorker worker;
 	
-	public ResultCheck(Plugin plugin, int taskID) {
+	public ResultCheck(Plugin plugin, int taskID, String plugin_url) {
 		this.plugin = plugin;
+		this.plugin_url = plugin_url;
 		this.scheduler = plugin.getServer().getScheduler();
 		for (BukkitWorker worker : scheduler.getActiveWorkers()) {
 			if (!worker.getOwner().equals(plugin) || worker.getTaskId() != taskID)
@@ -32,7 +35,7 @@ public class ResultCheck implements Runnable {
 		if (worker instanceof TitanPluginStats) {
 			if (((TitanPluginStats) worker).getResult().equals(Result.FAILURE)) {
 				scheduler.cancelTask(worker.getTaskId());
-				scheduler.scheduleAsyncRepeatingTask(plugin, new TitanPluginStats(plugin), 6000, 108000);
+				scheduler.scheduleAsyncRepeatingTask(plugin, new TitanPluginStats(plugin, plugin_url), 6000, 108000);
 			}
 		}
 	}

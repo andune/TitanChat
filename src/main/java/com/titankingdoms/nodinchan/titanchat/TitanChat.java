@@ -55,6 +55,8 @@ public final class TitanChat extends JavaPlugin {
 	
 	private static TitanChat instance;
 	
+	private final String url = getDescription().getWebsite();
+	
 	private static final Logger log = Logger.getLogger("TitanLog");
 	private static final Debugger db = new Debugger(1);
 	
@@ -244,6 +246,10 @@ public final class TitanChat extends JavaPlugin {
 	@Override
 	public Logger getLogger() {
 		return log;
+	}
+	
+	public PermissionsHook getHook() {
+		return permHook;
 	}
 	
 	/**
@@ -593,8 +599,8 @@ public final class TitanChat extends JavaPlugin {
 		log(Level.INFO, "is now enabling...");
 		instance = this;
 		
-		int scheduler = getServer().getScheduler().scheduleAsyncRepeatingTask(this, new TitanPluginStats(this), 0, 108000);
-		getServer().getScheduler().scheduleAsyncRepeatingTask(this, new ResultCheck(this, scheduler), 1, 108000);
+		int s = getServer().getScheduler().scheduleAsyncRepeatingTask(this, new TitanPluginStats(this, url), 0, 108000);
+		getServer().getScheduler().scheduleAsyncRepeatingTask(this, new ResultCheck(this, s, url), 1, 108000);
 		
 		if (getAddonDir().mkdir())
 			log(Level.INFO, "Creating addon directory...");

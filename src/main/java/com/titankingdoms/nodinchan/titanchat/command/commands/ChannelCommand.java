@@ -33,7 +33,6 @@ public class ChannelCommand extends Command {
 				if (plugin.has(player, "TitanChat.create")) {
 					if (!cm.exists(args[0])) {
 						plugin.getChannelManager().createChannel(player, args[0]);
-						plugin.sendInfo(player, "You have created " + args[0]);
 						
 					} else { plugin.sendWarning(player, "Channel already exists"); }
 					
@@ -43,7 +42,6 @@ public class ChannelCommand extends Command {
 				if (plugin.has(player, "TitanChat.create")) {
 					if (!cm.exists(args[0])) {
 						plugin.getChannelManager().createChannel(player, args[0]);
-						plugin.sendInfo(player, "You have created " + args[0]);
 						
 					} else { plugin.sendWarning(player, "Channel already exists"); }
 					
@@ -79,7 +77,7 @@ public class ChannelCommand extends Command {
 				Channel channel = cm.getChannel(args[0]);
 				
 				if (channel.canAccess(player)) {
-					if (!channel.getFollowerList().contains(player.getName())) {
+					if (!cm.getFollowers(channel).contains(player.getName())) {
 						channel.getFollowerList().add(player.getName());
 						channel.save();
 						
@@ -174,8 +172,12 @@ public class ChannelCommand extends Command {
 			if (cm.exists(args[0])) {
 				Channel channel = cm.getChannel(args[0]);
 				
-				if (channel.getFollowerList().contains(player.getName())) {
-					channel.getFollowerList().remove(player.getName());
+				if (cm.getFollowers(channel).contains(player.getName())) {
+					if (channel.getFollowerList().contains(player.getName()))
+						channel.getFollowerList().remove(player.getName());
+					else
+						plugin.getWildcardAvoider().removePermission(player, "TitanChat.follow." + channel.getName());
+					
 					channel.save();
 					
 					plugin.sendInfo(player, "You have unfollowed " + channel.getName());
