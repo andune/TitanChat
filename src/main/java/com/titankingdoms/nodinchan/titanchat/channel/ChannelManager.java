@@ -94,12 +94,13 @@ public final class ChannelManager {
 		db.i("Player " + player.getName() +
 				" is creating channel " + name);
 		
-		Channel channel = new Channel(name, Type.PUBLIC);
+		StandardChannel channel = new StandardChannel(name, Type.PUBLIC);
 		channels.add(channel);
 		
 		assignAdmin(player, channel);
 		chSwitch(player, channel);
 		
+		channel.getConfig().options().copyDefaults(true);
 		channel.save();
 		
 		plugin.sendInfo(player, "You have created " + channel.getName());
@@ -118,16 +119,14 @@ public final class ChannelManager {
 		
 		Channel channel = getChannel(name);
 		
-		List<String> participants = channel.getParticipants();
-		
-		for (String participant : participants) {
+		for (String participant : channel.getParticipants()) {
 			if (plugin.getPlayer(participant) != null)
 				chSwitch(plugin.getPlayer(participant), getSpawnChannel(player));
 		}
 		
 		channels.remove(channel);
 		
-		plugin.sendWarning(participants, channel.getName() + " has been deleted");
+		plugin.sendWarning(channel.getParticipants(), channel.getName() + " has been deleted");
 		
 		File file = new File(plugin.getChannelDir(), name + ".yml");
 		file.delete();

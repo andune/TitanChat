@@ -293,7 +293,7 @@ public class Channel extends Loadable {
 		
 		config = YamlConfiguration.loadConfiguration(configFile);
 		
-		InputStream defConfigStream = plugin.getResource("democonfig.yml");
+		InputStream defConfigStream = plugin.getResource("channel.yml");
 		
 		if (defConfigStream != null) {
 			YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
