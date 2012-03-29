@@ -122,7 +122,9 @@ public final class AddonManager {
 	 */
 	public void load() {
 		for (Addon addon : loader.load()) { register(addon); }
-		sortAddons();
+		List<Addon> backup = addons;
+		addons.clear();
+		addons.addAll(loader.sort(backup));
 	}
 	
 	/**
