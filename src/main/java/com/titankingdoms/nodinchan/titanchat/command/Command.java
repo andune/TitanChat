@@ -3,6 +3,7 @@ package com.titankingdoms.nodinchan.titanchat.command;
 import java.lang.reflect.Method;
 
 import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
 
 import com.nodinchan.loader.Loadable;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
@@ -15,7 +16,7 @@ import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
  * @author NodinChan
  *
  */
-public class Command extends Loadable {
+public class Command extends Loadable implements Listener {
 
 	protected final TitanChat plugin;
 	
@@ -65,5 +66,14 @@ public class Command extends Loadable {
 	 */
 	public final void register(CustomChannel channel) {
 		plugin.getChannelManager().register(channel);
+	}
+	
+	/**
+	 * Registers the Listener
+	 * 
+	 * @param listener The Listener to register
+	 */
+	public final void register(Listener listener) {
+		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 	}
 }

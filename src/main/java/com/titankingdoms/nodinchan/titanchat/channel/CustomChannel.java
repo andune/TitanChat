@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.addon.Addon;
@@ -19,7 +20,7 @@ import com.titankingdoms.nodinchan.titanchat.command.Command;
  * @author NodinChan
  *
  */
-public class CustomChannel extends Channel {
+public class CustomChannel extends Channel implements Listener {
 
 	protected final TitanChat plugin;
 	
@@ -132,6 +133,15 @@ public class CustomChannel extends Channel {
 	 */
 	public final void register(CustomChannel channel) {
 		plugin.getChannelManager().register(channel);
+	}
+	
+	/**
+	 * Registers the Listener
+	 * 
+	 * @param listener The Listener to register
+	 */
+	public final void register(Listener listener) {
+		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 	}
 	
 	/**

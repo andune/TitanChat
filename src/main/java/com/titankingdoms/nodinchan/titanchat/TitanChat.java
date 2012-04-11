@@ -602,6 +602,13 @@ public final class TitanChat extends JavaPlugin {
 		int s = getServer().getScheduler().scheduleAsyncRepeatingTask(this, new TitanPluginStats(this, url), 0, 108000);
 		getServer().getScheduler().scheduleAsyncRepeatingTask(this, new ResultCheck(this, s, url), 0, 108000);
 		
+		File config = new File(getDataFolder(), "config.yml");
+		
+		if (!config.exists()) {
+			log(Level.INFO, "Loading default config");
+			saveResource("config.yml", false);
+		}
+		
 		if (getAddonDir().mkdir())
 			log(Level.INFO, "Creating addon directory...");
 		
@@ -628,13 +635,6 @@ public final class TitanChat extends JavaPlugin {
 		cmdManager = new CommandManager(this);
 		format = new FormatHandler(this);
 		permHook = new PermissionsHook(this);
-		
-		File config = new File(getDataFolder(), "config.yml");
-		
-		if (!config.exists()) {
-			log(Level.INFO, "Loading default config");
-			saveResource("config.yml", false);
-		}
 		
 		PluginManager pm = getServer().getPluginManager();
 		

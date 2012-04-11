@@ -12,6 +12,7 @@ channels:
     enable-channels: true
     chat-display-colour: '&f'
     channel-limit: -1
+    quick-message: '@'
     messages:
         join: true
         leave: true

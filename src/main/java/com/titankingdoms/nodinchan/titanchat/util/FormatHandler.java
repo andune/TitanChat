@@ -6,6 +6,8 @@ import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelVariables;
 import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
 import com.titankingdoms.nodinchan.titanchat.channel.StandardChannel;
+import com.titankingdoms.nodinchan.titanchat.events.MessageFormatEvent;
+import com.titankingdoms.nodinchan.titanchat.events.MessageSendEvent;
 
 /**
  * FormatHandler - Handles formatting
@@ -22,7 +24,7 @@ public final class FormatHandler {
 	}
 	
 	/**
-	 * Gets the broadcast format and format the message
+	 * Gets the broadcast format and formats the message
 	 * 
 	 * @param player The sender
 	 * 
@@ -44,7 +46,10 @@ public final class FormatHandler {
 		message = message.replace("%suffix", playerSuffix);
 		message = message.replace("%gsuffix", groupSuffix);
 		
-		message = plugin.getAddonManager().executeFormat(player, message);
+		MessageFormatEvent formatEvent = new MessageFormatEvent(player, message);
+		plugin.getServer().getPluginManager().callEvent(formatEvent);
+		
+		message = formatEvent.getFormat();
 		
 		StringBuilder str = new StringBuilder();
 		
@@ -56,6 +61,11 @@ public final class FormatHandler {
 		}
 		
 		message = str.toString();
+		
+		MessageSendEvent sendEvent = new MessageSendEvent(player, msg);
+		plugin.getServer().getPluginManager().callEvent(sendEvent);
+		
+		msg = sendEvent.getMessage();
 		
 		message = message.replace("%message", colourise(msg));
 		
@@ -76,8 +86,9 @@ public final class FormatHandler {
 	/**
 	 * Check if Channel convert colours
 	 * 
-	 * @param name
-	 * @return
+	 * @param name The Channel name
+	 * 
+	 * @return True if converts
 	 */
 	public boolean colours(String name) {
 		if (plugin.getChannelManager().getStaffChannel().equals(plugin.getChannelManager().getChannel(name)))
@@ -101,11 +112,13 @@ public final class FormatHandler {
 	}
 	
 	/**
-	 * Gets the Arena
+	 * Gets the emote format and formats the message
 	 * 
-	 * @param player
-	 * @param msg
-	 * @return
+	 * @param player The sender
+	 * 
+	 * @param msg The message
+	 * 
+	 * @return The formatted message
 	 */
 	public String emoteFormat(Player player, String msg) {
 		String message = plugin.getConfig().getString("emote.player.format");
@@ -121,7 +134,10 @@ public final class FormatHandler {
 		message = message.replace("%suffix", playerSuffix);
 		message = message.replace("%gsuffix", groupSuffix);
 		
-		message = plugin.getAddonManager().executeFormat(player, message);
+		MessageFormatEvent formatEvent = new MessageFormatEvent(player, message);
+		plugin.getServer().getPluginManager().callEvent(formatEvent);
+		
+		message = formatEvent.getFormat();
 		
 		StringBuilder str = new StringBuilder();
 		
@@ -133,6 +149,11 @@ public final class FormatHandler {
 		}
 		
 		message = str.toString();
+		
+		MessageSendEvent sendEvent = new MessageSendEvent(player, msg);
+		plugin.getServer().getPluginManager().callEvent(sendEvent);
+		
+		msg = sendEvent.getMessage();
 		
 		message = message.replace("%action", colourise(msg));
 		
@@ -160,7 +181,10 @@ public final class FormatHandler {
 			message = message.replace("%suffix", playerSuffix);
 			message = message.replace("%gsuffix", groupSuffix);
 			
-			message = plugin.getAddonManager().executeFormat(player, message);
+			MessageFormatEvent formatEvent = new MessageFormatEvent(player, message);
+			plugin.getServer().getPluginManager().callEvent(formatEvent);
+			
+			message = formatEvent.getFormat();
 			
 			StringBuilder str = new StringBuilder();
 			
@@ -194,6 +218,11 @@ public final class FormatHandler {
 		String nameColour = variables.getNameColour();
 		
 		if (plugin.useDefaultFormat()) {
+			MessageSendEvent sendEvent = new MessageSendEvent(player, msg);
+			plugin.getServer().getPluginManager().callEvent(sendEvent);
+			
+			msg = sendEvent.getMessage();
+			
 			if (colours(channel) || plugin.has(player, "TitanChat.colours"))
 				message = colourise(tag + " " + playerPrefix + nameColour + name + playerSuffix + "&f: " + chatColour + msg);
 			else
@@ -209,7 +238,10 @@ public final class FormatHandler {
 			message = message.replace("%suffix", playerSuffix);
 			message = message.replace("%gsuffix", groupSuffix);
 			
-			message = plugin.getAddonManager().executeFormat(player, message);
+			MessageFormatEvent formatEvent = new MessageFormatEvent(player, message);
+			plugin.getServer().getPluginManager().callEvent(formatEvent);
+			
+			message = formatEvent.getFormat();
 			
 			StringBuilder str = new StringBuilder();
 			
@@ -222,6 +254,11 @@ public final class FormatHandler {
 			
 			message = str.toString();
 			
+			MessageSendEvent sendEvent = new MessageSendEvent(player, msg);
+			plugin.getServer().getPluginManager().callEvent(sendEvent);
+			
+			msg = sendEvent.getMessage();
+			
 			if (colours(channel) || plugin.has(player, "TitanChat.colours"))
 				message = message.replace("%message", colourise(chatColour + msg));
 			else
@@ -231,7 +268,7 @@ public final class FormatHandler {
 		return message;
 	}
 	
-	public String whisper(Player player, String msg) {
+	public String whisperFormat(Player player, String msg) {
 		String message = plugin.getConfig().getString("whisper.player.format");
 		
 		String playerPrefix = plugin.getPlayerPrefix(player);
@@ -245,7 +282,10 @@ public final class FormatHandler {
 		message = message.replace("%suffix", playerSuffix);
 		message = message.replace("%gsuffix", groupSuffix);
 		
-		message = plugin.getAddonManager().executeFormat(player, message);
+		MessageFormatEvent formatEvent = new MessageFormatEvent(player, message);
+		plugin.getServer().getPluginManager().callEvent(formatEvent);
+		
+		message = formatEvent.getFormat();
 		
 		StringBuilder str = new StringBuilder();
 		
@@ -257,6 +297,11 @@ public final class FormatHandler {
 		}
 		
 		message = str.toString();
+		
+		MessageSendEvent sendEvent = new MessageSendEvent(player, msg);
+		plugin.getServer().getPluginManager().callEvent(sendEvent);
+		
+		msg = sendEvent.getMessage();
 		
 		message = message.replace("%message", colourise(msg));
 		

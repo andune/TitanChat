@@ -11,8 +11,6 @@ import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import org.bukkit.entity.Player;
-
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.debug.Debugger;
 
@@ -39,31 +37,6 @@ public final class AddonManager {
 		this.loader = new AddonLoader(plugin);
 		this.addons = new ArrayList<Addon>();
 		this.jarFiles = new HashMap<Addon, JarFile>();
-	}
-	
-	/**
-	 * Tells all Addons that a chat message has been sent
-	 * 
-	 * @param name The name of the player
-	 * 
-	 * @param message The message sent
-	 */
-	public void chatMade(String name, String message) {
-		for (Addon addon : addons) { addon.chatMade(name, message); }
-	}
-	
-	/**
-	 * Tells all Addons that a chat message will be sent
-	 * 
-	 * @param player The message sender
-	 * 
-	 * @param message The message
-	 * 
-	 * @return The formatted message
-	 */
-	public String executeFormat(Player player, String message) {
-		for (Addon addon : addons) { message = addon.format(player, message); }
-		return message;
 	}
 	
 	/**

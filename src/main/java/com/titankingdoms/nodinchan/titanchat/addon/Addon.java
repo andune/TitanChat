@@ -7,7 +7,7 @@ import java.util.logging.Logger;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
 
 import com.nodinchan.loader.Loadable;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
@@ -20,7 +20,7 @@ import com.titankingdoms.nodinchan.titanchat.command.Command;
  * @author NodinChan
  *
  */
-public class Addon extends Loadable {
+public class Addon extends Loadable implements Listener {
 	
 	protected final TitanChat plugin;
 	
@@ -38,15 +38,6 @@ public class Addon extends Loadable {
 	}
 	
 	/**
-	 * Called after a chat message is sent
-	 * 
-	 * @param name The name of the Player
-	 * 
-	 * @param message The message sent
-	 */
-	public void chatMade(String name, String message) {}
-	
-	/**
 	 * Check if an Addon equals another
 	 */
 	@Override
@@ -56,17 +47,6 @@ public class Addon extends Loadable {
 		
 		return false;
 	}
-	
-	/**
-	 * Called when a message is being formatted
-	 * 
-	 * @param player The message sender
-	 * 
-	 * @param message The message
-	 * 
-	 * @return The formatted message
-	 */
-	public String format(Player player, String message) { return message; }
 	
 	/**
 	 * Gets the config
@@ -134,6 +114,15 @@ public class Addon extends Loadable {
 	 */
 	public final void register(CustomChannel channel) {
 		plugin.getChannelManager().register(channel);
+	}
+	
+	/**
+	 * Registers the Listener
+	 * 
+	 * @param listener The Listener to register
+	 */
+	public final void register(Listener listener) {
+		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 	}
 	
 	/**

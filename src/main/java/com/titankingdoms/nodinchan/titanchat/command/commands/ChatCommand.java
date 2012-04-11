@@ -129,7 +129,7 @@ public class ChatCommand extends Command {
 		
 		if (!args[0].equalsIgnoreCase("console")) {
 			player.sendMessage("You whispered to " + plugin.getPlayer(args[0]).getDisplayName() + ": " + str.toString());
-			plugin.getPlayer(args[0]).sendMessage(plugin.getFormatHandler().whisper(player, str.toString()));
+			plugin.getPlayer(args[0]).sendMessage(plugin.getFormatHandler().whisperFormat(player, str.toString()));
 			plugin.getLogger().info("[" + player.getName() + " -> " + plugin.getPlayer(args[0]).getName() + "] " + str.toString());
 			
 		} else { plugin.getLogger().info(player.getName() + " whispers: " + str.toString()); }

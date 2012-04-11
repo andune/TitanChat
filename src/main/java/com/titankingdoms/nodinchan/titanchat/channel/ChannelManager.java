@@ -39,7 +39,7 @@ public final class ChannelManager {
 	
 	private List<Channel> channels;
 	
-	private Map<Channel, Map<String, List<String>>> channelInvitors;
+	private final Map<Channel, Map<String, List<String>>> channelInvitors;
 	private final Map<CustomChannel, JarFile> jarFiles;
 	
 	public ChannelManager(TitanChat plugin) {

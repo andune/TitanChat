@@ -9,6 +9,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
+import com.titankingdoms.nodinchan.titanchat.events.MessageSendEvent;
 
 /**
  * TitanChatListener - Listeners
@@ -37,7 +38,7 @@ public final class TitanChatListener implements Listener {
 		if (plugin.enableChannels()) {
 			event.setCancelled(true);
 			
-			if (msg.startsWith("@") && !msg.substring(1).startsWith(" ")) {
+			if (msg.startsWith(plugin.getConfig().getString("channels.quick-message")) && !msg.substring(1).startsWith(" ")) {
 				Channel channel = plugin.getChannelManager().getChannel(msg.split(" ")[0].substring(1));
 					
 				if (channel != null) {
@@ -85,10 +86,14 @@ public final class TitanChatListener implements Listener {
 			
 		} else {
 			event.setFormat(plugin.getFormatHandler().format(player));
+			
+			MessageSendEvent sendEvent = new MessageSendEvent(player, msg);
+			plugin.getServer().getPluginManager().callEvent(sendEvent);
+			
+			msg = sendEvent.getMessage();
+			
 			event.setMessage(plugin.getFormatHandler().colourise(msg));
 		}
-		
-		plugin.getAddonManager().chatMade(player.getName(), msg);
 	}
 	
 	/**

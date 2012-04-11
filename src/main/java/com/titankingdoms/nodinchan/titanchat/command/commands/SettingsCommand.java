@@ -107,6 +107,9 @@ public class SettingsCommand extends Command {
 			}
 			break;
 			
+		case QUICK:
+			break;
+			
 		case NCOLOUR:
 			if (args.length < 2) { Settings.NCOLOUR.invalidArgLength(player); return; }
 			
@@ -325,6 +328,7 @@ public class SettingsCommand extends Command {
 	public enum Settings {
 		CHCOLOUR("ChColour", new String[] { "chcolour", "chcolor" }, "Changes the chat display colour of the channel", "chcolour [colourcode] <channel>"),
 		CONVERT("Convert", new String[] { "convert" }, "Toggles colour code converting", "convert <channel>"),
+		QUICK("Quick Message", new String[] { "quick" }, "Sets the quick message prefix", "quick [prefix] <channel>"),
 		NCOLOUR("NColour", new String[] { "ncolour", "ncolor" }, "Changes the name display colour of the channel", "ncolour [colourcode] <channel>"),
 		PASSWORD("Password", new String[] { "password" }, "Sets the password of the channel", "password [password] <channel>"),
 		TAG("Tag", new String[] { "tag" }, "Sets the tag of the channel", "tag [tag] <channel>"),

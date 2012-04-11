@@ -61,7 +61,7 @@ public final class ChannelVariables {
 	}
 	
 	/**
-	 * Get the Channel that uses this ChannelVariable
+	 * Gets the Channel that uses this ChannelVariable
 	 * 
 	 * @return The Channel using this instance
 	 */
@@ -70,7 +70,7 @@ public final class ChannelVariables {
 	}
 	
 	/**
-	 * Get the chat colour
+	 * Gets the chat colour
 	 * 
 	 * @return The chat colour
 	 */
@@ -79,7 +79,7 @@ public final class ChannelVariables {
 	}
 	
 	/**
-	 * Get the format
+	 * Gets the format
 	 * 
 	 * @return The format
 	 */
@@ -91,7 +91,7 @@ public final class ChannelVariables {
 	}
 	
 	/**
-	 * Get the name colour
+	 * Gets the name colour
 	 * 
 	 * @return The name colour
 	 */
@@ -100,7 +100,7 @@ public final class ChannelVariables {
 	}
 	
 	/**
-	 * Get the tag
+	 * Gets the tag
 	 * 
 	 * @return The tag
 	 */
@@ -109,7 +109,7 @@ public final class ChannelVariables {
 	}
 	
 	/**
-	 * Set the chat colour
+	 * Sets the chat colour
 	 * 
 	 * @param chatColour The colour code to set to
 	 */
@@ -118,7 +118,7 @@ public final class ChannelVariables {
 	}
 	
 	/**
-	 * Set whether the Channel converts colour codes
+	 * Sets whether the Channel converts colour codes
 	 * 
 	 * @param convert True if converts
 	 */
@@ -127,7 +127,7 @@ public final class ChannelVariables {
 	}
 	
 	/**
-	 * Set the format
+	 * Sets the format
 	 * 
 	 * @param format The format to set to
 	 */
@@ -136,7 +136,7 @@ public final class ChannelVariables {
 	}
 	
 	/**
-	 * Set the name colour
+	 * Sets the name colour
 	 * 
 	 * @param nameColour The colour code to set to
 	 */
@@ -145,7 +145,7 @@ public final class ChannelVariables {
 	}
 	
 	/**
-	 * Set the tag
+	 * Sets the tag
 	 * 
 	 * @param tag The tag to set to
 	 */
