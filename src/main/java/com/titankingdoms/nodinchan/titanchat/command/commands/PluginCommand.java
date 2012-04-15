@@ -4,6 +4,7 @@ import java.util.logging.Level;
 
 import org.bukkit.entity.Player;
 
+import com.titankingdoms.nodinchan.titanchat.addon.AddonManager;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
 import com.titankingdoms.nodinchan.titanchat.command.Command;
 import com.titankingdoms.nodinchan.titanchat.command.CommandID;
@@ -18,9 +19,11 @@ import com.titankingdoms.nodinchan.titanchat.debug.Debugger;
  */
 public class PluginCommand extends Command {
 	
+	private AddonManager am;
 	private ChannelManager cm;
 	
 	public PluginCommand() {
+		this.am = plugin.getAddonManager();
 		this.cm = plugin.getChannelManager();
 	}
 	
@@ -53,6 +56,7 @@ public class PluginCommand extends Command {
 			plugin.log(Level.INFO, "Reloading configs...");
 			plugin.sendInfo(player, "Reloading configs...");
 			plugin.reloadConfig();
+			am.reload();
 			cm.reload();
 			plugin.log(Level.INFO, "Configs reloaded");
 			plugin.sendInfo(player, "Configs reloaded");
