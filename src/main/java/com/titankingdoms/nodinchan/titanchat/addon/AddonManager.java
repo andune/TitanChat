@@ -111,8 +111,6 @@ public final class AddonManager {
 	
 	public void reload() {
 		for (Addon addon : addons) { addon.reloadConfig(); }
-		unload();
-		load();
 	}
 	
 	/**

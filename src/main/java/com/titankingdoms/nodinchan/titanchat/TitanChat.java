@@ -55,6 +55,8 @@ public final class TitanChat extends JavaPlugin {
 	
 	private static TitanChat instance;
 	
+	private String NAME;
+	
 	private final String url = "http://dev.bukkit.org/server-mods/titanchat/";
 	
 	private static final Logger log = Logger.getLogger("TitanLog");
@@ -367,7 +369,7 @@ public final class TitanChat extends JavaPlugin {
 	 * @param msg The message to send
 	 */
 	public void log(Level level, String msg) {
-		log.log(level, "[" + this + "] " + msg);
+		log.log(level, "[" + NAME + "] " + msg);
 	}
 	
 	/**
@@ -593,8 +595,10 @@ public final class TitanChat extends JavaPlugin {
 	 */
 	@Override
 	public void onEnable() {
-		log(Level.INFO, "is now enabling...");
 		instance = this;
+		this.NAME = instance.toString().split("-")[0];
+		
+		log(Level.INFO, "is now enabling...");
 		
 		int s = getServer().getScheduler().scheduleAsyncRepeatingTask(this, new TitanPluginStats(this, url), 0, 108000);
 		getServer().getScheduler().scheduleAsyncRepeatingTask(this, new ResultCheck(this, s, url), 0, 108000);
