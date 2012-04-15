@@ -653,7 +653,7 @@ public final class TitanChat extends JavaPlugin {
 		addonManager.load();
 		cmdManager.load();
 		
-		if (chManager.getDefaultChannel() == null) {
+		if (chManager.getDefaultChannel() == null && enableChannels()) {
 			log(Level.SEVERE, "A default channel is not defined");
 			pm.disablePlugin(this);
 			return;
