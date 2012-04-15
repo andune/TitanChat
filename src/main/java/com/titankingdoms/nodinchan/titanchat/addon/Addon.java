@@ -24,6 +24,8 @@ public class Addon extends Loadable implements Listener {
 	
 	protected final TitanChat plugin;
 	
+	private Addon instance;
+	
 	private final AddonManager manager;
 	
 	private Logger log = Logger.getLogger("TitanLog");
@@ -86,7 +88,11 @@ public class Addon extends Loadable implements Listener {
 	 * @return The file if found, otherwise null
 	 */
 	public final InputStream getResource(String fileName) {
-		return manager.getResource(this, fileName);
+		return manager.getResource(instance, fileName);
+	}
+	
+	public final void init(Addon addon) {
+		this.instance = addon;
 	}
 	
 	/**

@@ -24,6 +24,8 @@ public class CustomChannel extends Channel implements Listener {
 
 	protected final TitanChat plugin;
 	
+	private CustomChannel instance;
+	
 	private final ChannelManager manager;
 
 	private Logger log = Logger.getLogger("TitanLog");
@@ -99,7 +101,11 @@ public class CustomChannel extends Channel implements Listener {
 	 * @return The file if found, otherwise null
 	 */
 	public final InputStream getResource(String fileName) {
-		return manager.getResource(this, fileName);
+		return manager.getResource(instance, fileName);
+	}
+	
+	public void init(CustomChannel channel) {
+		this.instance = channel;
 	}
 	
 	/**
