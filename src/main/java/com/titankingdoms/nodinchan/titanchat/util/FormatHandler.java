@@ -1,5 +1,7 @@
 package com.titankingdoms.nodinchan.titanchat.util;
 
+import java.util.logging.Level;
+
 import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
@@ -90,6 +92,9 @@ public final class FormatHandler {
 		
 		if (plugin.getChannelManager().getChannel(name) instanceof CustomChannel)
 			return true;
+		
+		if (((StandardChannel) plugin.getChannelManager().getChannel(name)).getVariables() == null)
+			plugin.log(Level.INFO, "Debug 1");
 		
 		return ((StandardChannel) plugin.getChannelManager().getChannel(name)).getVariables().convert();
 	}
