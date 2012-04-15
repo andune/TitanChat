@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.bukkit.entity.Player;
 
+import com.nodinchan.loader.Loader;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.command.commands.*;
 import com.titankingdoms.nodinchan.titanchat.debug.Debugger;
@@ -24,8 +25,6 @@ public final class CommandManager {
 	
 	private static CommandManager instance;
 	
-	private final CommandLoader loader;
-	
 	private static final Debugger db = new Debugger(4);
 	
 	private List<CommandExecutor> executors;
@@ -33,7 +32,6 @@ public final class CommandManager {
 	public CommandManager(TitanChat plugin) {
 		this.plugin = plugin;
 		CommandManager.instance = this;
-		this.loader = new CommandLoader(plugin);
 		this.executors = new ArrayList<CommandExecutor>();
 	}
 	
@@ -138,7 +136,7 @@ public final class CommandManager {
 		register(new RankingCommand());
 		register(new SettingsCommand());
 		
-		for (Command command : loader.load()) { register(command); }
+		for (Command command : new Loader<Command>(plugin, plugin.getCommandDir(), new Object[0]).load()) { register(command); }
 		
 		sortCommands();
 	}

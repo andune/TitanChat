@@ -59,21 +59,6 @@ public class Channel extends Loadable {
 		this.whitelist = new ArrayList<String>();
 	}
 	
-	public Channel(String name, ChannelVariables variables) {
-		super(name);
-		this.plugin = TitanChat.getInstance();
-		this.type = Type.CUSTOM;
-		this.global = false;
-		this.silenced = false;
-		this.adminlist = new ArrayList<String>();
-		this.blacklist = new ArrayList<String>();
-		this.followerlist = new ArrayList<String>();
-		this.invitelist = new ArrayList<String>();
-		this.mutelist = new ArrayList<String>();
-		this.participants = new ArrayList<String>();
-		this.whitelist = new ArrayList<String>();
-	}
-	
 	/**
 	 * Check if the Player has access
 	 * 

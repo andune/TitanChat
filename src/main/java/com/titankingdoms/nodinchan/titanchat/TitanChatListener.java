@@ -87,7 +87,7 @@ public final class TitanChatListener implements Listener {
 		} else {
 			event.setFormat(plugin.getFormatHandler().format(player));
 			
-			MessageSendEvent sendEvent = new MessageSendEvent(player, msg);
+			MessageSendEvent sendEvent = new MessageSendEvent(player, plugin.getServer().getOnlinePlayers(), msg);
 			plugin.getServer().getPluginManager().callEvent(sendEvent);
 			
 			msg = sendEvent.getMessage();

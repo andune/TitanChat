@@ -37,12 +37,6 @@ public class CustomChannel extends Channel implements Listener {
 		this.manager = plugin.getChannelManager();
 	}
 	
-	public CustomChannel(String name, ChannelVariables variables) {
-		super(name, variables);
-		this.plugin = TitanChat.getInstance();
-		this.manager = plugin.getChannelManager();
-	}
-	
 	/**
 	 * Colourise the line of text
 	 * 

@@ -66,18 +66,18 @@ public class InformationCommand extends Command {
 		player.sendMessage(italic + ChatColor.WHITE + "(&o)");
 	}
 	
-	@CommandID(name = "Commands", triggers = "commands", requireChannel = false)
+	@CommandID(name = "Commands", triggers = { "commands", "cmds" }, requireChannel = false)
 	@CommandInfo(description = "Shows the command list", usage = "commands <page/command>")
 	public void commands(Player player, String[] args) {
 		CommandManager cm = plugin.getCommandManager();
 		
 		try {
 			int page = Integer.parseInt(args[0]) - 1;
-			int numPages = cm.getCommandAmount() / 5;
-			int start = page * 5;
-			int end = start + 5;
+			int numPages = cm.getCommandAmount() / 10;
+			int start = page * 10;
+			int end = start + 10;
 			
-			if (cm.getCommandAmount() % 5 != 0 && (numPages * 5) - cm.getCommandAmount() < 0)
+			if (cm.getCommandAmount() % 10 != 0 && (numPages * 10) - cm.getCommandAmount() < 0)
 				numPages++;
 			
 			if (end > cm.getCommandAmount())

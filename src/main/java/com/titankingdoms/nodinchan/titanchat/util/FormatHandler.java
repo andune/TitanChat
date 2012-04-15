@@ -3,11 +3,10 @@ package com.titankingdoms.nodinchan.titanchat.util;
 import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
-import com.titankingdoms.nodinchan.titanchat.channel.ChannelVariables;
 import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
 import com.titankingdoms.nodinchan.titanchat.channel.StandardChannel;
+import com.titankingdoms.nodinchan.titanchat.channel.Variables;
 import com.titankingdoms.nodinchan.titanchat.events.MessageFormatEvent;
-import com.titankingdoms.nodinchan.titanchat.events.MessageSendEvent;
 
 /**
  * FormatHandler - Handles formatting
@@ -61,11 +60,6 @@ public final class FormatHandler {
 		}
 		
 		message = str.toString();
-		
-		MessageSendEvent sendEvent = new MessageSendEvent(player, msg);
-		plugin.getServer().getPluginManager().callEvent(sendEvent);
-		
-		msg = sendEvent.getMessage();
 		
 		message = message.replace("%message", colourise(msg));
 		
@@ -150,11 +144,6 @@ public final class FormatHandler {
 		
 		message = str.toString();
 		
-		MessageSendEvent sendEvent = new MessageSendEvent(player, msg);
-		plugin.getServer().getPluginManager().callEvent(sendEvent);
-		
-		msg = sendEvent.getMessage();
-		
 		message = message.replace("%action", colourise(msg));
 		
 		return message;
@@ -206,7 +195,7 @@ public final class FormatHandler {
 	public String format(Player player, String channel, String msg) {
 		String message = "";
 		
-		ChannelVariables variables = ((StandardChannel) plugin.getChannelManager().getChannel(channel)).getVariables();
+		Variables variables = ((StandardChannel) plugin.getChannelManager().getChannel(channel)).getVariables();
 		
 		String name = player.getDisplayName();
 		String tag = variables.getTag();
@@ -218,11 +207,6 @@ public final class FormatHandler {
 		String nameColour = variables.getNameColour();
 		
 		if (plugin.useDefaultFormat()) {
-			MessageSendEvent sendEvent = new MessageSendEvent(player, msg);
-			plugin.getServer().getPluginManager().callEvent(sendEvent);
-			
-			msg = sendEvent.getMessage();
-			
 			if (colours(channel) || plugin.has(player, "TitanChat.colours"))
 				message = colourise(tag + " " + playerPrefix + nameColour + name + playerSuffix + "&f: " + chatColour + msg);
 			else
@@ -253,11 +237,6 @@ public final class FormatHandler {
 			}
 			
 			message = str.toString();
-			
-			MessageSendEvent sendEvent = new MessageSendEvent(player, msg);
-			plugin.getServer().getPluginManager().callEvent(sendEvent);
-			
-			msg = sendEvent.getMessage();
 			
 			if (colours(channel) || plugin.has(player, "TitanChat.colours"))
 				message = message.replace("%message", colourise(chatColour + msg));
@@ -297,11 +276,6 @@ public final class FormatHandler {
 		}
 		
 		message = str.toString();
-		
-		MessageSendEvent sendEvent = new MessageSendEvent(player, msg);
-		plugin.getServer().getPluginManager().callEvent(sendEvent);
-		
-		msg = sendEvent.getMessage();
 		
 		message = message.replace("%message", colourise(msg));
 		

@@ -1,5 +1,9 @@
 package com.titankingdoms.nodinchan.titanchat.channel;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.bukkit.entity.Player;
 
 /**
@@ -10,7 +14,7 @@ import org.bukkit.entity.Player;
  */
 public final class StandardChannel extends Channel {
 	
-	private final ChannelVariables variables;
+	private final Variables variables;
 	
 	private String password;
 	
@@ -20,7 +24,7 @@ public final class StandardChannel extends Channel {
 	
 	public StandardChannel(String name, Type type) {
 		super(name, type);
-		this.variables = new ChannelVariables(this);
+		this.variables = new Variables(this);
 		this.password = "";
 	}
 	
@@ -49,7 +53,7 @@ public final class StandardChannel extends Channel {
 	 * 
 	 * @return The channel variables
 	 */
-	public final ChannelVariables getVariables() {
+	public final Variables getVariables() {
 		return variables;
 	}
 	
@@ -97,18 +101,22 @@ public final class StandardChannel extends Channel {
 	@Override
 	public void sendMessage(Player player, String message) {
 		if (super.isGlobal())
-			plugin.getServer().broadcastMessage(message);
+			plugin.getChannelManager().sendMessage(player, Arrays.asList(plugin.getServer().getOnlinePlayers()), message);
 		
 		else {
+			List<Player> recipants = new ArrayList<Player>();
+			
 			for (String name : super.getParticipants()) {
 				if (plugin.getPlayer(name) != null)
-					plugin.getPlayer(name).sendMessage(message);
+					recipants.add(plugin.getPlayer(name));
 			}
 			
 			for (String name : plugin.getChannelManager().getFollowers(this)) {
-				if (plugin.getPlayer(name) != null && !super.getParticipants().contains(name))
-					plugin.getPlayer(name).sendMessage(message);
+				if (plugin.getPlayer(name) != null)
+					recipants.add(plugin.getPlayer(name));
 			}
+			
+			plugin.getChannelManager().sendMessage(player, recipants, message);
 		}
 	}
 	

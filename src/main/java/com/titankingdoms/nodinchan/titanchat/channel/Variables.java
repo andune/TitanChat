@@ -2,13 +2,7 @@ package com.titankingdoms.nodinchan.titanchat.channel;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 
-/**
- * ChannelVariables - Stores basic channel configuration
- * 
- * @author NodinChan
- *
- */
-public final class ChannelVariables {
+public final class Variables {
 
 	private final TitanChat plugin;
 	
@@ -23,7 +17,7 @@ public final class ChannelVariables {
 	private boolean joinMessage;
 	private boolean leaveMessage;
 	
-	public ChannelVariables(Channel channel) {
+	public Variables(Channel channel) {
 		this.plugin = TitanChat.getInstance();
 		this.channel = channel;
 		this.chatColour = "";

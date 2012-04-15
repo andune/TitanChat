@@ -17,6 +17,7 @@ import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.debug.Debugger;
+import com.titankingdoms.nodinchan.titanchat.events.MessageSendEvent;
 
 /**
  * ChannelManager - Manages Channels
@@ -387,7 +388,7 @@ public final class ChannelManager {
 	 * @param channel The Channel to load
 	 */
 	public void loadChannelVariables(StandardChannel channel) {
-		ChannelVariables variables = channel.getVariables();
+		Variables variables = channel.getVariables();
 		variables.setChatColour(channel.getConfig().getString("chat-display-colour"));
 		variables.setConvert(channel.getConfig().getBoolean("colour-code"));
 		
@@ -467,6 +468,29 @@ public final class ChannelManager {
 		channels.clear();
 		
 		try { load(); } catch (Exception e) {}
+	}
+	
+	/**
+	 * Sends the message to the recipants
+	 * 
+	 * @param sender The message sender
+	 * 
+	 * @param recipants The message recipants
+	 * 
+	 * @param message The message to be sent
+	 * 
+	 * @return True if message is successfully sent
+	 */
+	public boolean sendMessage(Player sender, List<Player> recipants, String message) {
+		MessageSendEvent event = new MessageSendEvent(sender, recipants, message);
+		plugin.getServer().getPluginManager().callEvent(event);
+		
+		if (event.isCancelled()) { return false; }
+		
+		for (Player recipant : event.getRecipants())
+			recipant.sendMessage(event.getMessage());
+		
+		return true;
 	}
 	
 	/**
