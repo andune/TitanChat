@@ -90,15 +90,6 @@ public class Addon extends Loadable implements Listener {
 	}
 	
 	/**
-	 * Registers the Addon
-	 * 
-	 * @param addon The Addon to register
-	 */
-	public final void register(Addon addon) {
-		manager.register(addon);
-	}
-	
-	/**
 	 * Registers the Command
 	 * 
 	 * @param command The Command to register

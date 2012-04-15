@@ -7,6 +7,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 
+import com.nodinchan.loader.LoadEvent;
+import com.titankingdoms.nodinchan.titanchat.addon.Addon;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
 import com.titankingdoms.nodinchan.titanchat.events.MessageSendEvent;
@@ -23,6 +25,15 @@ public final class TitanChatListener implements Listener {
 	
 	public TitanChatListener(TitanChat plugin) {
 		this.plugin = plugin;
+	}
+	
+	@EventHandler(priority = EventPriority.MONITOR)
+	public void onLoad(LoadEvent event) {
+		if (event.getLoadable() instanceof Addon && event.getPlugin() instanceof TitanChat)
+			plugin.getAddonManager().setJarFile((Addon) event.getLoadable(), event.getJarFile());
+		
+		if (event.getLoadable() instanceof CustomChannel && event.getPlugin() instanceof TitanChat)
+			plugin.getChannelManager().setJarFile((CustomChannel) event.getLoadable(), event.getJarFile());
 	}
 	
 	/**

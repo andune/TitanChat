@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import com.nodinchan.loader.Loader;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.debug.Debugger;
 
@@ -24,8 +25,6 @@ public final class AddonManager {
 	
 	private static AddonManager instance;
 	
-	private final AddonLoader loader;
-	
 	private static final Debugger db = new Debugger(2);
 	
 	private final List<Addon> addons;
@@ -34,7 +33,6 @@ public final class AddonManager {
 	
 	public AddonManager(TitanChat plugin) {
 		AddonManager.instance = this;
-		this.loader = new AddonLoader(plugin);
 		this.addons = new ArrayList<Addon>();
 		this.jarFiles = new HashMap<Addon, JarFile>();
 	}
@@ -94,6 +92,7 @@ public final class AddonManager {
 	 * Loads the Addons
 	 */
 	public void load() {
+		Loader<Addon> loader = new Loader<Addon>(TitanChat.getInstance(), TitanChat.getInstance().getAddonDir(), new Object[0]);
 		for (Addon addon : loader.load()) { register(addon); }
 		List<Addon> backup = addons;
 		addons.clear();
@@ -117,7 +116,7 @@ public final class AddonManager {
 	 * 
 	 * @param jarFile The JAR file of the Addon
 	 */
-	protected void setJarFile(Addon addon, JarFile jarFile) {
+	public void setJarFile(Addon addon, JarFile jarFile) {
 		jarFiles.put(addon, jarFile);
 	}
 	

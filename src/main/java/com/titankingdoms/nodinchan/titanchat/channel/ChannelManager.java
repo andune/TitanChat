@@ -15,6 +15,7 @@ import java.util.logging.Level;
 
 import org.bukkit.entity.Player;
 
+import com.nodinchan.loader.Loader;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.debug.Debugger;
 import com.titankingdoms.nodinchan.titanchat.events.MessageSendEvent;
@@ -31,8 +32,6 @@ public final class ChannelManager {
 	
 	private static ChannelManager instance;
 	
-	private final ChannelLoader loader;
-	
 	private static final Debugger db = new Debugger(3);
 	
 	private int channelAmount = 0;
@@ -46,7 +45,6 @@ public final class ChannelManager {
 	public ChannelManager(TitanChat plugin) {
 		this.plugin = plugin;
 		ChannelManager.instance = this;
-		this.loader = new ChannelLoader(plugin);
 		this.channels = new ArrayList<Channel>();
 		this.channelInvitors = new HashMap<Channel, Map<String, List<String>>>();
 		this.jarFiles = new HashMap<CustomChannel, JarFile>();
@@ -353,6 +351,8 @@ public final class ChannelManager {
 	public void load() throws Exception {
 		if (!plugin.enableChannels()) { plugin.log(Level.INFO, "Channels disabled"); return; }
 		
+		Loader<CustomChannel> loader = new Loader<CustomChannel>(plugin, plugin.getCustomChannelDir(), new Object[0]);
+		
 		for (CustomChannel channel : loader.load()) { if (exists(channel.getName())) { continue; } register(channel); }
 		customChAmount = channels.size();
 		
@@ -500,7 +500,7 @@ public final class ChannelManager {
 	 * 
 	 * @param jarFile The JAR file of the Channel
 	 */
-	protected void setJarFile(CustomChannel channel, JarFile jarFile) {
+	public void setJarFile(CustomChannel channel, JarFile jarFile) {
 		jarFiles.put(channel, jarFile);
 	}
 	

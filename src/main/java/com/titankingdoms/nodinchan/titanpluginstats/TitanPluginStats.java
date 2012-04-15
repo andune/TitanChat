@@ -42,7 +42,9 @@ public class TitanPluginStats implements Runnable {
 					this.result = Result.FAILURE;
 				else if (line.equals("SUCCESS"))
 					this.result = Result.SUCCESS;
-			}
+				
+			} else
+				this.result = Result.FAILURE;
 			
 			urlConnection.disconnect();
 			

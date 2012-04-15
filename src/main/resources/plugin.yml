@@ -1,5 +1,5 @@
 name: TitanChat
-version: '3.2-Build#${project.version}'
+version: '3.2-Build#${build.number}'
 author: NodinChan
 main: com.titankingdoms.nodinchan.titanchat.TitanChat
 softdepend: [Vault]

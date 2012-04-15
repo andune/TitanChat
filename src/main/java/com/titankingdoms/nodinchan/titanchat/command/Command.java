@@ -51,15 +51,6 @@ public class Command extends Loadable implements Listener {
 	}
 	
 	/**
-	 * Registers the command
-	 * 
-	 * @param command the command to register
-	 */
-	public final void register(Command command) {
-		plugin.getCommandManager().register(command);
-	}
-	
-	/**
 	 * Registers the custom channel
 	 * 
 	 * @param channel the channel to register

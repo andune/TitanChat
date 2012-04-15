@@ -121,15 +121,6 @@ public class CustomChannel extends Channel implements Listener {
 	}
 	
 	/**
-	 * Registers the custom channel
-	 * 
-	 * @param channel the channel to register
-	 */
-	public final void register(CustomChannel channel) {
-		plugin.getChannelManager().register(channel);
-	}
-	
-	/**
 	 * Registers the Listener
 	 * 
 	 * @param listener The Listener to register
