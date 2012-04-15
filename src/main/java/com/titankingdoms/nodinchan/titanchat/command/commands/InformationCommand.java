@@ -99,11 +99,7 @@ public class InformationCommand extends Command {
 			}
 			
 		} catch (IndexOutOfBoundsException e) {
-			player.sendMessage(ChatColor.AQUA + "TitanChat Commands");
-			player.sendMessage(ChatColor.AQUA + "Command: /titanchat [command] [arguments]");
-			player.sendMessage(ChatColor.AQUA + "Alias: /tc command [arguments]");
-			plugin.sendInfo(player, "\"/titanchat commands [page]\" for command list");
-			
+			plugin.getServer().dispatchCommand(player, "titanchat commands 1");
 		} catch (NumberFormatException e) {
 			if (cm.getCommandExecutor(args[0]) == null) {
 				plugin.sendWarning(player, "No info on command");

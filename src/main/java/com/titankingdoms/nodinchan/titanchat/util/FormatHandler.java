@@ -93,8 +93,8 @@ public final class FormatHandler {
 		if (plugin.getChannelManager().getChannel(name) instanceof CustomChannel)
 			return true;
 		
-		if (((StandardChannel) plugin.getChannelManager().getChannel(name)).getVariables() == null)
-			plugin.log(Level.INFO, "Debug 1");
+		if (((StandardChannel) plugin.getChannelManager().getChannel(name)) == null)
+			plugin.log(Level.INFO, "Debug 2");
 		
 		return ((StandardChannel) plugin.getChannelManager().getChannel(name)).getVariables().convert();
 	}
