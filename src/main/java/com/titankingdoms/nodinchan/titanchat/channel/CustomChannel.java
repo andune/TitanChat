@@ -126,7 +126,7 @@ public class CustomChannel extends Channel implements Listener {
 	 * @param listener The Listener to register
 	 */
 	public final void register(Listener listener) {
-		plugin.getServer().getPluginManager().registerEvents(this, plugin);
+		plugin.getServer().getPluginManager().registerEvents(listener, plugin);
 	}
 	
 	/**
