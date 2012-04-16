@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.logging.Level;
 
 import com.nodinchan.loader.Loader;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
@@ -94,9 +95,21 @@ public final class AddonManager {
 	public void load() {
 		Loader<Addon> loader = new Loader<Addon>(TitanChat.getInstance(), TitanChat.getInstance().getAddonDir(), new Object[0]);
 		for (Addon addon : loader.load()) { register(addon); }
-		List<Addon> backup = addons;
+		List<Addon> backup = new ArrayList<Addon>();
+		backup.addAll(addons);
 		addons.clear();
 		addons.addAll(loader.sort(backup));
+		
+		StringBuilder str = new StringBuilder();
+		
+		for (Addon addon : addons) {
+			if (str.length() > 0)
+				str.append(", ");
+			
+			str.append(addon.getName());
+		}
+		
+		TitanChat.getInstance().log(Level.INFO, "Addons loaded: " + str.toString());
 	}
 	
 	/**

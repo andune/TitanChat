@@ -5,7 +5,15 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 
+import net.milkbowl.vault.chat.Chat;
+import net.milkbowl.vault.permission.Permission;
+
 import org.anjocaido.groupmanager.GroupManager;
+import org.anjocaido.groupmanager.data.User;
+import org.anjocaido.groupmanager.dataholder.OverloadedWorldHolder;
+import org.anjocaido.groupmanager.permissions.AnjoPermissionsHandler;
+import org.anjocaido.groupmanager.utils.PermissionCheckResult;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -14,13 +22,15 @@ import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.RegisteredServiceProvider;
 
+import com.platymuus.bukkit.permissions.PermissionsPlugin;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.debug.Debugger;
 
+import ru.tehkode.permissions.PermissionGroup;
 import ru.tehkode.permissions.PermissionUser;
 import ru.tehkode.permissions.bukkit.PermissionsEx;
-
 
 import de.bananaco.bpermissions.api.ApiLayer;
 import de.bananaco.bpermissions.api.util.CalculableType;
@@ -35,8 +45,6 @@ public final class PermissionsHook implements Listener {
 	
 	private final TitanChat plugin;
 	
-	private final WildcardNodes wildcard;
-	
 	private static final Debugger db = new Debugger(5);
 	
 	private Plugin permissionsPlugin;
@@ -45,9 +53,16 @@ public final class PermissionsHook implements Listener {
 	
 	private boolean checked = false;
 	
+	private Permission perm;
+	private Chat chat;
+	
 	public PermissionsHook(TitanChat plugin) {
 		this.plugin = plugin;
-		this.wildcard = new WildcardNodes(this);
+		
+		if (plugin.getServer().getPluginManager().getPlugin("Vault") != null) {
+			setupChatService();
+			setupPermissionService();
+		}
 	}
 	
 	/**
@@ -71,32 +86,44 @@ public final class PermissionsHook implements Listener {
 	public String getGroupPrefix(Player player) {
 		String prefix = "";
 		
-		switch (using()) {
+		db.i("Getting group prefix of player " + player.getName());
 		
-		case PERMISSIONSEX:
-			String[] pexGroups = PermissionsEx.getPermissionManager().getUser(player).getGroupsNames();
-			String pexGroup = (pexGroups != null && pexGroups.length > 0) ? pexGroups[0] : "";
-			prefix = PermissionsEx.getPermissionManager().getGroup(pexGroup).getPrefix(player.getWorld().getName());
-			db.i("PermissionsEx returned group prefix: " + prefix);
-			break;
+		if (perm != null && chat != null) {
+			prefix = chat.getGroupPrefix(player.getWorld(), perm.getPrimaryGroup(player));
+			db.i("Returning: " + prefix);
+			return (prefix != null) ? prefix : "";
+		}
+		
+		for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
+			db.i("Checking if " + permInfo.getPermission() + " is a prefix permission");
 			
-		case BPERMISSIONS:
-			String[] bGroups = ApiLayer.getGroups(player.getWorld().getName(), CalculableType.USER, player.getName());
-			String bGroup = (bGroups != null && bGroups.length > 0) ? bGroups[0] : "";
-			prefix = (!bGroup.equals("")) ? ApiLayer.getValue(player.getWorld().getName(), CalculableType.GROUP, bGroup, "prefix") : "";
-			db.i("bPermissions returned group prefix: " + prefix);
-			break;
+			if (!(permInfo.getPermission().startsWith("TitanChat.g.prefix.")) || !(permInfo.getValue()))
+				continue;
 			
-		case GROUPMANAGER:
-			String group = ((GroupManager) permissionsPlugin).getWorldsHolder().getWorldPermissions(player).getGroup(player.getName());
-			prefix = ((GroupManager) permissionsPlugin).getWorldsHolder().getWorldPermissions(player).getGroupPrefix(group);
-			db.i("GroupManager returned group prefix: " + prefix);
+			prefix = permInfo.getPermission().substring(19);
 			break;
 		}
 		
-		if (prefix.equals("") || prefix == null) {
-			db.i("Permissions plugins did not return any prefix, checking permissions...");
-			prefix = wildcard.getGroupPrefix(player);
+		if (prefix.equals("")) {
+			switch (using()) {
+			
+			case PERMISSIONSEX:
+				db.i("Prefix not found with permission attachments, checking PermissionsEx");
+				
+				PermissionGroup[] groups = PermissionsEx.getPermissionManager().getUser(player).getGroups(player.getWorld().getName());
+				
+				if (groups != null && groups.length > 0) {
+					for (String perm : groups[0].getPermissions(player.getWorld().getName())) {
+						db.i("Checking if " + perm + " is a prefix permission");
+						
+						if (perm.startsWith("TitanChat.g.prefix.")) {
+							prefix = perm.substring(19);
+							db.i("PermissionsEx permissions returned prefix: " + prefix);
+						}
+					}
+				}
+				break;
+			}
 		}
 		
 		return (prefix.equals("") || prefix == null) ? "" : prefix;
@@ -112,32 +139,42 @@ public final class PermissionsHook implements Listener {
 	public String getGroupSuffix(Player player) {
 		String suffix = "";
 		
-		switch (using()) {
+		db.i("Getting group suffix of player " + player.getName());
 		
-		case PERMISSIONSEX:
-			String[] pexGroups = PermissionsEx.getPermissionManager().getUser(player).getGroupsNames();
-			String pexGroup = (pexGroups != null && pexGroups.length > 0) ? pexGroups[0] : "";
-			suffix = (!pexGroup.equals("")) ? PermissionsEx.getPermissionManager().getGroup(pexGroup).getSuffix(player.getWorld().getName()) : "";
-			db.i("PermissionsEx returned group suffix: " + suffix);
-			break;
+		if (perm != null && chat != null) {
+			suffix = chat.getGroupSuffix(player.getWorld(), perm.getPrimaryGroup(player));
+			db.i("Returning: " + suffix);
+			return (suffix != null) ? suffix : "";
+		}
+		
+		for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
+			db.i("Checking if " + permInfo.getPermission() + " is a suffix permission");
 			
-		case BPERMISSIONS:
-			String[] bGroups = ApiLayer.getGroups(player.getWorld().getName(), CalculableType.USER, player.getName());
-			String bGroup = (bGroups != null && bGroups.length > 0) ? bGroups[0] : "";
-			suffix = (!bGroup.equals("")) ? ApiLayer.getValue(player.getWorld().getName(), CalculableType.GROUP, bGroup, "suffix") : "";
-			db.i("bPermissions returned group suffix: " + suffix);
-			break;
+			if (!(permInfo.getPermission().startsWith("TitanChat.g.suffix.")) || !(permInfo.getValue()))
+				continue;
 			
-		case GROUPMANAGER:
-			String gmGroup = ((GroupManager) permissionsPlugin).getWorldsHolder().getWorldPermissions(player).getGroup(player.getName());
-			suffix = ((GroupManager) permissionsPlugin).getWorldsHolder().getWorldPermissions(player).getGroupSuffix(gmGroup);
-			db.i("GroupManager returned group suffix: " + suffix);
+			suffix = permInfo.getPermission().substring(19);
 			break;
 		}
 		
-		if (suffix.equals("") || suffix == null) {
-			db.i("Permissions plugins did not return any suffix, checking permissions...");
-			suffix = wildcard.getGroupSuffix(player);
+		if (suffix.equals("")) {
+			switch (using()) {
+			
+			case PERMISSIONSEX:
+				db.i("Suffix not found with permission attachments, checking PermissionsEx");
+				
+				PermissionGroup[] groups = PermissionsEx.getPermissionManager().getUser(player).getGroups(player.getWorld().getName());
+				
+				if (groups != null && groups.length > 0) {
+					for (String perm : groups[0].getPermissions(player.getWorld().getName())) {
+						if (perm.startsWith("TitanChat.g.suffix.")) {
+							suffix = perm.substring(19);
+							db.i("PermissionsEx permissions returned suffix: " + suffix);
+						}
+					}
+				}
+				break;
+			}
 		}
 		
 		return (suffix.equals("") || suffix == null) ? "" : suffix;
@@ -153,30 +190,39 @@ public final class PermissionsHook implements Listener {
 	public String getPlayerPrefix(Player player) {
 		String prefix = "";
 		
-		switch (using()) {
+		db.i("Getting prefix of player: " + player.getName());
 		
-		case PERMISSIONSEX:
-			PermissionUser user = PermissionsEx.getPermissionManager().getUser(player);
-			prefix = (user != null) ? user.getPrefix() : "";
-			db.i("PermissionsEx returned player prefix: " + prefix);
-			break;
+		if (chat != null) {
+			prefix = chat.getPlayerPrefix(player.getWorld(), player.getName());
+			db.i("Returning: " + prefix);
+			return (prefix != null) ? prefix : getGroupPrefix(player);
+		}
+		
+		for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
+			db.i("Checking if " + permInfo.getPermission() + " is a prefix permission");
 			
-		case BPERMISSIONS:
-			String[] bGroups = ApiLayer.getGroups(player.getWorld().getName(), CalculableType.USER, player.getName());
-			String bGroup = (bGroups != null && bGroups.length > 0) ? bGroups[0] : "";
-			prefix = (!bGroup.equals("")) ? ApiLayer.getValue(player.getWorld().getName(), CalculableType.USER, bGroup, "prefix") : "";
-			db.i("bPermissions returned player prefix: " + prefix);
-			break;
+			if (!(permInfo.getPermission().startsWith("TitanChat.p.prefix.")) || !(permInfo.getValue()))
+				continue;
 			
-		case GROUPMANAGER:
-			prefix = ((GroupManager) permissionsPlugin).getWorldsHolder().getWorldPermissions(player).getUserPrefix(player.getName());
-			db.i("GroupManager returned player prefix: " + prefix);
+			prefix = permInfo.getPermission().substring(19);
 			break;
 		}
 		
-		if (prefix.equals("") || prefix == null) {
-			db.i("Permissions plugins did not return any prefix, checking permissions...");
-			prefix = wildcard.getPlayerPrefix(player);
+		if (prefix.equals("")) {
+			switch (using()) {
+			
+			case PERMISSIONSEX:
+				db.i("Prefix not found with permission attachments, checking PermissionsEx");
+				
+				PermissionUser user = PermissionsEx.getPermissionManager().getUser(player);
+				for (String perm : user.getPermissions(player.getWorld().getName())) {
+					if (perm.startsWith("TitanChat.p.prefix.")) {
+						prefix = perm.substring(19);
+						db.i("PermissionsEx permissions returned prefix: " + prefix);
+					}
+				}
+				break;
+			}
 		}
 		
 		return (prefix.equals("") || prefix == null) ? getGroupPrefix(player) : prefix;
@@ -192,42 +238,46 @@ public final class PermissionsHook implements Listener {
 	public String getPlayerSuffix(Player player) {
 		String suffix = "";
 		
-		switch (using()) {
+		db.i("Getting suffix of player: " + player.getName());
 		
-		case PERMISSIONSEX:
-			PermissionUser user = PermissionsEx.getPermissionManager().getUser(player);
-			suffix = (user != null) ? user.getSuffix() : "";
-			db.i("PermissionsEx returned player suffix: " + suffix);
-			break;
+		if (chat != null) {
+			suffix = chat.getPlayerSuffix(player.getWorld(), player.getName());
+			db.i("Returning: " + suffix);
+			return (suffix != null) ? suffix : getGroupSuffix(player);
+		}
+		
+		for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
+			db.i("Checking if " + permInfo.getPermission() + " is a suffix permission");
 			
-		case BPERMISSIONS:
-			String[] bGroups = ApiLayer.getGroups(player.getWorld().getName(), CalculableType.USER, player.getName());
-			String bGroup = (bGroups != null && bGroups.length > 0) ? bGroups[0] : "";
-			suffix = (!bGroup.equals("")) ? ApiLayer.getValue(player.getWorld().getName(), CalculableType.USER, bGroup, "suffix") : "";
-			db.i("bPermissions returned player suffix: " + suffix);
-			break;
+			if (!(permInfo.getPermission().startsWith("TitanChat.p.suffix.")) || !(permInfo.getValue()))
+				continue;
 			
-		case GROUPMANAGER:
-			suffix = ((GroupManager) permissionsPlugin).getWorldsHolder().getWorldPermissions(player).getUserSuffix(player.getName());
-			db.i("GroupManager returned player suffix: " + suffix);
+			suffix = permInfo.getPermission().substring(19);
 			break;
 		}
 		
-		if (suffix.equals("") || suffix == null) {
-			db.i("Permissions plugins did not return any suffix, checking permissions...");
-			suffix = wildcard.getPlayerSuffix(player);
+		if (suffix.equals("")) {
+			switch (using()) {
+			
+			case PERMISSIONSEX:
+				db.i("Suffix not found with permission attachments, checking PermissionsEx");
+				
+				PermissionUser user = PermissionsEx.getPermissionManager().getUser(player);
+				for (String perm : user.getPermissions(player.getWorld().getName())) {
+					if (perm.startsWith("TitanChat.p.suffix.")) {
+						suffix = perm.substring(19);
+						db.i("PermissionsEx permissions returned suffix: " + suffix);
+					}
+				}
+				break;
+			}
 		}
 		
 		return (suffix.equals("") || suffix == null) ? getGroupSuffix(player) : suffix;
 	}
 	
-	/**
-	 * Gets the Wildcard avoider
-	 * 
-	 * @return The Wildcard avoider
-	 */
-	public WildcardNodes getWildcardAvoider() {
-		return wildcard;
+	public boolean has(Player player, String permission) {
+		return has(player, permission, false);
 	}
 	
 	/**
@@ -239,7 +289,61 @@ public final class PermissionsHook implements Listener {
 	 * 
 	 * @return True if the Player has the permission
 	 */
-	public boolean has(Player player, String permission) {
+	public boolean has(Player player, String permission, boolean avoidWildcard) {
+		if (avoidWildcard) {
+			for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
+				if (permInfo.getPermission().equals(permission))
+					return true;
+			}
+			
+			switch (using()) {
+			
+			case PERMISSIONSEX:
+				PermissionUser user = PermissionsEx.getPermissionManager().getUser(player);
+				
+				for (String perm : user.getPermissions(player.getWorld().getName())) {
+					if (perm.equals(permission))
+						return true;
+				}
+				break;
+				
+			case BPERMISSIONS:
+				de.bananaco.bpermissions.api.util.Permission[] perms = ApiLayer.getPermissions(player.getWorld().getName(), CalculableType.USER, player.getName());
+				
+				for (de.bananaco.bpermissions.api.util.Permission perm : perms) {
+					if (perm.name().equals(permission))
+						return true;
+				}
+				break;
+				
+			case PERMISSIONSBUKKIT:
+				PermissionsPlugin permBukkit = (PermissionsPlugin) TitanChat.getInstance().getServer().getPluginManager().getPlugin("PermissionsBukkit");
+				
+				for (String perm : permBukkit.getPlayerInfo(player.getName()).getPermissions().keySet()) {
+					if (perm.equals(permission) && permBukkit.getPlayerInfo(player.getName()).getPermissions().get(perm))
+						return true;
+				}
+				break;
+				
+			case GROUPMANAGER:
+				OverloadedWorldHolder holder = ((GroupManager) TitanChat.getInstance().getServer().getPluginManager().getPlugin("GroupManager")).getWorldsHolder().getWorldDataByPlayerName(player.getName());
+				AnjoPermissionsHandler handler = ((GroupManager) TitanChat.getInstance().getServer().getPluginManager().getPlugin("GroupManager")).getWorldsHolder().getWorldPermissionsByPlayerName(player.getName());
+				
+				if (holder != null && handler != null) {
+					User gmUser = holder.getUser(player.getName());
+					
+					if (gmUser != null) {
+						PermissionCheckResult result = handler.checkFullGMPermission(gmUser, permission, false);
+						return result.resultType.equals(PermissionCheckResult.Type.EXCEPTION) || result.resultType.equals(PermissionCheckResult.Type.FOUND);
+					}
+				}
+				break;
+			}
+		}
+		
+		if (usingVault())
+			return perm.has(player, permission);
+		
 		switch (using()) {
 		
 		case PERMISSIONSEX:
@@ -265,7 +369,7 @@ public final class PermissionsHook implements Listener {
 		if (permissionsPlugin != null) {
 			if (event.getPlugin().getName().equals(name)) {
 				permissionsPlugin = null;
-				if (!plugin.usingVault()) { plugin.log(Level.INFO, name + " unhooked"); }
+				if (!usingVault()) { plugin.log(Level.INFO, name + " unhooked"); }
 			}
 		}
 	}
@@ -303,7 +407,7 @@ public final class PermissionsHook implements Listener {
 					name = permissionsPlugin.getName();
 				}
 				
-			} else { if (!plugin.usingVault() && !checked) { plugin.log(Level.INFO, name + " detected and hooked"); checked = true; } }
+			} else { if (!usingVault() && !checked) { plugin.log(Level.INFO, name + " detected and hooked"); checked = true; } }
 		}
 	}
 	
@@ -316,17 +420,77 @@ public final class PermissionsHook implements Listener {
 			return;
 		}
 		
-		wildcard.removePermission(player, permission);
-	}
-	
-	public PermissionsPlugin using() {
-		if (permissionsPlugin != null)
-			return PermissionsPlugin.fromName(permissionsPlugin.getName());
+		switch (using()) {
 		
-		return PermissionsPlugin.SUPERPERMS;
+		case PERMISSIONSEX:
+			PermissionUser pexUser = PermissionsEx.getPermissionManager().getUser(player);
+			pexUser.removePermission(permission);
+			break;
+			
+		case BPERMISSIONS:
+			ApiLayer.removePermission(player.getWorld().getName(), CalculableType.USER, player.getName(), permission);
+			break;
+			
+		case PERMISSIONSBUKKIT:
+			TitanChat.getInstance().getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), "permissions player unsetperm " + player.getName() + " " + player.getWorld().getName() + ":" + permission);
+			break;
+			
+		case GROUPMANAGER:
+			OverloadedWorldHolder holder = ((GroupManager) TitanChat.getInstance().getServer().getPluginManager().getPlugin("GroupManager")).getWorldsHolder().getWorldDataByPlayerName(player.getName());
+			if (holder != null) {
+				User gmUser = holder.getUser(player.getName());
+				if (gmUser != null) { gmUser.removePermission(permission); }
+			}
+			break;
+			
+		case ZPERMISSIONS:
+			TitanChat.getInstance().getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), "permissions player unset " + player.getName() + " " + permission);
+			break;
+		}
 	}
 	
-	public enum PermissionsPlugin {
+	/**
+	 * Sets up the Chat Service of Vault
+	 * 
+	 * @return True if a Chat Service is present
+	 */
+	public boolean setupChatService() {
+		RegisteredServiceProvider<Chat> chatProvider = plugin.getServer().getServicesManager().getRegistration(Chat.class);
+		
+		if (chatProvider != null)
+			chat = chatProvider.getProvider();
+
+		db.i("Vault Chat Service is set up: " + (chat != null));
+		return chat != null;
+	}
+	
+	/**
+	 * Sets up the Permission Service of Vault
+	 * 
+	 * @return True if a Permission Service is present
+	 */
+	public boolean setupPermissionService() {
+		RegisteredServiceProvider<Permission> permissionProvider = plugin.getServer().getServicesManager().getRegistration(Permission.class);
+		
+		if (permissionProvider != null)
+			perm = permissionProvider.getProvider();
+		
+		db.i("Vault Permission Service is set up: " + (perm != null));
+		return perm != null;
+	}
+	
+	public Permissions using() {
+		if (permissionsPlugin != null)
+			return Permissions.fromName(permissionsPlugin.getName());
+		
+		return Permissions.SUPERPERMS;
+	}
+	
+	public boolean usingVault() {
+		return perm != null;
+	}
+	
+	public enum Permissions {
 		PERMISSIONSEX("PermissionsEx"),
 		BPERMISSIONS("bPermissions"),
 		SUPERPERMS("SuperPerms"),
@@ -336,19 +500,19 @@ public final class PermissionsHook implements Listener {
 		
 		private String name;
 		
-		private static Map<String, PermissionsPlugin> NAME_MAP = new HashMap<String, PermissionsPlugin>();
+		private static Map<String, Permissions> NAME_MAP = new HashMap<String, Permissions>();
 		
-		private PermissionsPlugin(String name) {
+		private Permissions(String name) {
 			this.name = name;
 		}
 		
 		static {
-			for (PermissionsPlugin permission : EnumSet.allOf(PermissionsPlugin.class)) {
+			for (Permissions permission : EnumSet.allOf(Permissions.class)) {
 				NAME_MAP.put(permission.name, permission);
 			}
 		}
 		
-		public static PermissionsPlugin fromName(String name) {
+		public static Permissions fromName(String name) {
 			return NAME_MAP.get(name);
 		}
 		

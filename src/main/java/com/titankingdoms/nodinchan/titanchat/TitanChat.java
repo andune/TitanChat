@@ -1,20 +1,22 @@
 package com.titankingdoms.nodinchan.titanchat;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.channels.Channels;
+import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import net.milkbowl.vault.chat.Chat;
-import net.milkbowl.vault.permission.Permission;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
-import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.titankingdoms.nodinchan.titanchat.addon.AddonManager;
@@ -22,13 +24,12 @@ import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
 import com.titankingdoms.nodinchan.titanchat.command.CommandManager;
 import com.titankingdoms.nodinchan.titanchat.debug.Debugger;
 import com.titankingdoms.nodinchan.titanchat.permissions.PermissionsHook;
-import com.titankingdoms.nodinchan.titanchat.permissions.WildcardNodes;
 import com.titankingdoms.nodinchan.titanchat.util.FormatHandler;
 import com.titankingdoms.nodinchan.titanpluginstats.ResultCheck;
 import com.titankingdoms.nodinchan.titanpluginstats.TitanPluginStats;
 
 /*
- *     TitanChat 3.1
+ *     TitanChat 3.2
  *     Copyright (C) 2012  Nodin Chan <nodinchan@nodinchan.net>
  *     
  *     This program is free software: you can redistribute it and/or modify
@@ -55,7 +56,7 @@ public final class TitanChat extends JavaPlugin {
 	
 	private static TitanChat instance;
 	
-	private String NAME;
+	private static String NAME;
 	
 	private final String url = "http://dev.bukkit.org/server-mods/titanchat/";
 	
@@ -71,9 +72,6 @@ public final class TitanChat extends JavaPlugin {
 	private boolean silenced = false;
 	
 	private List<String> muted;
-	
-	private Permission perm;
-	private Chat chat;
 	
 	/**
 	 * Creates a new list with items seperated with commas
@@ -197,46 +195,6 @@ public final class TitanChat extends JavaPlugin {
 	}
 	
 	/**
-	 * Get the group prefix of the Player
-	 * 
-	 * @param player The Player to find for
-	 * 
-	 * @return The group prefix
-	 */
-	public String getGroupPrefix(Player player) {
-		db.i("Getting group prefix of player " + player.getName());
-		
-		if (chat != null) {
-			String prefix = chat.getGroupPrefix(player.getWorld(), perm.getPrimaryGroup(player));
-			db.i("Returning: " + prefix);
-			return (prefix != null) ? prefix : "";
-		}
-
-		db.i("Returning PermissionsHook group prefix");
-		return permHook.getGroupPrefix(player);
-	}
-	
-	/**
-	 * Get the group suffix
-	 * 
-	 * @param player The Player to find for
-	 * 
-	 * @return The group suffix
-	 */
-	public String getGroupSuffix(Player player) {
-		db.i("Getting group suffix of player " + player.getName());
-		
-		if (chat != null) {
-			String suffix = chat.getGroupSuffix(player.getWorld(), perm.getPrimaryGroup(player));
-			db.i("Returning: " + suffix);
-			return (suffix != null) ? suffix : "";
-		}
-		
-		db.i("Returning PermissionsHook group suffix");
-		return permHook.getGroupSuffix(player);
-	}
-	
-	/**
 	 * Gets an instance of this
 	 * 
 	 * @return TitanChat instance
@@ -250,7 +208,12 @@ public final class TitanChat extends JavaPlugin {
 		return log;
 	}
 	
-	public PermissionsHook getHook() {
+	/**
+	 * Gets the PermissionsHook
+	 * 
+	 * @return The built-in PermissionsHook
+	 */
+	public PermissionsHook getPermissionsHook() {
 		return permHook;
 	}
 	
@@ -266,71 +229,6 @@ public final class TitanChat extends JavaPlugin {
 	}
 	
 	/**
-	 * Get the prefix of the Player
-	 * 
-	 * @param player The Player to get the prefix from
-	 * 
-	 * @return The prefix of the Player
-	 */
-	public String getPlayerPrefix(Player player) {
-		db.i("Getting prefix of player: " + player.getName());
-		
-		if (chat != null) {
-			String prefix = chat.getPlayerPrefix(player.getWorld(), player.getName());
-			db.i("Returning: " + prefix);
-			return (prefix != null) ? prefix : getGroupPrefix(player);
-		}
-		
-		db.i("Returning PermissionsHook player prefix");
-		return permHook.getPlayerPrefix(player);
-	}
-	
-	/**
-	 * Get the suffix of the Player
-	 * 
-	 * @param player The Player to get the suffix from
-	 * 
-	 * @return The suffix of the player
-	 */
-	public String getPlayerSuffix(Player player) {
-		db.i("Getting suffix of player: " + player.getName());
-		
-		if (chat != null) {
-			String suffix = chat.getPlayerSuffix(player.getWorld(), player.getName());
-			db.i("Returning: " + suffix);
-			return (suffix != null) ? suffix : "";
-		}
-		
-		db.i("Returning PermissionsHook player suffix");
-		return permHook.getPlayerSuffix(player);
-	}
-	
-	/**
-	 * Gets the Wildcard avoider
-	 * 
-	 * @return The Wildcard avoider
-	 */
-	public WildcardNodes getWildcardAvoider() {
-		return permHook.getWildcardAvoider();
-	}
-	
-	/**
-	 * Check if the Player has the permission
-	 * 
-	 * @param player The Player to check
-	 * 
-	 * @param permission The permission
-	 * 
-	 * @return True if the Player has the permission
-	 */
-	public boolean has(Player player, String permission) {
-		if (perm != null)
-			return perm.has(player, permission);
-		
-		return permHook.has(player, permission);
-	}
-	
-	/**
 	 * Check if the Player has voice
 	 * 
 	 * @param player The Player to check
@@ -338,9 +236,46 @@ public final class TitanChat extends JavaPlugin {
 	 * @return True if the Player has TitanChat.voice
 	 */
 	public boolean hasVoice(Player player) {
-		return has(player, "TitanChat.voice");
+		return permHook.has(player, "TitanChat.voice");
 	}
 	
+	public boolean initLoaderLib() {
+		try {
+			File destination = new File(getDataFolder().getParentFile().getParentFile(), "lib");
+			destination.mkdirs();
+			
+			File lib = new File(destination, "Loader.jar");
+			
+			if (!lib.exists()) {
+				System.out.println("Downloading Loader lib...");
+				URL url = new URL("http://dl.dropbox.com/u/62864352/Loader.jar");
+				ReadableByteChannel rbc = Channels.newChannel(url.openStream());
+				FileOutputStream output = new FileOutputStream(new File(destination, "Loader.jar"));
+				output.getChannel().transferFrom(rbc, 0, 1 << 24);
+				System.out.println("Downloaded Loader lib");
+			}
+			
+			URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+			
+			for (URL url : sysLoader.getURLs()) {
+				if (url.sameFile(lib.toURI().toURL()))
+					return true;
+			}
+			
+			try {
+				Method method = URLClassLoader.class.getDeclaredMethod("addURL", new Class[] { URL.class });
+				method.setAccessible(true);
+				method.invoke(sysLoader, new Object[] { lib.toURI().toURL() });
+				
+			} catch (Exception e) { return false; }
+			
+			return true;
+			
+		} catch (Exception e) { e.printStackTrace(); }
+		
+		return false;
+	}
+
 	/**
 	 * Check if the Server is silenced
 	 * 
@@ -358,7 +293,7 @@ public final class TitanChat extends JavaPlugin {
 	 * @return True if the Player has TitanChat.admin
 	 */
 	public boolean isStaff(Player player) {
-		return has(player, "TitanChat.admin");
+		return permHook.has(player, "TitanChat.admin");
 	}
 	
 	/**
@@ -474,7 +409,7 @@ public final class TitanChat extends JavaPlugin {
 				return true;
 			}
 			
-			if (has((Player) sender, "TitanChat.broadcast"))
+			if (permHook.has((Player) sender, "TitanChat.broadcast"))
 				try { cmdManager.execute((Player) sender, "broadcast", args); } catch (Exception e) {}
 			else
 				sendWarning((Player) sender, "You do not have permission");
@@ -511,7 +446,7 @@ public final class TitanChat extends JavaPlugin {
 				return true;
 			}
 			
-			if (has((Player) sender, "TitanChat.emote.server"))
+			if (permHook.has((Player) sender, "TitanChat.emote.server"))
 				try { cmdManager.execute((Player) sender, "me", args); } catch (Exception e) {}
 			else
 				sendWarning((Player) sender, "You do not have permission");
@@ -561,7 +496,7 @@ public final class TitanChat extends JavaPlugin {
 				return true;
 			}
 			
-			if (has((Player) sender, "TitanChat.whisper"))
+			if (permHook.has((Player) sender, "TitanChat.whisper"))
 				try { cmdManager.execute((Player) sender, "whisper", args); } catch (Exception e) {}
 			else
 				sendWarning((Player) sender, "You do not have permission");
@@ -596,9 +531,12 @@ public final class TitanChat extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		instance = this;
-		this.NAME = instance.toString().split("-")[0];
+		NAME = instance.toString().split("-")[0];
 		
 		log(Level.INFO, "is now enabling...");
+		
+		if (!initLoaderLib())
+			log(Level.INFO, "Failed to initialise Loader lib");
 		
 		int s = getServer().getScheduler().scheduleAsyncRepeatingTask(this, new TitanPluginStats(this, url), 0, 108000);
 		getServer().getScheduler().scheduleAsyncRepeatingTask(this, new ResultCheck(this, s, url), 0, 108000);
@@ -640,11 +578,6 @@ public final class TitanChat extends JavaPlugin {
 		PluginManager pm = getServer().getPluginManager();
 		
 		Debugger.load(this);
-		
-		if (pm.getPlugin("Vault") != null) {
-			setupChatService();
-			setupPermissionService();
-		}
 		
 		pm.registerEvents(permHook, this);
 		pm.registerEvents(new TitanChatListener(this), this);
@@ -755,50 +688,11 @@ public final class TitanChat extends JavaPlugin {
 	}
 	
 	/**
-	 * Sets up the Chat Service of Vault
-	 * 
-	 * @return True if a Chat Service is present
-	 */
-	public boolean setupChatService() {
-		RegisteredServiceProvider<Chat> chatProvider = getServer().getServicesManager().getRegistration(Chat.class);
-		
-		if (chatProvider != null)
-			chat = chatProvider.getProvider();
-
-		db.i("Vault Chat Service is set up: " + (chat != null));
-		return chat != null;
-	}
-	
-	/**
-	 * Sets up the Permission Service of Vault
-	 * 
-	 * @return True if a Permission Service is present
-	 */
-	public boolean setupPermissionService() {
-		RegisteredServiceProvider<Permission> permissionProvider = getServer().getServicesManager().getRegistration(Permission.class);
-		
-		if (permissionProvider != null)
-			perm = permissionProvider.getProvider();
-		
-		db.i("Vault Permission Service is set up: " + (perm != null));
-		return perm != null;
-	}
-	
-	/**
 	 * Check if default formatting should be used
 	 * 
 	 * @return True if default formatting should be used
 	 */
 	public boolean useDefaultFormat() {
 		return getConfig().getBoolean("formatting.use-built-in");
-	}
-	
-	/**
-	 * Check if Vault is used
-	 * 
-	 * @return True if Vault is used
-	 */
-	public boolean usingVault() {
-		return perm != null;
 	}
 }

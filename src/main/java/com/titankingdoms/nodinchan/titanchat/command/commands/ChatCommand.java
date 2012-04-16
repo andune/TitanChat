@@ -26,7 +26,7 @@ public class ChatCommand extends Command {
 	@CommandID(name = "Broadcast", triggers = "broadcast", requireChannel = false)
 	@CommandInfo(description = "Broadcasts the message globally", usage = "broadcast [message]")
 	public void broadcast(Player player, String[] args) {
-		if (args.length < 1 || !plugin.has(player, "TitanChat.broadcast")) { return; }
+		if (args.length < 1 || !plugin.getPermissionsHook().has(player, "TitanChat.broadcast")) { return; }
 		
 		StringBuilder str = new StringBuilder();
 		
@@ -44,7 +44,7 @@ public class ChatCommand extends Command {
 	@CommandID(name = "Emote", triggers = { "me", "em" })
 	@CommandInfo(description = "Action emote shown in channel", usage = "me [action]")
 	public void emote(Player player, String[] args) {
-		if (args.length < 1 || !plugin.has(player, "TitanChat.me")) { return; }
+		if (args.length < 1 || !plugin.getPermissionsHook().has(player, "TitanChat.me")) { return; }
 		
 		StringBuilder str = new StringBuilder();
 		
@@ -62,7 +62,7 @@ public class ChatCommand extends Command {
 	@CommandID(name = "Silence", triggers = "silence", requireChannel = false)
 	@CommandInfo(description = "Silences the channel/server", usage = "silence [channel]")
 	public void silence(Player player, String[] args) {
-		if (plugin.has(player, "TitanChat.silence")) {
+		if (plugin.getPermissionsHook().has(player, "TitanChat.silence")) {
 			if (!plugin.enableChannels()) {
 				plugin.setSilenced((plugin.isSilenced()) ? false : true);
 				
@@ -93,7 +93,7 @@ public class ChatCommand extends Command {
 				}
 				
 			} catch (IndexOutOfBoundsException e) {
-				if (plugin.has(player, "TitanChat.silence.server")) {
+				if (plugin.getPermissionsHook().has(player, "TitanChat.silence.server")) {
 					plugin.setSilenced((plugin.isSilenced()) ? false : true);
 					
 					if (plugin.isSilenced())
@@ -108,7 +108,7 @@ public class ChatCommand extends Command {
 	@CommandID(name = "whisper", triggers = { "whisper", "w" })
 	@CommandInfo(description = "Whisper messages to players", usage = "whisper [player] [message]")
 	public void whisper(Player player, String[] args) {
-		if (args.length < 2 || !plugin.has(player, "TitanChat.whisper")) { return; }
+		if (args.length < 2 || !plugin.getPermissionsHook().has(player, "TitanChat.whisper")) { return; }
 		
 		if (plugin.getPlayer(args[0]) == null || !args[0].equalsIgnoreCase("console")) {
 			plugin.sendWarning(player, "Player not online");

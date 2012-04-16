@@ -30,7 +30,7 @@ public class ChannelCommand extends Command {
 	public void create(Player player, String[] args) {
 		try {
 			if (plugin.getConfig().getInt("channels.channel-limit") < 0) {
-				if (plugin.has(player, "TitanChat.create")) {
+				if (plugin.getPermissionsHook().has(player, "TitanChat.create")) {
 					if (!cm.exists(args[0])) {
 						plugin.getChannelManager().createChannel(player, args[0]);
 						
@@ -39,7 +39,7 @@ public class ChannelCommand extends Command {
 				} else { plugin.sendWarning(player, "You do not have permission"); }
 				
 			} else if (plugin.getChannelManager().getChannelAmount() < plugin.getConfig().getInt("channel-limit")) {
-				if (plugin.has(player, "TitanChat.create")) {
+				if (plugin.getPermissionsHook().has(player, "TitanChat.create")) {
 					if (!cm.exists(args[0])) {
 						plugin.getChannelManager().createChannel(player, args[0]);
 						
@@ -56,7 +56,7 @@ public class ChannelCommand extends Command {
 	@CommandInfo(description = "Deletes the channel", usage = "delete [channel]")
 	public void delete(Player player, String[] args) {
 		try {
-			if (plugin.has(player, "TitanChat.delete")) {
+			if (plugin.getPermissionsHook().has(player, "TitanChat.delete")) {
 				if (cm.exists(args[0])) {
 					if (!cm.getChannel(args[0]).getType().equals(Type.DEFAULT) || !cm.getChannel(args[0]).getType().equals(Type.STAFF))
 						plugin.getChannelManager().deleteChannel(player, args[0]);
@@ -176,7 +176,7 @@ public class ChannelCommand extends Command {
 					if (channel.getFollowerList().contains(player.getName()))
 						channel.getFollowerList().remove(player.getName());
 					else
-						plugin.getWildcardAvoider().removePermission(player, "TitanChat.follow." + channel.getName());
+						plugin.getPermissionsHook().removePermission(player, "TitanChat.follow." + channel.getName());
 					
 					channel.save();
 					

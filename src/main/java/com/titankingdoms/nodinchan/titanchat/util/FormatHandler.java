@@ -34,21 +34,22 @@ public final class FormatHandler {
 	public String broadcastFormat(Player player, String msg) {
 		String message = plugin.getConfig().getString("broadcast.player.format");
 		
-		String playerPrefix = plugin.getPlayerPrefix(player);
-		String playerSuffix = plugin.getPlayerSuffix(player);
-		String groupPrefix = plugin.getGroupPrefix(player);
-		String groupSuffix = plugin.getGroupSuffix(player);
-		
-		message = message.replace("%prefix", playerPrefix);
-		message = message.replace("%gprefix", groupPrefix);
 		message = message.replace("%player", player.getDisplayName());
-		message = message.replace("%suffix", playerSuffix);
-		message = message.replace("%gsuffix", groupSuffix);
 		
 		MessageFormatEvent formatEvent = new MessageFormatEvent(player, message);
 		plugin.getServer().getPluginManager().callEvent(formatEvent);
 		
 		message = formatEvent.getFormat();
+		
+		String playerPrefix = plugin.getPermissionsHook().getPlayerPrefix(player);
+		String playerSuffix = plugin.getPermissionsHook().getPlayerSuffix(player);
+		String groupPrefix = plugin.getPermissionsHook().getGroupPrefix(player);
+		String groupSuffix = plugin.getPermissionsHook().getGroupSuffix(player);
+		
+		message = message.replace("%prefix", playerPrefix);
+		message = message.replace("%gprefix", groupPrefix);
+		message = message.replace("%suffix", playerSuffix);
+		message = message.replace("%gsuffix", groupSuffix);
 		
 		StringBuilder str = new StringBuilder();
 		
@@ -119,21 +120,22 @@ public final class FormatHandler {
 	public String emoteFormat(Player player, String msg) {
 		String message = plugin.getConfig().getString("emote.player.format");
 		
-		String playerPrefix = plugin.getPlayerPrefix(player);
-		String playerSuffix = plugin.getPlayerSuffix(player);
-		String groupPrefix = plugin.getGroupPrefix(player);
-		String groupSuffix = plugin.getGroupSuffix(player);
-
-		message = message.replace("%prefix", playerPrefix);
-		message = message.replace("%gprefix", groupPrefix);
 		message = message.replace("%player", player.getDisplayName());
-		message = message.replace("%suffix", playerSuffix);
-		message = message.replace("%gsuffix", groupSuffix);
 		
 		MessageFormatEvent formatEvent = new MessageFormatEvent(player, message);
 		plugin.getServer().getPluginManager().callEvent(formatEvent);
 		
 		message = formatEvent.getFormat();
+		
+		String playerPrefix = plugin.getPermissionsHook().getPlayerPrefix(player);
+		String playerSuffix = plugin.getPermissionsHook().getPlayerSuffix(player);
+		String groupPrefix = plugin.getPermissionsHook().getGroupPrefix(player);
+		String groupSuffix = plugin.getPermissionsHook().getGroupSuffix(player);
+		
+		message = message.replace("%prefix", playerPrefix);
+		message = message.replace("%gprefix", groupPrefix);
+		message = message.replace("%suffix", playerSuffix);
+		message = message.replace("%gsuffix", groupSuffix);
 		
 		StringBuilder str = new StringBuilder();
 		
@@ -154,10 +156,10 @@ public final class FormatHandler {
 	public String format(Player player) {
 		String message = "";
 		
-		String playerPrefix = plugin.getPlayerPrefix(player);
-		String playerSuffix = plugin.getPlayerSuffix(player);
-		String groupPrefix = plugin.getGroupPrefix(player);
-		String groupSuffix = plugin.getGroupSuffix(player);
+		String playerPrefix = plugin.getPermissionsHook().getPlayerPrefix(player);
+		String playerSuffix = plugin.getPermissionsHook().getPlayerSuffix(player);
+		String groupPrefix = plugin.getPermissionsHook().getGroupPrefix(player);
+		String groupSuffix = plugin.getPermissionsHook().getGroupSuffix(player);
 		String chatColour = plugin.getConfig().getString("channels.chat-display-colour");
 		
 		if (plugin.useDefaultFormat()) {
@@ -165,17 +167,18 @@ public final class FormatHandler {
 			
 		} else {
 			message = plugin.getConfig().getString("formatting.format");
-
-			message = message.replace("%prefix", playerPrefix);
-			message = message.replace("%gprefix", groupPrefix);
+			
 			message = message.replace("%player", "%1$s");
-			message = message.replace("%suffix", playerSuffix);
-			message = message.replace("%gsuffix", groupSuffix);
 			
 			MessageFormatEvent formatEvent = new MessageFormatEvent(player, message);
 			plugin.getServer().getPluginManager().callEvent(formatEvent);
 			
 			message = formatEvent.getFormat();
+
+			message = message.replace("%prefix", playerPrefix);
+			message = message.replace("%gprefix", groupPrefix);
+			message = message.replace("%suffix", playerSuffix);
+			message = message.replace("%gsuffix", groupSuffix);
 			
 			StringBuilder str = new StringBuilder();
 			
@@ -201,15 +204,15 @@ public final class FormatHandler {
 		
 		String name = player.getDisplayName();
 		String tag = variables.getTag();
-		String playerPrefix = plugin.getPlayerPrefix(player);
-		String playerSuffix = plugin.getPlayerSuffix(player);
-		String groupPrefix = plugin.getGroupPrefix(player);
-		String groupSuffix = plugin.getGroupSuffix(player);
+		String playerPrefix = plugin.getPermissionsHook().getPlayerPrefix(player);
+		String playerSuffix = plugin.getPermissionsHook().getPlayerSuffix(player);
+		String groupPrefix = plugin.getPermissionsHook().getGroupPrefix(player);
+		String groupSuffix = plugin.getPermissionsHook().getGroupSuffix(player);
 		String chatColour = variables.getChatColour();
 		String nameColour = variables.getNameColour();
 		
 		if (plugin.useDefaultFormat()) {
-			if (colours(channel) || plugin.has(player, "TitanChat.colours"))
+			if (colours(channel) || plugin.getPermissionsHook().has(player, "TitanChat.colours"))
 				message = colourise(tag + " " + playerPrefix + nameColour + name + playerSuffix + "&f: " + chatColour + msg);
 			else
 				message = colourise(tag + " " + playerPrefix + nameColour + name + playerSuffix + "&f: " + chatColour) + decolourise(msg);
@@ -218,16 +221,17 @@ public final class FormatHandler {
 			message = variables.getFormat();
 			
 			message = message.replace("%tag", tag);
-			message = message.replace("%prefix", playerPrefix);
-			message = message.replace("%gprefix", groupPrefix);
 			message = message.replace("%player", nameColour + name);
-			message = message.replace("%suffix", playerSuffix);
-			message = message.replace("%gsuffix", groupSuffix);
 			
 			MessageFormatEvent formatEvent = new MessageFormatEvent(player, message);
 			plugin.getServer().getPluginManager().callEvent(formatEvent);
 			
 			message = formatEvent.getFormat();
+			
+			message = message.replace("%prefix", playerPrefix);
+			message = message.replace("%gprefix", groupPrefix);
+			message = message.replace("%suffix", playerSuffix);
+			message = message.replace("%gsuffix", groupSuffix);
 			
 			StringBuilder str = new StringBuilder();
 			
@@ -240,7 +244,7 @@ public final class FormatHandler {
 			
 			message = str.toString();
 			
-			if (colours(channel) || plugin.has(player, "TitanChat.colours"))
+			if (colours(channel) || plugin.getPermissionsHook().has(player, "TitanChat.colours"))
 				message = message.replace("%message", colourise(chatColour + msg));
 			else
 				message = message.replace("%message", colourise(chatColour) + decolourise(msg));
@@ -252,21 +256,22 @@ public final class FormatHandler {
 	public String whisperFormat(Player player, String msg) {
 		String message = plugin.getConfig().getString("whisper.player.format");
 		
-		String playerPrefix = plugin.getPlayerPrefix(player);
-		String playerSuffix = plugin.getPlayerSuffix(player);
-		String groupPrefix = plugin.getGroupPrefix(player);
-		String groupSuffix = plugin.getGroupSuffix(player);
-
-		message = message.replace("%prefix", playerPrefix);
-		message = message.replace("%gprefix", groupPrefix);
 		message = message.replace("%player", player.getDisplayName());
-		message = message.replace("%suffix", playerSuffix);
-		message = message.replace("%gsuffix", groupSuffix);
 		
 		MessageFormatEvent formatEvent = new MessageFormatEvent(player, message);
 		plugin.getServer().getPluginManager().callEvent(formatEvent);
 		
 		message = formatEvent.getFormat();
+		
+		String playerPrefix = plugin.getPermissionsHook().getPlayerPrefix(player);
+		String playerSuffix = plugin.getPermissionsHook().getPlayerSuffix(player);
+		String groupPrefix = plugin.getPermissionsHook().getGroupPrefix(player);
+		String groupSuffix = plugin.getPermissionsHook().getGroupSuffix(player);
+		
+		message = message.replace("%prefix", playerPrefix);
+		message = message.replace("%gprefix", groupPrefix);
+		message = message.replace("%suffix", playerSuffix);
+		message = message.replace("%gsuffix", groupSuffix);
 		
 		StringBuilder str = new StringBuilder();
 		

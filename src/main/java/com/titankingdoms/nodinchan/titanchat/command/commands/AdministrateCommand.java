@@ -90,7 +90,7 @@ public class AdministrateCommand extends Command {
 		
 		try {
 			if (cm.exists(args[1])) {
-				if (plugin.has(player, "TitanChat.force")) {
+				if (plugin.getPermissionsHook().has(player, "TitanChat.force")) {
 					if (plugin.getPlayer(args[0]) != null) {
 						Player targetPlayer = plugin.getPlayer(args[0]);
 						Channel channel = cm.getChannel(args[1]);
@@ -109,7 +109,7 @@ public class AdministrateCommand extends Command {
 			} else { plugin.sendWarning(player, "No such channel"); }
 			
 		} catch (IndexOutOfBoundsException e) {
-			if (plugin.has(player, "TitanChat.force")) {
+			if (plugin.getPermissionsHook().has(player, "TitanChat.force")) {
 				if (plugin.getPlayer(args[0]) != null) {
 					Player targetPlayer = plugin.getPlayer(args[0]);
 					Channel channel = cm.getChannel(player);
@@ -179,7 +179,7 @@ public class AdministrateCommand extends Command {
 		if (args.length < 1) { invalidArgLength(player, "Mute"); }
 		
 		if (!plugin.enableChannels()) {
-			if (plugin.has(player, "TitanChat.mute")) {
+			if (plugin.getPermissionsHook().has(player, "TitanChat.mute")) {
 				if (plugin.getPlayer(args[0]) != null) {
 					plugin.mute(plugin.getPlayer(args[0]), true);
 					plugin.getServer().broadcastMessage("[TitanChat] " + ChatColor.GOLD + plugin.getPlayer(args[0]).getDisplayName() + " has been muted");
@@ -288,7 +288,7 @@ public class AdministrateCommand extends Command {
 		if (args.length < 1) { invalidArgLength(player, "Unmute"); }
 		
 		if (!plugin.enableChannels()) {
-			if (plugin.has(player, "TitanChat.mute")) {
+			if (plugin.getPermissionsHook().has(player, "TitanChat.mute")) {
 				if (plugin.getPlayer(args[0]) != null) {
 					plugin.mute(plugin.getPlayer(args[0]), false);
 					plugin.getServer().broadcastMessage("[TitanChat] " + ChatColor.GOLD + plugin.getPlayer(args[0]).getDisplayName() + " has been unmuted");

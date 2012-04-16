@@ -84,5 +84,12 @@
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/EssentialsGroupManager.jar</systemPath>
         </dependency>
+        <dependency>
+        	<groupId>com.nodinchan</groupId>
+        	<artifactId>Loader</artifactId>
+        	<version>1.0</version>
+        	<scope>system</scope>
+        	<systemPath>${project.basedir}/lib/Loader.jar</systemPath>
+        </dependency>
     </dependencies>
 </project>

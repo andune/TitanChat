@@ -69,6 +69,7 @@ TitanChat, a chat management and formatting plugin for Bukkit.
 * 28.03.12 - Now able to remove TitanChat.follow.[channel] with /tc unfollow [channel]
 * 11.04.12 - Slowly adding events and channel quick-message prefix is now configurable
 * 15.04.12 - Commands are now shown 10 per page
+* 16.04.12 - Loader now out-built as lib
 
 -----------------------------------------------------------------------------------------------------------------------
 

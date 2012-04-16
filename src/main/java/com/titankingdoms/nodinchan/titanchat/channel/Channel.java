@@ -67,7 +67,7 @@ public class Channel extends Loadable {
 	 * @return True if the Player has access
 	 */
 	public boolean canAccess(Player player) {
-		if (plugin.has(player, "TitanChat.access.*") || plugin.has(player, "TitanChat.access." + super.getName()))
+		if (plugin.getPermissionsHook().has(player, "TitanChat.access.*") || plugin.getPermissionsHook().has(player, "TitanChat.access." + super.getName()))
 			return true;
 		if (blacklist.contains(player.getName()))
 			return false;
@@ -89,7 +89,7 @@ public class Channel extends Loadable {
 	public boolean canBan(Player player) {
 		if (type.equals(Type.DEFAULT) || type.equals(Type.STAFF))
 			return false;
-		if (plugin.has(player, "TitanChat.ban.*") || plugin.has(player, "TitanChat.ban." + super.getName()))
+		if (plugin.getPermissionsHook().has(player, "TitanChat.ban.*") || plugin.getPermissionsHook().has(player, "TitanChat.ban." + super.getName()))
 			return true;
 		if (adminlist.contains(player.getName()))
 			return true;
@@ -105,7 +105,7 @@ public class Channel extends Loadable {
 	 * @return True if the Player can kick
 	 */
 	public boolean canKick(Player player) {
-		if (plugin.has(player, "TitanChat.kick.*") || plugin.has(player, "TitanChat.kick." + super.getName()))
+		if (plugin.getPermissionsHook().has(player, "TitanChat.kick.*") || plugin.getPermissionsHook().has(player, "TitanChat.kick." + super.getName()))
 			return true;
 		if (adminlist.contains(player.getName()))
 			return true;
@@ -121,7 +121,7 @@ public class Channel extends Loadable {
 	 * @return True if the Player can mute
 	 */
 	public boolean canMute(Player player) {
-		if (plugin.has(player, "TitanChat.silence") || plugin.has(player, "TitanChat.mute"))
+		if (plugin.getPermissionsHook().has(player, "TitanChat.silence") || plugin.getPermissionsHook().has(player, "TitanChat.mute"))
 			return true;
 		if (adminlist.contains(player.getName()))
 			return true;
@@ -137,7 +137,7 @@ public class Channel extends Loadable {
 	 * @return True if the Player can rank
 	 */
 	public boolean canRank(Player player) {
-		if (plugin.has(player, "TitanChat.rank.*") || plugin.has(player, "TitanChat.rank." + super.getName()))
+		if (plugin.getPermissionsHook().has(player, "TitanChat.rank.*") || plugin.getPermissionsHook().has(player, "TitanChat.rank." + super.getName()))
 			return true;
 		if (adminlist.contains(player.getName()))
 			return true;

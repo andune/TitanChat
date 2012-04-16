@@ -81,7 +81,7 @@ public class SettingsCommand extends Command {
 						return;
 					}
 					
-					if (plugin.has(player, "TitanChat.convert")) {
+					if (plugin.getPermissionsHook().has(player, "TitanChat.convert")) {
 						((StandardChannel) cm.getChannel(args[1])).getVariables().setConvert((((StandardChannel) cm.getChannel(args[1])).getVariables().convert()) ? false : true);
 						cm.getChannel(args[1]).save();
 						
@@ -97,7 +97,7 @@ public class SettingsCommand extends Command {
 					return;
 				}
 				
-				if (plugin.has(player, "TitanChat.convert")) {
+				if (plugin.getPermissionsHook().has(player, "TitanChat.convert")) {
 					((StandardChannel) cm.getChannel(player)).getVariables().setConvert((((StandardChannel) cm.getChannel(player)).getVariables().convert()) ? false : true);
 					cm.getChannel(player).save();
 					

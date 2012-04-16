@@ -233,7 +233,7 @@ public final class ChannelManager {
 		followers.addAll(channel.getFollowerList());
 		
 		for (Player player : plugin.getServer().getOnlinePlayers()) {
-			if (plugin.getWildcardAvoider().has(player, "TitanChat.follow." + channel.getName()) && !followers.contains(player.getName()))
+			if (plugin.getPermissionsHook().has(player, "TitanChat.follow." + channel.getName(), true) && !followers.contains(player.getName()))
 				followers.add(player.getName());
 		}
 		
@@ -284,12 +284,12 @@ public final class ChannelManager {
 	 */
 	public Channel getSpawnChannel(Player player) {
 		for (Channel channel : channels) {
-			if (plugin.getWildcardAvoider().has(player, "TitanChat.spawn." + channel.getName()) && channel.canAccess(player))
+			if (plugin.getPermissionsHook().has(player, "TitanChat.spawn." + channel.getName(), true) && channel.canAccess(player))
 				return channel;
 		}
 		
 		if (getStaffChannel() != null) {
-			if (plugin.has(player, "TitanChat.admin"))
+			if (plugin.isStaff(player))
 				return getStaffChannel();
 		}
 		
