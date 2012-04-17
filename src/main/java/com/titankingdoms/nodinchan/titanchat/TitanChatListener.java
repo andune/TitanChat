@@ -70,7 +70,7 @@ public final class TitanChatListener implements Listener {
 						MessageFormatEvent formatEvent = new MessageFormatEvent(player, ((CustomChannel) channel).getFormat());
 						plugin.getServer().getPluginManager().callEvent(formatEvent);
 						
-						((CustomChannel) channel).sendMessage(player, ((CustomChannel) channel).format(player, formatEvent.getFormat()));
+						((CustomChannel) channel).sendMessage(player, ((CustomChannel) channel).format(player, formatEvent.getFormat(), message));
 						return;
 					}
 					
@@ -92,7 +92,10 @@ public final class TitanChatListener implements Listener {
 			}
 			
 			if (channel instanceof CustomChannel) {
-				((CustomChannel) channel).sendMessage(player, ((CustomChannel) channel).format(player, msg));
+				MessageFormatEvent formatEvent = new MessageFormatEvent(player, ((CustomChannel) channel).getFormat());
+				plugin.getServer().getPluginManager().callEvent(formatEvent);
+				
+				((CustomChannel) channel).sendMessage(player, ((CustomChannel) channel).format(player, formatEvent.getFormat(), msg));
 				return;
 			}
 			

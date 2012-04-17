@@ -70,8 +70,8 @@ public class CustomChannel extends Channel implements Listener {
 	 * 
 	 * @return The formatted message
 	 */
-	public String format(Player sender, String message) {
-		return getFormat().replace("%player", sender.getDisplayName()).replace("%message", message);
+	public String format(Player sender, String format, String message) {
+		return format.replace("%player", sender.getDisplayName()).replace("%message", message);
 	}
 	
 	/**
