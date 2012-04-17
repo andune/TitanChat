@@ -4,7 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 
 import org.bukkit.configuration.file.FileConfiguration;
@@ -13,6 +16,7 @@ import org.bukkit.entity.Player;
 
 import com.nodinchan.ncloader.Loadable;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
+import com.titankingdoms.nodinchan.titanchat.debug.Debugger;
 import com.titankingdoms.nodinchan.titanchat.events.MessageSendEvent;
 
 /**
@@ -362,5 +366,45 @@ public class Channel extends Loadable {
 	@Override
 	public String toString() {
 		return "Channel:" + super.getName() + " : " + type.getName();
+	}
+	
+	/**
+	 * Type - Types of Channels
+	 * 
+	 * @author NodinChan
+	 *
+	 */
+	public enum Type {
+		CUSTOM("custom"),
+		DEFAULT("default"),
+		PASSWORD("password"),
+		PRIVATE("private"),
+		PUBLIC("public"),
+		STAFF("staff"),
+		UNKNOWN("unknown");
+		
+		private String name;
+
+		private final static Debugger db = new Debugger(3);
+		private static final Map<String, Type> NAME_MAP = new HashMap<String, Type>();
+		
+		private Type(String name) {
+			this.name = name;
+		}
+		
+		static {
+			for (Type type : EnumSet.allOf(Type.class)) {
+				db.i("Adding Type: " + type.name);
+				NAME_MAP.put(type.name, type);
+			}
+		}
+		
+		public static Type fromName(String name) {
+			return NAME_MAP.get(name);
+		}
+		
+		public String getName() {
+			return name;
+		}
 	}
 }

@@ -17,6 +17,7 @@ import org.bukkit.entity.Player;
 
 import com.nodinchan.ncloader.Loader;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
+import com.titankingdoms.nodinchan.titanchat.channel.Channel.Type;
 import com.titankingdoms.nodinchan.titanchat.debug.Debugger;
 
 /**
