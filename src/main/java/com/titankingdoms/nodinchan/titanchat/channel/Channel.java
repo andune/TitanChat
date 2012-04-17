@@ -11,8 +11,9 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
-import com.nodinchan.loader.Loadable;
+import com.nodinchan.ncloader.Loadable;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
+import com.titankingdoms.nodinchan.titanchat.events.MessageSendEvent;
 
 /**
  * Channel - Channel base
@@ -299,10 +300,34 @@ public class Channel extends Loadable {
 	/**
 	 * Called when a message is to be sent
 	 * 
-	 * @param player
-	 * @param message
+	 * @param sender The message sender
+	 * 
+	 * @param message The message to be sent
 	 */
-	public void sendMessage(Player player, String message) {}
+	public void sendMessage(Player sender, String message) {
+		sendMessage(sender, new ArrayList<Player>(), message);
+	}
+	
+	/**
+	 * Called when a message is to be sent
+	 * 
+	 * @param sender The message sender
+	 * 
+	 * @param recipants The players to send to
+	 * 
+	 * @param message The message to be sent
+	 */
+	protected final boolean sendMessage(Player sender, List<Player> recipants, String message) {
+		MessageSendEvent event = new MessageSendEvent(sender, recipants, message);
+		plugin.getServer().getPluginManager().callEvent(event);
+		
+		if (event.isCancelled()) { return false; }
+		
+		for (Player recipant : event.getRecipants())
+			recipant.sendMessage(event.getMessage());
+		
+		return true;
+	}
 	
 	/**
 	 * Sets whether the channel is global

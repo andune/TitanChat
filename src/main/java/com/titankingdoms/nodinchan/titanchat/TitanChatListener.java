@@ -7,7 +7,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 
-import com.nodinchan.loader.LoadEvent;
+import com.nodinchan.ncloader.LoadEvent;
 import com.titankingdoms.nodinchan.titanchat.addon.Addon;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
@@ -100,6 +100,11 @@ public final class TitanChatListener implements Listener {
 			
 			MessageSendEvent sendEvent = new MessageSendEvent(player, plugin.getServer().getOnlinePlayers(), msg);
 			plugin.getServer().getPluginManager().callEvent(sendEvent);
+			
+			if (sendEvent.isCancelled()) {
+				event.setCancelled(true);
+				return;
+			}
 			
 			msg = sendEvent.getMessage();
 			

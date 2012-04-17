@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.bukkit.entity.Player;
 
-import com.nodinchan.loader.Loader;
+import com.nodinchan.ncloader.Loader;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.command.commands.*;
 import com.titankingdoms.nodinchan.titanchat.debug.Debugger;

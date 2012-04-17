@@ -101,7 +101,7 @@ public final class StandardChannel extends Channel {
 	@Override
 	public void sendMessage(Player player, String message) {
 		if (super.isGlobal())
-			plugin.getChannelManager().sendMessage(player, Arrays.asList(plugin.getServer().getOnlinePlayers()), message);
+			sendMessage(player, Arrays.asList(plugin.getServer().getOnlinePlayers()), message);
 		
 		else {
 			List<Player> recipants = new ArrayList<Player>();
@@ -116,7 +116,7 @@ public final class StandardChannel extends Channel {
 					recipants.add(plugin.getPlayer(name));
 			}
 			
-			plugin.getChannelManager().sendMessage(player, recipants, message);
+			sendMessage(player, recipants, message);
 		}
 	}
 	

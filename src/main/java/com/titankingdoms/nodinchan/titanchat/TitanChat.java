@@ -1,14 +1,20 @@
 package com.titankingdoms.nodinchan.titanchat;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.Method;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -56,7 +62,7 @@ public final class TitanChat extends JavaPlugin {
 	
 	private static TitanChat instance;
 	
-	private static String NAME;
+	private String NAME;
 	
 	private final String url = "http://dev.bukkit.org/server-mods/titanchat/";
 	
@@ -244,15 +250,49 @@ public final class TitanChat extends JavaPlugin {
 			File destination = new File(getDataFolder().getParentFile().getParentFile(), "lib");
 			destination.mkdirs();
 			
-			File lib = new File(destination, "Loader.jar");
+			File lib = new File(destination, "NC-LoaderLib.jar");
+			
+			boolean download = false;
 			
 			if (!lib.exists()) {
-				System.out.println("Downloading Loader lib...");
-				URL url = new URL("http://dl.dropbox.com/u/62864352/Loader.jar");
+				System.out.println("Missing NC-Loader lib");
+				download = true;
+				
+			} else {
+				JarFile jarFile = new JarFile(lib);
+				Enumeration<JarEntry> entries = jarFile.entries();
+				
+				String version = "";
+				
+				while (entries.hasMoreElements()) {
+					JarEntry element = entries.nextElement();
+					
+					if (element.getName().equals("version.yml")) {
+						BufferedReader reader = new BufferedReader(new InputStreamReader(jarFile.getInputStream(element)));
+						version = reader.readLine().substring(9);
+					}
+				}
+				
+				if (version.equals("")) {
+					System.out.println("NC-Loader lib outdated");
+					download = true;
+					
+				} else {
+					HttpURLConnection urlConnection = (HttpURLConnection) new URL("http://www.nodinchan.com/ncloaderlibVersion.yml").openConnection();
+					BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+					
+					if (!reader.readLine().substring(9).equals(version))
+						download = true;
+				}
+			}
+			
+			if (download) {
+				System.out.println("Downloading NC-Loader lib...");
+				URL url = new URL("http://www.nodinchan.com/NC-LoaderLib.jar");
 				ReadableByteChannel rbc = Channels.newChannel(url.openStream());
-				FileOutputStream output = new FileOutputStream(new File(destination, "Loader.jar"));
+				FileOutputStream output = new FileOutputStream(lib);
 				output.getChannel().transferFrom(rbc, 0, 1 << 24);
-				System.out.println("Downloaded Loader lib");
+				System.out.println("Downloaded NC-Loader lib");
 			}
 			
 			URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
@@ -531,7 +571,7 @@ public final class TitanChat extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		instance = this;
-		NAME = instance.toString().split("-")[0];
+		NAME = "TitanChat " + instance.toString().split(" ")[1];
 		
 		log(Level.INFO, "is now enabling...");
 		

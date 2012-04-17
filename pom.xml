@@ -86,10 +86,10 @@
         </dependency>
         <dependency>
         	<groupId>com.nodinchan</groupId>
-        	<artifactId>Loader</artifactId>
+        	<artifactId>NC-LoaderLib</artifactId>
         	<version>1.0</version>
         	<scope>system</scope>
-        	<systemPath>${project.basedir}/lib/Loader.jar</systemPath>
+        	<systemPath>${project.basedir}/lib/NC-LoaderLib.jar</systemPath>
         </dependency>
     </dependencies>
 </project>

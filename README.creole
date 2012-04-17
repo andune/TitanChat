@@ -70,6 +70,7 @@ TitanChat, a chat management and formatting plugin for Bukkit.
 * 11.04.12 - Slowly adding events and channel quick-message prefix is now configurable
 * 15.04.12 - Commands are now shown 10 per page
 * 16.04.12 - Loader now out-built as lib
+* 17.04.12 - Permissions Prefix and Suffix hooks now out-built
 
 -----------------------------------------------------------------------------------------------------------------------
 
