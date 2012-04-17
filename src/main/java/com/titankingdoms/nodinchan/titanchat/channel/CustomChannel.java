@@ -62,16 +62,16 @@ public class CustomChannel extends Channel implements Listener {
 	}
 	
 	/**
-	 * The formatting of the channel
+	 * Formats the message
 	 * 
-	 * @param player The sender
+	 * @param sender The sender of the message
 	 * 
-	 * @param message The message
+	 * @param message The message to format
 	 * 
-	 * @return The format
+	 * @return The formatted message
 	 */
-	public String format(Player player, String message) {
-		return "<" + player.getDisplayName() + "> " + message;
+	public String format(Player sender, String message) {
+		return getFormat().replace("%player", sender.getDisplayName()).replace("%message", message);
 	}
 	
 	/**
@@ -82,6 +82,15 @@ public class CustomChannel extends Channel implements Listener {
 	public final FileConfiguration getConfig() {
 		if (config == null) { reloadConfig(); }
 		return config;
+	}
+	
+	/**
+	 * Gets the format of the channel
+	 * 
+	 * @return The format of the channel
+	 */
+	public String getFormat() {
+		return "<%player> %message";
 	}
 	
 	/**
