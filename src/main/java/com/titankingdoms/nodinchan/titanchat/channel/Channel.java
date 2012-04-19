@@ -358,7 +358,7 @@ public class Channel extends Loadable {
 		if (sendEvent.isCancelled()) { return false; }
 		
 		for (Player recipant : sendEvent.getRecipants()) {
-			MessageReceiveEvent receiveEvent = new MessageReceiveEvent(sender, recipant, message);
+			MessageReceiveEvent receiveEvent = new MessageReceiveEvent(sender, recipant, sendEvent.getMessage());
 			plugin.getServer().getPluginManager().callEvent(receiveEvent);
 			
 			if (receiveEvent.isCancelled()) { continue; }
