@@ -39,7 +39,7 @@ public class ChatCommand extends Command {
 		this.cm = plugin.getChannelManager();
 	}
 	
-	@CommandID(name = "Broadcast", triggers = "broadcast", requireChannel = false)
+	@CommandID(name = "Broadcast", triggers = { "broadcast", "bc" }, requireChannel = false)
 	@CommandInfo(description = "Broadcasts the message globally", usage = "broadcast [message]")
 	public void broadcast(Player player, String[] args) {
 		if (args.length < 1 || !plugin.getPermsBridge().has(player, "TitanChat.broadcast")) { return; }

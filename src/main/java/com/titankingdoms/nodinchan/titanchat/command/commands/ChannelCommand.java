@@ -41,7 +41,7 @@ public class ChannelCommand extends Command {
 		this.cm = plugin.getChannelManager();
 	}
 	
-	@CommandID(name = "Create", triggers = "create")
+	@CommandID(name = "Create", triggers = { "create", "c" })
 	@CommandInfo(description = "Creates a new channel", usage = "create [channel]")
 	public void create(Player player, String[] args) {
 		try {
@@ -68,7 +68,7 @@ public class ChannelCommand extends Command {
 		} catch (IndexOutOfBoundsException e) { invalidArgLength(player, "Create"); }
 	}
 	
-	@CommandID(name = "Delete", triggers = "delete")
+	@CommandID(name = "Delete", triggers = { "delete", "d" })
 	@CommandInfo(description = "Deletes the channel", usage = "delete [channel]")
 	public void delete(Player player, String[] args) {
 		try {
@@ -108,7 +108,7 @@ public class ChannelCommand extends Command {
 		} catch (IndexOutOfBoundsException e) { invalidArgLength(player, "Follow"); }
 	}
 	
-	@CommandID(name = "Join", triggers = "join")
+	@CommandID(name = "Join", triggers = { "join", "j" })
 	@CommandInfo(description = "Joins the channel", usage = "join [channel] <password>")
 	public void join(Player player, String[] args) {
 		if (args.length < 1) { invalidArgLength(player, "Join"); return; }

@@ -39,7 +39,7 @@ public class AdministrateCommand extends Command {
 		this.cm = plugin.getChannelManager();
 	}
 	
-	@CommandID(name = "Ban", triggers = "ban")
+	@CommandID(name = "Ban", triggers = { "ban", "b" })
 	@CommandInfo(description = "Bans the player from the channel", usage = "ban [player] <channel>")
 	public void ban(Player player, String[] args) {
 		if (args.length < 1) { invalidArgLength(player, "Ban"); return; }
@@ -143,7 +143,7 @@ public class AdministrateCommand extends Command {
 		}
 	}
 	
-	@CommandID(name = "Kick", triggers = "kick")
+	@CommandID(name = "Kick", triggers = { "kick", "k" })
 	@CommandInfo(description = "Kicks the player from the channel", usage = "kick [player] <channel>")
 	public void kick(Player player, String[] args) {
 		if (args.length < 1) { invalidArgLength(player, "Kick"); }
@@ -248,7 +248,7 @@ public class AdministrateCommand extends Command {
 		}
 	}
 	
-	@CommandID(name = "Unban", triggers = "unban")
+	@CommandID(name = "Unban", triggers = { "unban", "ub" })
 	@CommandInfo(description = "Unbans the player from the channel", usage = "unban [player] <channel>")
 	public void unban(Player player, String[] args) {
 		if (args.length < 1) { invalidArgLength(player, "Unban"); }

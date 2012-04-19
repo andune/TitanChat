@@ -82,7 +82,7 @@ public class InformationCommand extends Command {
 		player.sendMessage(italic + ChatColor.WHITE + "(&o)");
 	}
 	
-	@CommandID(name = "Commands", triggers = { "commands", "cmds" }, requireChannel = false)
+	@CommandID(name = "Commands", triggers = { "commands", "cmds", "help", "?" }, requireChannel = false)
 	@CommandInfo(description = "Shows the command list", usage = "commands <page/command>")
 	public void commands(Player player, String[] args) {
 		CommandManager cm = plugin.getCommandManager();
