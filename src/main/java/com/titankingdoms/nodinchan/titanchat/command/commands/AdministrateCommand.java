@@ -9,6 +9,22 @@ import com.titankingdoms.nodinchan.titanchat.command.Command;
 import com.titankingdoms.nodinchan.titanchat.command.CommandID;
 import com.titankingdoms.nodinchan.titanchat.command.CommandInfo;
 
+/*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
+ * 
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ * 
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ * 
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 /**
  * AdministrateCommand - Commands for Channel administration
  * 
@@ -90,7 +106,7 @@ public class AdministrateCommand extends Command {
 		
 		try {
 			if (cm.exists(args[1])) {
-				if (plugin.getPermissionsHook().has(player, "TitanChat.force")) {
+				if (plugin.getPermsBridge().has(player, "TitanChat.force")) {
 					if (plugin.getPlayer(args[0]) != null) {
 						Player targetPlayer = plugin.getPlayer(args[0]);
 						Channel channel = cm.getChannel(args[1]);
@@ -109,7 +125,7 @@ public class AdministrateCommand extends Command {
 			} else { plugin.sendWarning(player, "No such channel"); }
 			
 		} catch (IndexOutOfBoundsException e) {
-			if (plugin.getPermissionsHook().has(player, "TitanChat.force")) {
+			if (plugin.getPermsBridge().has(player, "TitanChat.force")) {
 				if (plugin.getPlayer(args[0]) != null) {
 					Player targetPlayer = plugin.getPlayer(args[0]);
 					Channel channel = cm.getChannel(player);
@@ -179,7 +195,7 @@ public class AdministrateCommand extends Command {
 		if (args.length < 1) { invalidArgLength(player, "Mute"); }
 		
 		if (!plugin.enableChannels()) {
-			if (plugin.getPermissionsHook().has(player, "TitanChat.mute")) {
+			if (plugin.getPermsBridge().has(player, "TitanChat.mute")) {
 				if (plugin.getPlayer(args[0]) != null) {
 					plugin.mute(plugin.getPlayer(args[0]), true);
 					plugin.getServer().broadcastMessage("[TitanChat] " + ChatColor.GOLD + plugin.getPlayer(args[0]).getDisplayName() + " has been muted");
@@ -288,7 +304,7 @@ public class AdministrateCommand extends Command {
 		if (args.length < 1) { invalidArgLength(player, "Unmute"); }
 		
 		if (!plugin.enableChannels()) {
-			if (plugin.getPermissionsHook().has(player, "TitanChat.mute")) {
+			if (plugin.getPermsBridge().has(player, "TitanChat.mute")) {
 				if (plugin.getPlayer(args[0]) != null) {
 					plugin.mute(plugin.getPlayer(args[0]), false);
 					plugin.getServer().broadcastMessage("[TitanChat] " + ChatColor.GOLD + plugin.getPlayer(args[0]).getDisplayName() + " has been unmuted");

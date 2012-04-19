@@ -11,6 +11,22 @@ import com.titankingdoms.nodinchan.titanchat.command.Command;
 import com.titankingdoms.nodinchan.titanchat.command.CommandID;
 import com.titankingdoms.nodinchan.titanchat.command.CommandInfo;
 
+/*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
+ * 
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ * 
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ * 
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 /**
  * ChannelCommand - Commands for Channel modification
  * 
@@ -30,7 +46,7 @@ public class ChannelCommand extends Command {
 	public void create(Player player, String[] args) {
 		try {
 			if (plugin.getConfig().getInt("channels.channel-limit") < 0) {
-				if (plugin.getPermissionsHook().has(player, "TitanChat.create")) {
+				if (plugin.getPermsBridge().has(player, "TitanChat.create")) {
 					if (!cm.exists(args[0])) {
 						plugin.getChannelManager().createChannel(player, args[0]);
 						
@@ -39,7 +55,7 @@ public class ChannelCommand extends Command {
 				} else { plugin.sendWarning(player, "You do not have permission"); }
 				
 			} else if (plugin.getChannelManager().getChannelAmount() < plugin.getConfig().getInt("channel-limit")) {
-				if (plugin.getPermissionsHook().has(player, "TitanChat.create")) {
+				if (plugin.getPermsBridge().has(player, "TitanChat.create")) {
 					if (!cm.exists(args[0])) {
 						plugin.getChannelManager().createChannel(player, args[0]);
 						
@@ -56,7 +72,7 @@ public class ChannelCommand extends Command {
 	@CommandInfo(description = "Deletes the channel", usage = "delete [channel]")
 	public void delete(Player player, String[] args) {
 		try {
-			if (plugin.getPermissionsHook().has(player, "TitanChat.delete")) {
+			if (plugin.getPermsBridge().has(player, "TitanChat.delete")) {
 				if (cm.exists(args[0])) {
 					if (!cm.getChannel(args[0]).getType().equals(Type.DEFAULT) || !cm.getChannel(args[0]).getType().equals(Type.STAFF))
 						plugin.getChannelManager().deleteChannel(player, args[0]);
@@ -176,7 +192,7 @@ public class ChannelCommand extends Command {
 					if (channel.getFollowerList().contains(player.getName()))
 						channel.getFollowerList().remove(player.getName());
 					else
-						plugin.getPermissionsHook().removePermission(player, "TitanChat.follow." + channel.getName());
+						plugin.getPermsBridge().removePermission(player, "TitanChat.follow." + channel.getName());
 					
 					channel.save();
 					

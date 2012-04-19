@@ -7,7 +7,7 @@
     <groupId>com.titankingdoms.dev</groupId>
     <artifactId>TitanChat</artifactId>
     <name>TitanChat</name>
-    <version>v3.2</version>
+    <version>v3.3</version>
 
     <description>TitanChat, a chat management and formatting plugin.</description>
     <build>
@@ -87,7 +87,7 @@
         <dependency>
         	<groupId>com.nodinchan</groupId>
         	<artifactId>NC-LoaderLib</artifactId>
-        	<version>1.0</version>
+        	<version>1.1</version>
         	<scope>system</scope>
         	<systemPath>${project.basedir}/lib/NC-LoaderLib.jar</systemPath>
         </dependency>

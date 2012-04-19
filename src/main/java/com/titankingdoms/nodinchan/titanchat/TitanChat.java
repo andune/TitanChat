@@ -25,29 +25,26 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import com.nodinchan.ncloader.metrics.Metrics;
 import com.titankingdoms.nodinchan.titanchat.addon.AddonManager;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
 import com.titankingdoms.nodinchan.titanchat.command.CommandManager;
-import com.titankingdoms.nodinchan.titanchat.debug.Debugger;
-import com.titankingdoms.nodinchan.titanchat.permissions.PermissionsHook;
+import com.titankingdoms.nodinchan.titanchat.util.Debugger;
 import com.titankingdoms.nodinchan.titanchat.util.FormatHandler;
-import com.titankingdoms.nodinchan.titanpluginstats.ResultCheck;
-import com.titankingdoms.nodinchan.titanpluginstats.TitanPluginStats;
+import com.titankingdoms.nodinchan.titanchat.util.PermsBridge;
 
-/*
- *     TitanChat 3.2
- *     Copyright (C) 2012  Nodin Chan <nodinchan@nodinchan.net>
- *     
+/*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
+ * 
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
  *     the Free Software Foundation, either version 3 of the License, or
  *     (at your option) any later version.
- *     
+ * 
  *     This program is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
- *     
+ * 
  *     You should have received a copy of the GNU General Public License
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
@@ -64,8 +61,6 @@ public final class TitanChat extends JavaPlugin {
 	
 	private String NAME;
 	
-	private final String url = "http://dev.bukkit.org/server-mods/titanchat/";
-	
 	private static final Logger log = Logger.getLogger("TitanLog");
 	private static final Debugger db = new Debugger(1);
 	
@@ -73,7 +68,7 @@ public final class TitanChat extends JavaPlugin {
 	private ChannelManager chManager;
 	private CommandManager cmdManager;
 	private FormatHandler format;
-	private PermissionsHook permHook;
+	private PermsBridge permBridge;
 	
 	private boolean silenced = false;
 	
@@ -219,8 +214,8 @@ public final class TitanChat extends JavaPlugin {
 	 * 
 	 * @return The built-in PermissionsHook
 	 */
-	public PermissionsHook getPermissionsHook() {
-		return permHook;
+	public PermsBridge getPermsBridge() {
+		return permBridge;
 	}
 	
 	/**
@@ -242,7 +237,7 @@ public final class TitanChat extends JavaPlugin {
 	 * @return True if the Player has TitanChat.voice
 	 */
 	public boolean hasVoice(Player player) {
-		return permHook.has(player, "TitanChat.voice");
+		return permBridge.has(player, "TitanChat.voice");
 	}
 	
 	public boolean initLoaderLib() {
@@ -315,6 +310,22 @@ public final class TitanChat extends JavaPlugin {
 		
 		return false;
 	}
+	
+	
+	public boolean initMetrics() {
+		try {
+			Metrics metrics = new Metrics(this);
+			
+			if (!metrics.start())
+				throw new Exception();
+			
+			return true;
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
 
 	/**
 	 * Check if the Server is silenced
@@ -333,7 +344,7 @@ public final class TitanChat extends JavaPlugin {
 	 * @return True if the Player has TitanChat.admin
 	 */
 	public boolean isStaff(Player player) {
-		return permHook.has(player, "TitanChat.admin");
+		return permBridge.has(player, "TitanChat.admin");
 	}
 	
 	/**
@@ -449,7 +460,7 @@ public final class TitanChat extends JavaPlugin {
 				return true;
 			}
 			
-			if (permHook.has((Player) sender, "TitanChat.broadcast"))
+			if (permBridge.has((Player) sender, "TitanChat.broadcast"))
 				try { cmdManager.execute((Player) sender, "broadcast", args); } catch (Exception e) {}
 			else
 				sendWarning((Player) sender, "You do not have permission");
@@ -486,7 +497,7 @@ public final class TitanChat extends JavaPlugin {
 				return true;
 			}
 			
-			if (permHook.has((Player) sender, "TitanChat.emote.server"))
+			if (permBridge.has((Player) sender, "TitanChat.emote.server"))
 				try { cmdManager.execute((Player) sender, "me", args); } catch (Exception e) {}
 			else
 				sendWarning((Player) sender, "You do not have permission");
@@ -536,7 +547,7 @@ public final class TitanChat extends JavaPlugin {
 				return true;
 			}
 			
-			if (permHook.has((Player) sender, "TitanChat.whisper"))
+			if (permBridge.has((Player) sender, "TitanChat.whisper"))
 				try { cmdManager.execute((Player) sender, "whisper", args); } catch (Exception e) {}
 			else
 				sendWarning((Player) sender, "You do not have permission");
@@ -576,10 +587,10 @@ public final class TitanChat extends JavaPlugin {
 		log(Level.INFO, "is now enabling...");
 		
 		if (!initLoaderLib())
-			log(Level.INFO, "Failed to initialise Loader lib");
+			log(Level.WARNING, "Failed to initialise Loader lib");
 		
-		int s = getServer().getScheduler().scheduleAsyncRepeatingTask(this, new TitanPluginStats(this, url), 0, 108000);
-		getServer().getScheduler().scheduleAsyncRepeatingTask(this, new ResultCheck(this, s, url), 0, 108000);
+		if (!initMetrics())
+			log(Level.WARNING, "Failed to hook into Metrics");
 		
 		File config = new File(getDataFolder(), "config.yml");
 		
@@ -613,13 +624,13 @@ public final class TitanChat extends JavaPlugin {
 		chManager = new ChannelManager(this);
 		cmdManager = new CommandManager(this);
 		format = new FormatHandler(this);
-		permHook = new PermissionsHook(this);
+		permBridge = new PermsBridge(this);
 		
 		PluginManager pm = getServer().getPluginManager();
 		
 		Debugger.load(this);
 		
-		pm.registerEvents(permHook, this);
+		pm.registerEvents(permBridge, this);
 		pm.registerEvents(new TitanChatListener(this), this);
 		
 		try { chManager.load(); } catch (Exception e) {}

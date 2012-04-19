@@ -18,7 +18,23 @@ import org.bukkit.entity.Player;
 import com.nodinchan.ncloader.Loader;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel.Type;
-import com.titankingdoms.nodinchan.titanchat.debug.Debugger;
+import com.titankingdoms.nodinchan.titanchat.util.Debugger;
+
+/*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
+ * 
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ * 
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ * 
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 /**
  * ChannelManager - Manages Channels
@@ -233,7 +249,7 @@ public final class ChannelManager {
 		followers.addAll(channel.getFollowerList());
 		
 		for (Player player : plugin.getServer().getOnlinePlayers()) {
-			if (plugin.getPermissionsHook().has(player, "TitanChat.follow." + channel.getName(), true) && !followers.contains(player.getName()))
+			if (plugin.getPermsBridge().has(player, "TitanChat.follow." + channel.getName(), true) && !followers.contains(player.getName()))
 				followers.add(player.getName());
 		}
 		
@@ -284,7 +300,7 @@ public final class ChannelManager {
 	 */
 	public Channel getSpawnChannel(Player player) {
 		for (Channel channel : channels) {
-			if (plugin.getPermissionsHook().has(player, "TitanChat.spawn." + channel.getName(), true) && channel.canAccess(player))
+			if (plugin.getPermsBridge().has(player, "TitanChat.spawn." + channel.getName(), true) && channel.canAccess(player))
 				return channel;
 		}
 		

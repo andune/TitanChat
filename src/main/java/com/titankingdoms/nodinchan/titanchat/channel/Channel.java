@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -16,8 +17,25 @@ import org.bukkit.entity.Player;
 
 import com.nodinchan.ncloader.Loadable;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
-import com.titankingdoms.nodinchan.titanchat.debug.Debugger;
+import com.titankingdoms.nodinchan.titanchat.events.MessageReceiveEvent;
 import com.titankingdoms.nodinchan.titanchat.events.MessageSendEvent;
+import com.titankingdoms.nodinchan.titanchat.util.Debugger;
+
+/*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
+ * 
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ * 
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ * 
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 /**
  * Channel - Channel base
@@ -72,7 +90,7 @@ public class Channel extends Loadable {
 	 * @return True if the Player has access
 	 */
 	public boolean canAccess(Player player) {
-		if (plugin.getPermissionsHook().has(player, "TitanChat.access.*") || plugin.getPermissionsHook().has(player, "TitanChat.access." + super.getName()))
+		if (plugin.getPermsBridge().has(player, "TitanChat.access.*") || plugin.getPermsBridge().has(player, "TitanChat.access." + super.getName()))
 			return true;
 		if (blacklist.contains(player.getName()))
 			return false;
@@ -94,7 +112,7 @@ public class Channel extends Loadable {
 	public boolean canBan(Player player) {
 		if (type.equals(Type.DEFAULT) || type.equals(Type.STAFF))
 			return false;
-		if (plugin.getPermissionsHook().has(player, "TitanChat.ban.*") || plugin.getPermissionsHook().has(player, "TitanChat.ban." + super.getName()))
+		if (plugin.getPermsBridge().has(player, "TitanChat.ban.*") || plugin.getPermsBridge().has(player, "TitanChat.ban." + super.getName()))
 			return true;
 		if (adminlist.contains(player.getName()))
 			return true;
@@ -110,7 +128,7 @@ public class Channel extends Loadable {
 	 * @return True if the Player can kick
 	 */
 	public boolean canKick(Player player) {
-		if (plugin.getPermissionsHook().has(player, "TitanChat.kick.*") || plugin.getPermissionsHook().has(player, "TitanChat.kick." + super.getName()))
+		if (plugin.getPermsBridge().has(player, "TitanChat.kick.*") || plugin.getPermsBridge().has(player, "TitanChat.kick." + super.getName()))
 			return true;
 		if (adminlist.contains(player.getName()))
 			return true;
@@ -126,7 +144,7 @@ public class Channel extends Loadable {
 	 * @return True if the Player can mute
 	 */
 	public boolean canMute(Player player) {
-		if (plugin.getPermissionsHook().has(player, "TitanChat.silence") || plugin.getPermissionsHook().has(player, "TitanChat.mute"))
+		if (plugin.getPermsBridge().has(player, "TitanChat.silence") || plugin.getPermsBridge().has(player, "TitanChat.mute"))
 			return true;
 		if (adminlist.contains(player.getName()))
 			return true;
@@ -142,7 +160,7 @@ public class Channel extends Loadable {
 	 * @return True if the Player can rank
 	 */
 	public boolean canRank(Player player) {
-		if (plugin.getPermissionsHook().has(player, "TitanChat.rank.*") || plugin.getPermissionsHook().has(player, "TitanChat.rank." + super.getName()))
+		if (plugin.getPermsBridge().has(player, "TitanChat.rank.*") || plugin.getPermsBridge().has(player, "TitanChat.rank." + super.getName()))
 			return true;
 		if (adminlist.contains(player.getName()))
 			return true;
@@ -322,15 +340,34 @@ public class Channel extends Loadable {
 	 * @param message The message to be sent
 	 */
 	protected final boolean sendMessage(Player sender, List<Player> recipants, String message) {
-		MessageSendEvent event = new MessageSendEvent(sender, recipants, message);
-		plugin.getServer().getPluginManager().callEvent(event);
+		MessageSendEvent sendEvent = new MessageSendEvent(sender, recipants, message);
+		plugin.getServer().getPluginManager().callEvent(sendEvent);
 		
-		if (event.isCancelled()) { return false; }
+		if (sendEvent.isCancelled()) { return false; }
 		
-		for (Player recipant : event.getRecipants())
-			recipant.sendMessage(event.getMessage());
+		for (Player recipant : sendEvent.getRecipants()) {
+			MessageReceiveEvent receiveEvent = new MessageReceiveEvent(sender, recipant, message);
+			plugin.getServer().getPluginManager().callEvent(receiveEvent);
+			
+			if (receiveEvent.isCancelled()) { continue; }
+			
+			receiveEvent.getRecipant().sendMessage(receiveEvent.getMessage());
+		}
 		
 		return true;
+	}
+	
+	/**
+	 * Called when a message is to be sent
+	 * 
+	 * @param sender The message sender
+	 * 
+	 * @param recipants The players to send to
+	 * 
+	 * @param message The message to be sent
+	 */
+	protected final boolean sendMessage(Player sender, Player[] recipants, String message) {
+		return sendMessage(sender, Arrays.asList(recipants), message);
 	}
 	
 	/**

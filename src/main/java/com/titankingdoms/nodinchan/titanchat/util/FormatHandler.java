@@ -8,6 +8,22 @@ import com.titankingdoms.nodinchan.titanchat.channel.StandardChannel;
 import com.titankingdoms.nodinchan.titanchat.channel.Variables;
 import com.titankingdoms.nodinchan.titanchat.events.MessageFormatEvent;
 
+/*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
+ * 
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ * 
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ * 
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 /**
  * FormatHandler - Handles formatting
  * 
@@ -41,10 +57,10 @@ public final class FormatHandler {
 		
 		message = formatEvent.getFormat();
 		
-		String playerPrefix = plugin.getPermissionsHook().getPlayerPrefix(player);
-		String playerSuffix = plugin.getPermissionsHook().getPlayerSuffix(player);
-		String groupPrefix = plugin.getPermissionsHook().getGroupPrefix(player);
-		String groupSuffix = plugin.getPermissionsHook().getGroupSuffix(player);
+		String playerPrefix = plugin.getPermsBridge().getPlayerPrefix(player);
+		String playerSuffix = plugin.getPermsBridge().getPlayerSuffix(player);
+		String groupPrefix = plugin.getPermsBridge().getGroupPrefix(player);
+		String groupSuffix = plugin.getPermsBridge().getGroupSuffix(player);
 		
 		message = message.replace("%prefix", playerPrefix);
 		message = message.replace("%gprefix", groupPrefix);
@@ -127,10 +143,10 @@ public final class FormatHandler {
 		
 		message = formatEvent.getFormat();
 		
-		String playerPrefix = plugin.getPermissionsHook().getPlayerPrefix(player);
-		String playerSuffix = plugin.getPermissionsHook().getPlayerSuffix(player);
-		String groupPrefix = plugin.getPermissionsHook().getGroupPrefix(player);
-		String groupSuffix = plugin.getPermissionsHook().getGroupSuffix(player);
+		String playerPrefix = plugin.getPermsBridge().getPlayerPrefix(player);
+		String playerSuffix = plugin.getPermsBridge().getPlayerSuffix(player);
+		String groupPrefix = plugin.getPermsBridge().getGroupPrefix(player);
+		String groupSuffix = plugin.getPermsBridge().getGroupSuffix(player);
 		
 		message = message.replace("%prefix", playerPrefix);
 		message = message.replace("%gprefix", groupPrefix);
@@ -156,10 +172,10 @@ public final class FormatHandler {
 	public String format(Player player) {
 		String message = "";
 		
-		String playerPrefix = plugin.getPermissionsHook().getPlayerPrefix(player);
-		String playerSuffix = plugin.getPermissionsHook().getPlayerSuffix(player);
-		String groupPrefix = plugin.getPermissionsHook().getGroupPrefix(player);
-		String groupSuffix = plugin.getPermissionsHook().getGroupSuffix(player);
+		String playerPrefix = plugin.getPermsBridge().getPlayerPrefix(player);
+		String playerSuffix = plugin.getPermsBridge().getPlayerSuffix(player);
+		String groupPrefix = plugin.getPermsBridge().getGroupPrefix(player);
+		String groupSuffix = plugin.getPermsBridge().getGroupSuffix(player);
 		String chatColour = plugin.getConfig().getString("channels.chat-display-colour");
 		
 		if (plugin.useDefaultFormat()) {
@@ -204,15 +220,15 @@ public final class FormatHandler {
 		
 		String name = player.getDisplayName();
 		String tag = variables.getTag();
-		String playerPrefix = plugin.getPermissionsHook().getPlayerPrefix(player);
-		String playerSuffix = plugin.getPermissionsHook().getPlayerSuffix(player);
-		String groupPrefix = plugin.getPermissionsHook().getGroupPrefix(player);
-		String groupSuffix = plugin.getPermissionsHook().getGroupSuffix(player);
+		String playerPrefix = plugin.getPermsBridge().getPlayerPrefix(player);
+		String playerSuffix = plugin.getPermsBridge().getPlayerSuffix(player);
+		String groupPrefix = plugin.getPermsBridge().getGroupPrefix(player);
+		String groupSuffix = plugin.getPermsBridge().getGroupSuffix(player);
 		String chatColour = variables.getChatColour();
 		String nameColour = variables.getNameColour();
 		
 		if (plugin.useDefaultFormat()) {
-			if (colours(channel) || plugin.getPermissionsHook().has(player, "TitanChat.colours"))
+			if (colours(channel) || plugin.getPermsBridge().has(player, "TitanChat.colours"))
 				message = colourise(tag + " " + playerPrefix + nameColour + name + playerSuffix + "&f: " + chatColour + msg);
 			else
 				message = colourise(tag + " " + playerPrefix + nameColour + name + playerSuffix + "&f: " + chatColour) + decolourise(msg);
@@ -244,7 +260,7 @@ public final class FormatHandler {
 			
 			message = str.toString();
 			
-			if (colours(channel) || plugin.getPermissionsHook().has(player, "TitanChat.colours"))
+			if (colours(channel) || plugin.getPermsBridge().has(player, "TitanChat.colours"))
 				message = message.replace("%message", colourise(chatColour + msg));
 			else
 				message = message.replace("%message", colourise(chatColour) + decolourise(msg));
@@ -263,10 +279,10 @@ public final class FormatHandler {
 		
 		message = formatEvent.getFormat();
 		
-		String playerPrefix = plugin.getPermissionsHook().getPlayerPrefix(player);
-		String playerSuffix = plugin.getPermissionsHook().getPlayerSuffix(player);
-		String groupPrefix = plugin.getPermissionsHook().getGroupPrefix(player);
-		String groupSuffix = plugin.getPermissionsHook().getGroupSuffix(player);
+		String playerPrefix = plugin.getPermsBridge().getPlayerPrefix(player);
+		String playerSuffix = plugin.getPermsBridge().getPlayerSuffix(player);
+		String groupPrefix = plugin.getPermsBridge().getGroupPrefix(player);
+		String groupSuffix = plugin.getPermsBridge().getGroupSuffix(player);
 		
 		message = message.replace("%prefix", playerPrefix);
 		message = message.replace("%gprefix", groupPrefix);
