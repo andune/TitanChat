@@ -122,12 +122,12 @@ public final class StandardChannel extends Channel {
 			List<Player> recipants = new ArrayList<Player>();
 			
 			for (String name : super.getParticipants()) {
-				if (plugin.getPlayer(name) != null)
+				if (plugin.getPlayer(name) != null && !recipants.contains(plugin.getPlayer(name)))
 					recipants.add(plugin.getPlayer(name));
 			}
 			
 			for (String name : plugin.getChannelManager().getFollowers(this)) {
-				if (plugin.getPlayer(name) != null && !recipants.contains(name))
+				if (plugin.getPlayer(name) != null && !recipants.contains(plugin.getPlayer(name)))
 					recipants.add(plugin.getPlayer(name));
 			}
 			
