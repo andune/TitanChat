@@ -18,6 +18,12 @@ import com.titankingdoms.nodinchan.titanchat.TitanChat;
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * Variables - Basic Channel information storage
+ * 
+ * @author NodinChan
+ *
+ */
 public final class Variables {
 
 	private final TitanChat plugin;
@@ -33,6 +39,11 @@ public final class Variables {
 	private boolean joinMessage;
 	private boolean leaveMessage;
 	
+	/**
+	 * Initialises variables
+	 * 
+	 * @param channel The Channel using this Variables instance
+	 */
 	public Variables(Channel channel) {
 		this.plugin = TitanChat.getInstance();
 		this.channel = channel;

@@ -49,6 +49,11 @@ public class Addon extends Loadable implements Listener {
 	private File configFile = null;
 	private FileConfiguration config = null;
 	
+	/**
+	 * Addons for supporting other plugins
+	 * 
+	 * @param name The name of the Addon
+	 */
 	public Addon(String name) {
 		super(name);
 		this.plugin = TitanChat.getInstance();
@@ -82,7 +87,7 @@ public class Addon extends Loadable implements Listener {
 	 * @return The data folder
 	 */
 	public final File getDataFolder() {
-		File dir = new File(plugin.getAddonDir(), super.getName());
+		File dir = new File(manager.getAddonDir(), super.getName());
 		dir.mkdir();
 		return dir;
 	}
@@ -107,6 +112,11 @@ public class Addon extends Loadable implements Listener {
 		return manager.getResource(instance, fileName);
 	}
 	
+	/**
+	 * Should be called in the constructor to initialise the instance
+	 * 
+	 * @param addon
+	 */
 	public final void init(Addon addon) {
 		this.instance = addon;
 	}
@@ -142,7 +152,7 @@ public class Addon extends Loadable implements Listener {
 	 * Reloads the config
 	 */
 	public final void reloadConfig() {
-		if (configFile == null) { configFile = new File(new File(plugin.getAddonDir(), super.getName()), "config.yml"); }
+		if (configFile == null) { configFile = new File(new File(manager.getAddonDir(), super.getName()), "config.yml"); }
 		
 		config = YamlConfiguration.loadConfiguration(configFile);
 		

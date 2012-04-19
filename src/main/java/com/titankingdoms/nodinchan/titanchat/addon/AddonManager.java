@@ -1,5 +1,6 @@
 package com.titankingdoms.nodinchan.titanchat.addon;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -33,23 +34,35 @@ import com.titankingdoms.nodinchan.titanchat.util.Debugger;
  */
 
 /**
- * AddonManager - Manages Addons and executes them when needed
+ * AddonManager - Addon Management and Storage
  * 
  * @author NodinChan
  *
  */
 public final class AddonManager {
 	
+	private final TitanChat plugin;
+	
 	private static AddonManager instance;
 	
 	private static final Debugger db = new Debugger(2);
 	
-	private final List<Addon> addons;
+	private List<Addon> addons;
 	
 	private final Map<Addon, JarFile> jarFiles;
 	
+	/**
+	 * Initialises variables
+	 * 
+	 * @param plugin TitanChat
+	 */
 	public AddonManager(TitanChat plugin) {
+		this.plugin = plugin;
 		AddonManager.instance = this;
+		
+		if (getAddonDir().mkdir())
+			plugin.log(Level.INFO, "Creating addon directory...");
+		
 		this.addons = new ArrayList<Addon>();
 		this.jarFiles = new HashMap<Addon, JarFile>();
 	}
@@ -68,6 +81,15 @@ public final class AddonManager {
 		}
 		
 		return null;
+	}
+	
+	/**
+	 * Gets the Addon directory
+	 * 
+	 * @return The Addon directory
+	 */
+	public File getAddonDir() {
+		return new File(plugin.getDataFolder(), "addons");
 	}
 	
 	/**
@@ -109,12 +131,9 @@ public final class AddonManager {
 	 * Loads the Addons
 	 */
 	public void load() {
-		Loader<Addon> loader = new Loader<Addon>(TitanChat.getInstance(), TitanChat.getInstance().getAddonDir(), new Object[0]);
+		Loader<Addon> loader = new Loader<Addon>(plugin, getAddonDir(), new Object[0]);
 		for (Addon addon : loader.load()) { register(addon); }
-		List<Addon> backup = new ArrayList<Addon>();
-		backup.addAll(addons);
-		addons.clear();
-		addons.addAll(loader.sort(backup));
+		addons = loader.sort(addons);
 		
 		StringBuilder str = new StringBuilder();
 		
@@ -125,7 +144,7 @@ public final class AddonManager {
 			str.append(addon.getName());
 		}
 		
-		TitanChat.getInstance().log(Level.INFO, "Addons loaded: " + str.toString());
+		plugin.log(Level.INFO, "Addons loaded: " + str.toString());
 	}
 	
 	/**

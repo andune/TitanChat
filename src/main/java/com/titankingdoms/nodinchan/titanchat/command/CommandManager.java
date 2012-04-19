@@ -1,10 +1,12 @@
 package com.titankingdoms.nodinchan.titanchat.command;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
 
 import org.bukkit.entity.Player;
 
@@ -45,9 +47,18 @@ public final class CommandManager {
 	
 	private List<CommandExecutor> executors;
 	
+	/**
+	 * Initialises variables
+	 * 
+	 * @param plugin TitanChat
+	 */
 	public CommandManager(TitanChat plugin) {
 		this.plugin = plugin;
 		CommandManager.instance = this;
+		
+		if (getCommandDir().mkdir())
+			plugin.log(Level.INFO, "Creating commands directory");
+		
 		this.executors = new ArrayList<CommandExecutor>();
 	}
 	
@@ -70,7 +81,7 @@ public final class CommandManager {
 			for (String trigger : executor.getMethod().getAnnotation(CommandID.class).triggers()) {
 				db.i("Checking trigger \"" + trigger + "\" with command \"" + command + "\"");
 				
-				if (trigger.equalsIgnoreCase(command))
+				if (trigger.equalsIgnoreCase(command)) {
 					try {
 						executor.execute(player, args);
 						return;
@@ -87,6 +98,7 @@ public final class CommandManager {
 						db.i(e.getLocalizedMessage());
 						break;
 					}
+				}
 			}
 		}
 		
@@ -101,6 +113,15 @@ public final class CommandManager {
 	 */
 	public int getCommandAmount() {
 		return executors.size();
+	}
+	
+	/**
+	 * Gets the Command directory
+	 * 
+	 * @return The Command directory
+	 */
+	public File getCommandDir() {
+		return new File(TitanChat.getInstance().getAddonManager().getAddonDir(), "commands");
 	}
 	
 	/**
@@ -152,7 +173,7 @@ public final class CommandManager {
 		register(new RankingCommand());
 		register(new SettingsCommand());
 		
-		for (Command command : new Loader<Command>(plugin, plugin.getCommandDir(), new Object[0]).load()) { register(command); }
+		for (Command command : new Loader<Command>(plugin, getCommandDir(), new Object[0]).load()) { register(command); }
 		
 		sortCommands();
 	}

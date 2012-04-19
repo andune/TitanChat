@@ -124,16 +124,7 @@ public final class TitanChat extends JavaPlugin {
 	}
 	
 	/**
-	 * Get the Addon directory
-	 * 
-	 * @return The Addon directory
-	 */
-	public File getAddonDir() {
-		return new File(getDataFolder(), "addons");
-	}
-	
-	/**
-	 * Get the AddonManager
+	 * Gets the AddonManager
 	 * 
 	 * @return The AddonManager
 	 */
@@ -142,7 +133,7 @@ public final class TitanChat extends JavaPlugin {
 	}
 	
 	/**
-	 * Get the Channel directory
+	 * Gets the Channel directory
 	 * 
 	 * @return The Channel directory
 	 */
@@ -151,7 +142,7 @@ public final class TitanChat extends JavaPlugin {
 	}
 	
 	/**
-	 * Get the ChannelManager
+	 * Gets the ChannelManager
 	 * 
 	 * @return The ChannelManager
 	 */
@@ -160,16 +151,7 @@ public final class TitanChat extends JavaPlugin {
 	}
 	
 	/**
-	 * Get the Command directory
-	 * 
-	 * @return The Command directory
-	 */
-	public File getCommandDir() {
-		return new File(getAddonDir(), "commands");
-	}
-	
-	/**
-	 * Get the CommandManager
+	 * Gets the CommandManager
 	 * 
 	 * @return The CommandManager
 	 */
@@ -178,16 +160,7 @@ public final class TitanChat extends JavaPlugin {
 	}
 	
 	/**
-	 * Get the Custom Channel directory
-	 * 
-	 * @return The Custom Channel directory
-	 */
-	public File getCustomChannelDir() {
-		return new File(getAddonDir(), "channels");
-	}
-	
-	/**
-	 * Get the FormatHandler
+	 * Gets the FormatHandler
 	 * 
 	 * @return The FormatHandler
 	 */
@@ -210,16 +183,16 @@ public final class TitanChat extends JavaPlugin {
 	}
 	
 	/**
-	 * Gets the PermissionsHook
+	 * Gets the PermsBridge
 	 * 
-	 * @return The built-in PermissionsHook
+	 * @return The built-in PermsBridge
 	 */
 	public PermsBridge getPermsBridge() {
 		return permBridge;
 	}
 	
 	/**
-	 * Get Player by name
+	 * Gets Player by name
 	 * 
 	 * @param name The name of the Player
 	 * 
@@ -310,7 +283,6 @@ public final class TitanChat extends JavaPlugin {
 		
 		return false;
 	}
-	
 	
 	public boolean initMetrics() {
 		try {
@@ -598,15 +570,6 @@ public final class TitanChat extends JavaPlugin {
 			log(Level.INFO, "Loading default config");
 			saveResource("config.yml", false);
 		}
-		
-		if (getAddonDir().mkdir())
-			log(Level.INFO, "Creating addon directory...");
-		
-		if (getCustomChannelDir().mkdir())
-			log(Level.INFO, "Creating custom channel directory...");
-		
-		if (getCommandDir().mkdir())
-			log(Level.INFO, "Creating commands directory");
 		
 		if (getChannelDir().mkdir()) {
 			log(Level.INFO, "Creating channel directory...");

@@ -34,7 +34,16 @@ public final class CommandExecutor {
 	private final Command command;
 	
 	private final String name;
-
+	
+	/**
+	 * Initialises variables
+	 * 
+	 * @param method The method of the command
+	 * 
+	 * @param command The Command instance with the method
+	 * 
+	 * @param name The name of the Command
+	 */
 	public CommandExecutor(Method method, Command command, String name) {
 		this.method = method;
 		this.command = command;

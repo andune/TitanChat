@@ -63,10 +63,22 @@ public class Channel extends Loadable {
 	private File configFile = null;
 	private FileConfiguration config = null;
 	
+	/**
+	 * New Channel instance of Type unknown
+	 * 
+	 * @param name Channel name
+	 */
 	public Channel(String name) {
 		this(name, Type.UNKNOWN);
 	}
 	
+	/**
+	 * New Channel instance of Type type
+	 * 
+	 * @param name Channel name
+	 * 
+	 * @param type Channel type
+	 */
 	public Channel(String name, Type type) {
 		super(name);
 		this.plugin = TitanChat.getInstance();
@@ -198,7 +210,7 @@ public class Channel extends Loadable {
 	}
 	
 	/**
-	 * Get the config
+	 * Gets the config
 	 * 
 	 * @return The config
 	 */

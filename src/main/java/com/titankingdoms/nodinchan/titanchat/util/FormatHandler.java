@@ -34,6 +34,11 @@ public final class FormatHandler {
 	
 	private final TitanChat plugin;
 	
+	/**
+	 * Initialises variables
+	 * 
+	 * @param plugin TitanChat
+	 */
 	public FormatHandler(TitanChat plugin) {
 		this.plugin = plugin;
 	}

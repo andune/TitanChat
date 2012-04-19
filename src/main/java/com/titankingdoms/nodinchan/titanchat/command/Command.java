@@ -36,6 +36,9 @@ public class Command extends Loadable implements Listener {
 
 	protected final TitanChat plugin;
 	
+	/**
+	 * Initialises variables
+	 */
 	public Command() {
 		super("");
 		this.plugin = TitanChat.getInstance();

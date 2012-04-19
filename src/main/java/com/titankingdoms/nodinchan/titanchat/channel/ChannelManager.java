@@ -37,7 +37,7 @@ import com.titankingdoms.nodinchan.titanchat.util.Debugger;
  */
 
 /**
- * ChannelManager - Manages Channels
+ * ChannelManager - Channel Management and Storage
  * 
  * @author NodinChan
  *
@@ -58,9 +58,18 @@ public final class ChannelManager {
 	private final Map<Channel, Map<String, List<String>>> channelInvitors;
 	private final Map<CustomChannel, JarFile> jarFiles;
 	
+	/**
+	 * Initialises variables
+	 * 
+	 * @param plugin TitanChat
+	 */
 	public ChannelManager(TitanChat plugin) {
 		this.plugin = plugin;
 		ChannelManager.instance = this;
+		
+		if (getCustomChannelDir().mkdir())
+			plugin.log(Level.INFO, "Creating custom channel directory...");
+		
 		this.channels = new ArrayList<Channel>();
 		this.channelInvitors = new HashMap<Channel, Map<String, List<String>>>();
 		this.jarFiles = new HashMap<CustomChannel, JarFile>();
@@ -218,6 +227,15 @@ public final class ChannelManager {
 	public int getChannelAmount() {
 		return channelAmount;
 	}
+	
+	/**
+	 * Gets the Custom Channel directory
+	 * 
+	 * @return The Custom Channel directory
+	 */
+	public File getCustomChannelDir() {
+		return new File(plugin.getAddonManager().getAddonDir(), "channels");
+	}
 
 	/**
 	 * Gets the Default Channel of the Server
@@ -367,7 +385,7 @@ public final class ChannelManager {
 	public void load() throws Exception {
 		if (!plugin.enableChannels()) { plugin.log(Level.INFO, "Channels disabled"); return; }
 		
-		Loader<CustomChannel> loader = new Loader<CustomChannel>(plugin, plugin.getCustomChannelDir(), new Object[0]);
+		Loader<CustomChannel> loader = new Loader<CustomChannel>(plugin, getCustomChannelDir(), new Object[0]);
 		
 		for (CustomChannel channel : loader.load()) { if (exists(channel.getName())) { continue; } register(channel); }
 		customChAmount = channels.size();

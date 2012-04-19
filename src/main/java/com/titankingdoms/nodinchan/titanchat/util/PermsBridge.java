@@ -71,12 +71,28 @@ public final class PermsBridge implements Listener {
 	private Permission perm;
 	private Chat chat;
 	
+	/**
+	 * Initialises variables
+	 * 
+	 * @param plugin TitanChat
+	 */
 	public PermsBridge(TitanChat plugin) {
 		this.plugin = plugin;
 		
 		if (plugin.getServer().getPluginManager().getPlugin("Vault") != null) {
-			setupChatService();
-			setupPermissionService();
+			RegisteredServiceProvider<Chat> chatProvider = plugin.getServer().getServicesManager().getRegistration(Chat.class);
+			
+			if (chatProvider != null)
+				chat = chatProvider.getProvider();
+			
+			db.i("Vault Chat Service is set up: " + (chat != null));
+			
+			RegisteredServiceProvider<Permission> permissionProvider = plugin.getServer().getServicesManager().getRegistration(Permission.class);
+			
+			if (permissionProvider != null)
+				perm = permissionProvider.getProvider();
+			
+			db.i("Vault Permission Service is set up: " + (perm != null));
 		}
 	}
 	
@@ -462,36 +478,6 @@ public final class PermsBridge implements Listener {
 			TitanChat.getInstance().getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), "permissions player unset " + player.getName() + " " + permission);
 			break;
 		}
-	}
-	
-	/**
-	 * Sets up the Chat Service of Vault
-	 * 
-	 * @return True if a Chat Service is present
-	 */
-	public boolean setupChatService() {
-		RegisteredServiceProvider<Chat> chatProvider = plugin.getServer().getServicesManager().getRegistration(Chat.class);
-		
-		if (chatProvider != null)
-			chat = chatProvider.getProvider();
-
-		db.i("Vault Chat Service is set up: " + (chat != null));
-		return chat != null;
-	}
-	
-	/**
-	 * Sets up the Permission Service of Vault
-	 * 
-	 * @return True if a Permission Service is present
-	 */
-	public boolean setupPermissionService() {
-		RegisteredServiceProvider<Permission> permissionProvider = plugin.getServer().getServicesManager().getRegistration(Permission.class);
-		
-		if (permissionProvider != null)
-			perm = permissionProvider.getProvider();
-		
-		db.i("Vault Permission Service is set up: " + (perm != null));
-		return perm != null;
 	}
 	
 	public Permissions using() {

@@ -40,10 +40,20 @@ public final class TitanChatListener implements Listener {
 
 	private TitanChat plugin;
 	
+	/**
+	 * Listens to events and act accordingly
+	 * 
+	 * @param plugin TitanChat
+	 */
 	public TitanChatListener(TitanChat plugin) {
 		this.plugin = plugin;
 	}
 	
+	/**
+	 * Listens to the LoadEvent
+	 * 
+	 * @param event LoadEvent
+	 */
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onLoad(LoadEvent event) {
 		if (event.getLoadable() instanceof Addon && event.getPlugin() instanceof TitanChat)

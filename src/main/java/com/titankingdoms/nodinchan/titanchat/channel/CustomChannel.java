@@ -169,7 +169,7 @@ public class CustomChannel extends Channel implements Listener {
 	 * Reloads the config
 	 */
 	public final void reloadConfig() {
-		if (configFile == null) { configFile = new File(new File(plugin.getAddonDir(), super.getName()), "config.yml"); }
+		if (configFile == null) { configFile = new File(new File(plugin.getAddonManager().getAddonDir(), super.getName()), "config.yml"); }
 		
 		config = YamlConfiguration.loadConfiguration(configFile);
 		
