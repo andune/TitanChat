@@ -1,5 +1,8 @@
 package com.titankingdoms.nodinchan.titanchat.command.commands;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
@@ -8,6 +11,7 @@ import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
 import com.titankingdoms.nodinchan.titanchat.command.Command;
 import com.titankingdoms.nodinchan.titanchat.command.CommandID;
 import com.titankingdoms.nodinchan.titanchat.command.CommandInfo;
+import com.titankingdoms.nodinchan.titanchat.events.MessageSendEvent;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -53,8 +57,10 @@ public class ChatCommand extends Command {
 			str.append(word);
 		}
 		
-		plugin.getServer().broadcastMessage(plugin.getFormatHandler().broadcastFormat(player, str.toString()));
-		plugin.getLogger().info("<" + player.getName() + "> " + str.toString());
+		MessageSendEvent event = new MessageSendEvent(player, plugin.getServer().getOnlinePlayers(), str.toString());
+		plugin.getServer().getPluginManager().callEvent(event);
+		
+		plugin.getServer().broadcastMessage(plugin.getFormatHandler().broadcastFormat(player).replace("%message", event.getMessage()));
 	}
 	
 	@CommandID(name = "Emote", triggers = { "me", "em" })
@@ -71,8 +77,26 @@ public class ChatCommand extends Command {
 			str.append(word);
 		}
 		
-		cm.getChannel(player).sendMessage(player, plugin.getFormatHandler().emoteFormat(player, str.toString()));
-		plugin.getLogger().info("* " + player.getName() + " " + str.toString());
+		List<Player> recipants = new ArrayList<Player>();
+		
+		for (String name : cm.getChannel(player).getParticipants()) {
+			if (plugin.getPlayer(name) != null && !recipants.contains(plugin.getPlayer(name)))
+				recipants.add(plugin.getPlayer(name));
+		}
+		
+		for (String name : cm.getFollowers(cm.getChannel(player))) {
+			if (plugin.getPlayer(name) != null && !recipants.contains(plugin.getPlayer(name)))
+				recipants.add(plugin.getPlayer(name));
+		}
+		
+		MessageSendEvent event = new MessageSendEvent(player, recipants, str.toString());
+		plugin.getServer().getPluginManager().callEvent(event);
+		
+		String format = plugin.getFormatHandler().emoteFormat(player);
+		
+		for (Player recipant : recipants) {
+			recipant.sendMessage(format.replace("%action", event.getMessage()));
+		}
 	}
 	
 	@CommandID(name = "Silence", triggers = "silence", requireChannel = false)
@@ -144,9 +168,13 @@ public class ChatCommand extends Command {
 		}
 		
 		if (!args[0].equalsIgnoreCase("console")) {
-			player.sendMessage("You whispered to " + plugin.getPlayer(args[0]).getDisplayName() + ": " + str.toString());
-			plugin.getPlayer(args[0]).sendMessage(plugin.getFormatHandler().whisperFormat(player, str.toString()));
-			plugin.getLogger().info("[" + player.getName() + " -> " + plugin.getPlayer(args[0]).getName() + "] " + str.toString());
+			MessageSendEvent event = new MessageSendEvent(player, new Player[] { plugin.getPlayer(args[0]) }, str.toString());
+			plugin.getServer().getPluginManager().callEvent(event);
+			
+			String format = plugin.getFormatHandler().whisperFormat(player);
+			
+			player.sendMessage(ChatColor.DARK_PURPLE + "[You -> " + plugin.getPlayer(args[0]).getDisplayName() + "] " + event.getMessage());
+			plugin.getPlayer(args[0]).sendMessage(format.replace("%message", event.getMessage()));
 			
 		} else { plugin.getLogger().info(player.getName() + " whispers: " + str.toString()); }
 	}

@@ -11,32 +11,9 @@ import com.nodinchan.ncloader.LoadEvent;
 import com.titankingdoms.nodinchan.titanchat.addon.Addon;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
-import com.titankingdoms.nodinchan.titanchat.events.MessageFormatEvent;
 import com.titankingdoms.nodinchan.titanchat.events.MessageSendEvent;
 
-/*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
- * 
- *     This program is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- * 
- *     This program is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- * 
- *     You should have received a copy of the GNU General Public License
- *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-/**
- * TitanChatListener - Listeners
- * 
- * @author NodinChan
- *
- */
-public final class TitanChatListener implements Listener {
+public class TitanChatListener implements Listener {
 
 	private TitanChat plugin;
 	
@@ -68,40 +45,27 @@ public final class TitanChatListener implements Listener {
 	 * 
 	 * @param event PlayerChatEvent
 	 */
-	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onPlayerChat(PlayerChatEvent event) {
 		Player player = event.getPlayer();
-		String msg = event.getMessage();
+		String message = event.getMessage();
 		
 		if (plugin.enableChannels()) {
 			event.setCancelled(true);
 			
-			if (msg.startsWith(plugin.getConfig().getString("channels.quick-message")) && !msg.substring(1).startsWith(" ")) {
-				Channel channel = plugin.getChannelManager().getChannel(msg.split(" ")[0].substring(1));
-					
+			String quickMessage = plugin.getConfig().getString("channels.quick-message");
+			
+			if (message.startsWith(quickMessage) && !message.substring(quickMessage.length()).startsWith(" ")) {
+				Channel channel = plugin.getChannelManager().getChannel(message.split(" ")[0].substring(quickMessage.length()));
+				
 				if (channel != null) {
 					if (!channel.canAccess(player))
 						return;
 					
-					if (!plugin.hasVoice(player)) {
-						if (plugin.isSilenced()) { plugin.sendWarning(player, "The server is silenced"); return; }
-						if (channel.isSilenced()) { plugin.sendWarning(player, "The channel is silenced"); return; }
-						if (channel.getMuteList().contains(player.getName())) { plugin.sendWarning(player, "You have been muted"); return; }
-						if (plugin.muted(player)) { plugin.sendWarning(player, "You have been muted"); return; }
-					}
-					
-					String message = msg.replace(msg.split(" ")[0] + " ", "");
-					
-					if (channel instanceof CustomChannel) {
-						MessageFormatEvent formatEvent = new MessageFormatEvent(player, ((CustomChannel) channel).getFormat());
-						plugin.getServer().getPluginManager().callEvent(formatEvent);
-						
-						((CustomChannel) channel).sendMessage(player, ((CustomChannel) channel).format(player, formatEvent.getFormat(), message));
+					if (voiceless(player, channel))
 						return;
-					}
 					
-					message = plugin.getFormatHandler().format(player, channel.getName(), message);
-					channel.sendMessage(player, message);
+					channel.sendMessage(player, message.substring(message.split(" ")[0].length()));
 					
 				} else { plugin.sendWarning(player, "No such channel"); }
 				
@@ -110,28 +74,15 @@ public final class TitanChatListener implements Listener {
 			
 			Channel channel = plugin.getChannelManager().getChannel(player);
 			
-			if (!plugin.hasVoice(player)) {
-				if (plugin.isSilenced()) { plugin.sendWarning(player, "The server is silenced"); return; }
-				if (channel.isSilenced()) { plugin.sendWarning(player, "The channel is silenced"); return; }
-				if (channel.getMuteList().contains(player.getName())) { plugin.sendWarning(player, "You have been muted"); return; }
-				if (plugin.muted(player)) { plugin.sendWarning(player, "You have been muted"); return; }
-			}
-			
-			if (channel instanceof CustomChannel) {
-				MessageFormatEvent formatEvent = new MessageFormatEvent(player, ((CustomChannel) channel).getFormat());
-				plugin.getServer().getPluginManager().callEvent(formatEvent);
-				
-				((CustomChannel) channel).sendMessage(player, ((CustomChannel) channel).format(player, formatEvent.getFormat(), msg));
+			if (voiceless(player, channel))
 				return;
-			}
 			
-			String message = plugin.getFormatHandler().format(player, channel.getName(), msg);
 			channel.sendMessage(player, message);
 			
 		} else {
-			event.setFormat(plugin.getFormatHandler().format(player));
+			event.setFormat(plugin.getFormatHandler().format(player, null, true));
 			
-			MessageSendEvent sendEvent = new MessageSendEvent(player, plugin.getServer().getOnlinePlayers(), msg);
+			MessageSendEvent sendEvent = new MessageSendEvent(player, plugin.getServer().getOnlinePlayers(), message);
 			plugin.getServer().getPluginManager().callEvent(sendEvent);
 			
 			if (sendEvent.isCancelled()) {
@@ -139,9 +90,9 @@ public final class TitanChatListener implements Listener {
 				return;
 			}
 			
-			msg = sendEvent.getMessage();
+			String colour = plugin.getConfig().getString("channels.chat-display-colour");
 			
-			event.setMessage(plugin.getFormatHandler().colourise(msg));
+			event.setMessage(plugin.getFormatHandler().colourise(colour + sendEvent.getMessage()));
 		}
 	}
 	
@@ -165,5 +116,32 @@ public final class TitanChatListener implements Listener {
 			plugin.sendWarning(event.getPlayer(), "All channels are silenced");
 		else if (channel.isSilenced())
 			plugin.sendWarning(event.getPlayer(), channel.getName() + " is silenced");
+	}
+	
+	private boolean voiceless(Player player, Channel channel) {
+		if (plugin.getPermsBridge().has(player, "TitanChat.voice"))
+			return false;
+		
+		if (plugin.isSilenced()) {
+			plugin.sendWarning(player, "The server is silenced");
+			return true;
+		}
+		
+		if (channel.isSilenced()) {
+			plugin.sendWarning(player, "The channel is silenced");
+			return true;
+		}
+		
+		if (channel.getMuteList().contains(player.getName())) {
+			plugin.sendWarning(player, "You have been muted");
+			return true;
+		}
+		
+		if (plugin.getChannelManager().isMuted(player)) {
+			plugin.sendWarning(player, "You have been muted");
+			return true;
+		}
+		
+		return false;
 	}
 }

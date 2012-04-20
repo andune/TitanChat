@@ -10,7 +10,6 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
@@ -71,8 +70,6 @@ public final class TitanChat extends JavaPlugin {
 	private PermsBridge permBridge;
 	
 	private boolean silenced = false;
-	
-	private List<String> muted;
 	
 	/**
 	 * Creates a new list with items seperated with commas
@@ -202,17 +199,6 @@ public final class TitanChat extends JavaPlugin {
 		return getServer().getPlayer(name);
 	}
 	
-	/**
-	 * Check if the Player has voice
-	 * 
-	 * @param player The Player to check
-	 * 
-	 * @return True if the Player has TitanChat.voice
-	 */
-	public boolean hasVoice(Player player) {
-		return permBridge.has(player, "TitanChat.voice");
-	}
-	
 	public boolean initLoaderLib() {
 		try {
 			File destination = new File(getDataFolder().getParentFile().getParentFile(), "lib");
@@ -331,33 +317,6 @@ public final class TitanChat extends JavaPlugin {
 	}
 	
 	/**
-	 * Mute/Unmute the Player
-	 * 
-	 * @param player The Player to mute/unmute
-	 * 
-	 * @param mute Whether to mute or unmute
-	 */
-	public void mute(Player player, boolean mute) {
-		db.i((mute ? "" : "un") + "muting player");
-		
-		if (mute)
-			muted.add(player.getName());
-		else
-			muted.remove(player.getName());
-	}
-	
-	/**
-	 * Check if player is muted
-	 * 
-	 * @param player The Player to check
-	 * 
-	 * @return True if the Player is muted
-	 */
-	public boolean muted(Player player) {
-		return muted.contains(player.getName());
-	}
-	
-	/**
 	 * Called when a Player uses a command
 	 * 
 	 * @param sender The sender who sent the command
@@ -390,7 +349,8 @@ public final class TitanChat extends JavaPlugin {
 			
 			if (!(sender instanceof Player)) {
 				if (args[0].equalsIgnoreCase("reload")) {
-					getServer().dispatchCommand(sender, "titanchat reload");
+					try { cmdManager.getCommandExecutor("Reload").execute(null, new String[0]);
+					} catch (Exception e) { e.printStackTrace(); }
 					return true;
 				}
 				
@@ -580,8 +540,6 @@ public final class TitanChat extends JavaPlugin {
 			saveResource("channels/README.yml", false);
 			saveResource("channels/Staff.yml", false);
 		}
-		
-		muted = new ArrayList<String>();
 		
 		addonManager = new AddonManager(this);
 		chManager = new ChannelManager(this);

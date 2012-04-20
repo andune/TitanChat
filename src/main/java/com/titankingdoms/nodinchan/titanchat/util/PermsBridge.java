@@ -62,7 +62,7 @@ public final class PermsBridge implements Listener {
 	
 	private static final Debugger db = new Debugger(5);
 	
-	private Plugin permissionsPlugin;
+	private static Plugin permissionsPlugin;
 	
 	private String name = "SuperPerms";
 	
@@ -119,44 +119,41 @@ public final class PermsBridge implements Listener {
 		
 		db.i("Getting group prefix of player " + player.getName());
 		
-		if (perm != null && chat != null) {
-			prefix = chat.getGroupPrefix(player.getWorld(), perm.getPrimaryGroup(player));
-			db.i("Returning: " + prefix);
-			return (prefix != null) ? prefix : "";
-		}
-		
 		for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
 			db.i("Checking if " + permInfo.getPermission() + " is a prefix permission");
 			
-			if (!(permInfo.getPermission().startsWith("TitanChat.g.prefix.")) || !(permInfo.getValue()))
+			if (!permInfo.getPermission().startsWith("TitanChat.g.prefix.") || !permInfo.getValue())
 				continue;
 			
 			prefix = permInfo.getPermission().substring(19);
 			break;
 		}
 		
-		if (prefix.equals("")) {
-			switch (using()) {
+		if (prefix.equals("") && using().equals(Permissions.PERMISSIONSEX)) {
+			db.i("Prefix not found with permission attachments, checking PermissionsEx");
 			
-			case PERMISSIONSEX:
-				db.i("Prefix not found with permission attachments, checking PermissionsEx");
-				
-				PermissionGroup[] groups = PermissionsEx.getPermissionManager().getUser(player).getGroups(player.getWorld().getName());
-				
-				if (groups != null && groups.length > 0) {
-					for (String perm : groups[0].getPermissions(player.getWorld().getName())) {
-						db.i("Checking if " + perm + " is a prefix permission");
-						
-						if (perm.startsWith("TitanChat.g.prefix.")) {
-							prefix = perm.substring(19);
-							db.i("PermissionsEx permissions returned prefix: " + prefix);
-						}
+			PermissionGroup[] groups = PermissionsEx.getPermissionManager().getUser(player).getGroups(player.getWorld().getName());
+			
+			if (groups != null && groups.length > 0) {
+				for (String perm : groups[0].getPermissions(player.getWorld().getName())) {
+					db.i("Checking if " + perm + " is a prefix permission");
+					
+					if (perm.startsWith("TitanChat.g.prefix.")) {
+						prefix = perm.substring(19);
+						db.i("PermissionsEx permissions returned prefix: " + prefix);
 					}
 				}
-				break;
 			}
 		}
 		
+		if (prefix.equals("")) {
+			if (perm != null && chat != null)
+				prefix = chat.getGroupPrefix(player.getWorld(), perm.getPrimaryGroup(player));
+			else
+				prefix = using().getGroupPrefix(player);
+		}
+		
+		db.i("Returning: " + prefix);
 		return (prefix.equals("") || prefix == null) ? "" : prefix;
 	}
 	
@@ -172,12 +169,6 @@ public final class PermsBridge implements Listener {
 		
 		db.i("Getting group suffix of player " + player.getName());
 		
-		if (perm != null && chat != null) {
-			suffix = chat.getGroupSuffix(player.getWorld(), perm.getPrimaryGroup(player));
-			db.i("Returning: " + suffix);
-			return (suffix != null) ? suffix : "";
-		}
-		
 		for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
 			db.i("Checking if " + permInfo.getPermission() + " is a suffix permission");
 			
@@ -188,26 +179,29 @@ public final class PermsBridge implements Listener {
 			break;
 		}
 		
-		if (suffix.equals("")) {
-			switch (using()) {
+		if (suffix.equals("") && using().equals(Permissions.PERMISSIONSEX)) {
+			db.i("Suffix not found with permission attachments, checking PermissionsEx");
 			
-			case PERMISSIONSEX:
-				db.i("Suffix not found with permission attachments, checking PermissionsEx");
-				
-				PermissionGroup[] groups = PermissionsEx.getPermissionManager().getUser(player).getGroups(player.getWorld().getName());
-				
-				if (groups != null && groups.length > 0) {
-					for (String perm : groups[0].getPermissions(player.getWorld().getName())) {
-						if (perm.startsWith("TitanChat.g.suffix.")) {
-							suffix = perm.substring(19);
-							db.i("PermissionsEx permissions returned suffix: " + suffix);
-						}
+			PermissionGroup[] groups = PermissionsEx.getPermissionManager().getUser(player).getGroups(player.getWorld().getName());
+			
+			if (groups != null && groups.length > 0) {
+				for (String perm : groups[0].getPermissions(player.getWorld().getName())) {
+					if (perm.startsWith("TitanChat.g.suffix.")) {
+						suffix = perm.substring(19);
+						db.i("PermissionsEx permissions returned suffix: " + suffix);
 					}
 				}
-				break;
 			}
 		}
 		
+		if (suffix.equals("")) {
+			if (perm != null && chat != null)
+				suffix = chat.getGroupSuffix(player.getWorld(), perm.getPrimaryGroup(player));
+			else
+				suffix = using().getGroupSuffix(player);
+		}
+		
+		db.i("Returning: " + suffix);
 		return (suffix.equals("") || suffix == null) ? "" : suffix;
 	}
 	
@@ -223,12 +217,6 @@ public final class PermsBridge implements Listener {
 		
 		db.i("Getting prefix of player: " + player.getName());
 		
-		if (chat != null) {
-			prefix = chat.getPlayerPrefix(player.getWorld(), player.getName());
-			db.i("Returning: " + prefix);
-			return (prefix != null) ? prefix : getGroupPrefix(player);
-		}
-		
 		for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
 			db.i("Checking if " + permInfo.getPermission() + " is a prefix permission");
 			
@@ -239,23 +227,26 @@ public final class PermsBridge implements Listener {
 			break;
 		}
 		
-		if (prefix.equals("")) {
-			switch (using()) {
+		if (prefix.equals("") && using().equals(Permissions.PERMISSIONSEX)) {
+			db.i("Prefix not found with permission attachments, checking PermissionsEx");
 			
-			case PERMISSIONSEX:
-				db.i("Prefix not found with permission attachments, checking PermissionsEx");
-				
-				PermissionUser user = PermissionsEx.getPermissionManager().getUser(player);
-				for (String perm : user.getPermissions(player.getWorld().getName())) {
-					if (perm.startsWith("TitanChat.p.prefix.")) {
-						prefix = perm.substring(19);
-						db.i("PermissionsEx permissions returned prefix: " + prefix);
-					}
+			PermissionUser user = PermissionsEx.getPermissionManager().getUser(player);
+			for (String perm : user.getPermissions(player.getWorld().getName())) {
+				if (perm.startsWith("TitanChat.p.prefix.")) {
+					prefix = perm.substring(19);
+					db.i("PermissionsEx permissions returned prefix: " + prefix);
 				}
-				break;
 			}
 		}
 		
+		if (prefix.equals("")) {
+			if (chat != null)
+				prefix = chat.getPlayerPrefix(player.getWorld(), player.getName());
+			else
+				prefix = using().getPlayerPrefix(player);
+		}
+		
+		db.i("Returning: " + prefix);
 		return (prefix.equals("") || prefix == null) ? getGroupPrefix(player) : prefix;
 	}
 	
@@ -271,12 +262,6 @@ public final class PermsBridge implements Listener {
 		
 		db.i("Getting suffix of player: " + player.getName());
 		
-		if (chat != null) {
-			suffix = chat.getPlayerSuffix(player.getWorld(), player.getName());
-			db.i("Returning: " + suffix);
-			return (suffix != null) ? suffix : getGroupSuffix(player);
-		}
-		
 		for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
 			db.i("Checking if " + permInfo.getPermission() + " is a suffix permission");
 			
@@ -287,26 +272,36 @@ public final class PermsBridge implements Listener {
 			break;
 		}
 		
-		if (suffix.equals("")) {
-			switch (using()) {
+		if (suffix.equals("") && using().equals(Permissions.PERMISSIONSEX)) {
+			db.i("Suffix not found with permission attachments, checking PermissionsEx");
 			
-			case PERMISSIONSEX:
-				db.i("Suffix not found with permission attachments, checking PermissionsEx");
-				
-				PermissionUser user = PermissionsEx.getPermissionManager().getUser(player);
-				for (String perm : user.getPermissions(player.getWorld().getName())) {
-					if (perm.startsWith("TitanChat.p.suffix.")) {
-						suffix = perm.substring(19);
-						db.i("PermissionsEx permissions returned suffix: " + suffix);
-					}
+			PermissionUser user = PermissionsEx.getPermissionManager().getUser(player);
+			for (String perm : user.getPermissions(player.getWorld().getName())) {
+				if (perm.startsWith("TitanChat.p.suffix.")) {
+					suffix = perm.substring(19);
+					db.i("PermissionsEx permissions returned suffix: " + suffix);
 				}
-				break;
 			}
 		}
 		
+		if (suffix.equals("")) {
+			if (chat != null)
+				suffix = chat.getPlayerSuffix(player.getWorld(), player.getName());
+			else
+				suffix = using().getPlayerSuffix(player);
+		}
+		
+		db.i("Returning: " + suffix);
 		return (suffix.equals("") || suffix == null) ? getGroupSuffix(player) : suffix;
 	}
 	
+	/**
+	 * Check if a Player has a permission
+	 * 
+	 * @param player The Player to be checked
+	 * 
+	 * @param permission The permission to be checked
+	 */
 	public boolean has(Player player, String permission) {
 		return has(player, permission, false);
 	}
@@ -491,34 +486,216 @@ public final class PermsBridge implements Listener {
 		return perm != null;
 	}
 	
-	public enum Permissions {
-		PERMISSIONSEX("PermissionsEx"),
-		BPERMISSIONS("bPermissions"),
-		SUPERPERMS("SuperPerms"),
-		PERMISSIONSBUKKIT("PermissionsBukkit"),
-		GROUPMANAGER("GroupManager"),
-		ZPERMISSIONS("zPermissions");
+	protected enum Permissions {
+		PERMISSIONSEX("PermissionsEx") {
+			
+			@Override
+			protected String getGroupPrefix(Player player) {
+				PermissionUser user = PermissionsEx.getPermissionManager().getUser(player);
+				
+				if (user != null) {
+					if (user.getGroups(player.getWorld().getName()).length > 0) {
+						PermissionGroup group = user.getGroups(player.getWorld().getName())[0];
+						return (group != null) ? group.getPrefix() : "";
+					}
+				}
+				
+				return "";
+			}
+			
+			@Override
+			protected String getGroupSuffix(Player player) {
+				PermissionUser user = PermissionsEx.getPermissionManager().getUser(player);
+				
+				if (user != null) {
+					if (user.getGroups(player.getWorld().getName()).length > 0) {
+						PermissionGroup group = user.getGroups(player.getWorld().getName())[0];
+						return (group != null) ? group.getSuffix() : "";
+					}
+				}
+				
+				return "";
+			}
+			
+			@Override
+			protected String getPlayerPrefix(Player player) {
+				PermissionUser user = PermissionsEx.getPermissionManager().getUser(player);
+				return (user != null) ? user.getPrefix() : "";
+			}
+			
+			@Override
+			protected String getPlayerSuffix(Player player) {
+				PermissionUser user = PermissionsEx.getPermissionManager().getUser(player);
+				return (user != null) ? user.getSuffix() : "";
+			}
+			
+		},
+		BPERMISSIONS("bPermissions") {
+			
+			@Override
+			protected String getGroupPrefix(Player player) {
+				String[] groups = ApiLayer.getGroups(player.getWorld().getName(), CalculableType.USER, player.getName());
+				
+				if (groups != null) {
+					if (groups.length > 0)
+						return ApiLayer.getValue(player.getWorld().getName(), CalculableType.GROUP, groups[0], "prefix");
+				}
+				
+				return "";
+			}
+			
+			@Override
+			protected String getGroupSuffix(Player player) {
+				String[] groups = ApiLayer.getGroups(player.getWorld().getName(), CalculableType.USER, player.getName());
+				
+				if (groups != null) {
+					if (groups.length > 0)
+						return ApiLayer.getValue(player.getWorld().getName(), CalculableType.GROUP, groups[0], "suffix");
+				}
+				
+				return "";
+			}
+			
+			@Override
+			protected String getPlayerPrefix(Player player) {
+				return ApiLayer.getValue(player.getWorld().getName(), CalculableType.USER, player.getName(), "prefix");
+			}
+			
+			@Override
+			protected String getPlayerSuffix(Player player) {
+				return ApiLayer.getValue(player.getWorld().getName(), CalculableType.USER, player.getName(), "suffix");
+			}
+		},
+		SUPERPERMS("SuperPerms") {
+			
+			@Override
+			protected String getGroupPrefix(Player player) {
+				return "";
+			}
+			
+			@Override
+			protected String getGroupSuffix(Player player) {
+				return "";
+			}
+			
+			@Override
+			protected String getPlayerPrefix(Player player) {
+				return "";
+			}
+			
+			@Override
+			protected String getPlayerSuffix(Player player) {
+				return "";
+			}
+		},
+		PERMISSIONSBUKKIT("PermissionsBukkit") {
+			
+			@Override
+			protected String getGroupPrefix(Player player) {
+				return "";
+			}
+			
+			@Override
+			protected String getGroupSuffix(Player player) {
+				return "";
+			}
+			
+			@Override
+			protected String getPlayerPrefix(Player player) {
+				return "";
+			}
+			
+			@Override
+			protected String getPlayerSuffix(Player player) {
+				return "";
+			}
+		},
+		GROUPMANAGER("GroupManager") {
+			
+			@Override
+			protected String getGroupPrefix(Player player) {
+				AnjoPermissionsHandler handler = ((GroupManager) PermsBridge.permissionsPlugin).getWorldsHolder().getWorldPermissions(player.getWorld().getName());
+				return (handler != null) ? handler.getGroupPrefix(handler.getGroup(player.getName())) : "";
+			}
+			
+			@Override
+			protected String getGroupSuffix(Player player) {
+				AnjoPermissionsHandler handler = ((GroupManager) PermsBridge.permissionsPlugin).getWorldsHolder().getWorldPermissions(player.getWorld().getName());
+				return (handler != null) ? handler.getGroupSuffix(handler.getGroup(player.getName())) : "";
+			}
+			
+			@Override
+			protected String getPlayerPrefix(Player player) {
+				AnjoPermissionsHandler handler = ((GroupManager) PermsBridge.permissionsPlugin).getWorldsHolder().getWorldPermissions(player.getWorld().getName());
+				return (handler != null) ? handler.getUserPrefix(player.getName()) : "";
+			}
+			
+			@Override
+			protected String getPlayerSuffix(Player player) {
+				AnjoPermissionsHandler handler = ((GroupManager) PermsBridge.permissionsPlugin).getWorldsHolder().getWorldPermissions(player.getWorld().getName());
+				return (handler != null) ? handler.getUserSuffix(player.getName()) : "";
+			}
+		},
+		ZPERMISSIONS("zPermissions") {
+			
+			@Override
+			protected String getGroupPrefix(Player player) {
+				return "";
+			}
+			
+			@Override
+			protected String getGroupSuffix(Player player) {
+				return "";
+			}
+			
+			@Override
+			protected String getPlayerPrefix(Player player) {
+				return "";
+			}
+			
+			@Override
+			protected String getPlayerSuffix(Player player) {
+				return "";
+			}
+		};
 		
 		private String name;
 		
 		private static Map<String, Permissions> NAME_MAP = new HashMap<String, Permissions>();
 		
+		/**
+		 * Enum of Permissions Plugins TitanChat supports
+		 * 
+		 * @param name Plugin name
+		 */
 		private Permissions(String name) {
 			this.name = name;
 		}
 		
 		static {
-			for (Permissions permission : EnumSet.allOf(Permissions.class)) {
+			for (Permissions permission : EnumSet.allOf(Permissions.class))
 				NAME_MAP.put(permission.name, permission);
-			}
 		}
 		
+		/**
+		 * Gets the Permissions Enum from the plugin's name
+		 * 
+		 * @param name Plugin name
+		 * 
+		 * @return Permissions Enum of that name
+		 */
 		public static Permissions fromName(String name) {
 			return NAME_MAP.get(name);
 		}
 		
+		protected abstract String getGroupPrefix(Player player);
+		protected abstract String getGroupSuffix(Player player);
+		
 		public String getName() {
 			return name;
 		}
+		
+		protected abstract String getPlayerPrefix(Player player);
+		protected abstract String getPlayerSuffix(Player player);
 	}
 }

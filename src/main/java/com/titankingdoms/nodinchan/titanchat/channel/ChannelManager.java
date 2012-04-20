@@ -54,6 +54,7 @@ public final class ChannelManager {
 	private int customChAmount = 0;
 	
 	private List<Channel> channels;
+	private final List<String> muted;
 	
 	private final Map<Channel, Map<String, List<String>>> channelInvitors;
 	private final Map<CustomChannel, JarFile> jarFiles;
@@ -71,6 +72,7 @@ public final class ChannelManager {
 			plugin.log(Level.INFO, "Creating custom channel directory...");
 		
 		this.channels = new ArrayList<Channel>();
+		this.muted = new ArrayList<String>();
 		this.channelInvitors = new HashMap<Channel, Map<String, List<String>>>();
 		this.jarFiles = new HashMap<CustomChannel, JarFile>();
 	}
@@ -345,6 +347,17 @@ public final class ChannelManager {
 	}
 	
 	/**
+	 * Check if player is muted
+	 * 
+	 * @param player The Player to check
+	 * 
+	 * @return True if the Player is muted
+	 */
+	public boolean isMuted(Player player) {
+		return muted.contains(player.getName());
+	}
+
+	/**
 	 * Loads the Channel of the given name
 	 * 
 	 * @param name The Channel name
@@ -431,6 +444,22 @@ public final class ChannelManager {
 		
 		variables.setNameColour(channel.getConfig().getString("name-display-colour"));
 		variables.setTag(channel.getConfig().getString("tag"));
+	}
+	
+	/**
+	 * Mute/Unmute the Player
+	 * 
+	 * @param player The Player to mute/unmute
+	 * 
+	 * @param mute Whether to mute or unmute
+	 */
+	public void mute(Player player, boolean mute) {
+		db.i((mute ? "" : "un") + "muting player");
+		
+		if (mute)
+			muted.add(player.getName());
+		else
+			muted.remove(player.getName());
 	}
 	
 	/**

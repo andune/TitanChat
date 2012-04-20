@@ -72,6 +72,7 @@ TitanChat, a chat management and formatting plugin for Bukkit.
 * 16.04.12 - Loader now out-built as lib
 * 17.04.12 - Permissions Prefix and Suffix hooks now out-built
 * 19.04.12 - Now uses Metrics, added a new MessageReceiveEvent and regrouped several JAVA Files
+* 20.04.12 - PrefixSuffix Addon built back in
 
 -----------------------------------------------------------------------------------------------------------------------
 
