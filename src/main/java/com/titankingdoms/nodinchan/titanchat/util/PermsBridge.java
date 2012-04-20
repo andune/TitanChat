@@ -345,6 +345,15 @@ public final class PermsBridge implements Listener {
 			case PERMISSIONSBUKKIT:
 				PermissionsPlugin permBukkit = (PermissionsPlugin) TitanChat.getInstance().getServer().getPluginManager().getPlugin("PermissionsBukkit");
 				
+				if (permBukkit == null)
+					System.out.println("PermissionsBukkit is null");
+				
+				if (permBukkit.getPlayerInfo(player.getName()) == null)
+					System.out.println("PlayerInfo is null");
+				
+				if (permBukkit.getPlayerInfo(player.getName()).getPermissions() == null)
+					System.out.println("No permissions in PlayerInfo");
+				
 				for (String perm : permBukkit.getPlayerInfo(player.getName()).getPermissions().keySet()) {
 					if (perm.equals(permission) && permBukkit.getPlayerInfo(player.getName()).getPermissions().get(perm))
 						return true;
