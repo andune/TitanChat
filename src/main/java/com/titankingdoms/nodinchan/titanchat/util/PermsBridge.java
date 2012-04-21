@@ -10,6 +10,7 @@ import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.permission.Permission;
 
 import org.anjocaido.groupmanager.GroupManager;
+import org.anjocaido.groupmanager.data.Group;
 import org.anjocaido.groupmanager.data.User;
 import org.anjocaido.groupmanager.dataholder.OverloadedWorldHolder;
 import org.anjocaido.groupmanager.permissions.AnjoPermissionsHandler;
@@ -377,6 +378,21 @@ public final class PermsBridge implements Listener {
 	}
 	
 	public void removePermission(Player player, String permission) {
+		if (perm != null) {
+			if (perm.playerRemove(player, permission)) {
+				if (perm.groupRemove(player.getWorld(), perm.getPrimaryGroup(player), permission))
+					return;
+				else
+					return;
+				
+			} else if (perm.groupRemove(player.getWorld(), perm.getPrimaryGroup(player), permission)) {
+				if (perm.playerRemove(player, permission))
+					return;
+				else
+					return;
+			}
+		}
+		
 		for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
 			if (!permInfo.getPermission().equals(permission))
 				continue;
@@ -463,8 +479,16 @@ public final class PermsBridge implements Listener {
 			
 			@Override
 			protected void remove(Player player, String permission) {
-				PermissionUser pexUser = PermissionsEx.getPermissionManager().getUser(player);
-				pexUser.removePermission(permission);
+				PermissionUser user = PermissionsEx.getPermissionManager().getUser(player);
+				
+				if (user != null) {
+					user.removePermission(permission);
+					
+					if (user.getGroupsNames(player.getWorld().getName()).length > 0) {
+						PermissionGroup group = PermissionsEx.getPermissionManager().getGroup(user.getGroupsNames(player.getWorld().getName())[0]);
+						group.removePermission(permission);
+					}
+				}
 			}
 		},
 		BPERMISSIONS("bPermissions") {
@@ -526,6 +550,11 @@ public final class PermsBridge implements Listener {
 			@Override
 			protected void remove(Player player, String permission) {
 				ApiLayer.removePermission(player.getWorld().getName(), CalculableType.USER, player.getName(), permission);
+				
+				String[] groups = ApiLayer.getGroups(player.getWorld().getName(), CalculableType.USER, player.getName());
+				
+				if (groups != null && groups.length > 0)
+					ApiLayer.removePermission(player.getWorld().getName(), CalculableType.GROUP, groups[0], permission);
 			}
 		},
 		SUPERPERMS("SuperPerms") {
@@ -570,7 +599,10 @@ public final class PermsBridge implements Listener {
 			
 			@Override
 			protected void remove(Player player, String permission) {
-				TitanChat.getInstance().getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), "permissions player unsetperm " + player.getName() + " " + player.getWorld().getName() + ":" + permission);
+				for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
+					if (permInfo.getAttachment() != null && permInfo.getAttachment().getPlugin().equals(permissionsPlugin))
+						permInfo.getAttachment().unsetPermission(permission);
+				}
 			}
 		},
 		PERMISSIONSBUKKIT("PermissionsBukkit") {
@@ -676,8 +708,11 @@ public final class PermsBridge implements Listener {
 			protected void remove(Player player, String permission) {
 				OverloadedWorldHolder holder = ((GroupManager) TitanChat.getInstance().getServer().getPluginManager().getPlugin("GroupManager")).getWorldsHolder().getWorldDataByPlayerName(player.getName());
 				if (holder != null) {
-					User gmUser = holder.getUser(player.getName());
-					if (gmUser != null) { gmUser.removePermission(permission); }
+					User user = holder.getUser(player.getName());
+					Group group = user.getGroup();
+					
+					if (user != null) { user.removePermission(permission); }
+					if (group != null) { group.removePermission(permission); }
 				}
 			}
 		},
