@@ -24,9 +24,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.nodinchan.ncloader.MetricsHook;
-import com.nodinchan.ncloader.metrics.Graph;
-import com.nodinchan.ncloader.metrics.Plotter;
+import com.nodinchan.ncloader.metrics.Metrics.Graph;
+import com.nodinchan.ncloader.metrics.Metrics;
+import com.nodinchan.ncloader.metrics.Metrics.Plotter;
 import com.titankingdoms.nodinchan.titanchat.addon.AddonManager;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
 import com.titankingdoms.nodinchan.titanchat.command.CommandManager;
@@ -283,21 +283,17 @@ public final class TitanChat extends JavaPlugin {
 	 * @return True is Metrics is initialised
 	 */
 	public boolean initMetrics() {
-		log(Level.INFO, "Hooking Metrics");
-		
-		MetricsHook metrics = new MetricsHook(this);
-		
-		Graph graph = metrics.createGraph("Permissions");
-		graph.addPlotter(new Plotter(permBridge.using().getName()) {
+		try {
+			log(Level.INFO, "Hooking Metrics");
 			
-			@Override
-			public int getValue() {
-				return 1;
-			}
+			Metrics metrics = new Metrics(this);
 			
-		});
+			if (!metrics.start())
+				throw new Exception();
+			
+		} catch (Exception e) { return false;}
 		
-		return metrics.start();
+		return true;
 	}
 
 	/**
