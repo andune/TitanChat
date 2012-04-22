@@ -377,6 +377,13 @@ public final class PermsBridge implements Listener {
 		}
 	}
 	
+	/**
+	 * Removes the permission from the player
+	 * 
+	 * @param player The player to remove from
+	 * 
+	 * @param permission The permission to remove
+	 */
 	public void removePermission(Player player, String permission) {
 		if (perm != null) {
 			if (perm.playerRemove(player, permission)) {
@@ -403,6 +410,11 @@ public final class PermsBridge implements Listener {
 		using().remove(player, permission);
 	}
 	
+	/**
+	 * Gets the Permissions System
+	 * 
+	 * @return The Permissions System the Server is using
+	 */
 	public Permissions using() {
 		if (permissionsPlugin != null)
 			return Permissions.fromName(permissionsPlugin.getName());
@@ -410,6 +422,11 @@ public final class PermsBridge implements Listener {
 		return Permissions.SUPERPERMS;
 	}
 	
+	/**
+	 * Check for Vault
+	 * 
+	 * @return True if Vault is present
+	 */
 	public static boolean usingVault() {
 		return perm != null;
 	}
@@ -815,6 +832,11 @@ public final class PermsBridge implements Listener {
 		 */
 		protected abstract String getGroupSuffix(Player player);
 		
+		/**
+		 * Gets the name of the Permissions Plugin
+		 * 
+		 * @return Permissions Plugin's name
+		 */
 		public String getName() {
 			return name;
 		}

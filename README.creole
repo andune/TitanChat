@@ -72,7 +72,9 @@ TitanChat, a chat management and formatting plugin for Bukkit.
 * 16.04.12 - Loader now out-built as lib
 * 17.04.12 - Permissions Prefix and Suffix hooks now out-built
 * 19.04.12 - Now uses Metrics, added a new MessageReceiveEvent and regrouped several JAVA Files
-* 20.04.12 - PrefixSuffix Addon built back in
+* 20.04.12 - Stop asking PermissionsBukkit for permissions when a Player joins the server cause it breaks itself
+* 21.04.12 - Updated Metrics and did a rewrite on the Listener
+* 22.04.12 - TitanChat v3.3 release
 
 -----------------------------------------------------------------------------------------------------------------------
 

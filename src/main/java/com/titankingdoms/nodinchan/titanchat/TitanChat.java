@@ -200,6 +200,11 @@ public final class TitanChat extends JavaPlugin {
 		return getServer().getPlayer(name);
 	}
 	
+	/**
+	 * Initialises the NC-LoaderLib
+	 * 
+	 * @return True if the Lib is initialised
+	 */
 	public boolean initLoaderLib() {
 		try {
 			File destination = new File(getDataFolder().getParentFile().getParentFile(), "lib");
@@ -271,6 +276,11 @@ public final class TitanChat extends JavaPlugin {
 		return false;
 	}
 	
+	/**
+	 * Initialises Metrics
+	 * 
+	 * @return True is Metrics is initialised
+	 */
 	public boolean initMetrics() {
 		try {
 			Metrics metrics = new Metrics(this);
@@ -290,10 +300,7 @@ public final class TitanChat extends JavaPlugin {
 			
 			return true;
 			
-		} catch (Exception e) {
-			e.printStackTrace();
-			return false;
-		}
+		} catch (Exception e) { return false; }
 	}
 
 	/**
