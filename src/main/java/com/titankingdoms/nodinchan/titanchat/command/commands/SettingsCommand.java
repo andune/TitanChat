@@ -341,6 +341,12 @@ public class SettingsCommand extends Command {
 		}
 	}
 	
+	/**
+	 * Settings - Settings available as commands
+	 * 
+	 * @author NodinChan
+	 *
+	 */
 	public enum Settings {
 		CHCOLOUR("ChColour", new String[] { "chcolour", "chcolor" }, "Changes the chat display colour of the channel", "chcolour [colourcode] <channel>"),
 		CONVERT("Convert", new String[] { "convert" }, "Toggles colour code converting", "convert <channel>"),

@@ -431,7 +431,16 @@ public final class PermsBridge implements Listener {
 		return perm != null;
 	}
 	
+	/**
+	 * Permissions - Permissions Plugin the Server is using
+	 * 
+	 * @author NodinChan
+	 *
+	 */
 	public enum Permissions {
+		/**
+		 * Represents PermissionsEx
+		 */
 		PERMISSIONSEX("PermissionsEx") {
 			
 			@Override
@@ -508,6 +517,9 @@ public final class PermsBridge implements Listener {
 				}
 			}
 		},
+		/**
+		 * Represents bPermissions
+		 */
 		BPERMISSIONS("bPermissions") {
 			
 			@Override
@@ -574,6 +586,9 @@ public final class PermsBridge implements Listener {
 					ApiLayer.removePermission(player.getWorld().getName(), CalculableType.GROUP, groups[0], permission);
 			}
 		},
+		/**
+		 * Represents SuperPerms
+		 */
 		SUPERPERMS("SuperPerms") {
 			
 			@Override
@@ -622,6 +637,9 @@ public final class PermsBridge implements Listener {
 				}
 			}
 		},
+		/**
+		 * Represents PermissionsBukkit
+		 */
 		PERMISSIONSBUKKIT("PermissionsBukkit") {
 			
 			@Override
@@ -670,6 +688,9 @@ public final class PermsBridge implements Listener {
 				}
 			}
 		},
+		/**
+		 * Represents GroupManager
+		 */
 		GROUPMANAGER("GroupManager") {
 			
 			@Override
@@ -733,6 +754,9 @@ public final class PermsBridge implements Listener {
 				}
 			}
 		},
+		/**
+		 * Represents zPermissions
+		 */
 		ZPERMISSIONS("zPermissions") {
 			
 			@Override

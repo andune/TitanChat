@@ -13,6 +13,12 @@ import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
 import com.titankingdoms.nodinchan.titanchat.events.MessageSendEvent;
 
+/**
+ * TitanChatListener - Event Listener of TitanChat
+ * 
+ * @author NodinChan
+ *
+ */
 public class TitanChatListener implements Listener {
 
 	private TitanChat plugin;
