@@ -62,6 +62,8 @@ public final class PermsBridge implements Listener {
 	
 	private final TitanChat plugin;
 	
+	private final ConfigPermsManagement cpm;
+	
 	private static final Debugger db = new Debugger(5);
 	
 	private static Plugin permissionsPlugin;
@@ -80,6 +82,7 @@ public final class PermsBridge implements Listener {
 	 */
 	public PermsBridge(TitanChat plugin) {
 		this.plugin = plugin;
+		this.cpm = new ConfigPermsManagement(plugin);
 		
 		if (plugin.getServer().getPluginManager().getPlugin("Vault") != null) {
 			RegisteredServiceProvider<Chat> chatProvider = plugin.getServer().getServicesManager().getRegistration(Chat.class);
@@ -121,15 +124,17 @@ public final class PermsBridge implements Listener {
 		
 		db.i("Getting group prefix of player " + player.getName());
 		
-		for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
-			db.i("Checking if " + permInfo.getPermission() + " is a prefix permission");
-			
-			if (!permInfo.getPermission().startsWith("TitanChat.g.prefix.") || !permInfo.getValue())
-				continue;
-			
-			prefix = permInfo.getPermission().substring(19);
-			break;
-		}
+		//for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
+		//	db.i("Checking if " + permInfo.getPermission() + " is a prefix permission");
+		//	
+		//	if (!permInfo.getPermission().startsWith("TitanChat.g.prefix.") || !permInfo.getValue())
+		//		continue;
+		//	
+		//	prefix = permInfo.getPermission().substring(19);
+		//	break;
+		//}
+		
+		prefix = cpm.getGroupPrefix(player);
 		
 		if (prefix.equals("") && using().equals(Permissions.PERMISSIONSEX)) {
 			db.i("Prefix not found with permission attachments, checking PermissionsEx");
@@ -171,15 +176,17 @@ public final class PermsBridge implements Listener {
 		
 		db.i("Getting group suffix of player " + player.getName());
 		
-		for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
-			db.i("Checking if " + permInfo.getPermission() + " is a suffix permission");
-			
-			if (!permInfo.getPermission().startsWith("TitanChat.g.suffix.") || !permInfo.getValue())
-				continue;
-			
-			suffix = permInfo.getPermission().substring(19);
-			break;
-		}
+		//for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
+		//	db.i("Checking if " + permInfo.getPermission() + " is a suffix permission");
+		//	
+		//	if (!permInfo.getPermission().startsWith("TitanChat.g.suffix.") || !permInfo.getValue())
+		//		continue;
+		//	
+		//	suffix = permInfo.getPermission().substring(19);
+		//	break;
+		//}
+		
+		suffix = cpm.getGroupSuffix(player);
 		
 		if (suffix.equals("") && using().equals(Permissions.PERMISSIONSEX)) {
 			db.i("Suffix not found with permission attachments, checking PermissionsEx");
@@ -219,15 +226,17 @@ public final class PermsBridge implements Listener {
 		
 		db.i("Getting prefix of player: " + player.getName());
 		
-		for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
-			db.i("Checking if " + permInfo.getPermission() + " is a prefix permission");
-			
-			if (!permInfo.getPermission().startsWith("TitanChat.p.prefix.") || !permInfo.getValue())
-				continue;
-			
-			prefix = permInfo.getPermission().substring(19);
-			break;
-		}
+		//for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
+		//	db.i("Checking if " + permInfo.getPermission() + " is a prefix permission");
+		//	
+		//	if (!permInfo.getPermission().startsWith("TitanChat.p.prefix.") || !permInfo.getValue())
+		//		continue;
+		//	
+		//	prefix = permInfo.getPermission().substring(19);
+		//	break;
+		//}
+		
+		prefix = cpm.getPlayerPrefix(player);
 		
 		if (prefix.equals("") && using().equals(Permissions.PERMISSIONSEX)) {
 			db.i("Prefix not found with permission attachments, checking PermissionsEx");
@@ -264,15 +273,17 @@ public final class PermsBridge implements Listener {
 		
 		db.i("Getting suffix of player: " + player.getName());
 		
-		for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
-			db.i("Checking if " + permInfo.getPermission() + " is a suffix permission");
-			
-			if (!permInfo.getPermission().startsWith("TitanChat.p.suffix.") || !permInfo.getValue())
-				continue;
-			
-			suffix = permInfo.getPermission().substring(19);
-			break;
-		}
+		//for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
+		//	db.i("Checking if " + permInfo.getPermission() + " is a suffix permission");
+		//	
+		//	if (!permInfo.getPermission().startsWith("TitanChat.p.suffix.") || !permInfo.getValue())
+		//		continue;
+		//	
+		//	suffix = permInfo.getPermission().substring(19);
+		//	break;
+		//}
+		
+		suffix = cpm.getPlayerSuffix(player);
 		
 		if (suffix.equals("") && using().equals(Permissions.PERMISSIONSEX)) {
 			db.i("Suffix not found with permission attachments, checking PermissionsEx");

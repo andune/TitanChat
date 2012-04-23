@@ -10,7 +10,6 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -24,7 +23,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.nodinchan.ncloader.metrics.Metrics;
+import com.nodinchan.ncloader.Main;
+import com.nodinchan.ncloader.Main.MetricsHook;
 import com.titankingdoms.nodinchan.titanchat.addon.AddonManager;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
 import com.titankingdoms.nodinchan.titanchat.command.CommandManager;
@@ -219,29 +219,33 @@ public final class TitanChat extends JavaPlugin {
 				
 			} else {
 				JarFile jarFile = new JarFile(lib);
-				Enumeration<JarEntry> entries = jarFile.entries();
 				
 				double version = 0;
 				
-				while (entries.hasMoreElements()) {
-					JarEntry element = entries.nextElement();
-					
-					if (element.getName().equals("version.yml")) {
-						BufferedReader reader = new BufferedReader(new InputStreamReader(jarFile.getInputStream(element)));
-						version = Double.parseDouble(reader.readLine().substring(9).trim());
-					}
-				}
-				
-				if (version == 0) {
-					System.out.println("NC-Loader lib outdated");
-					download = true;
+				if (jarFile.getEntry("version.yml") != null) {
+					JarEntry element = jarFile.getJarEntry("version.yml");
+					BufferedReader reader = new BufferedReader(new InputStreamReader(jarFile.getInputStream(element)));
+					version = Double.parseDouble(reader.readLine().substring(9).trim());
 					
 				} else {
-					HttpURLConnection urlConnection = (HttpURLConnection) new URL("http://www.nodinchan.com/NC-LoaderLib/version.yml").openConnection();
-					BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-					
-					if (Double.parseDouble(reader.readLine().replace("NC-LoaderLib Version ", "").trim()) > version)
+					System.out.println("Missing version.yml");
+					download = true;
+				}
+				
+				if (!download) {
+					if (version == 0) {
+						System.out.println("NC-Loader lib outdated");
 						download = true;
+						
+					} else {
+						HttpURLConnection urlConnection = (HttpURLConnection) new URL("http://www.nodinchan.com/NC-LoaderLib/version.yml").openConnection();
+						BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+						
+						if (Double.parseDouble(reader.readLine().replace("NC-LoaderLib Version ", "").trim()) > version) {
+							System.out.println("NC-Loader lib outdated");
+							download = true;
+						}
+					}
 				}
 			}
 			
@@ -284,7 +288,7 @@ public final class TitanChat extends JavaPlugin {
 		try {
 			log(Level.INFO, "Hooking Metrics");
 			
-			Metrics metrics = new Metrics(this);
+			MetricsHook metrics = new Main(this).getMetricsHook();
 			
 			if (!metrics.start())
 				throw new Exception();

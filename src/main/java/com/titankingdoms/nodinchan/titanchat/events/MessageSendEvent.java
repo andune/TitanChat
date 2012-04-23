@@ -24,6 +24,12 @@ import org.bukkit.event.HandlerList;
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * MessageSendEvent - Called when a message is to be sent to a group of Players
+ * 
+ * @author NodinChan
+ *
+ */
 public final class MessageSendEvent extends Event implements Cancellable {
 	
 	private static final HandlerList handlers = new HandlerList();

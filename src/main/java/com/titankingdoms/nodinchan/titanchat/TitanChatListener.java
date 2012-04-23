@@ -11,6 +11,7 @@ import com.nodinchan.ncloader.LoadEvent;
 import com.titankingdoms.nodinchan.titanchat.addon.Addon;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
+import com.titankingdoms.nodinchan.titanchat.events.MessageFormatEvent;
 import com.titankingdoms.nodinchan.titanchat.events.MessageSendEvent;
 
 /**
@@ -71,6 +72,16 @@ public class TitanChatListener implements Listener {
 					if (voiceless(player, channel))
 						return;
 					
+					if (channel instanceof CustomChannel) {
+						String format = ((CustomChannel) channel).format(player, ((CustomChannel) channel).getFormat());
+						
+						MessageFormatEvent formatEvent = new MessageFormatEvent(player, format);
+						plugin.getServer().getPluginManager().callEvent(formatEvent);
+						
+						channel.sendMessage(player, formatEvent.getFormat().replace("%message", message));
+						return;
+					}
+					
 					channel.sendMessage(player, message.substring(message.split(" ")[0].length()));
 					
 				} else { plugin.sendWarning(player, "No such channel"); }
@@ -82,6 +93,16 @@ public class TitanChatListener implements Listener {
 			
 			if (voiceless(player, channel))
 				return;
+			
+			if (channel instanceof CustomChannel) {
+				String format = ((CustomChannel) channel).format(player, ((CustomChannel) channel).getFormat());
+				
+				MessageFormatEvent formatEvent = new MessageFormatEvent(player, format);
+				plugin.getServer().getPluginManager().callEvent(formatEvent);
+				
+				channel.sendMessage(player, formatEvent.getFormat().replace("%message", message));
+				return;
+			}
 			
 			channel.sendMessage(player, message);
 			

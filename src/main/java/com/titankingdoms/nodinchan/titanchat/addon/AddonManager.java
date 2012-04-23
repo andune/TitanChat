@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -170,27 +169,6 @@ public final class AddonManager {
 	 */
 	public void setJarFile(Addon addon, JarFile jarFile) {
 		jarFiles.put(addon, jarFile);
-	}
-	
-	/**
-	 * Sorts the Addons
-	 */
-	public void sortAddons() {
-		List<Addon> addons = new ArrayList<Addon>();
-		List<String> names = new ArrayList<String>();
-		
-		for (Addon addon : this.addons) {
-			names.add(addon.getName());
-		}
-		
-		Collections.sort(names);
-		
-		for (String name : names) {
-			addons.add(getAddon(name));
-		}
-		
-		this.addons.clear();
-		this.addons.addAll(addons);
 	}
 	
 	/**
