@@ -81,6 +81,9 @@ public final class PermsBridge implements Listener {
 	public PermsBridge(TitanChat plugin) {
 		this.plugin = plugin;
 		
+		for (String permission : plugin.getConfig().getStringList("permissions"))
+			plugin.getServer().getPluginManager().addPermission(new org.bukkit.permissions.Permission(permission));
+		
 		if (plugin.getServer().getPluginManager().getPlugin("Vault") != null) {
 			RegisteredServiceProvider<Chat> chatProvider = plugin.getServer().getServicesManager().getRegistration(Chat.class);
 			
@@ -127,7 +130,7 @@ public final class PermsBridge implements Listener {
 			if (!permInfo.getPermission().startsWith("titanchat.g.prefix.") || !permInfo.getValue())
 				continue;
 			
-			prefix = getPermission(permInfo.getPermission()).getName().substring(19);
+			prefix = getPermissionNode(permInfo.getPermission()).substring(19);
 		}
 		
 		if (prefix.equals("") && using().equals(Permissions.PERMISSIONSEX)) {
@@ -176,7 +179,7 @@ public final class PermsBridge implements Listener {
 			if (!permInfo.getPermission().startsWith("titanchat.g.suffix.") || !permInfo.getValue())
 				continue;
 			
-			suffix = getPermission(permInfo.getPermission()).getName().substring(19);
+			suffix = getPermissionNode(permInfo.getPermission()).substring(19);
 			break;
 		}
 		
@@ -206,8 +209,26 @@ public final class PermsBridge implements Listener {
 		return (suffix.equals("") || suffix == null) ? "" : suffix;
 	}
 	
+	/**
+	 * Gets the Permission
+	 * 
+	 * @param name The permission node
+	 * 
+	 * @return The Permission
+	 */
 	public org.bukkit.permissions.Permission getPermission(String name) {
 		return plugin.getServer().getPluginManager().getPermission(name);
+	}
+	
+	/**
+	 * Gets the exact Permission Node
+	 * 
+	 * @param name The permission node
+	 * 
+	 * @return The exact Permission Node
+	 */
+	public String getPermissionNode(String name) {
+		return plugin.getServer().getPluginManager().getPermission(name).getName();
 	}
 	
 	/**
@@ -228,7 +249,7 @@ public final class PermsBridge implements Listener {
 			if (!permInfo.getPermission().startsWith("titanchat.p.prefix.") || !permInfo.getValue())
 				continue;
 			
-			prefix = getPermission(permInfo.getPermission()).getName().substring(19);
+			prefix = getPermissionNode(permInfo.getPermission()).substring(19);
 			break;
 		}
 		
@@ -273,7 +294,7 @@ public final class PermsBridge implements Listener {
 			if (!permInfo.getPermission().startsWith("titanchat.p.suffix.") || !permInfo.getValue())
 				continue;
 			
-			suffix = getPermission(permInfo.getPermission()).getName().substring(19);
+			suffix = getPermissionNode(permInfo.getPermission()).substring(19);
 			break;
 		}
 		
