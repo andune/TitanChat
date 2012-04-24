@@ -41,9 +41,3 @@ formatting:
     use-built-in: true
     format: "%tag %prefix%player%suffix: %message"
 debug: none
-
-permissions:
-    TitanChat.prefix.admin: '[&4Admin&f]'
-    TitanChat.prefix.user: '[&7User&f]'
-    TitanChat.suffix.nodinchan: ' the &6Dev &f'
-    TitanChat.suffix.owner: ' the &4Owner &f'
