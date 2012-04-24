@@ -34,6 +34,7 @@ public final class MessageReceiveEvent extends Event implements Cancellable {
 	private final Player sender;
 	private final Player recipant;
 	
+	private String format;
 	private String message;
 	
 	private boolean cancelled = false;
@@ -47,10 +48,29 @@ public final class MessageReceiveEvent extends Event implements Cancellable {
 	 * 
 	 * @param message The message
 	 */
-	public MessageReceiveEvent(Player sender, Player recipant, String message) {
+	public MessageReceiveEvent(Player sender, Player recipant, String format, String message) {
 		this.sender = sender;
 		this.recipant = recipant;
+		this.format = format;
 		this.message = message;
+	}
+	
+	/**
+	 * Gets the format
+	 * 
+	 * @return The format of the message
+	 */
+	public String getFormat() {
+		return format;
+	}
+	
+	/**
+	 * Gets the entire formatted message
+	 * 
+	 * @return The formatted message
+	 */
+	public String getFormattedMessage() {
+		return format.replace("%message", message);
 	}
 	
 	public static HandlerList getHandlerList() {
@@ -94,6 +114,15 @@ public final class MessageReceiveEvent extends Event implements Cancellable {
 	 */
 	public boolean isCancelled() {
 		return cancelled;
+	}
+	
+	/**
+	 * Sets the format
+	 * 
+	 * @param format The new format
+	 */
+	public void setFormat(String format) {
+		this.format = format;
 	}
 	
 	/**

@@ -360,12 +360,12 @@ public class Channel extends Loadable {
 		String format = plugin.getFormatHandler().format(sender, getName(), false);
 		
 		for (Player recipant : sendEvent.getRecipants()) {
-			MessageReceiveEvent receiveEvent = new MessageReceiveEvent(sender, recipant, format.replace("%message", sendEvent.getMessage()));
+			MessageReceiveEvent receiveEvent = new MessageReceiveEvent(sender, recipant, format, sendEvent.getMessage());
 			plugin.getServer().getPluginManager().callEvent(receiveEvent);
 			
 			if (receiveEvent.isCancelled()) { continue; }
 			
-			receiveEvent.getRecipant().sendMessage(receiveEvent.getMessage());
+			receiveEvent.getRecipant().sendMessage(receiveEvent.getFormattedMessage());
 		}
 		
 		return "";
