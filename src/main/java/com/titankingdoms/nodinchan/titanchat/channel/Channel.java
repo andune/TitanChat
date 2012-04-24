@@ -338,8 +338,8 @@ public class Channel extends Loadable {
 	 * 
 	 * @param message The message to be sent
 	 */
-	public void sendMessage(Player sender, String message) {
-		sendMessage(sender, new ArrayList<Player>(), message);
+	public String sendMessage(Player sender, String message) {
+		return sendMessage(sender, new ArrayList<Player>(), message);
 	}
 	
 	/**
@@ -351,11 +351,11 @@ public class Channel extends Loadable {
 	 * 
 	 * @param message The message to be sent
 	 */
-	protected final boolean sendMessage(Player sender, List<Player> recipants, String message) {
+	protected final String sendMessage(Player sender, List<Player> recipants, String message) {
 		MessageSendEvent sendEvent = new MessageSendEvent(sender, recipants, message);
 		plugin.getServer().getPluginManager().callEvent(sendEvent);
 		
-		if (sendEvent.isCancelled()) { return false; }
+		if (sendEvent.isCancelled()) { return ""; }
 		
 		String format = plugin.getFormatHandler().format(sender, getName(), false);
 		
@@ -368,7 +368,7 @@ public class Channel extends Loadable {
 			receiveEvent.getRecipant().sendMessage(receiveEvent.getMessage());
 		}
 		
-		return true;
+		return "";
 	}
 	
 	/**
@@ -380,7 +380,7 @@ public class Channel extends Loadable {
 	 * 
 	 * @param message The message to be sent
 	 */
-	protected final boolean sendMessage(Player sender, Player[] recipants, String message) {
+	protected final String sendMessage(Player sender, Player[] recipants, String message) {
 		return sendMessage(sender, Arrays.asList(recipants), message);
 	}
 	

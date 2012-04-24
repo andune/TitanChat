@@ -1,5 +1,8 @@
 package com.titankingdoms.nodinchan.titanchat;
 
+import java.util.logging.Level;
+
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -78,11 +81,18 @@ public class TitanChatListener implements Listener {
 						MessageFormatEvent formatEvent = new MessageFormatEvent(player, format);
 						plugin.getServer().getPluginManager().callEvent(formatEvent);
 						
-						channel.sendMessage(player, formatEvent.getFormat().replace("%message", message));
+						String log = channel.sendMessage(player, formatEvent.getFormat().replace("%message", message.substring(message.split(" ")[0].length())));
+						
+						if (!log.equals(""))
+							Bukkit.getLogger().log(Level.INFO, log);
+						
 						return;
 					}
 					
-					channel.sendMessage(player, message.substring(message.split(" ")[0].length()));
+					String log = channel.sendMessage(player, message.substring(message.split(" ")[0].length()));
+					
+					if (!log.equals(""))
+						Bukkit.getLogger().log(Level.INFO, log);
 					
 				} else { plugin.sendWarning(player, "No such channel"); }
 				
@@ -100,11 +110,18 @@ public class TitanChatListener implements Listener {
 				MessageFormatEvent formatEvent = new MessageFormatEvent(player, format);
 				plugin.getServer().getPluginManager().callEvent(formatEvent);
 				
-				channel.sendMessage(player, formatEvent.getFormat().replace("%message", message));
+				String log = channel.sendMessage(player, formatEvent.getFormat().replace("%message", message));
+				
+				if (!log.equals(""))
+					Bukkit.getLogger().log(Level.INFO, log);
+				
 				return;
 			}
 			
-			channel.sendMessage(player, message);
+			String log = channel.sendMessage(player, message);
+			
+			if (!log.equals(""))
+				Bukkit.getLogger().log(Level.INFO, log);
 			
 		} else {
 			event.setFormat(plugin.getFormatHandler().format(player, null, true));

@@ -1,6 +1,7 @@
 package com.titankingdoms.nodinchan.titanchat.channel;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.bukkit.entity.Player;
@@ -114,13 +115,13 @@ public final class StandardChannel extends Channel {
 	}
 	
 	@Override
-	public void sendMessage(Player player, String message) {
+	public String sendMessage(Player player, String message) {
+		List<Player> recipants = new ArrayList<Player>();
+		
 		if (super.isGlobal())
-			sendMessage(player, plugin.getServer().getOnlinePlayers(), message);
+			recipants.addAll(Arrays.asList(plugin.getServer().getOnlinePlayers()));
 		
 		else {
-			List<Player> recipants = new ArrayList<Player>();
-			
 			for (String name : super.getParticipants()) {
 				if (plugin.getPlayer(name) != null && !recipants.contains(plugin.getPlayer(name)))
 					recipants.add(plugin.getPlayer(name));
@@ -130,9 +131,9 @@ public final class StandardChannel extends Channel {
 				if (plugin.getPlayer(name) != null && !recipants.contains(plugin.getPlayer(name)))
 					recipants.add(plugin.getPlayer(name));
 			}
-			
-			sendMessage(player, recipants, message);
 		}
+		
+		return sendMessage(player, recipants, message);
 	}
 	
 	/**

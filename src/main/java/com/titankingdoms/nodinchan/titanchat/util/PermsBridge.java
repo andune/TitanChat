@@ -81,8 +81,10 @@ public final class PermsBridge implements Listener {
 	public PermsBridge(TitanChat plugin) {
 		this.plugin = plugin;
 		
-		for (String permission : plugin.getConfig().getStringList("permissions"))
+		for (String permission : plugin.getConfig().getStringList("permissions")) {
+			plugin.log(Level.INFO, "Registering " + permission);
 			plugin.getServer().getPluginManager().addPermission(new org.bukkit.permissions.Permission(permission));
+		}
 		
 		if (plugin.getServer().getPluginManager().getPlugin("Vault") != null) {
 			RegisteredServiceProvider<Chat> chatProvider = plugin.getServer().getServicesManager().getRegistration(Chat.class);
