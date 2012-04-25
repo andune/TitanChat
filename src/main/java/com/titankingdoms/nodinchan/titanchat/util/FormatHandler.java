@@ -112,6 +112,17 @@ public final class FormatHandler {
 		return event.getFormat();
 	}
 	
+	/**
+	 * Gets the format and formats the message
+	 * 
+	 * @param player The sender
+	 * 
+	 * @param channel The channel to send to
+	 * 
+	 * @param defaultMc Whether the it's default Minecraft without channels
+	 * 
+	 * @return The formatted message
+	 */
 	public String format(Player player, String channel, boolean defaultMc) {
 		if (defaultMc) {
 			MessageFormatEvent event = new MessageFormatEvent(player, Format.DEFAULT.format(player));

@@ -46,6 +46,8 @@ public final class MessageReceiveEvent extends Event implements Cancellable {
 	 * 
 	 * @param recipant The message recipant
 	 * 
+	 * @param format The format
+	 * 
 	 * @param message The message
 	 */
 	public MessageReceiveEvent(Player sender, Player recipant, String format, String message) {

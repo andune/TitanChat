@@ -3,6 +3,8 @@ package com.titankingdoms.nodinchan.titanchat.channel;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Logger;
 
 import org.bukkit.configuration.file.FileConfiguration;
@@ -13,6 +15,9 @@ import org.bukkit.event.Listener;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.addon.Addon;
 import com.titankingdoms.nodinchan.titanchat.command.Command;
+import com.titankingdoms.nodinchan.titanchat.events.MessageFormatEvent;
+import com.titankingdoms.nodinchan.titanchat.events.MessageReceiveEvent;
+import com.titankingdoms.nodinchan.titanchat.events.MessageSendEvent;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -187,5 +192,30 @@ public class CustomChannel extends Channel implements Listener {
 	public final void saveConfig() {
 		if (config == null || configFile == null) { return; }
 		try { config.save(configFile); } catch (IOException e) {}
+	}
+	
+	protected final String sendMessage(Player sender, List<Player> recipants, String message) {
+		MessageSendEvent sendEvent = new MessageSendEvent(sender, recipants, message);
+		plugin.getServer().getPluginManager().callEvent(sendEvent);
+		
+		if (sendEvent.isCancelled()) { return ""; }
+		
+		MessageFormatEvent formatEvent = new MessageFormatEvent(sender, format(sender, getFormat()));
+		plugin.getServer().getPluginManager().callEvent(formatEvent);
+		
+		for (Player recipant : sendEvent.getRecipants()) {
+			MessageReceiveEvent receiveEvent = new MessageReceiveEvent(sender, recipant, formatEvent.getFormat(), sendEvent.getMessage());
+			plugin.getServer().getPluginManager().callEvent(receiveEvent);
+			
+			if (receiveEvent.isCancelled()) { continue; }
+			
+			receiveEvent.getRecipant().sendMessage(receiveEvent.getFormattedMessage());
+		}
+		
+		return formatEvent.getFormat().replace("%message", sendEvent.getMessage());
+	}
+	
+	protected final String sendMessage(Player sender, Player[] recipants, String message) {
+		return sendMessage(sender, Arrays.asList(recipants), message);
 	}
 }

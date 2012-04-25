@@ -14,7 +14,6 @@ import com.nodinchan.ncloader.LoadEvent;
 import com.titankingdoms.nodinchan.titanchat.addon.Addon;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
-import com.titankingdoms.nodinchan.titanchat.events.MessageFormatEvent;
 import com.titankingdoms.nodinchan.titanchat.events.MessageSendEvent;
 
 /**
@@ -75,20 +74,6 @@ public class TitanChatListener implements Listener {
 					if (voiceless(player, channel))
 						return;
 					
-					if (channel instanceof CustomChannel) {
-						String format = ((CustomChannel) channel).format(player, ((CustomChannel) channel).getFormat());
-						
-						MessageFormatEvent formatEvent = new MessageFormatEvent(player, format);
-						plugin.getServer().getPluginManager().callEvent(formatEvent);
-						
-						String log = channel.sendMessage(player, formatEvent.getFormat().replace("%message", message.substring(message.split(" ")[0].length())));
-						
-						if (!log.equals(""))
-							Bukkit.getLogger().log(Level.INFO, log);
-						
-						return;
-					}
-					
 					String log = channel.sendMessage(player, message.substring(message.split(" ")[0].length()));
 					
 					if (!log.equals(""))
@@ -103,20 +88,6 @@ public class TitanChatListener implements Listener {
 			
 			if (voiceless(player, channel))
 				return;
-			
-			if (channel instanceof CustomChannel) {
-				String format = ((CustomChannel) channel).format(player, ((CustomChannel) channel).getFormat());
-				
-				MessageFormatEvent formatEvent = new MessageFormatEvent(player, format);
-				plugin.getServer().getPluginManager().callEvent(formatEvent);
-				
-				String log = channel.sendMessage(player, formatEvent.getFormat().replace("%message", message));
-				
-				if (!log.equals(""))
-					Bukkit.getLogger().log(Level.INFO, log);
-				
-				return;
-			}
 			
 			String log = channel.sendMessage(player, message);
 			
