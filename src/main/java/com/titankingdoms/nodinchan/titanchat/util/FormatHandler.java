@@ -65,7 +65,7 @@ public final class FormatHandler {
 	 * @return The colourised text
 	 */
 	public String colourise(String text) {
-		return text.replaceAll("(&([a-f0-9A-Fk-oK-O]))", "\u00A7$2");
+		return text.replaceAll("(&([a-f0-9A-Fk-oK-OrR]))", "\u00A7$2");
 	}
 	
 	/**
@@ -95,7 +95,7 @@ public final class FormatHandler {
 	 * @return The decolourised text
 	 */
 	public String decolourise(String message) {
-		return message.replaceAll("(&([a-f0-9A-Fk-oK-O]))", "");
+		return message.replaceAll("(&([a-f0-9A-Fk-oK-OrR]))", "");
 	}
 	
 	/**
@@ -182,7 +182,7 @@ public final class FormatHandler {
 				
 				if (plugin.useDefaultFormat()) {
 					format = "%tag %prefix%player%suffix&f: %message";
-					format = format.replace("%player", variables.getNameColour() + ((Player) params[0]).getDisplayName());
+					format = format.replace("%player", variables.getNameColour() + ((Player) params[0]).getDisplayName() + "&f");
 					format = format.replace("%tag", variables.getTag());
 					format = format.replace("%prefix", plugin.getPermsBridge().getPlayerPrefix((Player) params[0]));
 					format = format.replace("%suffix", plugin.getPermsBridge().getPlayerSuffix((Player) params[0]));
@@ -192,7 +192,7 @@ public final class FormatHandler {
 					
 				} else {
 					format = variables.getFormat();
-					format = format.replace("%player", variables.getNameColour() + ((Player) params[0]).getDisplayName());
+					format = format.replace("%player", variables.getNameColour() + ((Player) params[0]).getDisplayName() + "&f");
 					format = format.replace("%tag", variables.getTag());
 					format = format.replace("%prefix", plugin.getPermsBridge().getPlayerPrefix((Player) params[0]));
 					format = format.replace("%suffix", plugin.getPermsBridge().getPlayerSuffix((Player) params[0]));
