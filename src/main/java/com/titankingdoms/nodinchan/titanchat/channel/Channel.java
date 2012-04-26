@@ -287,7 +287,9 @@ public class Channel extends Loadable {
 	 * 
 	 * @param player The player joining
 	 */
-	public void join(Player player) {}
+	public void join(Player player) {
+		participants.add(player.getName());
+	}
 	
 	/**
 	 * Gets the participant list
@@ -303,7 +305,9 @@ public class Channel extends Loadable {
 	 * 
 	 * @param player The player leaving
 	 */
-	public void leave(Player player) {}
+	public void leave(Player player) {
+		participants.remove(player.getName());
+	}
 	
 	/**
 	 * Reloads the config

@@ -401,7 +401,6 @@ public final class ChannelManager {
 		Loader<CustomChannel> loader = new Loader<CustomChannel>(plugin, getCustomChannelDir(), new Object[0]);
 		
 		for (CustomChannel channel : loader.load()) { if (exists(channel.getName())) { continue; } register(channel); }
-		customChAmount = channels.size();
 		
 		for (String fileName : plugin.getChannelDir().list()) {
 			if (exists(fileName.replace(".yml", "")) || fileName.equals("README.yml"))
@@ -414,7 +413,7 @@ public final class ChannelManager {
 			
 			loadChannelVariables(channel);
 			
-			channels.add(channel);
+			register(channel);
 		}
 		
 		sortChannels();
@@ -510,6 +509,9 @@ public final class ChannelManager {
 	 * @param channel The Custom Channel to be registered
 	 */
 	public void register(Channel channel) {
+		if (channel instanceof CustomChannel)
+			customChAmount++;
+		
 		channels.add(channel);
 	}
 	

@@ -567,9 +567,8 @@ public final class TitanChat extends JavaPlugin {
 		pm.registerEvents(permBridge, this);
 		pm.registerEvents(new TitanChatListener(this), this);
 		
-		try { chManager.load(); } catch (Exception e) {}
-		
 		addonManager.load();
+		try { chManager.load(); } catch (Exception e) {}
 		cmdManager.load();
 		
 		if (chManager.getDefaultChannel() == null && enableChannels()) {

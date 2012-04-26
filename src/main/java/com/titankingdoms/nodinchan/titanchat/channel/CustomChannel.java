@@ -194,6 +194,7 @@ public class CustomChannel extends Channel implements Listener {
 		try { config.save(configFile); } catch (IOException e) {}
 	}
 	
+	@Override
 	protected final String sendMessage(Player sender, List<Player> recipants, String message) {
 		MessageSendEvent sendEvent = new MessageSendEvent(sender, recipants, message);
 		plugin.getServer().getPluginManager().callEvent(sendEvent);
@@ -204,7 +205,7 @@ public class CustomChannel extends Channel implements Listener {
 		plugin.getServer().getPluginManager().callEvent(formatEvent);
 		
 		for (Player recipant : sendEvent.getRecipants()) {
-			MessageReceiveEvent receiveEvent = new MessageReceiveEvent(sender, recipant, formatEvent.getFormat(), sendEvent.getMessage());
+			MessageReceiveEvent receiveEvent = new MessageReceiveEvent(sender, recipant, colourise(formatEvent.getFormat()), sendEvent.getMessage());
 			plugin.getServer().getPluginManager().callEvent(receiveEvent);
 			
 			if (receiveEvent.isCancelled()) { continue; }
@@ -215,6 +216,7 @@ public class CustomChannel extends Channel implements Listener {
 		return formatEvent.getFormat().replace("%message", sendEvent.getMessage());
 	}
 	
+	@Override
 	protected final String sendMessage(Player sender, Player[] recipants, String message) {
 		return sendMessage(sender, Arrays.asList(recipants), message);
 	}
