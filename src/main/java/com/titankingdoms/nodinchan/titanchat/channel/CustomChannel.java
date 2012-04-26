@@ -68,7 +68,7 @@ public class CustomChannel extends Channel implements Listener {
 	 * @return The colourised line of text
 	 */
 	public String colourise(String text) {
-		return text.replaceAll("(&([a-f0-9A-Fk-oK-O]))", "\u00A7$2");
+		return plugin.getFormatHandler().colourise(text);
 	}
 	
 	/**
@@ -79,7 +79,7 @@ public class CustomChannel extends Channel implements Listener {
 	 * @return The decolourised line of text
 	 */
 	public String decolourise(String text) {
-		return text.replaceAll("(&([a-f0-9A-Fk-oK-O]))", "");
+		return plugin.getFormatHandler().decolourise(text);
 	}
 	
 	/**
