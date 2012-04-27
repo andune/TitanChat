@@ -38,6 +38,9 @@ public class RankingCommand extends Command {
 		this.cm = plugin.getChannelManager();
 	}
 	
+	/**
+	 * Add Command - Whitelists the player for the channel
+	 */
 	@CommandID(name = "Add", triggers = "add")
 	@CommandInfo(description = "Whitelists the player for the channel", usage = "add [player] <channel>")
 	public void add(Player player, String[] args) {
@@ -68,6 +71,9 @@ public class RankingCommand extends Command {
 		}
 	}
 	
+	/**
+	 * Demote Command - Demotes the player of the channel
+	 */
 	@CommandID(name = "Demote", triggers = "demote")
 	@CommandInfo(description = "Demotes the player of the channel", usage = "demote [player] <channel>")
 	public void demote(Player player, String[] args) {
@@ -118,6 +124,9 @@ public class RankingCommand extends Command {
 		}
 	}
 	
+	/**
+	 * Promote Command - Promotes the player of the channel
+	 */
 	@CommandID(name = "Promote", triggers = "promote")
 	@CommandInfo(description = "Promotes the player of the channel", usage = "promote [player] <channel>")
 	public void promote(Player player, String[] args) {

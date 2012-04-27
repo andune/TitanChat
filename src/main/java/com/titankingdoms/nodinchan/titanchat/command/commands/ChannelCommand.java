@@ -41,6 +41,9 @@ public class ChannelCommand extends Command {
 		this.cm = plugin.getChannelManager();
 	}
 	
+	/**
+	 * Create Command - Creates a new channel
+	 */
 	@CommandID(name = "Create", triggers = { "create", "c" })
 	@CommandInfo(description = "Creates a new channel", usage = "create [channel]")
 	public void create(Player player, String[] args) {
@@ -68,6 +71,9 @@ public class ChannelCommand extends Command {
 		} catch (IndexOutOfBoundsException e) { invalidArgLength(player, "Create"); }
 	}
 	
+	/**
+	 * Delete Command - Deletes the channel
+	 */
 	@CommandID(name = "Delete", triggers = { "delete", "d" })
 	@CommandInfo(description = "Deletes the channel", usage = "delete [channel]")
 	public void delete(Player player, String[] args) {
@@ -85,6 +91,9 @@ public class ChannelCommand extends Command {
 		} catch (IndexOutOfBoundsException e) { invalidArgLength(player, "Delete"); }
 	}
 	
+	/**
+	 * Follow Command - Follows the channel
+	 */
 	@CommandID(name = "Follow", triggers = "follow")
 	@CommandInfo(description = "Follows the channel", usage = "follow [channel]")
 	public void follow(Player player, String[] args) {
@@ -108,6 +117,9 @@ public class ChannelCommand extends Command {
 		} catch (IndexOutOfBoundsException e) { invalidArgLength(player, "Follow"); }
 	}
 	
+	/**
+	 * Join Command - Joins the channel
+	 */
 	@CommandID(name = "Join", triggers = { "join", "j" })
 	@CommandInfo(description = "Joins the channel", usage = "join [channel] <password>")
 	public void join(Player player, String[] args) {
@@ -181,6 +193,9 @@ public class ChannelCommand extends Command {
 		}
 	}
 	
+	/**
+	 * Unfollow Command - Unfollows the channel
+	 */
 	@CommandID(name = "Unfollow", triggers = "unfollow")
 	@CommandInfo(description = "Unfollows the channel", usage = "unfollow [channel]")
 	public void unfollow(Player player, String[] args) {

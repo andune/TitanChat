@@ -43,6 +43,9 @@ public class PluginCommand extends Command {
 		this.cm = plugin.getChannelManager();
 	}
 	
+	/**
+	 * Debug Command - Toggles the debug
+	 */
 	@CommandID(name = "Debug", triggers = "debug")
 	@CommandInfo(description = "Toggles the debug", usage = "debug [type]")
 	public void debug(Player player, String[] args) {
@@ -65,6 +68,9 @@ public class PluginCommand extends Command {
 		} catch (IndexOutOfBoundsException e) { invalidArgLength(player, "Debug"); }
 	}
 	
+	/**
+	 * Reload Command - Reloads the config
+	 */
 	@CommandID(name = "Reload", triggers = "reload")
 	@CommandInfo(description = "Reloads the config", usage = "reload")
 	public void reload(Player player, String[] args) {

@@ -44,6 +44,9 @@ public class InformationCommand extends Command {
 		this.cm = plugin.getChannelManager();
 	}
 	
+	/**
+	 * ColourCodes Command - Lists out avalable colour codes and respective colours
+	 */
 	@CommandID(name = "ColourCodes", triggers = { "colourcodes", "colorcodes", "colours", "colors", "codes" }, requireChannel = false)
 	@CommandInfo(description = "Lists out avalable colour codes and respective colours", usage = "colourcodes")
 	public void colourcodes(Player player, String[] args) {
@@ -82,6 +85,9 @@ public class InformationCommand extends Command {
 		player.sendMessage(italic + ChatColor.WHITE + "(&o)");
 	}
 	
+	/**
+	 * Commands Command - Shows the command list
+	 */
 	@CommandID(name = "Commands", triggers = { "commands", "cmds", "help", "?" }, requireChannel = false)
 	@CommandInfo(description = "Shows the command list", usage = "commands <page/command>")
 	public void commands(Player player, String[] args) {
@@ -145,6 +151,9 @@ public class InformationCommand extends Command {
 		}
 	}
 	
+	/**
+	 * Info Command - Gets the participants and followers of the channel
+	 */
 	@CommandID(name = "Info", triggers = "info")
 	@CommandInfo(description = "Gets the participants and followers of the channel", usage = "info <channel>")
 	public void info(Player player, String[] args) {
@@ -181,6 +190,9 @@ public class InformationCommand extends Command {
 		}
 	}
 	
+	/**
+	 * List Command - Lists all channels you have access to
+	 */
 	@CommandID(name = "List", triggers = "list")
 	@CommandInfo(description = "Lists all channels you have access to", usage = "list")
 	public void list(Player player, String[] args) {

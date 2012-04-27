@@ -39,6 +39,9 @@ public class AdministrateCommand extends Command {
 		this.cm = plugin.getChannelManager();
 	}
 	
+	/**
+	 * Ban Command - Bans the player from the channel
+	 */
 	@CommandID(name = "Ban", triggers = { "ban", "b" })
 	@CommandInfo(description = "Bans the player from the channel", usage = "ban [player] <channel>")
 	public void ban(Player player, String[] args) {
@@ -99,6 +102,9 @@ public class AdministrateCommand extends Command {
 		}
 	}
 	
+	/**
+	 * Force Command - Forces the player to join the channel
+	 */
 	@CommandID(name = "Force", triggers = "force")
 	@CommandInfo(description = "Forces the player to join the channel", usage = "force [player] <channel>")
 	public void force(Player player, String[] args) {
@@ -143,6 +149,9 @@ public class AdministrateCommand extends Command {
 		}
 	}
 	
+	/**
+	 * Kick Command - Kicks the player from the channel
+	 */
 	@CommandID(name = "Kick", triggers = { "kick", "k" })
 	@CommandInfo(description = "Kicks the player from the channel", usage = "kick [player] <channel>")
 	public void kick(Player player, String[] args) {
@@ -189,6 +198,9 @@ public class AdministrateCommand extends Command {
 		}
 	}
 	
+	/**
+	 * Mute Command - Mutes the player on the channel
+	 */
 	@CommandID(name = "Mute", triggers = "mute", requireChannel = false)
 	@CommandInfo(description = "Mutes the player on the channel", usage = "mute [player] <channel>")
 	public void mute(Player player, String[] args) {
@@ -248,6 +260,9 @@ public class AdministrateCommand extends Command {
 		}
 	}
 	
+	/**
+	 * Unban Command - Unbans the player from the channel
+	 */
 	@CommandID(name = "Unban", triggers = { "unban", "ub" })
 	@CommandInfo(description = "Unbans the player from the channel", usage = "unban [player] <channel>")
 	public void unban(Player player, String[] args) {
@@ -298,6 +313,9 @@ public class AdministrateCommand extends Command {
 		}
 	}
 	
+	/**
+	 * Unmute Command - Unmutes the player on the channel
+	 */
 	@CommandID(name = "Unmute", triggers = "unmute", requireChannel = false)
 	@CommandInfo(description = "Unmutes the player on the channel", usage = "unmute [player] <channel>")
 	public void unmute(Player player, String[] args) {

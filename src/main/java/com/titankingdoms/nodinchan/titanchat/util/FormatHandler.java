@@ -152,6 +152,12 @@ public final class FormatHandler {
 		return event.getFormat();
 	}
 	
+	/**
+	 * Format - Formats
+	 * 
+	 * @author NodinChan
+	 *
+	 */
 	private enum Format {
 		BROADCAST {
 			
@@ -259,6 +265,13 @@ public final class FormatHandler {
 			}
 		};
 		
+		/**
+		 * Gets the format
+		 * 
+		 * @param params Parameters for each kind of format
+		 * 
+		 * @return The format
+		 */
 		public abstract String format(Object... params);
 	}
 }

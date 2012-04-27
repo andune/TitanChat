@@ -38,6 +38,9 @@ public class InvitationCommand extends Command {
 		this.cm = plugin.getChannelManager();
 	}
 	
+	/**
+	 * Accept Command - Accepts the channel join invitation and joins the channel
+	 */
 	@CommandID(name = "Accept", triggers = "accept")
 	@CommandInfo(description = "Accepts the channel join invitation and joins the channel", usage = "accept [channel]")
 	public void accept(Player player, String[] args) {
@@ -59,6 +62,9 @@ public class InvitationCommand extends Command {
 		} catch (IndexOutOfBoundsException e) { invalidArgLength(player, "Accept"); }
 	}
 	
+	/**
+	 * Decline Command - Declines the channel join invitation
+	 */
 	@CommandID(name = "Decline", triggers = "decline")
 	@CommandInfo(description = "Declines the channel join invitation", usage = "decline [channel]")
 	public void decline(Player player, String[] args) {
@@ -79,6 +85,9 @@ public class InvitationCommand extends Command {
 		} catch (IndexOutOfBoundsException e) { invalidArgLength(player, "Decline"); }
 	}
 	
+	/**
+	 * Invite Command - Invites the player to join the channel
+	 */
 	@CommandID(name = "Invite", triggers = "invite")
 	@CommandInfo(description = "Invites the player to join the channel", usage = "invite [player] <channel>")
 	public void invite(Player player, String[] args) {

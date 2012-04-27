@@ -43,6 +43,9 @@ public class ChatCommand extends Command {
 		this.cm = plugin.getChannelManager();
 	}
 	
+	/**
+	 * Broadcast Command - Broadcasts the message globally
+	 */
 	@CommandID(name = "Broadcast", triggers = { "broadcast", "bc" }, requireChannel = false)
 	@CommandInfo(description = "Broadcasts the message globally", usage = "broadcast [message]")
 	public void broadcast(Player player, String[] args) {
@@ -63,6 +66,9 @@ public class ChatCommand extends Command {
 		plugin.getServer().broadcastMessage(plugin.getFormatHandler().broadcastFormat(player).replace("%message", event.getMessage()));
 	}
 	
+	/**
+	 * Emote Command - Action emote shown in channel
+	 */
 	@CommandID(name = "Emote", triggers = { "me", "em" })
 	@CommandInfo(description = "Action emote shown in channel", usage = "me [action]")
 	public void emote(Player player, String[] args) {
@@ -99,6 +105,9 @@ public class ChatCommand extends Command {
 		}
 	}
 	
+	/**
+	 * Silence Command - Silences the channel/server
+	 */
 	@CommandID(name = "Silence", triggers = "silence", requireChannel = false)
 	@CommandInfo(description = "Silences the channel/server", usage = "silence [channel]")
 	public void silence(Player player, String[] args) {
@@ -145,6 +154,9 @@ public class ChatCommand extends Command {
 		}
 	}
 	
+	/**
+	 * Whisper Command - Whisper messages to players
+	 */
 	@CommandID(name = "whisper", triggers = { "whisper", "w" })
 	@CommandInfo(description = "Whisper messages to players", usage = "whisper [player] [message]")
 	public void whisper(Player player, String[] args) {

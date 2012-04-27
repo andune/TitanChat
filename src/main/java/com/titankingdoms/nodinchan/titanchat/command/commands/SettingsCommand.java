@@ -45,6 +45,9 @@ public class SettingsCommand extends Command {
 		this.cm = plugin.getChannelManager();
 	}
 	
+	/**
+	 * Set Command - Sets the channel settings
+	 */
 	@CommandID(name = "Set", triggers = "set")
 	@CommandInfo(description = "Sets the channel settings", usage = "set [setting] [value/channel> <channel>")
 	public void set(Player player, String[] args) {
