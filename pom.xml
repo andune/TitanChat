@@ -103,7 +103,7 @@
         <dependency>
         	<groupId>com.nodinchan</groupId>
         	<artifactId>NC-LoaderLib</artifactId>
-        	<version>1.3</version>
+        	<version>1.4</version>
         	<scope>system</scope>
         	<systemPath>${project.basedir}/lib/NC-LoaderLib.jar</systemPath>
         </dependency>

@@ -175,6 +175,9 @@ public final class AddonManager {
 	 * Unloads the Addons
 	 */
 	public void unload() {
+		for (Addon addon : addons)
+			addon.unload();
+		
 		addons.clear();
 	}
 }

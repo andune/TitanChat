@@ -23,8 +23,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.nodinchan.ncloader.Main;
-import com.nodinchan.ncloader.Main.MetricsHook;
+import com.nodinchan.ncloader.metrics.Main;
+import com.nodinchan.ncloader.metrics.Main.MetricsHook;
 import com.titankingdoms.nodinchan.titanchat.addon.AddonManager;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
 import com.titankingdoms.nodinchan.titanchat.command.CommandManager;
