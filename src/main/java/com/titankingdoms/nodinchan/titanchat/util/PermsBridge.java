@@ -71,7 +71,7 @@ public final class PermsBridge implements Listener {
 	private boolean checked = false;
 	
 	private static Permission perm;
-	private Chat chat;
+	private static Chat chat;
 	
 	/**
 	 * Initialises variables
@@ -150,12 +150,8 @@ public final class PermsBridge implements Listener {
 			}
 		}
 		
-		if (prefix.equals("")) {
-			if (perm != null && chat != null)
-				prefix = chat.getGroupPrefix(player.getWorld(), perm.getPrimaryGroup(player));
-			else
-				prefix = using().getGroupPrefix(player);
-		}
+		if (prefix.equals(""))
+			prefix = using().getGroupPrefix(player);
 		
 		db.i("Returning: " + prefix);
 		return (prefix.equals("") || prefix == null) ? "" : prefix;
@@ -198,12 +194,8 @@ public final class PermsBridge implements Listener {
 			}
 		}
 		
-		if (suffix.equals("")) {
-			if (perm != null && chat != null)
-				suffix = chat.getGroupSuffix(player.getWorld(), perm.getPrimaryGroup(player));
-			else
-				suffix = using().getGroupSuffix(player);
-		}
+		if (suffix.equals(""))
+			suffix = using().getGroupSuffix(player);
 		
 		db.i("Returning: " + suffix);
 		return (suffix.equals("") || suffix == null) ? "" : suffix;
@@ -265,12 +257,8 @@ public final class PermsBridge implements Listener {
 			}
 		}
 		
-		if (prefix.equals("")) {
-			if (chat != null)
-				prefix = chat.getPlayerPrefix(player.getWorld(), player.getName());
-			else
-				prefix = using().getPlayerPrefix(player);
-		}
+		if (prefix.equals(""))
+			prefix = using().getPlayerPrefix(player);
 		
 		db.i("Returning: " + prefix);
 		return (prefix.equals("") || prefix == null) ? getGroupPrefix(player) : prefix;
@@ -310,12 +298,8 @@ public final class PermsBridge implements Listener {
 			}
 		}
 		
-		if (suffix.equals("")) {
-			if (chat != null)
-				suffix = chat.getPlayerSuffix(player.getWorld(), player.getName());
-			else
-				suffix = using().getPlayerSuffix(player);
-		}
+		if (suffix.equals(""))
+			suffix = using().getPlayerSuffix(player);
 		
 		db.i("Returning: " + suffix);
 		return (suffix.equals("") || suffix == null) ? getGroupSuffix(player) : suffix;
@@ -409,21 +393,6 @@ public final class PermsBridge implements Listener {
 	 * @param permission The permission to remove
 	 */
 	public void removePermission(Player player, String permission) {
-		if (perm != null) {
-			if (perm.playerRemove(player, permission)) {
-				if (perm.groupRemove(player.getWorld(), perm.getPrimaryGroup(player), permission))
-					return;
-				else
-					return;
-				
-			} else if (perm.groupRemove(player.getWorld(), perm.getPrimaryGroup(player), permission)) {
-				if (perm.playerRemove(player, permission))
-					return;
-				else
-					return;
-			}
-		}
-		
 		for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
 			if (!permInfo.getPermission().equals(permission))
 				continue;
@@ -775,6 +744,70 @@ public final class PermsBridge implements Listener {
 					
 					if (user != null) { user.removePermission(permission); }
 					if (group != null) { group.removePermission(permission); }
+				}
+			}
+		},
+		VAULT("Vault") {
+			
+			@Override
+			protected String getGroupPrefix(Player player) {
+				try {
+					return chat.getGroupPrefix(player.getWorld(), perm.getPrimaryGroup(player));
+					
+				} catch (Exception e) { return ""; }
+			}
+			
+			@Override
+			protected String getGroupSuffix(Player player) {
+				try {
+					return chat.getGroupSuffix(player.getWorld(), perm.getPrimaryGroup(player));
+					
+				} catch (Exception e) { return ""; }
+			}
+			
+			@Override
+			protected String getPlayerPrefix(Player player) {
+				try {
+					return chat.getPlayerPrefix(player.getWorld(), player.getName());
+					
+				} catch (Exception e) { return ""; }
+			}
+			
+			@Override
+			protected String getPlayerSuffix(Player player) {
+				try {
+					return chat.getPlayerSuffix(player.getWorld(), player.getName());
+					
+				} catch (Exception e) { return ""; }
+			}
+			
+			@Override
+			protected boolean has(Player player, String permission, boolean avoidWildcard) {
+				if (avoidWildcard) {
+					for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
+						if (permInfo.getPermission().equalsIgnoreCase(permission) && permInfo.getValue())
+							return true;
+					}
+					
+				} else
+					return perm.has(player, permission);
+				
+				return false;
+			}
+			
+			@Override
+			protected void remove(Player player, String permission) {
+				if (perm.playerRemove(player, permission)) {
+					if (perm.groupRemove(player.getWorld(), perm.getPrimaryGroup(player), permission))
+						return;
+					else
+						return;
+					
+				} else if (perm.groupRemove(player.getWorld(), perm.getPrimaryGroup(player), permission)) {
+					if (perm.playerRemove(player, permission))
+						return;
+					else
+						return;
 				}
 			}
 		},

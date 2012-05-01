@@ -20,6 +20,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -204,7 +205,7 @@ public final class TitanChat extends JavaPlugin {
 	 * 
 	 * @return True if the Lib is initialised
 	 */
-	public boolean initLoaderLib() {
+	private boolean initLoaderLib() {
 		try {
 			File destination = new File(getDataFolder().getParentFile().getParentFile(), "lib");
 			destination.mkdirs();
@@ -284,18 +285,14 @@ public final class TitanChat extends JavaPlugin {
 	 * 
 	 * @return True is Metrics is initialised
 	 */
-	public boolean initMetrics() {
-		try {
-			log(Level.INFO, "Hooking Metrics");
-			
-			MetricsHook metrics = new Main(this).getMetricsHook();
-			
-			if (!metrics.start())
-				throw new Exception();
-			
-		} catch (Exception e) { return false;}
+	private boolean initMetrics() {
+		log(Level.INFO, "Hooking Metrics");
+		MetricsHook metrics = new Main(this).getMetricsHook();
 		
-		return true;
+		if (metrics.isOptOut())
+			return true;
+		
+		return metrics.start();
 	}
 
 	/**
@@ -526,13 +523,7 @@ public final class TitanChat extends JavaPlugin {
 	 */
 	@Override
 	public void onEnable() {
-		instance = this;
-		NAME = "TitanChat " + instance.toString().split(" ")[1];
-		
 		log(Level.INFO, "is now enabling...");
-		
-		if (!initLoaderLib())
-			log(Level.WARNING, "Failed to initialise Loader lib");
 		
 		if (!initMetrics())
 			log(Level.WARNING, "Failed to hook into Metrics");
@@ -564,8 +555,8 @@ public final class TitanChat extends JavaPlugin {
 		
 		Debugger.load(this);
 		
-		pm.registerEvents(permBridge, this);
-		pm.registerEvents(new TitanChatListener(this), this);
+		register(permBridge);
+		register(new TitanChatListener(this));
 		
 		addonManager.load();
 		try { chManager.load(); } catch (Exception e) {}
@@ -578,6 +569,15 @@ public final class TitanChat extends JavaPlugin {
 		}
 		
 		log(Level.INFO, "is now enabled");
+	}
+	
+	@Override
+	public void onLoad() {
+		instance = this;
+		NAME = "TitanChat " + instance.toString().split(" ")[1];
+		
+		if (!initLoaderLib())
+			log(Level.WARNING, "Failed to initialise Loader lib");
 	}
 	
 	/**
@@ -605,6 +605,15 @@ public final class TitanChat extends JavaPlugin {
 		db.i("Command arguments: " + str.toString());
 		
 		return (str.toString().equals("")) ? new String[] {} : str.toString().split(" ");
+	}
+	
+	/**
+	 * Registers the Listener
+	 * 
+	 * @param listener The Listener to register
+	 */
+	public void register(Listener listener) {
+		getServer().getPluginManager().registerEvents(listener, this);
 	}
 	
 	/**

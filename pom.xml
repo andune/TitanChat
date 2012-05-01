@@ -7,7 +7,7 @@
     <groupId>com.titankingdoms.dev</groupId>
     <artifactId>TitanChat</artifactId>
     <name>TitanChat</name>
-    <version>v3.4</version>
+    <version>v3.5</version>
 
     <description>TitanChat, a chat management and formatting plugin.</description>
     <build>
@@ -71,6 +71,8 @@
             <groupId>de.bananaco</groupId>
             <artifactId>bPermissions</artifactId>
             <version>dev-SNAPSHOT</version>
+            <type>jar</type>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>ru.tehkode</groupId>
@@ -103,7 +105,7 @@
         <dependency>
         	<groupId>com.nodinchan</groupId>
         	<artifactId>NC-LoaderLib</artifactId>
-        	<version>1.4</version>
+        	<version>1.5</version>
         	<scope>system</scope>
         	<systemPath>${project.basedir}/lib/NC-LoaderLib.jar</systemPath>
         </dependency>
