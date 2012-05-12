@@ -108,7 +108,7 @@ public class InformationCommand extends Command {
 			if (page + 1 > 0 || page + 1 <= numPages) {
 				player.sendMessage(ChatColor.AQUA + "=== TitanChat Command List (" + (page + 1) + "/" + numPages + ") ===");
 				for (int cmdNum = start; cmdNum < end; cmdNum++) {
-					player.sendMessage(ChatColor.AQUA + plugin.getCommandManager().getCommandExecutor(cmdNum).getName());
+					player.sendMessage(ChatColor.AQUA + plugin.getCommandManager().getCommandExecutor(cmdNum).getAnnotation(CommandID.class).name());
 				}
 				plugin.sendInfo(player, "Arguments: [NECESSARY] <OPTIONAL>");
 				plugin.sendInfo(player, "\"/titanchat commands [command]\" for more info");
@@ -123,14 +123,14 @@ public class InformationCommand extends Command {
 		} catch (IndexOutOfBoundsException e) {
 			plugin.getServer().dispatchCommand(player, "titanchat commands 1");
 		} catch (NumberFormatException e) {
-			if (cm.getCommandExecutor(args[0]) == null) {
+			Method method = cm.getCommandExecutor(args[0]);
+			
+			if (method == null) {
 				plugin.sendWarning(player, "No info on command");
 				return;
 			}
 			
-			player.sendMessage(ChatColor.AQUA + "=== " + cm.getCommandExecutor(args[0]).getName() + " Command ===");
-			
-			Method method = cm.getCommandExecutor(args[0]).getMethod();
+			player.sendMessage(ChatColor.AQUA + "=== " + method.getAnnotation(CommandID.class).name() + " Command ===");
 			
 			if (method.getAnnotation(CommandInfo.class) != null)
 				player.sendMessage(ChatColor.AQUA + "Description: " + method.getAnnotation(CommandInfo.class).description());

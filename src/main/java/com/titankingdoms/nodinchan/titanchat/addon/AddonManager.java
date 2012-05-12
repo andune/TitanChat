@@ -156,10 +156,6 @@ public final class AddonManager {
 		addons.add(addon);
 	}
 	
-	public void reload() {
-		for (Addon addon : addons) { addon.reloadConfig(); }
-	}
-	
 	/**
 	 * Saves the JAR files of the Addons for future use
 	 * 
@@ -172,12 +168,13 @@ public final class AddonManager {
 	}
 	
 	/**
-	 * Unloads the Addons
+	 * Unloads the AddonManager and all Addons
 	 */
 	public void unload() {
 		for (Addon addon : addons)
 			addon.unload();
 		
 		addons.clear();
+		jarFiles.clear();
 	}
 }

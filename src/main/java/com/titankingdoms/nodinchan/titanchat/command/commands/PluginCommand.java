@@ -9,6 +9,7 @@ import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
 import com.titankingdoms.nodinchan.titanchat.command.Command;
 import com.titankingdoms.nodinchan.titanchat.command.CommandID;
 import com.titankingdoms.nodinchan.titanchat.command.CommandInfo;
+import com.titankingdoms.nodinchan.titanchat.command.CommandManager;
 import com.titankingdoms.nodinchan.titanchat.util.Debugger;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
@@ -36,11 +37,13 @@ import com.titankingdoms.nodinchan.titanchat.util.Debugger;
 public class PluginCommand extends Command {
 	
 	private AddonManager am;
-	private ChannelManager cm;
+	private ChannelManager chm;
+	private CommandManager cmdm;
 	
 	public PluginCommand() {
 		this.am = plugin.getAddonManager();
-		this.cm = plugin.getChannelManager();
+		this.chm = plugin.getChannelManager();
+		plugin.getCommandManager();
 	}
 	
 	/**
@@ -77,8 +80,12 @@ public class PluginCommand extends Command {
 		if (player == null) {
 			plugin.log(Level.INFO, "Reloading configs...");
 			plugin.reloadConfig();
-			am.reload();
-			cm.reload();
+			am.unload();
+			chm.unload();
+			cmdm.unload();
+			am.load();
+			chm.load();
+			cmdm.load();
 			plugin.log(Level.INFO, "Configs reloaded");
 			return;
 		}
@@ -87,8 +94,12 @@ public class PluginCommand extends Command {
 			plugin.log(Level.INFO, "Reloading configs...");
 			plugin.sendInfo(player, "Reloading configs...");
 			plugin.reloadConfig();
-			am.reload();
-			cm.reload();
+			am.unload();
+			chm.unload();
+			cmdm.unload();
+			am.load();
+			chm.load();
+			cmdm.load();
 			plugin.log(Level.INFO, "Configs reloaded");
 			plugin.sendInfo(player, "Configs reloaded");
 			

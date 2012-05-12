@@ -12,6 +12,7 @@ import com.titankingdoms.nodinchan.titanchat.command.Command;
 import com.titankingdoms.nodinchan.titanchat.command.CommandID;
 import com.titankingdoms.nodinchan.titanchat.command.CommandInfo;
 import com.titankingdoms.nodinchan.titanchat.events.MessageSendEvent;
+import com.titankingdoms.nodinchan.titanchat.mail.MailManager.Mail;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -102,6 +103,24 @@ public class ChatCommand extends Command {
 		
 		for (Player recipant : recipants) {
 			recipant.sendMessage(format.replace("%action", event.getMessage()));
+		}
+	}
+	
+	/**
+	 * Mail Command - Manages mail
+	 */
+	@CommandID(name = "Mail", triggers = "mail", requireChannel = false)
+	@CommandInfo(description = "Manages mail", usage = "mail <command> <arguments>")
+	public void mail(Player player, String[] args) {
+		Mail mail = Mail.fromName(args[0].toLowerCase());
+		
+		if (mail != null) {
+			String[] arguments = new String[args.length - 1];
+			
+			for (int arg = 1; arg < args.length; arg++)
+				arguments[arg - 1] = args[arg];
+			
+			mail.execute(player, arguments);
 		}
 	}
 	

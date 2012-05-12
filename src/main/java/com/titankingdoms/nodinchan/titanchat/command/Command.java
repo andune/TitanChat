@@ -54,7 +54,7 @@ public class Command extends Loadable implements Listener {
 	public final void invalidArgLength(Player player, String name) {
 		plugin.sendWarning(player, "Invalid Argument Length");
 		
-		Method method = plugin.getCommandManager().getCommandExecutor(name).getMethod();
+		Method method = plugin.getCommandManager().getCommandExecutor(name);
 		
 		if (method.getAnnotation(CommandInfo.class) != null)
 			plugin.sendInfo(player, "Usage: /titanchat " + method.getAnnotation(CommandInfo.class).usage());

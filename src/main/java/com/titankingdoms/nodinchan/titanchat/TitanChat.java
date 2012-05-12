@@ -24,11 +24,11 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.nodinchan.ncloader.metrics.Main;
-import com.nodinchan.ncloader.metrics.Main.MetricsHook;
+import com.nodinchan.ncloader.metrics.Metrics;
 import com.titankingdoms.nodinchan.titanchat.addon.AddonManager;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
 import com.titankingdoms.nodinchan.titanchat.command.CommandManager;
+import com.titankingdoms.nodinchan.titanchat.mail.MailManager;
 import com.titankingdoms.nodinchan.titanchat.util.Debugger;
 import com.titankingdoms.nodinchan.titanchat.util.FormatHandler;
 import com.titankingdoms.nodinchan.titanchat.util.PermsBridge;
@@ -68,6 +68,7 @@ public final class TitanChat extends JavaPlugin {
 	private ChannelManager chManager;
 	private CommandManager cmdManager;
 	private FormatHandler format;
+	private MailManager mail;
 	private PermsBridge permBridge;
 	
 	private boolean silenced = false;
@@ -181,6 +182,24 @@ public final class TitanChat extends JavaPlugin {
 	}
 	
 	/**
+	 * Gets the Mail Directory
+	 * 
+	 * @return The Mail Directory
+	 */
+	public File getMailDir() {
+		return new File(getDataFolder(), "mail");
+	}
+
+	/**
+	 * Gets the MailManager
+	 * 
+	 * @return The MailManager
+	 */
+	public MailManager getMailManager() {
+		return mail;
+	}
+	
+	/**
 	 * Gets the PermsBridge
 	 * 
 	 * @return The built-in PermsBridge
@@ -287,12 +306,16 @@ public final class TitanChat extends JavaPlugin {
 	 */
 	private boolean initMetrics() {
 		log(Level.INFO, "Hooking Metrics");
-		MetricsHook metrics = new Main(this).getMetricsHook();
 		
-		if (metrics.isOptOut())
-			return true;
-		
-		return metrics.start();
+		try {
+			Metrics metrics = new Metrics(this);
+			
+			if (metrics.isOptOut())
+				return true;
+			
+			return metrics.start();
+			
+		} catch (Exception e) { return false; }
 	}
 
 	/**
@@ -359,7 +382,7 @@ public final class TitanChat extends JavaPlugin {
 			
 			if (!(sender instanceof Player)) {
 				if (args[0].equalsIgnoreCase("reload")) {
-					try { cmdManager.getCommandExecutor("Reload").execute(null, new String[0]);
+					try { cmdManager.execute(null, "reload", new String[0]);
 					} catch (Exception e) { e.printStackTrace(); }
 					return true;
 				}
@@ -535,6 +558,9 @@ public final class TitanChat extends JavaPlugin {
 			saveResource("config.yml", false);
 		}
 		
+		if (getMailDir().mkdir())
+			log(Level.INFO, "Creating mail directory...");
+		
 		if (getChannelDir().mkdir()) {
 			log(Level.INFO, "Creating channel directory...");
 			saveResource("channels/Default.yml", false);
@@ -549,6 +575,7 @@ public final class TitanChat extends JavaPlugin {
 		chManager = new ChannelManager(this);
 		cmdManager = new CommandManager(this);
 		format = new FormatHandler(this);
+		mail = new MailManager();
 		permBridge = new PermsBridge(this);
 		
 		PluginManager pm = getServer().getPluginManager();

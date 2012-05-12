@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.jar.JarEntry;
@@ -53,10 +55,11 @@ public final class ChannelManager {
 	private int channelAmount = 0;
 	private int customChAmount = 0;
 	
-	private List<Channel> channels;
+	private final List<Channel> linked;
 	private final List<String> muted;
 	
 	private final Map<Channel, Map<String, List<String>>> channelInvitors;
+	private Map<String, Channel> channels;
 	private final Map<CustomChannel, JarFile> jarFiles;
 	
 	/**
@@ -71,9 +74,10 @@ public final class ChannelManager {
 		if (getCustomChannelDir().mkdir())
 			plugin.log(Level.INFO, "Creating custom channel directory...");
 		
-		this.channels = new ArrayList<Channel>();
 		this.muted = new ArrayList<String>();
+		this.linked = new LinkedList<Channel>();
 		this.channelInvitors = new HashMap<Channel, Map<String, List<String>>>();
+		this.channels = new LinkedHashMap<String, Channel>();
 		this.jarFiles = new HashMap<CustomChannel, JarFile>();
 	}
 	
@@ -121,7 +125,7 @@ public final class ChannelManager {
 				" is creating channel " + name);
 		
 		StandardChannel channel = new StandardChannel(name, Type.PUBLIC);
-		channels.add(channel);
+		channels.put(name, channel);
 		
 		assignAdmin(player, channel);
 		chSwitch(player, channel);
@@ -179,9 +183,9 @@ public final class ChannelManager {
 	 * @return The list of accessible Channels of the Player
 	 */
 	public List<String> getAccessList(Player player) {
-		List<String> channels = new ArrayList<String>();
+		List<String> channels = new LinkedList<String>();
 		
-		for (Channel channel : this.channels) {
+		for (Channel channel : linked) {
 			if (channel.canAccess(player))
 				channels.add(channel.getName());
 		}
@@ -197,12 +201,7 @@ public final class ChannelManager {
 	 * @return The Channel if it exists, otherwise null
 	 */
 	public Channel getChannel(String name) {
-		for (Channel channel : channels) {
-			if (channel.getName().equalsIgnoreCase(name))
-				return channel;
-		}
-		
-		return null;
+		return channels.get(name);
 	}
 
 	/**
@@ -213,7 +212,7 @@ public final class ChannelManager {
 	 * @return The Channel if it exists, otherwise null
 	 */
 	public Channel getChannel(Player player) {
-		for (Channel channel : channels) {
+		for (Channel channel : channels.values()) {
 			if (channel.getParticipants().contains(player.getName()))
 				return channel;
 		}
@@ -245,7 +244,7 @@ public final class ChannelManager {
 	 * @return The Default Channel
 	 */
 	public Channel getDefaultChannel() {
-		for (Channel channel : channels) {
+		for (Channel channel : channels.values()) {
 			if (channel.getType().equals(Type.DEFAULT))
 				return channel;
 		}
@@ -319,7 +318,7 @@ public final class ChannelManager {
 	 * @return The Spawn Channel
 	 */
 	public Channel getSpawnChannel(Player player) {
-		for (Channel channel : channels) {
+		for (Channel channel : channels.values()) {
 			if (plugin.getPermsBridge().has(player, "TitanChat.spawn." + channel.getName(), true) && channel.canAccess(player))
 				return channel;
 		}
@@ -338,7 +337,7 @@ public final class ChannelManager {
 	 * @return The Staff Channel
 	 */
 	public Channel getStaffChannel() {
-		for (Channel channel : channels) {
+		for (Channel channel : channels.values()) {
 			if (channel.getType().equals(Type.STAFF))
 				return channel;
 		}
@@ -395,7 +394,7 @@ public final class ChannelManager {
 	 * 
 	 * @throws Exception
 	 */
-	public void load() throws Exception {
+	public void load() {
 		if (!plugin.enableChannels()) { plugin.log(Level.INFO, "Channels disabled"); return; }
 		
 		Loader<CustomChannel> loader = new Loader<CustomChannel>(plugin, getCustomChannelDir(), new Object[0]);
@@ -512,27 +511,7 @@ public final class ChannelManager {
 		if (channel instanceof CustomChannel)
 			customChAmount++;
 		
-		channels.add(channel);
-	}
-	
-	/**
-	 * Reloads all Channels
-	 */
-	public void reload() {
-		for (Channel channel : channels) {
-			if (channel instanceof CustomChannel) {
-				((CustomChannel) channel).reload();
-			}
-			
-			if (channel instanceof StandardChannel) {
-				channel.reloadConfig();
-				loadChannelVariables((StandardChannel) channel);
-			}
-		}
-		
-		channels.clear();
-		
-		try { load(); } catch (Exception e) {}
+		channels.put(channel.getName(), channel);
 	}
 	
 	/**
@@ -550,17 +529,16 @@ public final class ChannelManager {
 	 * Sorts the Channels
 	 */
 	public void sortChannels() {
-		List<Channel> channels = new ArrayList<Channel>();
-		List<String> names = new ArrayList<String>();
-		
-		for (Channel channel : this.channels) {
-			names.add(channel.getName());
-		}
+		Map<String, Channel> channels = new LinkedHashMap<String, Channel>();
+		List<String> names = new ArrayList<String>(this.channels.keySet());
 		
 		Collections.sort(names);
 		
+		linked.clear();
+		
 		for (String name : names) {
-			channels.add(getChannel(name));
+			linked.add(getChannel(name));
+			channels.put(name, getChannel(name));
 		}
 		
 		this.channels = channels;
@@ -570,8 +548,13 @@ public final class ChannelManager {
 	 * Unloads the Channels
 	 */
 	public void unload() {
-		for (Channel channel : channels) { channel.save(); }
+		for (Channel channel : channels.values())
+			channel.save();
+		
 		channels.clear();
+		jarFiles.clear();
+		channelAmount = 0;
+		customChAmount = 0;
 	}
 	
 	/**

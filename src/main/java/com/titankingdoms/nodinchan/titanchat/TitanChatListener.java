@@ -54,7 +54,7 @@ public class TitanChatListener implements Listener {
 	 * 
 	 * @param event PlayerChatEvent
 	 */
-	@EventHandler(priority = EventPriority.HIGHEST)
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
 	public void onPlayerChat(PlayerChatEvent event) {
 		Player player = event.getPlayer();
 		String message = event.getMessage();
