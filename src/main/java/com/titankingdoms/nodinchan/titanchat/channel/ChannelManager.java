@@ -245,7 +245,7 @@ public final class ChannelManager {
 	 */
 	public Channel getDefaultChannel() {
 		for (Channel channel : channels.values()) {
-			if (channel.getType().equals(Type.DEFAULT))
+			if (channel.getType().equals(Type.DEFAULT_PUBLIC) || channel.getType().equals(Type.DEFAULT_PRIVATE) || channel.getType().equals(Type.DEFAULT_PASSWORD))
 				return channel;
 		}
 		
@@ -357,39 +357,6 @@ public final class ChannelManager {
 	}
 
 	/**
-	 * Loads the Channel of the given name
-	 * 
-	 * @param name The Channel name
-	 * 
-	 * @return The loaded Channel
-	 */
-	public StandardChannel loadChannel(String name) {
-		StandardChannel channel = new StandardChannel(name);
-		
-		channel.setType(channel.getConfig().getString("type"));
-		
-		channel.setGlobal(channel.getConfig().getBoolean("global"));
-		
-		channel.setPassword(channel.getConfig().getString("password"));
-		
-		if (channel.getConfig().getStringList("admins") != null)
-			channel.getAdminList().addAll(channel.getConfig().getStringList("admins"));
-		
-		if (channel.getConfig().getStringList("blacklist") != null)
-			channel.getBlackList().addAll(channel.getConfig().getStringList("blacklist"));
-		
-		if (channel.getConfig().getStringList("followers") != null)
-			channel.getFollowerList().addAll(channel.getConfig().getStringList("followers"));
-		
-		if (channel.getConfig().getStringList("whitelist") != null)
-			channel.getWhiteList().addAll(channel.getConfig().getStringList("whitelist"));
-		
-		loadChannelVariables(channel);
-		
-		return channel;
-	}
-	
-	/**
 	 * Loads all channels
 	 * 
 	 * @throws Exception
@@ -427,6 +394,39 @@ public final class ChannelManager {
 		plugin.log(Level.INFO, "Channels loaded");
 	}
 	
+	/**
+	 * Loads the Channel of the given name
+	 * 
+	 * @param name The Channel name
+	 * 
+	 * @return The loaded Channel
+	 */
+	public StandardChannel loadChannel(String name) {
+		StandardChannel channel = new StandardChannel(name);
+		
+		channel.setType(channel.getConfig().getString("type"));
+		
+		channel.setGlobal(channel.getConfig().getBoolean("global"));
+		
+		channel.setPassword(channel.getConfig().getString("password"));
+		
+		if (channel.getConfig().getStringList("admins") != null)
+			channel.getAdminList().addAll(channel.getConfig().getStringList("admins"));
+		
+		if (channel.getConfig().getStringList("blacklist") != null)
+			channel.getBlackList().addAll(channel.getConfig().getStringList("blacklist"));
+		
+		if (channel.getConfig().getStringList("followers") != null)
+			channel.getFollowerList().addAll(channel.getConfig().getStringList("followers"));
+		
+		if (channel.getConfig().getStringList("whitelist") != null)
+			channel.getWhiteList().addAll(channel.getConfig().getStringList("whitelist"));
+		
+		loadChannelVariables(channel);
+		
+		return channel;
+	}
+
 	/**
 	 * Loads the ChannelVariables of the Channel
 	 * 

@@ -106,7 +106,7 @@ public class Channel extends Loadable {
 			return true;
 		if (blacklist.contains(player.getName()))
 			return false;
-		if (type.equals(Type.DEFAULT) || type.equals(Type.PUBLIC))
+		if (type.equals(Type.DEFAULT_PUBLIC) || type.equals(Type.PUBLIC))
 			return true;
 		if (adminlist.contains(player.getName()) || whitelist.contains(player.getName()))
 			return true;
@@ -122,7 +122,7 @@ public class Channel extends Loadable {
 	 * @return True if the Player can ban
 	 */
 	public boolean canBan(Player player) {
-		if (type.equals(Type.DEFAULT) || type.equals(Type.STAFF))
+		if (type.equals(Type.DEFAULT_PUBLIC) || type.equals(Type.DEFAULT_PRIVATE) || type.equals(Type.DEFAULT_PASSWORD) || type.equals(Type.STAFF))
 			return false;
 		if (plugin.getPermsBridge().has(player, "TitanChat.ban.*") || plugin.getPermsBridge().has(player, "TitanChat.ban." + super.getName()))
 			return true;
@@ -431,7 +431,9 @@ public class Channel extends Loadable {
 	 */
 	public enum Type {
 		CUSTOM("custom"),
-		DEFAULT("default"),
+		DEFAULT_PASSWORD("defaultpassword"),
+		DEFAULT_PRIVATE("defaultprivate"),
+		DEFAULT_PUBLIC("defaultpublic"),
 		PASSWORD("password"),
 		PRIVATE("private"),
 		PUBLIC("public"),

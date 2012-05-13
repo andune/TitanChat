@@ -245,7 +245,9 @@ public class SettingsCommand extends Command {
 								plugin.sendInfo(player, "You cannot set a channel's type as custom");
 								break;
 							
-							case DEFAULT:
+							case DEFAULT_PASSWORD:
+							case DEFAULT_PRIVATE:
+							case DEFAULT_PUBLIC:
 							case STAFF:
 								if (plugin.isStaff(player)) {
 									cm.getChannel(args[2]).setType(args[1]);
@@ -298,7 +300,9 @@ public class SettingsCommand extends Command {
 							plugin.sendInfo(player, "You cannot set a channel's type as custom");
 							break;
 						
-						case DEFAULT:
+						case DEFAULT_PASSWORD:
+						case DEFAULT_PRIVATE:
+						case DEFAULT_PUBLIC:
 						case STAFF:
 							if (plugin.isStaff(player)) {
 								cm.getChannel(player).setType(args[1]);

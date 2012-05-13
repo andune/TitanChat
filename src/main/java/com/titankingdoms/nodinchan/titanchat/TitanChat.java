@@ -10,6 +10,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.util.Arrays;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -382,16 +383,40 @@ public final class TitanChat extends JavaPlugin {
 			
 			if (!(sender instanceof Player)) {
 				if (args[0].equalsIgnoreCase("reload")) {
-					try { cmdManager.execute(null, "reload", new String[0]);
-					} catch (Exception e) { e.printStackTrace(); }
+					try { cmdManager.execute(null, "reload", new String[0]); } catch (Exception e) { e.printStackTrace(); }
 					return true;
 				}
 				
-				log(Level.INFO, "Please use commands in-game"); return true;
+				if (args[0].equalsIgnoreCase("broadcast")) {
+					if (!getConfig().getBoolean("broadcast.server.enable")) {
+						log(Level.WARNING, "Command disabled");
+						return true;
+					}
+					
+					String message = getConfig().getString("broadcast.server.format");
+					
+					StringBuilder str = new StringBuilder();
+					
+					for (String word : args) {
+						if (str.length() > 0)
+							str.append(" ");
+						
+						str.append(word);
+					}
+					
+					message = message.replace("%message", str.toString());
+					
+					getServer().broadcastMessage(getFormatHandler().colourise(message));
+					getLogger().info("<Server> " + getFormatHandler().decolourise(str.toString()));
+					return true;
+				}
+				
+				log(Level.INFO, "Please use commands in-game");
+				return true;
 			}
 
 			db.i("CommandManager executing command:");
-			cmdManager.execute((Player) sender, args[0], parseCommand(args));
+			cmdManager.execute((Player) sender, args[0], Arrays.copyOfRange(args, 1, args.length));
 			return true;
 		}
 		
@@ -598,6 +623,9 @@ public final class TitanChat extends JavaPlugin {
 		log(Level.INFO, "is now enabled");
 	}
 	
+	/**
+	 * Called when Plugin loads
+	 */
 	@Override
 	public void onLoad() {
 		instance = this;
@@ -605,33 +633,6 @@ public final class TitanChat extends JavaPlugin {
 		
 		if (!initLoaderLib())
 			log(Level.WARNING, "Failed to initialise Loader lib");
-	}
-	
-	/**
-	 * Parses the command arguments
-	 * 
-	 * @param args Arguments to parse
-	 * 
-	 * @return The parsed arguments
-	 */
-	public String[] parseCommand(String[] args) {
-		db.i("Parsing command");
-		
-		StringBuilder str = new StringBuilder();
-		
-		for (String arg : args) {
-			if (str.length() > 0)
-				str.append(" ");
-			
-			if (arg.equals(args[0]))
-				continue;
-			
-			str.append(arg);
-		}
-		
-		db.i("Command arguments: " + str.toString());
-		
-		return (str.toString().equals("")) ? new String[] {} : str.toString().split(" ");
 	}
 	
 	/**

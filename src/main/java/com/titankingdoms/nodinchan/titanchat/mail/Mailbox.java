@@ -38,8 +38,9 @@ public final class Mailbox implements Serializable {
 		this.mailbox = new LinkedList<Mail>();
 	}
 	
-	public void deleteMail(int mail) {
-		mailbox.remove(mail);
+	public boolean deleteMail(int mail) {
+		try { mailbox.remove(mail); return true;
+		} catch (IndexOutOfBoundsException e) { return false; }
 	}
 	
 	public List<Mail> getMail() {
@@ -66,6 +67,10 @@ public final class Mailbox implements Serializable {
 	
 	public void receiveMail(String sender, String message) {
 		mailbox.add(new Mail(sender, System.currentTimeMillis(), message));
+	}
+	
+	public int size() {
+		return mailbox.size();
 	}
 	
 	public void sort() {
@@ -107,7 +112,7 @@ public final class Mailbox implements Serializable {
 		}
 		
 		public String getDateTime() {
-			return new SimpleDateFormat("[dd.MM.yy HH:mm:ss]").format(new Date(time));
+			return new SimpleDateFormat("dd.MM.yy HH:mm:ss").format(new Date(time));
 		}
 		
 		public String getMessage() {
@@ -120,6 +125,10 @@ public final class Mailbox implements Serializable {
 		
 		public long getSystemTime() {
 			return time;
+		}
+		
+		public String getTitle() {
+			return message.substring(0, 11) + "...";
 		}
 		
 		public boolean isRead() {

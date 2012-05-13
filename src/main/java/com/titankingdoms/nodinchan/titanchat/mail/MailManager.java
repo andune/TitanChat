@@ -11,6 +11,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -40,12 +41,16 @@ public class MailManager implements Listener {
 	
 	private final TitanChat plugin;
 	
+	private static MailManager instance;
+	
 	private final Map<String, Mailbox> mailboxes;
 	
 	private final boolean enable;
 	
 	public MailManager() {
 		this.plugin = TitanChat.getInstance();
+		MailManager.instance = this;
+		
 		this.enable = this.plugin.getConfig().getBoolean("mail.enable");
 		
 		if (enable)
@@ -56,6 +61,10 @@ public class MailManager implements Listener {
 	
 	public boolean enable() {
 		return enable;
+	}
+	
+	public static MailManager getInstance() {
+		return instance;
 	}
 	
 	public Mailbox getMailbox(String name) {
@@ -136,6 +145,88 @@ public class MailManager implements Listener {
 	}
 	
 	public enum Mail {
+		CHECK("check") {
+			
+			@Override
+			public void execute(Player player, String[] args) {
+				Mailbox mailbox = MailManager.getInstance().getMailbox(player.getName());
+				
+				try {
+					int page = Integer.parseInt(args[0]) - 1;
+					int numPages = mailbox.size() / 10;
+					int start = page * 10;
+					int end = start + 10;
+					
+					if (mailbox.size() % 10 != 0 && (numPages * 10) - mailbox.size() < 0)
+						numPages++;
+					
+					if (end > mailbox.size())
+						end = mailbox.size();
+					
+					if (page + 1 > 0 || page + 1 <= numPages) {
+						player.sendMessage(ChatColor.AQUA + "=== TitanChat Mail System (" + (page + 1) + "/" + numPages + ") ===");
+						for (int mailNum = start; mailNum < end; mailNum++) {
+							com.titankingdoms.nodinchan.titanchat.mail.Mailbox.Mail mail = mailbox.getMail().get(mailNum);
+							String no = spaceBefore((mailNum + 1) + "", 3) + (mailNum + 1) + spaceAfter((mailNum + 1) + "", 3);
+							String title = mail.getTitle();
+							String sender = spaceBefore(mail.getSender(), 16) + mail.getSender() + spaceAfter(mail.getSender(), 16);
+							
+							String read = (mail.isRead()) ? "Read" : "Unread";
+							
+							player.sendMessage(ChatColor.AQUA + " " + no + "  " + title + "  " + sender + "  " + read);
+							
+						}
+						player.sendMessage(ChatColor.AQUA + " No.      Title           Sender       Read ");
+						
+					} else {
+						TitanChat.getInstance().getServer().dispatchCommand(player, "titanchat mail check 1");
+					}
+					
+				} catch (IndexOutOfBoundsException e) {
+					TitanChat.getInstance().getServer().dispatchCommand(player, "titanchat mail check 1");
+					
+				} catch (NumberFormatException e) {
+					TitanChat.getInstance().sendWarning(player, "Invalid Page Number");
+				}
+			}
+		},
+		DELETE("delete") {
+			
+			@Override
+			public void execute(Player player, String[] args) {
+				try {
+					if (MailManager.getInstance().getMailbox(player.getName()).deleteMail(Integer.parseInt(args[0])))
+						TitanChat.getInstance().sendInfo(player, "Successfully deleted mail");
+					else
+						TitanChat.getInstance().sendWarning(player, "Failed to delete mail");
+					
+				} catch (IndexOutOfBoundsException e) {
+					TitanChat.getInstance().sendWarning(player, "Fail to find mail");
+					
+				} catch (NumberFormatException e) {
+					if (args[0].equalsIgnoreCase("all")) {
+						for (int mail = 0; mail < MailManager.getInstance().getMailbox(player.getName()).size(); mail++)
+							MailManager.getInstance().getMailbox(player.getName()).deleteMail(mail);
+						TitanChat.getInstance().sendInfo(player, "Successfully deleted all mail");
+						
+					} else {
+						TitanChat.getInstance().sendWarning(player, "Invalid mail");
+					}
+				}
+			}
+		},
+		HELP("help") {
+			
+			@Override
+			public void execute(Player player, String[] args) {
+				player.sendMessage(ChatColor.AQUA + "=== TitanChat Mail System Help ===");
+				player.sendMessage(ChatColor.AQUA + "CHECK                   - Checks mail box for mail");
+				player.sendMessage(ChatColor.AQUA + "DELETE <mailno.>        - Deletes mail");
+				player.sendMessage(ChatColor.AQUA + "HELP                    - Displays this help");
+				player.sendMessage(ChatColor.AQUA + "READ <mailno.>          - Reads the mail");
+				player.sendMessage(ChatColor.AQUA + "SEND <target> <message> - Sends the mail to the target");
+			}
+		},
 		READ("read") {
 			
 			@Override
@@ -171,6 +262,32 @@ public class MailManager implements Listener {
 		
 		public String getName() {
 			return name;
+		}
+		
+		public String spaceAfter(String word, int limit) {
+			double spaces = (limit - word.length()) * 0.5;
+			
+			StringBuilder str = new StringBuilder();
+			
+			for (int space = 0; space < (spaces > ((int) spaces) ? (int) spaces + 1 : spaces); space++)
+				str.append(" ");
+			
+			System.out.println("Before:" + word + ":" + str.toString().length());
+			
+			return str.toString();
+		}
+		
+		public String spaceBefore(String word, int limit) {
+			int spaces = (int) ((limit - word.length()) * 0.5);
+			
+			StringBuilder str = new StringBuilder();
+			
+			for (int space = 0; space < spaces; space++)
+				str.append(" ");
+			
+			System.out.println("After:" + word + ":" + str.toString().length());
+			
+			return str.toString();
 		}
 	}
 }

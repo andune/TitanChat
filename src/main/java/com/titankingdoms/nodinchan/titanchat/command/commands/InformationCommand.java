@@ -107,9 +107,8 @@ public class InformationCommand extends Command {
 			
 			if (page + 1 > 0 || page + 1 <= numPages) {
 				player.sendMessage(ChatColor.AQUA + "=== TitanChat Command List (" + (page + 1) + "/" + numPages + ") ===");
-				for (int cmdNum = start; cmdNum < end; cmdNum++) {
+				for (int cmdNum = start; cmdNum < end; cmdNum++)
 					player.sendMessage(ChatColor.AQUA + plugin.getCommandManager().getCommandExecutor(cmdNum).getAnnotation(CommandID.class).name());
-				}
 				plugin.sendInfo(player, "Arguments: [NECESSARY] <OPTIONAL>");
 				plugin.sendInfo(player, "\"/titanchat commands [command]\" for more info");
 				

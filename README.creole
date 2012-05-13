@@ -80,6 +80,7 @@ TitanChat, a chat management and formatting plugin for Bukkit.
 * 26.04.12 - Fixed Custom Channels and update to FormatHandler
 * 27.04.12 - Updated pom.xml
 * 01.05.12 - Minor changes
+* 13.05.12 - Mail system in progress
 
 -----------------------------------------------------------------------------------------------------------------------
 

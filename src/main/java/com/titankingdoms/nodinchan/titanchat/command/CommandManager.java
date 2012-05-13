@@ -53,6 +53,7 @@ public final class CommandManager {
 	
 	private Map<String, Method> executors;
 	private final Map<String, Command> originate;
+	private final Map<String, String> triggers;
 	
 	/**
 	 * Initialises variables
@@ -69,6 +70,7 @@ public final class CommandManager {
 		this.linked = new LinkedList<Method>();
 		this.executors = new LinkedHashMap<String, Method>();
 		this.originate = new HashMap<String, Command>();
+		this.triggers = new HashMap<String, String>();
 	}
 	
 	/**
@@ -81,7 +83,7 @@ public final class CommandManager {
 	 * @param args The arguments
 	 */
 	public void execute(Player player, String command, String[] args) {
-		Method method = getCommandExecutor(command);
+		Method method = getCommandExecutor(getCommandName(command));
 		
 		if (method != null) {
 			if (method.getAnnotation(CommandID.class).requireChannel() && !plugin.enableChannels()) {
@@ -90,16 +92,16 @@ public final class CommandManager {
 			}
 			
 			try {
-				method.invoke(originate.get(command.toLowerCase()), player, args);
+				method.invoke(originate.get(getCommandName(command)), player, args);
 				return;
 			} catch (IllegalAccessException e) {
-				db.i("An IllegalAccessException has occured while using command: " + command);
+				db.i("An IllegalAccessException has occured while using command: " + getCommandName(command));
 				db.i(e.getLocalizedMessage());
 			} catch (IllegalArgumentException e) {
-				db.i("An IllgealArgumentException has occured while using command: " + command);
+				db.i("An IllgealArgumentException has occured while using command: " + getCommandName(command));
 				db.i(e.getLocalizedMessage());
 			} catch (InvocationTargetException e) {
-				db.i("An InvocationTargetException has occured while using command: " + command);
+				db.i("An InvocationTargetException has occured while using command: " + getCommandName(command));
 				db.i(e.getLocalizedMessage());
 			}
 		}
@@ -127,25 +129,36 @@ public final class CommandManager {
 	}
 	
 	/**
-	 * Gets the CommandExecutor by its name
+	 * Gets the Method by its name
 	 * 
 	 * @param name The name
 	 * 
-	 * @return The CommandExecutor if it exists, otherwise null
+	 * @return The Method if it exists, otherwise null
 	 */
 	public Method getCommandExecutor(String name) {
 		return executors.get(name.toLowerCase());
 	}
 	
 	/**
-	 * Gets the CommandExecutor from the list by index
+	 * Gets the Method from the list by index
 	 * 
 	 * @param exeNum The index of the executor in the list
 	 * 
-	 * @return The CommandExecutor
+	 * @return The Method
 	 */
 	public Method getCommandExecutor(int exeNum) {
 		return executors.values().toArray(new Method[executors.values().size()])[exeNum];
+	}
+	
+	/**
+	 * Gets the name of the Command
+	 * 
+	 * @param trigger A trigger of the command
+	 * 
+	 * @return
+	 */
+	public String getCommandName(String trigger) {
+		return triggers.get(trigger.toLowerCase());
 	}
 	
 	/**
@@ -187,10 +200,11 @@ public final class CommandManager {
 			if (method.getAnnotation(CommandID.class) != null) {
 				db.i("Adding new executor: " + method.getAnnotation(CommandID.class).name());
 				
-				for (String trigger : method.getAnnotation(CommandID.class).triggers()) {
-					executors.put(trigger.toLowerCase(), method);
-					originate.put(trigger.toLowerCase(), command);
-				}
+				executors.put(method.getAnnotation(CommandID.class).name().toLowerCase(), method);
+				originate.put(method.getAnnotation(CommandID.class).name().toLowerCase(), command);
+				
+				for (String trigger : method.getAnnotation(CommandID.class).triggers())
+					triggers.put(trigger.toLowerCase(), method.getAnnotation(CommandID.class).name());
 			}
 		}
 	}
@@ -220,5 +234,6 @@ public final class CommandManager {
 	public void unload() {
 		executors.clear();
 		originate.clear();
+		triggers.clear();
 	}
 }

@@ -80,7 +80,7 @@ public class ChannelCommand extends Command {
 		try {
 			if (plugin.getPermsBridge().has(player, "TitanChat.delete")) {
 				if (cm.exists(args[0])) {
-					if (!cm.getChannel(args[0]).getType().equals(Type.DEFAULT) || !cm.getChannel(args[0]).getType().equals(Type.STAFF))
+					if (!cm.getChannel(args[0]).getType().equals(Type.DEFAULT_PUBLIC) || !cm.getChannel(args[0]).getType().equals(Type.DEFAULT_PRIVATE) || !cm.getChannel(args[0]).getType().equals(Type.DEFAULT_PASSWORD) || !cm.getChannel(args[0]).getType().equals(Type.STAFF))
 						plugin.getChannelManager().deleteChannel(player, args[0]);
 					else { plugin.sendWarning(player, "You cannot delete this channel"); }
 					
@@ -147,11 +147,12 @@ public class ChannelCommand extends Command {
 			
 			switch (channel.getType()) {
 			
-			case DEFAULT:
+			case DEFAULT_PUBLIC:
 				cm.chSwitch(player, channel);
 				plugin.sendInfo(player, "You have switched channels");
 				break;
 				
+			case DEFAULT_PASSWORD:
 			case PASSWORD:
 				if (!password.equals("")) {
 					if (channel.correctPassword(password)) {
@@ -166,6 +167,7 @@ public class ChannelCommand extends Command {
 				} else { plugin.sendWarning(player, "You need to enter a password"); }
 				break;
 				
+			case DEFAULT_PRIVATE:
 			case PRIVATE:
 				if (channel.canAccess(player)) {
 					cm.chSwitch(player, channel);
