@@ -2,6 +2,7 @@ tag: '[Pub]'
 chat-display-colour: '&a'
 name-display-colour: '&a'
 type: public
+special-type: none
 global: false
 colour-code: false
 password: ''

@@ -134,16 +134,16 @@ public class InformationCommand extends Command {
 			if (method.getAnnotation(CommandInfo.class) != null)
 				player.sendMessage(ChatColor.AQUA + "Description: " + method.getAnnotation(CommandInfo.class).description());
 			
-			StringBuilder cmdStr = new StringBuilder();
+			StringBuilder str = new StringBuilder();
 			
 			for (String alias : method.getAnnotation(CommandID.class).triggers()) {
-				if (cmdStr.length() > 0)
-					cmdStr.append(", ");
+				if (str.length() > 0)
+					str.append(", ");
 				
-				cmdStr.append(alias);
+				str.append(alias);
 			}
 			
-			player.sendMessage(ChatColor.AQUA + "Aliases: " + cmdStr.toString());
+			player.sendMessage(ChatColor.AQUA + "Aliases: " + str.toString());
 			
 			if (method.getAnnotation(CommandInfo.class) != null)
 				player.sendMessage(ChatColor.AQUA + "Usage: /titanchat " + method.getAnnotation(CommandInfo.class).usage());
@@ -182,6 +182,11 @@ public class InformationCommand extends Command {
 			
 		} catch (IndexOutOfBoundsException e) {
 			Channel channel = cm.getChannel(player);
+			
+			if (channel == null) {
+				plugin.sendWarning(player, "Specify a channel or join a channel to use this command");
+				return;
+			}
 			
 			player.sendMessage(ChatColor.AQUA + "=== " + channel.getName() + " ===");
 			player.sendMessage(ChatColor.AQUA + "Participants: " + plugin.createList(channel.getParticipants()));

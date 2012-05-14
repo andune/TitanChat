@@ -48,6 +48,7 @@ public class Channel extends Loadable {
 	protected final TitanChat plugin;
 	
 	private Type type;
+	private Type special;
 	
 	private boolean global;
 	private boolean silenced;
@@ -64,7 +65,7 @@ public class Channel extends Loadable {
 	private FileConfiguration config = null;
 	
 	/**
-	 * New Channel instance of Type unknown
+	 * New Channel instance of Type unknown and special Type none
 	 * 
 	 * @param name Channel name
 	 */
@@ -73,13 +74,24 @@ public class Channel extends Loadable {
 	}
 	
 	/**
-	 * New Channel instance of Type type
+	 * New Channel instance of Type type and special Type none
+	 * 
+	 * @param name Channel name
+	 */
+	public Channel(String name, Type type) {
+		this(name, type, Type.NONE);
+	}
+	
+	/**
+	 * New Channel instance of Type type and special Type specialType
 	 * 
 	 * @param name Channel name
 	 * 
-	 * @param type Channel type
+	 * @param type Channel Type
+	 * 
+	 * @param specialType Channel special Type
 	 */
-	public Channel(String name, Type type) {
+	public Channel(String name, Type type, Type specialType) {
 		super(name);
 		this.plugin = TitanChat.getInstance();
 		this.type = type;
@@ -106,7 +118,7 @@ public class Channel extends Loadable {
 			return true;
 		if (blacklist.contains(player.getName()))
 			return false;
-		if (type.equals(Type.DEFAULT_PUBLIC) || type.equals(Type.PUBLIC))
+		if (type.equals(Type.PUBLIC))
 			return true;
 		if (adminlist.contains(player.getName()) || whitelist.contains(player.getName()))
 			return true;
@@ -122,7 +134,7 @@ public class Channel extends Loadable {
 	 * @return True if the Player can ban
 	 */
 	public boolean canBan(Player player) {
-		if (type.equals(Type.DEFAULT_PUBLIC) || type.equals(Type.DEFAULT_PRIVATE) || type.equals(Type.DEFAULT_PASSWORD) || type.equals(Type.STAFF))
+		if (special.equals(Type.DEFAULT) || special.equals(Type.STAFF))
 			return false;
 		if (plugin.getPermsBridge().has(player, "TitanChat.ban.*") || plugin.getPermsBridge().has(player, "TitanChat.ban." + super.getName()))
 			return true;
@@ -244,6 +256,15 @@ public class Channel extends Loadable {
 	 */
 	public List<String> getMuteList() {
 		return mutelist;
+	}
+	
+	/**
+	 * Gets the special type
+	 * 
+	 * @return Special type
+	 */
+	public final Type getSpecialType() {
+		return special;
 	}
 	
 	/**
@@ -406,13 +427,35 @@ public class Channel extends Loadable {
 		this.silenced = silenced;
 	}
 	
+	public void setSpecialType(Type type) {
+		this.type = type;
+	}
+	
+	/**
+	 * Sets the special type of the channel
+	 * 
+	 * @param type The special type
+	 */
+	public void setSpecialType(String type) {
+		setSpecialType(Type.fromName(type));
+	}
+	
+	/**
+	 * Sets the type of the channel
+	 * 
+	 * @param type The type
+	 */
+	public void setType(Type type) {
+		this.type = type;
+	}
+	
 	/**
 	 * Sets the type of the channel
 	 * 
 	 * @param type The type
 	 */
 	public void setType(String type) {
-		this.type = Type.fromName(type);
+		setSpecialType(Type.fromName(type));
 	}
 	
 	/**
@@ -430,23 +473,24 @@ public class Channel extends Loadable {
 	 *
 	 */
 	public enum Type {
-		CUSTOM("custom"),
-		DEFAULT_PASSWORD("defaultpassword"),
-		DEFAULT_PRIVATE("defaultprivate"),
-		DEFAULT_PUBLIC("defaultpublic"),
-		PASSWORD("password"),
-		PRIVATE("private"),
-		PUBLIC("public"),
-		STAFF("staff"),
-		UNKNOWN("unknown");
+		CUSTOM("custom", false),
+		DEFAULT("default", true),
+		NONE("none", true),
+		PASSWORD("password", false),
+		PRIVATE("private", false),
+		PUBLIC("public", false),
+		STAFF("staff", true),
+		UNKNOWN("unknown", false);
 		
 		private String name;
+		private boolean special;
 
 		private final static Debugger db = new Debugger(3);
 		private static final Map<String, Type> NAME_MAP = new HashMap<String, Type>();
 		
-		private Type(String name) {
+		private Type(String name, boolean special) {
 			this.name = name;
+			this.special = special;
 		}
 		
 		static {
@@ -462,6 +506,10 @@ public class Channel extends Loadable {
 		
 		public String getName() {
 			return name;
+		}
+		
+		public boolean isSpecial() {
+			return special;
 		}
 	}
 }

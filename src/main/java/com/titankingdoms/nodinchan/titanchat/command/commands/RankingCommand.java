@@ -60,9 +60,16 @@ public class RankingCommand extends Command {
 			} else { plugin.sendWarning(player, "No such channel"); }
 			
 		} catch (IndexOutOfBoundsException e) {
-			if (cm.getChannel(player).canRank(player)) {
+			Channel channel = cm.getChannel(player);
+			
+			if (channel == null) {
+				plugin.sendWarning(player, "Specify a channel or join a channel to use this command");
+				return;
+			}
+			
+			if (channel.canRank(player)) {
 				if (plugin.getPlayer(args[0]) != null) {
-					cm.whitelistMember(plugin.getPlayer(args[0]), cm.getChannel(player));
+					cm.whitelistMember(plugin.getPlayer(args[0]), channel);
 					plugin.sendInfo(player, plugin.getPlayer(args[0]).getDisplayName() + " has been added to the Member List");
 					
 				} else { plugin.sendWarning(player, "Player not online"); }
@@ -104,6 +111,11 @@ public class RankingCommand extends Command {
 			
 		} catch (IndexOutOfBoundsException e) {
 			Channel channel = cm.getChannel(player);
+			
+			if (channel == null) {
+				plugin.sendWarning(player, "Specify a channel or join a channel to use this command");
+				return;
+			}
 			
 			if (channel.canRank(player)) {
 				if (plugin.getPlayer(args[0]) != null) {
@@ -153,13 +165,20 @@ public class RankingCommand extends Command {
 			} else { plugin.sendWarning(player, "No such channel"); }
 			
 		} catch (IndexOutOfBoundsException e) {
-			if (cm.getChannel(player).canRank(player)) {
+			Channel channel = cm.getChannel(player);
+			
+			if (channel == null) {
+				plugin.sendWarning(player, "Specify a channel or join a channel to use this command");
+				return;
+			}
+			
+			if (channel.canRank(player)) {
 				if (plugin.getPlayer(args[0]) != null) {
 					Player targetPlayer = plugin.getPlayer(args[0]);
 					
-					if (!cm.getChannel(player).getAdminList().contains(player.getName())) {
-						cm.assignAdmin(targetPlayer, cm.getChannel(player));
-						plugin.sendInfo(player, "You have been promoted in " + cm.getChannel(player).getName());
+					if (!channel.getAdminList().contains(player.getName())) {
+						cm.assignAdmin(targetPlayer, channel);
+						plugin.sendInfo(player, "You have been promoted in " + channel.getName());
 						plugin.sendInfo(cm.getChannel(args[0]).getParticipants(), targetPlayer.getDisplayName() + " has been promoted");
 						
 					} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " is already an Admin"); }

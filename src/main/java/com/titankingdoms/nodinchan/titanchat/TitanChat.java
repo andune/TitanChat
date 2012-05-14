@@ -33,6 +33,7 @@ import com.titankingdoms.nodinchan.titanchat.mail.MailManager;
 import com.titankingdoms.nodinchan.titanchat.util.Debugger;
 import com.titankingdoms.nodinchan.titanchat.util.FormatHandler;
 import com.titankingdoms.nodinchan.titanchat.util.PermsBridge;
+import com.titankingdoms.nodinchan.titanchat.util.variable.Variable;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -71,6 +72,7 @@ public final class TitanChat extends JavaPlugin {
 	private FormatHandler format;
 	private MailManager mail;
 	private PermsBridge permBridge;
+	private Variable variable;
 	
 	private boolean silenced = false;
 	
@@ -181,15 +183,6 @@ public final class TitanChat extends JavaPlugin {
 	public Logger getLogger() {
 		return log;
 	}
-	
-	/**
-	 * Gets the Mail Directory
-	 * 
-	 * @return The Mail Directory
-	 */
-	public File getMailDir() {
-		return new File(getDataFolder(), "mail");
-	}
 
 	/**
 	 * Gets the MailManager
@@ -207,6 +200,15 @@ public final class TitanChat extends JavaPlugin {
 	 */
 	public PermsBridge getPermsBridge() {
 		return permBridge;
+	}
+	
+	/**
+	 * Gets the Variable manager
+	 * 
+	 * @return The Variable manager
+	 */
+	public Variable getVariableManager() {
+		return variable;
 	}
 	
 	/**
@@ -562,6 +564,8 @@ public final class TitanChat extends JavaPlugin {
 		addonManager.unload();
 		chManager.unload();
 		cmdManager.unload();
+		mail.unload();
+		variable.unload();
 		
 		log(Level.INFO, "is now disabled");
 	}
@@ -583,9 +587,6 @@ public final class TitanChat extends JavaPlugin {
 			saveResource("config.yml", false);
 		}
 		
-		if (getMailDir().mkdir())
-			log(Level.INFO, "Creating mail directory...");
-		
 		if (getChannelDir().mkdir()) {
 			log(Level.INFO, "Creating channel directory...");
 			saveResource("channels/Default.yml", false);
@@ -602,6 +603,7 @@ public final class TitanChat extends JavaPlugin {
 		format = new FormatHandler(this);
 		mail = new MailManager();
 		permBridge = new PermsBridge(this);
+		variable = new Variable();
 		
 		PluginManager pm = getServer().getPluginManager();
 		
@@ -613,8 +615,9 @@ public final class TitanChat extends JavaPlugin {
 		addonManager.load();
 		try { chManager.load(); } catch (Exception e) {}
 		cmdManager.load();
+		format.load();
 		
-		if (chManager.getDefaultChannel() == null && enableChannels()) {
+		if (chManager.getDefaultChannels().size() < 0 && enableChannels()) {
 			log(Level.SEVERE, "A default channel is not defined");
 			pm.disablePlugin(this);
 			return;

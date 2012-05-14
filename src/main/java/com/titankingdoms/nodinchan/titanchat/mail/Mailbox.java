@@ -32,10 +32,12 @@ public final class Mailbox implements Serializable {
 	private final String owner;
 	
 	private LinkedList<Mail> mailbox;
+	private List<Integer> selection;
 	
 	public Mailbox(String owner) {
 		this.owner = owner;
 		this.mailbox = new LinkedList<Mail>();
+		this.selection = new LinkedList<Integer>();
 	}
 	
 	public boolean deleteMail(int mail) {
@@ -49,6 +51,10 @@ public final class Mailbox implements Serializable {
 	
 	public String getOwner() {
 		return owner;
+	}
+	
+	public List<Integer> getSelection() {
+		return selection;
 	}
 	
 	public int getUnreadMail() {

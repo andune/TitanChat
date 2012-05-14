@@ -1,6 +1,7 @@
 package com.titankingdoms.nodinchan.titanchat.command.commands;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.bukkit.ChatColor;
@@ -11,6 +12,7 @@ import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
 import com.titankingdoms.nodinchan.titanchat.command.Command;
 import com.titankingdoms.nodinchan.titanchat.command.CommandID;
 import com.titankingdoms.nodinchan.titanchat.command.CommandInfo;
+import com.titankingdoms.nodinchan.titanchat.events.MessageReceiveEvent;
 import com.titankingdoms.nodinchan.titanchat.events.MessageSendEvent;
 import com.titankingdoms.nodinchan.titanchat.mail.MailManager.Mail;
 
@@ -86,14 +88,19 @@ public class ChatCommand extends Command {
 		
 		List<Player> recipants = new ArrayList<Player>();
 		
-		for (String name : cm.getChannel(player).getParticipants()) {
-			if (plugin.getPlayer(name) != null && !recipants.contains(plugin.getPlayer(name)))
-				recipants.add(plugin.getPlayer(name));
-		}
-		
-		for (String name : cm.getFollowers(cm.getChannel(player))) {
-			if (plugin.getPlayer(name) != null && !recipants.contains(plugin.getPlayer(name)))
-				recipants.add(plugin.getPlayer(name));
+		if (cm.getChannel(player) == null) {
+			recipants.add(player);
+			
+		} else {
+			for (String name : cm.getChannel(player).getParticipants()) {
+				if (plugin.getPlayer(name) != null && !recipants.contains(plugin.getPlayer(name)))
+					recipants.add(plugin.getPlayer(name));
+			}
+			
+			for (String name : cm.getFollowers(cm.getChannel(player))) {
+				if (plugin.getPlayer(name) != null && !recipants.contains(plugin.getPlayer(name)))
+					recipants.add(plugin.getPlayer(name));
+			}
 		}
 		
 		MessageSendEvent event = new MessageSendEvent(player, recipants, str.toString());
@@ -102,8 +109,16 @@ public class ChatCommand extends Command {
 		String format = plugin.getFormatHandler().emoteFormat(player);
 		
 		for (Player recipant : recipants) {
-			recipant.sendMessage(format.replace("%action", event.getMessage()));
+			MessageReceiveEvent receiveEvent = new MessageReceiveEvent(player, recipant, format.replace("%action", "%message"), event.getMessage());
+			plugin.getServer().getPluginManager().callEvent(receiveEvent);
+			
+			if (receiveEvent.isCancelled()) { continue; }
+			
+			recipant.sendMessage(receiveEvent.getFormattedMessage());
 		}
+		
+		if (cm.getChannel(player) == null)
+			player.sendMessage(ChatColor.GOLD + "Nobody hears you...");
 	}
 	
 	/**
@@ -112,16 +127,17 @@ public class ChatCommand extends Command {
 	@CommandID(name = "Mail", triggers = "mail", requireChannel = false)
 	@CommandInfo(description = "Manages mail", usage = "mail <command> <arguments>")
 	public void mail(Player player, String[] args) {
+		if (args.length < 1) {
+			plugin.getServer().dispatchCommand(player, "titanchat mail help");
+			return;
+		}
+		
 		Mail mail = Mail.fromName(args[0].toLowerCase());
 		
-		if (mail != null) {
-			String[] arguments = new String[args.length - 1];
-			
-			for (int arg = 1; arg < args.length; arg++)
-				arguments[arg - 1] = args[arg];
-			
-			mail.execute(player, arguments);
-		}
+		if (mail != null)
+			mail.execute(player, Arrays.copyOfRange(args, 1, args.length));
+		else
+			plugin.sendWarning(player, "Invalid mail command");
 	}
 	
 	/**
@@ -204,8 +220,11 @@ public class ChatCommand extends Command {
 			
 			String format = plugin.getFormatHandler().whisperFormat(player);
 			
+			MessageReceiveEvent receiveEvent = new MessageReceiveEvent(player, plugin.getPlayer(args[0]), format, event.getMessage());
+			plugin.getServer().getPluginManager().callEvent(receiveEvent);
+			
 			player.sendMessage(ChatColor.DARK_PURPLE + "[You -> " + plugin.getPlayer(args[0]).getDisplayName() + "] " + event.getMessage());
-			plugin.getPlayer(args[0]).sendMessage(format.replace("%message", event.getMessage()));
+			plugin.getPlayer(args[0]).sendMessage(receiveEvent.getFormattedMessage());
 			
 		} else { plugin.getLogger().info(player.getName() + " whispers: " + str.toString()); }
 	}

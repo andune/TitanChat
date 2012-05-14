@@ -2,6 +2,7 @@ tag: '[Priv]'
 chat-display-colour: '&b'
 name-display-colour: '&b'
 type: private
+special-type: none
 global: false
 colour-code: false
 password: ''

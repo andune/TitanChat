@@ -80,7 +80,7 @@ public class ChannelCommand extends Command {
 		try {
 			if (plugin.getPermsBridge().has(player, "TitanChat.delete")) {
 				if (cm.exists(args[0])) {
-					if (!cm.getChannel(args[0]).getType().equals(Type.DEFAULT_PUBLIC) || !cm.getChannel(args[0]).getType().equals(Type.DEFAULT_PRIVATE) || !cm.getChannel(args[0]).getType().equals(Type.DEFAULT_PASSWORD) || !cm.getChannel(args[0]).getType().equals(Type.STAFF))
+					if (!cm.getChannel(args[0]).getSpecialType().equals(Type.DEFAULT) || !cm.getChannel(args[0]).getSpecialType().equals(Type.STAFF))
 						plugin.getChannelManager().deleteChannel(player, args[0]);
 					else { plugin.sendWarning(player, "You cannot delete this channel"); }
 					
@@ -129,7 +129,7 @@ public class ChannelCommand extends Command {
 			Channel ch = cm.getChannel(args[0]);
 			String password = "";
 			
-			if (cm.getChannel(player).equals(ch)) { plugin.sendWarning(player, "You are already on the channel"); return; }
+			if (ch.equals(cm.getChannel(player))) { plugin.sendWarning(player, "You are already on the channel"); return; }
 			
 			try { password = args[1]; } catch (IndexOutOfBoundsException e) {}
 			
@@ -147,28 +147,73 @@ public class ChannelCommand extends Command {
 			
 			switch (channel.getType()) {
 			
-			case DEFAULT_PUBLIC:
-				cm.chSwitch(player, channel);
-				plugin.sendInfo(player, "You have switched channels");
+			case PASSWORD:
+				switch (channel.getSpecialType()) {
+				
+				case DEFAULT:
+					if (!password.equals("")) {
+						if (channel.correctPassword(password)) {
+							cm.chSwitch(player, channel);
+							plugin.sendInfo(player, "You have switched channels");
+							
+						} else { plugin.sendWarning(player, "Incorrect password"); }
+						
+					} else { plugin.sendWarning(player, "You need to enter a password"); }
+					break;
+					
+				case NONE:
+					if (!password.equals("")) {
+						if (channel.correctPassword(password)) {
+							if (channel.canAccess(player)) {
+								cm.chSwitch(player, channel);
+								plugin.sendInfo(player, "You have switched channels");
+								
+							} else { plugin.sendWarning(player, "You are banned on this channel"); }
+							
+						} else { plugin.sendWarning(player, "Incorrect password"); }
+						
+					} else { plugin.sendWarning(player, "You need to enter a password"); }
+					break;
+					
+				case STAFF:
+					if (plugin.isStaff(player)) {
+						if (!password.equals("")) {
+							if (channel.correctPassword(password)) {
+								cm.chSwitch(player, channel);
+								plugin.sendInfo(player, "You have switched channels");
+									
+							} else { plugin.sendWarning(player, "Incorrect password"); }
+								
+						} else { plugin.sendWarning(player, "You need to enter a password"); }
+						
+					} else { plugin.sendWarning(player, "You do not have permission to join " + channel.getName()); }
+					break;
+				}
 				break;
 				
-			case DEFAULT_PASSWORD:
-			case PASSWORD:
-				if (!password.equals("")) {
-					if (channel.correctPassword(password)) {
+			case PRIVATE:
+				switch (channel.getSpecialType()) {
+				
+				case DEFAULT:
+				case NONE:
+					if (channel.canAccess(player)) {
+						cm.chSwitch(player, channel);
+						plugin.sendInfo(player, "You have switched channels");
+						
+					} else { plugin.sendWarning(player, "You are not on the whitelist"); }
+					break;
+					
+				case STAFF:
+					if (plugin.isStaff(player)) {
 						if (channel.canAccess(player)) {
 							cm.chSwitch(player, channel);
 							plugin.sendInfo(player, "You have switched channels");
 							
-						} else { plugin.sendWarning(player, "You are banned on this channel"); }
+						} else { plugin.sendWarning(player, "You are not on the whitelist"); }
 						
-					} else { plugin.sendWarning(player, "Incorrect password"); }
-					
-				} else { plugin.sendWarning(player, "You need to enter a password"); }
-				break;
+					}
+				}
 				
-			case DEFAULT_PRIVATE:
-			case PRIVATE:
 				if (channel.canAccess(player)) {
 					cm.chSwitch(player, channel);
 					plugin.sendInfo(player, "You have switched channels");
@@ -177,22 +222,43 @@ public class ChannelCommand extends Command {
 				break;
 				
 			case PUBLIC:
-				if (channel.canAccess(player)) {
-					cm.chSwitch(player, channel);
-					plugin.sendInfo(player, "You have switched channels");
-					
-				} else { plugin.sendWarning(player, "You are banned on this channel"); }
-				break;
+				switch (channel.getSpecialType()) {
 				
-			case STAFF:
-				if (plugin.isStaff(player)) {
+				case DEFAULT:
 					cm.chSwitch(player, channel);
 					plugin.sendInfo(player, "You have switched channels");
+					break;
 					
-				} else { plugin.sendWarning(player, "You do not have permission to join " + channel.getName()); }
+				case NONE:
+					if (channel.canAccess(player)) {
+						cm.chSwitch(player, channel);
+						plugin.sendInfo(player, "You have switched channels");
+						
+					} else { plugin.sendWarning(player, "You are banned on this channel"); }
+					break;
+					
+				case STAFF:
+					if (plugin.isStaff(player)) {
+						cm.chSwitch(player, channel);
+						plugin.sendInfo(player, "You have switched channels");
+						
+					} else { plugin.sendWarning(player, "You do not have permission to join " + channel.getName()); }
+				}
 				break;
 			}
 		}
+	}
+	
+	@CommandID(name = "Leave", triggers = { "leave", "part"})
+	@CommandInfo(description = "Leaves the channel you are in", usage = "leave")
+	public void leave(Player player, String[] args) {
+		Channel channel = cm.getChannel(player);
+		
+		if (channel != null) {
+			channel.leave(player);
+			plugin.sendInfo(player, "You have left the channel");
+			
+		} else { plugin.sendWarning(player, "You are not in any channels"); }
 	}
 	
 	/**

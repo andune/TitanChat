@@ -2,6 +2,7 @@ tag: '[]'
 chat-display-colour: ''
 name-display-colour: ''
 type: public
+special-type: none
 global: true
 colour-code: false
 password: ''

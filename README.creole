@@ -81,6 +81,7 @@ TitanChat, a chat management and formatting plugin for Bukkit.
 * 27.04.12 - Updated pom.xml
 * 01.05.12 - Minor changes
 * 13.05.12 - Mail system in progress
+* 14.05.12 - Completed Mail system, changed channel type system and reduced use of listeners
 
 -----------------------------------------------------------------------------------------------------------------------
 

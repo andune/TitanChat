@@ -7,9 +7,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -57,6 +62,9 @@ public class MailManager implements Listener {
 			this.plugin.getServer().getPluginManager().registerEvents(this, plugin);
 		
 		this.mailboxes = new HashMap<String, Mailbox>();
+		
+		if (getMailDir().mkdir())
+			plugin.log(Level.INFO, "Creating mail directory...");
 	}
 	
 	public boolean enable() {
@@ -71,11 +79,20 @@ public class MailManager implements Listener {
 		return mailboxes.get(name);
 	}
 	
+	/**
+	 * Gets the Mail Directory
+	 * 
+	 * @return The Mail Directory
+	 */
+	public File getMailDir() {
+		return new File(plugin.getDataFolder(), "mail");
+	}
+	
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerQuit(PlayerQuitEvent event) {
 		ObjectOutputStream output;
 		try {
-			output = new ObjectOutputStream(new FileOutputStream(new File(plugin.getMailDir(), event.getPlayer().getName() + ".mailbox")));
+			output = new ObjectOutputStream(new FileOutputStream(new File(getMailDir(), event.getPlayer().getName() + ".mailbox")));
 			output.writeObject(mailboxes.get(event.getPlayer().getName()));
 			output.close();
 			
@@ -92,7 +109,7 @@ public class MailManager implements Listener {
 		Mailbox mailbox = null;
 		
 		if (!mailboxes.containsKey(event.getPlayer().getName())) {
-			File mb = new File(plugin.getMailDir(), event.getPlayer().getName() + ".mailbox");
+			File mb = new File(getMailDir(), event.getPlayer().getName() + ".mailbox");
 			
 			try {
 				if (mb.createNewFile()) {
@@ -129,7 +146,7 @@ public class MailManager implements Listener {
 	public void unload() {
 		for (Mailbox mailbox : mailboxes.values()) {
 			try {
-				File mb = new File(plugin.getMailDir(), mailbox.getOwner() + ".mailbox");
+				File mb = new File(getMailDir(), mailbox.getOwner() + ".mailbox");
 				
 				ObjectOutputStream output = new ObjectOutputStream(new FileOutputStream(mb));
 				output.writeObject(mailbox);
@@ -194,23 +211,51 @@ public class MailManager implements Listener {
 			
 			@Override
 			public void execute(Player player, String[] args) {
+				Mailbox mailbox = MailManager.getInstance().getMailbox(player.getName());
+				
 				try {
-					if (MailManager.getInstance().getMailbox(player.getName()).deleteMail(Integer.parseInt(args[0])))
+					if (args.length < 1)
+						throw new IndexOutOfBoundsException();
+					
+					int deleted = 0;
+					
+					if (mailbox.deleteMail(Integer.parseInt(args[0]) - 1))
+						deleted++;
+					
+					for (String arg : Arrays.copyOfRange(args, 1, args.length)) {
+						try {
+							if (mailbox.deleteMail(Integer.parseInt(arg)))
+								deleted++;
+							
+						} catch (NumberFormatException e) {}
+					}
+					
+					if (deleted == 1)
 						TitanChat.getInstance().sendInfo(player, "Successfully deleted mail");
+					else if (deleted > 0)
+						TitanChat.getInstance().sendInfo(player, "Successfully deleted selection");
 					else
 						TitanChat.getInstance().sendWarning(player, "Failed to delete mail");
 					
 				} catch (IndexOutOfBoundsException e) {
-					TitanChat.getInstance().sendWarning(player, "Fail to find mail");
+					if (mailbox.getSelection().size() < 1) {
+						TitanChat.getInstance().sendWarning(player, "Failed to find mail");
+						return;
+					}
+					
+					for (int mail : mailbox.getSelection())
+						mailbox.deleteMail(mail);
+					
+					TitanChat.getInstance().sendInfo(player, "Successfully deleted selection");
 					
 				} catch (NumberFormatException e) {
 					if (args[0].equalsIgnoreCase("all")) {
-						for (int mail = 0; mail < MailManager.getInstance().getMailbox(player.getName()).size(); mail++)
-							MailManager.getInstance().getMailbox(player.getName()).deleteMail(mail);
+						for (int mail = 0; mail < mailbox.size(); mail++)
+							mailbox.deleteMail(mail);
 						TitanChat.getInstance().sendInfo(player, "Successfully deleted all mail");
 						
 					} else {
-						TitanChat.getInstance().sendWarning(player, "Invalid mail");
+						TitanChat.getInstance().sendWarning(player, "Failed to find mail");
 					}
 				}
 			}
@@ -220,18 +265,88 @@ public class MailManager implements Listener {
 			@Override
 			public void execute(Player player, String[] args) {
 				player.sendMessage(ChatColor.AQUA + "=== TitanChat Mail System Help ===");
-				player.sendMessage(ChatColor.AQUA + "CHECK                   - Checks mail box for mail");
-				player.sendMessage(ChatColor.AQUA + "DELETE <mailno.>        - Deletes mail");
-				player.sendMessage(ChatColor.AQUA + "HELP                    - Displays this help");
-				player.sendMessage(ChatColor.AQUA + "READ <mailno.>          - Reads the mail");
-				player.sendMessage(ChatColor.AQUA + "SEND <target> <message> - Sends the mail to the target");
+				player.sendMessage(ChatColor.AQUA + "CHECK                    - Checks mail box for mail");
+				player.sendMessage(ChatColor.AQUA + "DELETE [no.] [no.]...    - Deletes mail");
+				player.sendMessage(ChatColor.AQUA + "HELP                     - Displays this help");
+				player.sendMessage(ChatColor.AQUA + "READ <no.>               - Reads the mail");
+				player.sendMessage(ChatColor.AQUA + "SEL <no.> <no.>...       - Selects the list of mail");
+				player.sendMessage(ChatColor.AQUA + "SEND <target> <message>  - Sends the mail to the target");
+				player.sendMessage(ChatColor.AQUA + "SETREAD [no.] [no.]...   - Sets all the mail to read");
+				player.sendMessage(ChatColor.AQUA + "SETUNREAD [no.] [no.]... - Sets all the mail to unread");
+				player.sendMessage(ChatColor.AQUA + "\"[no.]\" is the ID of the mail you see when you check mail.");
 			}
 		},
 		READ("read") {
 			
 			@Override
 			public void execute(Player player, String[] args) {
+				try {
+					com.titankingdoms.nodinchan.titanchat.mail.Mailbox.Mail mail = MailManager.getInstance().getMailbox(player.getName()).readMail(Integer.parseInt(args[0]));
+					player.sendMessage("Sender: " + mail.getSender());
+					player.sendMessage("Date: " + mail.getDateTime());
+					player.sendMessage("Title: " + mail.getTitle());
+					player.sendMessage(mail.getMessage());
+					
+				} catch (IndexOutOfBoundsException e) {
+					TitanChat.getInstance().sendWarning(player, "Failed to find mail");
+					
+				} catch (NumberFormatException e) {
+					TitanChat.getInstance().sendWarning(player, "Failed to find mail");
+				}
+			}
+		},
+		SEL("sel") {
+			
+			@Override
+			public void execute(Player player, String[] args) {
+				Mailbox mailbox = MailManager.getInstance().getMailbox(player.getName());
 				
+				List<Integer> mailList = new ArrayList<Integer>();
+				
+				for (String arg : args) {
+					try {
+						int mail = Integer.parseInt(arg) - 1;
+						
+						if (mail < 0 || mail > mailbox.size())
+							continue;
+						
+						mailList.add(mail);
+						
+					} catch (NumberFormatException e) {}
+				}
+				
+				Collections.sort(mailList);
+				
+				mailbox.getSelection().clear();
+				mailbox.getSelection().addAll(mailList);
+				TitanChat.getInstance().sendInfo(player, "You have selected " + mailList.size() + " mail");
+			}
+		},
+		SELECT("select") {
+			
+			@Override
+			public void execute(Player player, String[] args) {
+				Mailbox mailbox = MailManager.getInstance().getMailbox(player.getName());
+				
+				List<Integer> mailList = new ArrayList<Integer>();
+				
+				for (String arg : args) {
+					try {
+						int mail = Integer.parseInt(arg) - 1;
+						
+						if (mail < 0 || mail > mailbox.size())
+							continue;
+						
+						mailList.add(mail);
+						
+					} catch (NumberFormatException e) {}
+				}
+				
+				Collections.sort(mailList);
+				
+				mailbox.getSelection().clear();
+				mailbox.getSelection().addAll(mailList);
+				TitanChat.getInstance().sendInfo(player, "You have selected " + mailList.size() + " mail");
 			}
 		},
 		SEND("send") {
@@ -239,6 +354,114 @@ public class MailManager implements Listener {
 			@Override
 			public void execute(Player player, String[] args) {
 				
+			}
+		},
+		SETREAD("setread") {
+			
+			@Override
+			public void execute(Player player, String[] args) {
+				Mailbox mailbox = MailManager.getInstance().getMailbox(player.getName());
+				
+				try {
+					if (args.length < 1)
+						throw new IndexOutOfBoundsException();
+					
+					int set = 0;
+					
+					mailbox.readMail(Integer.parseInt(args[0]) - 1).setRead(true);
+					set++;
+					
+					for (String arg : Arrays.copyOfRange(args, 1, args.length)) {
+						try {
+							mailbox.readMail(Integer.parseInt(arg) - 1).setRead(true);
+							set++;
+							
+						} catch (NumberFormatException e) {}
+					}
+					
+					if (set == 1)
+						TitanChat.getInstance().sendInfo(player, "Successfully set mail as read");
+					else if (set > 0)
+						TitanChat.getInstance().sendInfo(player, "Successfully set selection as read");
+					else
+						TitanChat.getInstance().sendWarning(player, "Failed to set mail as read");
+					
+				} catch (IndexOutOfBoundsException e) {
+					if (mailbox.getSelection().size() < 1) {
+						TitanChat.getInstance().sendWarning(player, "Failed to find mail");
+						return;
+					}
+					
+					for (int mail : mailbox.getSelection())
+						mailbox.readMail(mail).setRead(true);
+					
+					TitanChat.getInstance().sendInfo(player, "Successfully set selection as read");
+					
+				} catch (NumberFormatException e) {
+					if (args[0].equalsIgnoreCase("all")) {
+						for (com.titankingdoms.nodinchan.titanchat.mail.Mailbox.Mail mail : mailbox.getMail())
+							mail.setRead(true);
+						
+						TitanChat.getInstance().sendInfo(player, "Successfully set all mail as read");
+						
+					} else {
+						TitanChat.getInstance().sendWarning(player, "Failed to find mail");
+					}
+				}
+			}
+		},
+		SETUNREAD("setunread") {
+			
+			@Override
+			public void execute(Player player, String[] args) {
+				Mailbox mailbox = MailManager.getInstance().getMailbox(player.getName());
+				
+				try {
+					if (args.length < 1)
+						throw new IndexOutOfBoundsException();
+					
+					int set = 0;
+					
+					mailbox.readMail(Integer.parseInt(args[0]) - 1).setRead(false);
+					set++;
+					
+					for (String arg : Arrays.copyOfRange(args, 1, args.length)) {
+						try {
+							mailbox.readMail(Integer.parseInt(arg) - 1).setRead(false);
+							set++;
+							
+						} catch (NumberFormatException e) {}
+					}
+					
+					if (set == 1)
+						TitanChat.getInstance().sendInfo(player, "Successfully set mail as unread");
+					else if (set > 0)
+						TitanChat.getInstance().sendInfo(player, "Successfully set selection as unread");
+					else
+						TitanChat.getInstance().sendWarning(player, "Failed to set mail as unread");
+					
+				} catch (IndexOutOfBoundsException e) {
+					if (mailbox.getSelection().size() < 1) {
+						TitanChat.getInstance().sendWarning(player, "Failed to find mail");
+						return;
+					}
+					
+					for (int mail : mailbox.getSelection())
+						mailbox.readMail(mail).setRead(false);
+					
+					TitanChat.getInstance().sendInfo(player, "Successfully set selection as unread");
+					
+				} catch (NumberFormatException e) {
+					if (args[0].equalsIgnoreCase("all")) {
+						for (com.titankingdoms.nodinchan.titanchat.mail.Mailbox.Mail mail : mailbox.getMail())
+							mail.setRead(false);
+						
+						TitanChat.getInstance().sendInfo(player, "Successfully set all mail as unread");
+						
+					} else {
+						TitanChat.getInstance().sendWarning(player, "Failed to find mail");
+					}
+				}
 			}
 		};
 		
@@ -272,8 +495,6 @@ public class MailManager implements Listener {
 			for (int space = 0; space < (spaces > ((int) spaces) ? (int) spaces + 1 : spaces); space++)
 				str.append(" ");
 			
-			System.out.println("Before:" + word + ":" + str.toString().length());
-			
 			return str.toString();
 		}
 		
@@ -284,8 +505,6 @@ public class MailManager implements Listener {
 			
 			for (int space = 0; space < spaces; space++)
 				str.append(" ");
-			
-			System.out.println("After:" + word + ":" + str.toString().length());
 			
 			return str.toString();
 		}

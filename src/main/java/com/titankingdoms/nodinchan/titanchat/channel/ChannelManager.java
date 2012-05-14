@@ -106,10 +106,12 @@ public final class ChannelManager {
 	 */
 	public void chSwitch(Player player, Channel channel) {
 		db.i("Channel switch of player " + player.getName() +
-				" from channel " + getChannel(player).getName() +
+				" from channel " + ((getChannel(player) != null) ? getChannel(player).getName() : "none") +
 				" to channel " + channel.getName());
 		
-		getChannel(player).leave(player);
+		if (getChannel(player) != null)
+			getChannel(player).leave(player);
+		
 		channel.join(player);
 	}
 
@@ -124,7 +126,7 @@ public final class ChannelManager {
 		db.i("Player " + player.getName() +
 				" is creating channel " + name);
 		
-		StandardChannel channel = new StandardChannel(name, Type.PUBLIC);
+		StandardChannel channel = new StandardChannel(name, Type.PUBLIC, Type.NONE);
 		channels.put(name, channel);
 		
 		assignAdmin(player, channel);
@@ -239,17 +241,19 @@ public final class ChannelManager {
 	}
 
 	/**
-	 * Gets the Default Channel of the Server
+	 * Gets the Default Channels of the Server
 	 * 
-	 * @return The Default Channel
+	 * @return The Default Channels
 	 */
-	public Channel getDefaultChannel() {
-		for (Channel channel : channels.values()) {
-			if (channel.getType().equals(Type.DEFAULT_PUBLIC) || channel.getType().equals(Type.DEFAULT_PRIVATE) || channel.getType().equals(Type.DEFAULT_PASSWORD))
-				return channel;
+	public List<Channel> getDefaultChannels() {
+		List<Channel> channels = new LinkedList<Channel>();
+		
+		for (Channel channel : this.channels.values()) {
+			if (channel.getSpecialType().equals(Type.DEFAULT))
+				channels.add(channel);
 		}
 		
-		return null;
+		return channels;
 	}
 	
 	/**
@@ -323,26 +327,37 @@ public final class ChannelManager {
 				return channel;
 		}
 		
-		if (getStaffChannel() != null) {
-			if (plugin.isStaff(player))
-				return getStaffChannel();
+		if (getStaffChannels().size() > 0) {
+			if (plugin.isStaff(player)) {
+				for (Channel channel : getStaffChannels()) {
+					if (channel.getType().equals(Type.PUBLIC))
+						return channel;
+				}
+			}
 		}
 		
-		return getDefaultChannel();
-	}
-	
-	/**
-	 * Gets the Staff Channel
-	 * 
-	 * @return The Staff Channel
-	 */
-	public Channel getStaffChannel() {
-		for (Channel channel : channels.values()) {
-			if (channel.getType().equals(Type.STAFF))
+		for (Channel channel : getDefaultChannels()) {
+			if (channel.getType().equals(Type.PUBLIC))
 				return channel;
 		}
 		
 		return null;
+	}
+	
+	/**
+	 * Gets the Staff Channels of the Server
+	 * 
+	 * @return The Staff Channels
+	 */
+	public List<Channel> getStaffChannels() {
+		List<Channel> channels = new LinkedList<Channel>();
+		
+		for (Channel channel : this.channels.values()) {
+			if (channel.getSpecialType().equals(Type.STAFF))
+				channels.add(channel);
+		}
+		
+		return channels;
 	}
 	
 	/**
@@ -405,6 +420,8 @@ public final class ChannelManager {
 		StandardChannel channel = new StandardChannel(name);
 		
 		channel.setType(channel.getConfig().getString("type"));
+		
+		channel.setSpecialType(channel.getConfig().getString("special-type"));
 		
 		channel.setGlobal(channel.getConfig().getBoolean("global"));
 		

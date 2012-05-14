@@ -1,12 +1,15 @@
 package com.titankingdoms.nodinchan.titanchat.util;
 
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
 import com.titankingdoms.nodinchan.titanchat.channel.StandardChannel;
 import com.titankingdoms.nodinchan.titanchat.channel.Variables;
+import com.titankingdoms.nodinchan.titanchat.channel.Channel.Type;
 import com.titankingdoms.nodinchan.titanchat.events.MessageFormatEvent;
+import com.titankingdoms.nodinchan.titanchat.util.variable.Variable.IVariable;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -76,10 +79,8 @@ public final class FormatHandler {
 	 * @return True if converts
 	 */
 	public boolean colours(String name) {
-		if (plugin.getChannelManager().getStaffChannel() != null) {
-			if (plugin.getChannelManager().getStaffChannel().equals(plugin.getChannelManager().getChannel(name)))
-				return true;
-		}
+		if (plugin.getChannelManager().getChannel(name).getSpecialType().equals(Type.STAFF))
+			return true;
 		
 		if (plugin.getChannelManager().getChannel(name) instanceof CustomChannel)
 			return true;
@@ -136,6 +137,77 @@ public final class FormatHandler {
 			
 			return event.getFormat();
 		}
+	}
+	
+	public void load() {
+		plugin.getVariableManager().register(new IVariable() {
+			
+			@Override
+			public Class<? extends Event> getEvent() {
+				return MessageFormatEvent.class;
+			}
+			
+			@Override
+			public String getReplacement(Player sender, Player... recipants) {
+				return colourise(plugin.getPermsBridge().getPlayerPrefix(sender));
+			}
+			
+			@Override
+			public String getVariable() {
+				return "%prefix";
+			}
+			
+		}, new IVariable() {
+			
+			@Override
+			public Class<? extends Event> getEvent() {
+				return MessageFormatEvent.class;
+			}
+			
+			@Override
+			public String getReplacement(Player sender, Player... recipants) {
+				return colourise(plugin.getPermsBridge().getPlayerSuffix(sender));
+			}
+			
+			@Override
+			public String getVariable() {
+				return "%suffix";
+			}
+			
+		}, new IVariable() {
+			
+			@Override
+			public Class<? extends Event> getEvent() {
+				return MessageFormatEvent.class;
+			}
+			
+			@Override
+			public String getReplacement(Player sender, Player... recipants) {
+				return colourise(plugin.getPermsBridge().getGroupPrefix(sender));
+			}
+			
+			@Override
+			public String getVariable() {
+				return "%gprefix";
+			}
+			
+		}, new IVariable() {
+			
+			@Override
+			public Class<? extends Event> getEvent() {
+				return MessageFormatEvent.class;
+			}
+			
+			@Override
+			public String getReplacement(Player sender, Player... recipants) {
+				return colourise(plugin.getPermsBridge().getGroupSuffix(sender));
+			}
+			
+			@Override
+			public String getVariable() {
+				return "%gsuffix";
+			}
+		});
 	}
 	
 	/**

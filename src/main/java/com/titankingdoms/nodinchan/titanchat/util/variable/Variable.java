@@ -1,5 +1,11 @@
 package com.titankingdoms.nodinchan.titanchat.util.variable;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -27,40 +33,52 @@ import com.titankingdoms.nodinchan.titanchat.events.MessageSendEvent;
 
 public final class Variable implements Listener {
 	
+	private final List<IVariable> variables;
+	
 	public Variable() {
+		this.variables = new ArrayList<IVariable>();
 		TitanChat.getInstance().getServer().getPluginManager().registerEvents(this, TitanChat.getInstance());
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onMessageFormat(MessageFormatEvent event) {
-		for (IVariable variable : FormatVariable.getVariables())
-			event.setFormat(variable.replace(event.getFormat()));
+		for (IVariable variable : variables)
+			if (event.getClass().isAssignableFrom(variable.getEvent()))
+				event.setFormat(variable.replace(event.getFormat(), event.getSender()));
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onMessageReceive(MessageReceiveEvent event) {
-		for (IVariable variable : ReceiveVariable.getVariables())
-			event.setFormat(variable.replace(event.getFormat()));
+		for (IVariable variable : variables)
+			if (event.getClass().isAssignableFrom(variable.getEvent()))
+				event.setFormat(variable.replace(event.getFormat(), event.getSender(), event.getRecipant()));
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onMessageSend(MessageSendEvent event) {
-		for (IVariable variable : SendVariable.getVariables())
-			event.setMessage(variable.replace(event.getMessage()));
+		for (IVariable variable : variables)
+			if (event.getClass().isAssignableFrom(variable.getEvent()))
+				event.setMessage(variable.replace(event.getMessage(), event.getSender(), event.getRecipants().toArray(new Player[0])));
 	}
 	
-	public static void unload() {
-		FormatVariable.unload();
-		ReceiveVariable.unload();
-		SendVariable.unload();
+	public void register(IVariable... variables) {
+		this.variables.addAll(Arrays.asList(variables));
 	}
 	
-	public interface IVariable {
+	public void unload() {
+		variables.clear();
+	}
+	
+	public static abstract class IVariable {
 		
-		public String getReplacement();
+		public abstract Class<? extends Event> getEvent();
 		
-		public String getVariable();
+		public abstract String getReplacement(Player sender, Player... recipants);
 		
-		public String replace(String line);
+		public abstract String getVariable();
+		
+		public final String replace(String line, Player sender, Player... recipants) {
+			return line.replace(getVariable(), getReplacement(sender, recipants));
+		}
 	}
 }

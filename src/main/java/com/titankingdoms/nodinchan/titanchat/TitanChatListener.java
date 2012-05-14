@@ -86,6 +86,11 @@ public class TitanChatListener implements Listener {
 			
 			Channel channel = plugin.getChannelManager().getChannel(player);
 			
+			if (channel == null) {
+				plugin.sendWarning(player, "You are not in a channel, please join one to chat");
+				return;
+			}
+			
 			if (voiceless(player, channel))
 				return;
 			
@@ -125,11 +130,15 @@ public class TitanChatListener implements Listener {
 			return;
 		
 		Channel channel = plugin.getChannelManager().getSpawnChannel(event.getPlayer());
-		channel.join(event.getPlayer());
+		
+		if (channel != null)
+			channel.join(event.getPlayer());
+		else
+			plugin.sendWarning(event.getPlayer(), "Failed to find your spawn channel");
 		
 		if (plugin.isSilenced())
 			plugin.sendWarning(event.getPlayer(), "All channels are silenced");
-		else if (channel.isSilenced())
+		else if (channel != null && channel.isSilenced())
 			plugin.sendWarning(event.getPlayer(), channel.getName() + " is silenced");
 	}
 	

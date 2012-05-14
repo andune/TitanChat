@@ -114,6 +114,11 @@ public class InvitationCommand extends Command {
 		} catch (IndexOutOfBoundsException e) {
 			Channel channel = cm.getChannel(player);
 			
+			if (channel == null) {
+				plugin.sendWarning(player, "Specify a channel or join a channel to use this command");
+				return;
+			}
+			
 			if (channel.getAdminList().contains(player.getName())) {
 				if (plugin.getPlayer(args[0]) != null) {
 					channel.getInviteList().add(plugin.getPlayer(args[0]).getName());

@@ -1,7 +1,8 @@
 tag: '[D]'
 chat-display-colour: '&f'
 name-display-colour: '&f'
-type: default
+type: public
+special-type: default
 global: true
 colour-code: false
 password: ''

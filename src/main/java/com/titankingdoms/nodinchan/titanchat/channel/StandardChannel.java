@@ -39,7 +39,11 @@ public final class StandardChannel extends Channel {
 	}
 	
 	public StandardChannel(String name, Type type) {
-		super(name, type);
+		this(name, type, Type.NONE);
+	}
+	
+	public StandardChannel(String name, Type type, Type specialType) {
+		super(name, type, specialType);
 		this.variables = new Variables(this);
 		this.password = "";
 	}
@@ -75,7 +79,7 @@ public final class StandardChannel extends Channel {
 	
 	@Override
 	public void join(Player player) {
-		super.getParticipants().add(player.getName());
+		super.join(player);
 		
 		if (variables.enableJoinMessages() && plugin.enableJoinMessage()) {
 			for (String participant : super.getParticipants()) {
@@ -87,7 +91,7 @@ public final class StandardChannel extends Channel {
 	
 	@Override
 	public void leave(Player player) {
-		super.getParticipants().remove(player.getName());
+		super.leave(player);
 		
 		if (variables.enableLeaveMessages() && plugin.enableLeaveMessage()) {
 			for (String participant : super.getParticipants()) {
@@ -103,6 +107,7 @@ public final class StandardChannel extends Channel {
 		getConfig().set("chat-display-colour", variables.getChatColour());
 		getConfig().set("name-display-colour", variables.getNameColour());
 		getConfig().set("type", super.getType().getName());
+		getConfig().set("special-type", super.getSpecialType().getName());
 		getConfig().set("global", super.isGlobal());
 		getConfig().set("colour-code", variables.convert());
 		getConfig().set("password", "");

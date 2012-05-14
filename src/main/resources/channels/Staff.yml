@@ -1,7 +1,8 @@
 tag: '[S]'
 chat-display-colour: '&4'
 name-display-colour: '&4'
-type: staff
+type: public
+special-type: staff
 global: false
 colour-code: true
 password: ''

@@ -55,7 +55,7 @@ public class CustomChannel extends Channel implements Listener {
 	private FileConfiguration config = null;
 	
 	public CustomChannel(String name) {
-		super(name, Type.CUSTOM);
+		super(name, Type.CUSTOM, Type.NONE);
 		this.plugin = TitanChat.getInstance();
 		this.manager = plugin.getChannelManager();
 	}

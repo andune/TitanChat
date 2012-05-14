@@ -78,7 +78,12 @@ public class AdministrateCommand extends Command {
 		} catch (IndexOutOfBoundsException e) {
 			Channel channel = cm.getChannel(player);
 			
-			if (cm.getChannel(player).canBan(player)) {
+			if (channel == null) {
+				plugin.sendWarning(player, "Specify a channel or join a channel to use this command");
+				return;
+			}
+			
+			if (channel.canBan(player)) {
 				if (plugin.getPlayer(args[0]) != null) {
 					Player targetPlayer = plugin.getPlayer(args[0]);
 					
@@ -117,7 +122,7 @@ public class AdministrateCommand extends Command {
 						Player targetPlayer = plugin.getPlayer(args[0]);
 						Channel channel = cm.getChannel(args[1]);
 						
-						if (!cm.getChannel(targetPlayer).equals(channel)) {
+						if (!channel.equals(cm.getChannel(targetPlayer))) {
 							cm.chSwitch(targetPlayer, channel);
 							plugin.sendInfo(player, "You have forced " + targetPlayer.getDisplayName() + " to join the channel");
 							plugin.sendInfo(targetPlayer, "You have been forced to join " + channel.getName());
@@ -136,7 +141,12 @@ public class AdministrateCommand extends Command {
 					Player targetPlayer = plugin.getPlayer(args[0]);
 					Channel channel = cm.getChannel(player);
 					
-					if (!cm.getChannel(targetPlayer).equals(channel)) {
+					if (channel == null) {
+						plugin.sendWarning(player, "Specify a channel or join a channel to use this command");
+						return;
+					}
+					
+					if (!channel.equals(cm.getChannel(targetPlayer))) {
 						cm.chSwitch(targetPlayer, channel);
 						plugin.sendInfo(player, "You have forced " + targetPlayer.getDisplayName() + " to join the channel");
 						plugin.sendInfo(targetPlayer, "You have been forced to join " + channel.getName());
@@ -180,6 +190,11 @@ public class AdministrateCommand extends Command {
 			
 		} catch (IndexOutOfBoundsException e) {
 			Channel channel = cm.getChannel(player);
+			
+			if (channel == null) {
+				plugin.sendWarning(player, "Specify a channel or join a channel to use this command");
+				return;
+			}
 			
 			if (channel.canKick(player)) {
 				if (plugin.getPlayer(args[0]) != null) {
@@ -243,6 +258,11 @@ public class AdministrateCommand extends Command {
 		} catch (IndexOutOfBoundsException e) {
 			Channel channel = cm.getChannel(player);
 			
+			if (channel == null) {
+				plugin.sendWarning(player, "Specify a channel or join a channel to use this command");
+				return;
+			}
+			
 			if (channel.canMute(player)) {
 				if (plugin.getPlayer(args[0]) != null) {
 					Player targetPlayer = plugin.getPlayer(args[0]);
@@ -293,6 +313,11 @@ public class AdministrateCommand extends Command {
 			
 		} catch (IndexOutOfBoundsException e) {
 			Channel channel = cm.getChannel(player);
+			
+			if (channel == null) {
+				plugin.sendWarning(player, "Specify a channel or join a channel to use this command");
+				return;
+			}
 			
 			if (channel.canBan(player)) {
 				if (plugin.getPlayer(args[0]) != null) {
@@ -362,10 +387,16 @@ public class AdministrateCommand extends Command {
 			}
 			
 		} catch (IndexOutOfBoundsException e) {
-			if (cm.getChannel(player).canMute(player)) {
+			Channel channel = cm.getChannel(player);
+			
+			if (channel == null) {
+				plugin.sendWarning(player, "Specify a channel or join a channel to use this command");
+				return;
+			}
+			
+			if (channel.canMute(player)) {
 				if (plugin.getPlayer(args[0]) != null) {
 					Player targetPlayer = plugin.getPlayer(args[0]);
-					Channel channel = cm.getChannel(player);
 					
 					if (channel.getMuteList().contains(targetPlayer.getName())) {
 						channel.getMuteList().remove(targetPlayer.getName());
