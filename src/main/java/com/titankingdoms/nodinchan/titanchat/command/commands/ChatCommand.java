@@ -127,6 +127,11 @@ public class ChatCommand extends Command {
 	@CommandID(name = "Mail", triggers = "mail", requireChannel = false)
 	@CommandInfo(description = "Manages mail", usage = "mail <command> <arguments>")
 	public void mail(Player player, String[] args) {
+		if (!plugin.getMailManager().enable()) {
+			plugin.sendWarning(player, "The Mail System has been disabled");
+			return;
+		}
+		
 		if (args.length < 1) {
 			plugin.getServer().dispatchCommand(player, "titanchat mail help");
 			return;

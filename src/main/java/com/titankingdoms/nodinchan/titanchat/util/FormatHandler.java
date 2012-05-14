@@ -139,6 +139,9 @@ public final class FormatHandler {
 		}
 	}
 	
+	/**
+	 * Loads the basic Chat variables
+	 */
 	public void load() {
 		plugin.getVariableManager().register(new IVariable() {
 			

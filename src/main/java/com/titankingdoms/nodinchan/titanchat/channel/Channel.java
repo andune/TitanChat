@@ -351,6 +351,9 @@ public class Channel extends Loadable {
 	 */
 	public void save() {}
 	
+	/**
+	 * Saves the config
+	 */
 	public void saveConfig() {
 		if (configFile == null || config == null) { return; }
 		try { config.save(configFile); } catch (IOException e) { plugin.log(Level.SEVERE, "Could not save config to " + configFile); }
@@ -500,14 +503,31 @@ public class Channel extends Loadable {
 			}
 		}
 		
+		/**
+		 * Gets the Type from its name
+		 * 
+		 * @param name The name of the Type
+		 * 
+		 * @return The Type if found, otherwise null
+		 */
 		public static Type fromName(String name) {
 			return NAME_MAP.get(name);
 		}
 		
+		/**
+		 * Gets the name of the Type
+		 * 
+		 * @return The name of the Type
+		 */
 		public String getName() {
 			return name;
 		}
 		
+		/**
+		 * Check if the Type is a special Type
+		 * 
+		 * @return True if the Type is a special Type
+		 */
 		public boolean isSpecial() {
 			return special;
 		}

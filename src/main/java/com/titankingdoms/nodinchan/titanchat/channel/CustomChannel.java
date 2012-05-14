@@ -134,6 +134,11 @@ public class CustomChannel extends Channel implements Listener {
 		return manager.getResource(instance, fileName);
 	}
 	
+	/**
+	 * Initialises the CustomChannel instance
+	 * 
+	 * @param channel
+	 */
 	public void init(CustomChannel channel) {
 		this.instance = channel;
 	}

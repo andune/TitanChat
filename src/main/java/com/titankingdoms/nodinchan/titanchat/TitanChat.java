@@ -179,6 +179,9 @@ public final class TitanChat extends JavaPlugin {
 		return instance;
 	}
 	
+	/**
+	 * Gets the Logger of the plugin
+	 */
 	@Override
 	public Logger getLogger() {
 		return log;

@@ -28,7 +28,17 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CommandInfo {
 	
+	/**
+	 * Gets the description of the Command
+	 * 
+	 * @return The Command description
+	 */
 	String description();
 	
+	/**
+	 * Gets the usage of the command
+	 * 
+	 * @return The Command usage
+	 */
 	String usage();
 }

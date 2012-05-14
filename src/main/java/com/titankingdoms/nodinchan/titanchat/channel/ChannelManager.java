@@ -267,6 +267,13 @@ public final class ChannelManager {
 		return getChannel(name).getName();
 	}
 	
+	/**
+	 * Gets all followers of the Channel
+	 * 
+	 * @param channel The Channel
+	 * 
+	 * @return All followers of the Channel
+	 */
 	public List<String> getFollowers(Channel channel) {
 		List<String> followers = new ArrayList<String>();
 		followers.addAll(channel.getFollowerList());

@@ -28,9 +28,24 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CommandID {
 	
+	/**
+	 * Gets the name of the Command
+	 * 
+	 * @return The Command name
+	 */
 	String name();
 	
+	/**
+	 * Gets the triggers of the Command
+	 * 
+	 * @return The Command triggers
+	 */
 	String[] triggers();
 	
+	/**
+	 * Check if the Command requires Channels to be enabled
+	 * 
+	 * @return True if Channels are required
+	 */
 	boolean requireChannel() default true;
 }

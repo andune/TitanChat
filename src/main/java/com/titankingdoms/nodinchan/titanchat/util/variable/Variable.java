@@ -40,6 +40,11 @@ public final class Variable implements Listener {
 		TitanChat.getInstance().getServer().getPluginManager().registerEvents(this, TitanChat.getInstance());
 	}
 	
+	/**
+	 * Listens to MessageFormatEvent to format with variables
+	 * 
+	 * @param event MessageFormatEvent
+	 */
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onMessageFormat(MessageFormatEvent event) {
 		for (IVariable variable : variables)
@@ -47,6 +52,11 @@ public final class Variable implements Listener {
 				event.setFormat(variable.replace(event.getFormat(), event.getSender()));
 	}
 	
+	/**
+	 * Listens to MessageReceiveEvent to format with variables
+	 * 
+	 * @param event MessageReceiveEvent
+	 */
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onMessageReceive(MessageReceiveEvent event) {
 		for (IVariable variable : variables)
@@ -54,6 +64,11 @@ public final class Variable implements Listener {
 				event.setFormat(variable.replace(event.getFormat(), event.getSender(), event.getRecipant()));
 	}
 	
+	/**
+	 * Listens to MessageSendEvent to format with variables
+	 * 
+	 * @param event MessageSendEvent
+	 */
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onMessageSend(MessageSendEvent event) {
 		for (IVariable variable : variables)
@@ -61,22 +76,60 @@ public final class Variable implements Listener {
 				event.setMessage(variable.replace(event.getMessage(), event.getSender(), event.getRecipants().toArray(new Player[0])));
 	}
 	
+	/**
+	 * Registers the array of variables
+	 * 
+	 * @param variables The variables to register
+	 */
 	public void register(IVariable... variables) {
 		this.variables.addAll(Arrays.asList(variables));
 	}
 	
+	/**
+	 * Unloads this manager
+	 */
 	public void unload() {
 		variables.clear();
 	}
 	
 	public static abstract class IVariable {
 		
+		/**
+		 * Gets the Class of the Event to format for
+		 * 
+		 * @return The Class of the Event
+		 */
 		public abstract Class<? extends Event> getEvent();
 		
+		/**
+		 * Gets the replacement for the variable
+		 * 
+		 * @param sender The sender of the message
+		 * 
+		 * @param recipants The recipants of the message
+		 * 
+		 * @return The variable replacement
+		 */
 		public abstract String getReplacement(Player sender, Player... recipants);
 		
+		/**
+		 * Gets the variable
+		 * 
+		 * @return The variable
+		 */
 		public abstract String getVariable();
 		
+		/**
+		 * Replaces the variable with the replacement
+		 * 
+		 * @param line The line to be formatted
+		 * 
+		 * @param sender The sender of the message
+		 * 
+		 * @param recipants The recipants of the message
+		 * 
+		 * @return The formattted line
+		 */
 		public final String replace(String line, Player sender, Player... recipants) {
 			return line.replace(getVariable(), getReplacement(sender, recipants));
 		}

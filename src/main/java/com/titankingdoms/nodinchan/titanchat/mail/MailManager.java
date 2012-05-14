@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.logging.Level;
 
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -42,6 +43,12 @@ import com.titankingdoms.nodinchan.titanchat.TitanChat;
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * MailManager - Manages Player MailBoxes
+ * 
+ * @author NodinChan
+ *
+ */
 public class MailManager implements Listener {
 	
 	private final TitanChat plugin;
@@ -67,16 +74,33 @@ public class MailManager implements Listener {
 			plugin.log(Level.INFO, "Creating mail directory...");
 	}
 	
+	/**
+	 * Check if Mail system is enabled
+	 * 
+	 * @return True if the Mail system is enabled
+	 */
 	public boolean enable() {
 		return enable;
 	}
 	
+	/**
+	 * Gets an instance of this
+	 * 
+	 * @return MailManager instance
+	 */
 	public static MailManager getInstance() {
 		return instance;
 	}
 	
+	/**
+	 * Gets the Mailbox of the Player
+	 * 
+	 * @param name The name of the Player
+	 * 
+	 * @return The Player Mailbox if found, otherwise null
+	 */
 	public Mailbox getMailbox(String name) {
-		return mailboxes.get(name);
+		return mailboxes.get(name.toLowerCase());
 	}
 	
 	/**
@@ -88,6 +112,50 @@ public class MailManager implements Listener {
 		return new File(plugin.getDataFolder(), "mail");
 	}
 	
+	/**
+	 * Loads the Mailbox of the Player
+	 * 
+	 * @param name The name of the Player
+	 * 
+	 * @return The Player Mailbox
+	 */
+	public Mailbox loadMailbox(String name) {
+		Mailbox mailbox = null;
+		
+		File mb = new File(getMailDir(), name + ".mailbox");
+		
+		try {
+			if (mb.createNewFile()) {
+				mailboxes.put(name.toLowerCase(), (mailbox = new Mailbox(name)));
+				getMailbox(name).receiveMail("Sender", "Welcome to " + plugin.getServer().getServerName() + "!");
+				ObjectOutputStream output = new ObjectOutputStream(new FileOutputStream(mb));
+				output.writeObject(getMailbox(name));
+				output.close();
+				
+			} else {
+				ObjectInputStream input = new ObjectInputStream(new FileInputStream(mb));
+				mailboxes.put(name.toLowerCase(), (mailbox = (Mailbox) input.readObject()));
+				input.close();
+			}
+			
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+			
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return mailbox;
+	}
+	
+	/**
+	 * Listens to PlayerQuitEvent to save the Player Mailbox
+	 * 
+	 * @param event PlayerQuitEvent
+	 */
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerQuit(PlayerQuitEvent event) {
 		ObjectOutputStream output;
@@ -104,36 +172,17 @@ public class MailManager implements Listener {
 		}
 	}
 	
+	/**
+	 * Listens to PlayerJoinEvent to load the Player Mailbox
+	 * 
+	 * @param event PlayerJoinEvent
+	 */
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		Mailbox mailbox = null;
 		
-		if (!mailboxes.containsKey(event.getPlayer().getName())) {
-			File mb = new File(getMailDir(), event.getPlayer().getName() + ".mailbox");
-			
-			try {
-				if (mb.createNewFile()) {
-					mailboxes.put(event.getPlayer().getName(), (mailbox = new Mailbox(event.getPlayer().getName())));
-					mailboxes.get(event.getPlayer().getName()).receiveMail("Sender", "Welcome to " + plugin.getServer().getName() + "!");
-					ObjectOutputStream output = new ObjectOutputStream(new FileOutputStream(mb));
-					output.writeObject(mailboxes.get(event.getPlayer().getName()));
-					output.close();
-					
-				} else {
-					ObjectInputStream input = new ObjectInputStream(new FileInputStream(mb));
-					mailboxes.put(event.getPlayer().getName(), (mailbox = (Mailbox) input.readObject()));
-					input.close();
-				}
-				
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-				
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-				
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+		if (getMailbox(event.getPlayer().getName()) == null) {
+			mailbox = loadMailbox(event.getPlayer().getName());
 			
 		} else {
 			mailbox = mailboxes.get(event.getPlayer().getName());
@@ -143,6 +192,9 @@ public class MailManager implements Listener {
 			plugin.sendInfo(event.getPlayer(), "You have " + mailbox.getUnreadMail() + " unread mail");
 	}
 	
+	/**
+	 * Unloads the MailManager
+	 */
 	public void unload() {
 		for (Mailbox mailbox : mailboxes.values()) {
 			try {
@@ -159,8 +211,16 @@ public class MailManager implements Listener {
 				e.printStackTrace();
 			}
 		}
+		
+		mailboxes.clear();
 	}
 	
+	/**
+	 * Mail - Mail system commands
+	 * 
+	 * @author NodinChan
+	 *
+	 */
 	public enum Mail {
 		CHECK("check") {
 			
@@ -193,7 +253,7 @@ public class MailManager implements Listener {
 							player.sendMessage(ChatColor.AQUA + " " + no + "  " + title + "  " + sender + "  " + read);
 							
 						}
-						player.sendMessage(ChatColor.AQUA + " No.      Title           Sender       Read ");
+						player.sendMessage(ChatColor.AQUA + " No.      Title           Sender       Read");
 						
 					} else {
 						TitanChat.getInstance().getServer().dispatchCommand(player, "titanchat mail check 1");
@@ -219,13 +279,23 @@ public class MailManager implements Listener {
 					
 					int deleted = 0;
 					
-					if (mailbox.deleteMail(Integer.parseInt(args[0]) - 1))
+					int previousDeleted = 0;
+					int previous;
+					
+					if (mailbox.deleteMail((previous = Integer.parseInt(args[0]) - 1)))
 						deleted++;
 					
 					for (String arg : Arrays.copyOfRange(args, 1, args.length)) {
 						try {
-							if (mailbox.deleteMail(Integer.parseInt(arg)))
+							int current = Integer.parseInt(arg) - 1;
+							
+							if (previous < current)
+								current -= (previousDeleted += 1);
+							
+							if (mailbox.deleteMail((current)))
 								deleted++;
+							
+							previous = current;
 							
 						} catch (NumberFormatException e) {}
 					}
@@ -243,9 +313,21 @@ public class MailManager implements Listener {
 						return;
 					}
 					
-					for (int mail : mailbox.getSelection())
-						mailbox.deleteMail(mail);
+					boolean first = true;
+					int previousDeleted = 0;
+					int previous = 0;
 					
+					for (int mail : mailbox.getSelection()) {
+						if (((first) ? (previous = mail + 1) : previous) < mail)
+							mail -= (previousDeleted += 1);
+						
+						mailbox.deleteMail((mail));
+						
+						previous = mail;
+						first = false;
+					}
+					
+					mailbox.getSelection().clear();
 					TitanChat.getInstance().sendInfo(player, "Successfully deleted selection");
 					
 				} catch (NumberFormatException e) {
@@ -353,7 +435,45 @@ public class MailManager implements Listener {
 			
 			@Override
 			public void execute(Player player, String[] args) {
+				if (args.length < 2) {
+					TitanChat.getInstance().sendWarning(player, "You require at least 1 word in your message");
+					return;
+				}
 				
+				Mailbox mailbox = MailManager.getInstance().getMailbox(args[0]);
+				
+				if (mailbox == null) {
+					OfflinePlayer offline = TitanChat.getInstance().getServer().getOfflinePlayer(args[0]);
+					
+					if (offline.hasPlayedBefore()) {
+						mailbox = MailManager.getInstance().loadMailbox(offline.getName());
+						
+					} else {
+						TitanChat.getInstance().sendWarning(player, args[0] + " does not have a Mailbox");
+						return;
+					}
+				}
+				
+				StringBuilder str = new StringBuilder();
+				
+				for (String arg : Arrays.copyOfRange(args, 1, args.length)) {
+					if (str.length() > 0)
+						str.append(" ");
+					
+					str.append(arg);
+				}
+				
+				mailbox.receiveMail(player.getName(), str.toString());
+				TitanChat.getInstance().sendInfo(player, "You successfully sent the message to " + args[0]);
+				
+				if (TitanChat.getInstance().getPlayer(args[0]) != null) {
+					Player target = TitanChat.getInstance().getPlayer(args[0]);
+					TitanChat.getInstance().sendInfo(player, target.getDisplayName() + " is online, you can talk to him/her directly");
+					TitanChat.getInstance().sendInfo(target, "You received an email from " + player.getDisplayName());
+					
+					if (mailbox.getUnreadMail() > 0)
+						TitanChat.getInstance().sendInfo(target, "You have " + mailbox.getUnreadMail() + " unread mail");
+				}
 			}
 		},
 		SETREAD("setread") {
@@ -368,13 +488,17 @@ public class MailManager implements Listener {
 					
 					int set = 0;
 					
-					mailbox.readMail(Integer.parseInt(args[0]) - 1).setRead(true);
-					set++;
+					if (Integer.parseInt(args[0]) - 1 > 0 && Integer.parseInt(args[0]) - 1 < mailbox.getMail().size()) {
+						mailbox.readMail(Integer.parseInt(args[0]) - 1).setRead(true);
+						set++;
+					}
 					
 					for (String arg : Arrays.copyOfRange(args, 1, args.length)) {
 						try {
-							mailbox.readMail(Integer.parseInt(arg) - 1).setRead(true);
-							set++;
+							if (Integer.parseInt(args[0]) - 1 > 0 && Integer.parseInt(args[0]) - 1 < mailbox.getMail().size()) {
+								mailbox.readMail(Integer.parseInt(arg) - 1).setRead(true);
+								set++;
+							}
 							
 						} catch (NumberFormatException e) {}
 					}
@@ -422,13 +546,17 @@ public class MailManager implements Listener {
 					
 					int set = 0;
 					
-					mailbox.readMail(Integer.parseInt(args[0]) - 1).setRead(false);
-					set++;
+					if (Integer.parseInt(args[0]) - 1 > 0 && Integer.parseInt(args[0]) - 1 < mailbox.getMail().size()) {
+						mailbox.readMail(Integer.parseInt(args[0]) - 1).setRead(false);
+						set++;
+					}
 					
 					for (String arg : Arrays.copyOfRange(args, 1, args.length)) {
 						try {
-							mailbox.readMail(Integer.parseInt(arg) - 1).setRead(false);
-							set++;
+							if (Integer.parseInt(args[0]) - 1 > 0 && Integer.parseInt(args[0]) - 1 < mailbox.getMail().size()) {
+								mailbox.readMail(Integer.parseInt(arg) - 1).setRead(false);
+								set++;
+							}
 							
 						} catch (NumberFormatException e) {}
 					}
@@ -477,16 +605,44 @@ public class MailManager implements Listener {
 				NAME_MAP.put(mail.name, mail);
 		}
 		
+		/**
+		 * Executes the command
+		 * 
+		 * @param player The command sender
+		 * 
+		 * @param args The command arguments
+		 */
 		public abstract void execute(Player player, String[] args);
 		
+		/**
+		 * Gets the command from its name
+		 * 
+		 * @param name The name of the command
+		 * 
+		 * @return The command
+		 */
 		public static Mail fromName(String name) {
 			return NAME_MAP.get(name);
 		}
 		
+		/**
+		 * Gets the name of the command
+		 * 
+		 * @return The command name
+		 */
 		public String getName() {
 			return name;
 		}
 		
+		/**
+		 * Calculates the space after a word, given the limit of characters to centre the word
+		 * 
+		 * @param word The word to be centred
+		 * 
+		 * @param limit The character limit
+		 * 
+		 * @return The space calculated
+		 */
 		public String spaceAfter(String word, int limit) {
 			double spaces = (limit - word.length()) * 0.5;
 			
@@ -498,6 +654,15 @@ public class MailManager implements Listener {
 			return str.toString();
 		}
 		
+		/**
+		 * Calculates the space before a word, given the limit of characters to centre the word
+		 * 
+		 * @param word The word to be centred
+		 * 
+		 * @param limit The character limit
+		 * 
+		 * @return The space calculated
+		 */
 		public String spaceBefore(String word, int limit) {
 			int spaces = (int) ((limit - word.length()) * 0.5);
 			

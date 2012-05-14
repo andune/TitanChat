@@ -560,32 +560,78 @@ public class SettingsCommand extends Command {
 			}
 		}
 		
+		/**
+		 * Executes the command
+		 * 
+		 * @param player The command sender
+		 * 
+		 * @param args The command arguments
+		 */
 		public abstract void execute(Player player, String[] args);
 		
+		/**
+		 * Gets the command from its name
+		 * 
+		 * @param name The name of the command
+		 * 
+		 * @return The command if found, otherwise null
+		 */
 		public static Settings fromName(String name) {
 			return NAME_MAP.get(name);
 		}
 		
+		/**
+		 * Gets the command from one of its triggers
+		 * 
+		 * @param trigger The trigger of the command
+		 * 
+		 * @return The command if found, otherwise null
+		 */
 		public static Settings fromTrigger(String trigger) {
 			return TRIGGER_MAP.get(trigger);
 		}
 		
+		/**
+		 * Gets the aliases of the command
+		 * 
+		 * @return The command aliases
+		 */
 		public String[] getAliases() {
 			return triggers;
 		}
 		
+		/**
+		 * Gets the description of the command
+		 * 
+		 * @return The command description
+		 */
 		public String getDescription() {
 			return description;
 		}
 		
+		/**
+		 * Gets the name of the command
+		 * 
+		 * @return The command name
+		 */
 		public String getName() {
 			return name;
 		}
 		
+		/**
+		 * Gets the usage of the command
+		 * 
+		 * @return The command usage
+		 */
 		public String getUsage() {
 			return usage;
 		}
 		
+		/**
+		 * Sends an invalid argument length warning to the Player
+		 * 
+		 * @param player The Player to warn
+		 */
 		public void invalidArgLength(Player player) {
 			player.sendMessage("[TitanChat] " + ChatColor.RED + "Invalid Argument Length");
 			player.sendMessage("[TitanChat] " + ChatColor.GOLD + "Usage: /titanchat set " + usage);
