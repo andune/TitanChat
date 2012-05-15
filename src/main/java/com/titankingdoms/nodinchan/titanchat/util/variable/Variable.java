@@ -31,6 +31,12 @@ import com.titankingdoms.nodinchan.titanchat.events.MessageSendEvent;
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * Variable - Variable manager
+ * 
+ * @author NodinChan
+ *
+ */
 public final class Variable implements Listener {
 	
 	private final List<IVariable> variables;
@@ -92,6 +98,12 @@ public final class Variable implements Listener {
 		variables.clear();
 	}
 	
+	/**
+	 * IVariable - Represents a variable
+	 * 
+	 * @author NodinChan
+	 *
+	 */
 	public static abstract class IVariable {
 		
 		/**

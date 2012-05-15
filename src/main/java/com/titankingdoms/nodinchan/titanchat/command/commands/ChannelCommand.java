@@ -102,7 +102,7 @@ public class ChannelCommand extends Command {
 				Channel channel = cm.getChannel(args[0]);
 				
 				if (channel.canAccess(player)) {
-					if (!cm.getFollowers(channel).contains(player.getName())) {
+					if (!channel.getFollowerList().contains(player.getName())) {
 						channel.getFollowerList().add(player.getName());
 						channel.save();
 						

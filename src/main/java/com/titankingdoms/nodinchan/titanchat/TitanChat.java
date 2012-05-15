@@ -18,6 +18,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -96,6 +97,17 @@ public final class TitanChat extends JavaPlugin {
 		}
 		
 		return str.toString();
+	}
+	
+	/**
+	 * Creates a new list with items seperated with commas
+	 * 
+	 * @param array The string array to create a list from
+	 * 
+	 * @return The created list of items
+	 */
+	public String createList(String[] array) {
+		return createList(Arrays.asList(array));
 	}
 	
 	/**
@@ -197,21 +209,23 @@ public final class TitanChat extends JavaPlugin {
 	}
 	
 	/**
+	 * Gets OfflinePlayer by name
+	 * 
+	 * @param name The name of the OfflinePlayer
+	 * 
+	 * @return The OfflinePlayer with the name
+	 */
+	public OfflinePlayer getOfflinePlayer(String name) {
+		return getServer().getOfflinePlayer(name);
+	}
+	
+	/**
 	 * Gets the PermsBridge
 	 * 
 	 * @return The built-in PermsBridge
 	 */
 	public PermsBridge getPermsBridge() {
 		return permBridge;
-	}
-	
-	/**
-	 * Gets the Variable manager
-	 * 
-	 * @return The Variable manager
-	 */
-	public Variable getVariableManager() {
-		return variable;
 	}
 	
 	/**
@@ -222,9 +236,19 @@ public final class TitanChat extends JavaPlugin {
 	 * @return The Player with the name
 	 */
 	public Player getPlayer(String name) {
-		return getServer().getPlayer(name);
+		OfflinePlayer player = getOfflinePlayer(name);
+		return (player.isOnline()) ? player.getPlayer() : null;
 	}
 	
+	/**
+	 * Gets the Variable manager
+	 * 
+	 * @return The Variable manager
+	 */
+	public Variable getVariableManager() {
+		return variable;
+	}
+
 	/**
 	 * Initialises the NC-LoaderLib
 	 * 

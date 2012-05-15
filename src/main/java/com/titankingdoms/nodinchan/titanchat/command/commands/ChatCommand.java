@@ -202,7 +202,7 @@ public class ChatCommand extends Command {
 	public void whisper(Player player, String[] args) {
 		if (args.length < 2 || !plugin.getPermsBridge().has(player, "TitanChat.whisper")) { return; }
 		
-		if (plugin.getPlayer(args[0]) == null || !args[0].equalsIgnoreCase("console")) {
+		if (plugin.getPlayer(args[0]) == null) {
 			plugin.sendWarning(player, "Player not online");
 			return;
 		}
@@ -219,18 +219,15 @@ public class ChatCommand extends Command {
 			str.append(word);
 		}
 		
-		if (!args[0].equalsIgnoreCase("console")) {
-			MessageSendEvent event = new MessageSendEvent(player, new Player[] { plugin.getPlayer(args[0]) }, str.toString());
-			plugin.getServer().getPluginManager().callEvent(event);
-			
-			String format = plugin.getFormatHandler().whisperFormat(player);
-			
-			MessageReceiveEvent receiveEvent = new MessageReceiveEvent(player, plugin.getPlayer(args[0]), format, event.getMessage());
-			plugin.getServer().getPluginManager().callEvent(receiveEvent);
-			
-			player.sendMessage(ChatColor.DARK_PURPLE + "[You -> " + plugin.getPlayer(args[0]).getDisplayName() + "] " + event.getMessage());
-			plugin.getPlayer(args[0]).sendMessage(receiveEvent.getFormattedMessage());
-			
-		} else { plugin.getLogger().info(player.getName() + " whispers: " + str.toString()); }
+		MessageSendEvent event = new MessageSendEvent(player, new Player[] { plugin.getPlayer(args[0]) }, str.toString());
+		plugin.getServer().getPluginManager().callEvent(event);
+		
+		String format = plugin.getFormatHandler().whisperFormat(player);
+		
+		MessageReceiveEvent receiveEvent = new MessageReceiveEvent(player, plugin.getPlayer(args[0]), format, event.getMessage());
+		plugin.getServer().getPluginManager().callEvent(receiveEvent);
+		
+		player.sendMessage(ChatColor.DARK_PURPLE + "[You -> " + plugin.getPlayer(args[0]).getDisplayName() + "] " + event.getMessage());
+		plugin.getPlayer(args[0]).sendMessage(receiveEvent.getFormattedMessage());
 	}
 }

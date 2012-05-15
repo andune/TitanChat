@@ -157,9 +157,9 @@ public class InformationCommand extends Command {
 	@CommandInfo(description = "Gets the participants and followers of the channel", usage = "info <channel>")
 	public void info(Player player, String[] args) {
 		try {
-			Channel channel = cm.getChannel(args[0]);
-			
-			if (channel != null) {
+			if (cm.exists(args[0])) {
+				Channel channel = cm.getChannel(args[0]);
+				
 				if (channel.canAccess(player)) {
 					player.sendMessage(ChatColor.AQUA + "=== " + channel.getName() + " ===");
 

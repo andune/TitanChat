@@ -15,6 +15,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
 
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import com.nodinchan.ncloader.Loader;
@@ -89,12 +90,23 @@ public final class ChannelManager {
 	 * @param channel The Channel to assign the Player to
 	 */
 	public void assignAdmin(Player player, Channel channel) {
-		db.i("Assigning player " + player.getName() +
-				" as admin of channel " + channel.getName());
-		
+		db.i("Assigning player " + player.getName() + " as admin of channel " + channel.getName());
 		channel.getAdminList().add(player.getName());
 		channel.save();
 		plugin.sendInfo(player, "You are now an Admin of " + channel.getName());
+	}
+	
+	/**
+	 * Assigns the OfflinePlayer as an admin of the Channel
+	 * 
+	 * @param player The OfflinePlayer to be assigned admin
+	 * 
+	 * @param channel The Channel to assign the OfflinePlayer to
+	 */
+	public void assignAdmin(OfflinePlayer player, Channel channel) {
+		db.i("Assigning player " + player.getName() + " as admin of channel " + channel.getName());
+		channel.getAdminList().add(player.getName());
+		channel.save();
 	}
 	
 	/**
@@ -105,14 +117,15 @@ public final class ChannelManager {
 	 * @param channel The Channel to join
 	 */
 	public void chSwitch(Player player, Channel channel) {
-		db.i("Channel switch of player " + player.getName() +
+		db.i("Switching player " + player.getName() +
 				" from channel " + ((getChannel(player) != null) ? getChannel(player).getName() : "none") +
 				" to channel " + channel.getName());
 		
 		if (getChannel(player) != null)
 			getChannel(player).leave(player);
 		
-		channel.join(player);
+		if (channel != null)
+			channel.join(player);
 	}
 
 	/**
@@ -123,9 +136,7 @@ public final class ChannelManager {
 	 * @param name The Channel name
 	 */
 	public void createChannel(Player player, String name) {
-		db.i("Player " + player.getName() +
-				" is creating channel " + name);
-		
+		db.i("Player " + player.getName() + " is creating channel " + name);
 		StandardChannel channel = new StandardChannel(name, Type.PUBLIC, Type.NONE);
 		channels.put(name, channel);
 		
@@ -146,9 +157,7 @@ public final class ChannelManager {
 	 * @param name The Channel name
 	 */
 	public void deleteChannel(Player player, String name) {
-		db.i("Player " + player.getName() +
-				" is deleting channel " + name);
-		
+		db.i("Player " + player.getName() + " is deleting channel " + name);
 		Channel channel = getChannel(name);
 		
 		for (String participant : channel.getParticipants()) {
@@ -399,8 +408,6 @@ public final class ChannelManager {
 			if (channel == null)
 				continue;
 			
-			loadChannelVariables(channel);
-			
 			register(channel);
 		}
 		
@@ -589,10 +596,22 @@ public final class ChannelManager {
 	 * @param channel The Channel to whitelist the Player to
 	 */
 	public void whitelistMember(Player player, Channel channel) {
-		db.i("Adding player " + player.getName() +
-				" to whitelist of channel " + channel.getName());
+		db.i("Adding player " + player.getName() + " to whitelist of channel " + channel.getName());
 		channel.getWhiteList().add(player.getName());
 		channel.save();
 		plugin.sendInfo(player, "You are now a Member of " + channel.getName());
+	}
+	
+	/**
+	 * Whitelists the OfflinePlayer to the Channel
+	 * 
+	 * @param player The OfflinePlayer to whitelist
+	 * 
+	 * @param channel The Channel to whitelist the OfflinePlayer to
+	 */
+	public void whitelistMember(OfflinePlayer player, Channel channel) {
+		db.i("Adding player " + player.getName() + " to whitelist of channel " + channel.getName());
+		channel.getWhiteList().add(player.getName());
+		channel.save();
 	}
 }
