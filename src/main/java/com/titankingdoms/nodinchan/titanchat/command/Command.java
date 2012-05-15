@@ -1,5 +1,6 @@
 package com.titankingdoms.nodinchan.titanchat.command;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import org.bukkit.entity.Player;
@@ -51,13 +52,12 @@ public class Command extends Loadable implements Listener {
 	 * 
 	 * @param name the command's name
 	 */
-	public final void invalidArgLength(Player player, String name) {
+	public final void invalidArgLength(Player player, String trigger) {
 		plugin.sendWarning(player, "Invalid Argument Length");
+		Executor executor = plugin.getCommandManager().getCommandExecutor(trigger);
 		
-		Method method = plugin.getCommandManager().getCommandExecutor(name);
-		
-		if (method.getAnnotation(CommandInfo.class) != null)
-			plugin.sendInfo(player, "Usage: /titanchat " + method.getAnnotation(CommandInfo.class).usage());
+		if (executor.getMethod().getAnnotation(CommandInfo.class) != null)
+			plugin.sendInfo(player, "Usage: /titanchat " + executor.getMethod().getAnnotation(CommandInfo.class).usage());
 	}
 	
 	/**
@@ -85,5 +85,84 @@ public class Command extends Loadable implements Listener {
 	 */
 	public final void register(Listener listener) {
 		plugin.register(listener);
+	}
+	
+	/**
+	 * Executor - Represents each command method in a Command
+	 * 
+	 * @author NodinChan
+	 *
+	 */
+	public static final class Executor {
+		
+		private final Method method;
+		
+		private final Command command;
+		
+		private final String name;
+		
+		public Executor(Method method, Command command) {
+			this.method = method;
+			this.command = command;
+			this.name = method.getAnnotation(CommandID.class).name();
+		}
+		
+		@Override
+		public boolean equals(Object object) {
+			if (object instanceof Executor)
+				if (((Executor) object).getMethod().equals(method))
+					if (((Executor) object).getCommand().equals(command))
+						if (((Method) object).getName().equals(name))
+							return true;
+			
+			return false;
+		}
+		
+		/**
+		 * Executes the command
+		 * 
+		 * @param player The command sender
+		 * 
+		 * @param args The command arguments
+		 * 
+		 * @throws InvocationTargetException 
+		 * @throws IllegalArgumentException 
+		 * @throws IllegalAccessException 
+		 */
+		public void execute(Player player, String[] args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+			method.invoke(command, player, args);
+		}
+		
+		/**
+		 * Gets the Command
+		 * 
+		 * @return The Command
+		 */
+		public Command getCommand() {
+			return command;
+		}
+		
+		/**
+		 * Gets the method
+		 * 
+		 * @return The Method
+		 */
+		public Method getMethod() {
+			return method;
+		}
+		
+		/**
+		 * Gets the name of the command
+		 * 
+		 * @return The command name
+		 */
+		public String getName() {
+			return name;
+		}
+		
+		@Override
+		public String toString() {
+			return "Command:" + name;
+		}
 	}
 }

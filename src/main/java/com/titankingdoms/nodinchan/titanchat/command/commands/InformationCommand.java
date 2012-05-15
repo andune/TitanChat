@@ -1,6 +1,5 @@
 package com.titankingdoms.nodinchan.titanchat.command.commands;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -108,7 +107,7 @@ public class InformationCommand extends Command {
 			if (page + 1 > 0 || page + 1 <= numPages) {
 				player.sendMessage(ChatColor.AQUA + "=== TitanChat Command List (" + (page + 1) + "/" + numPages + ") ===");
 				for (int cmdNum = start; cmdNum < end; cmdNum++)
-					player.sendMessage(ChatColor.AQUA + plugin.getCommandManager().getCommandExecutor(cmdNum).getAnnotation(CommandID.class).name());
+					player.sendMessage(ChatColor.AQUA + plugin.getCommandManager().getCommandExecutor(cmdNum).getMethod().getAnnotation(CommandID.class).name());
 				plugin.sendInfo(player, "Arguments: [NECESSARY] <OPTIONAL>");
 				plugin.sendInfo(player, "\"/titanchat commands [command]\" for more info");
 				
@@ -122,21 +121,21 @@ public class InformationCommand extends Command {
 		} catch (IndexOutOfBoundsException e) {
 			plugin.getServer().dispatchCommand(player, "titanchat commands 1");
 		} catch (NumberFormatException e) {
-			Method method = cm.getCommandExecutor(args[0]);
+			Executor executor = cm.getCommandExecutorByName(args[0]);
 			
-			if (method == null) {
+			if (executor == null) {
 				plugin.sendWarning(player, "No info on command");
 				return;
 			}
 			
-			player.sendMessage(ChatColor.AQUA + "=== " + method.getAnnotation(CommandID.class).name() + " Command ===");
+			player.sendMessage(ChatColor.AQUA + "=== " + executor.getMethod().getAnnotation(CommandID.class).name() + " Command ===");
 			
-			if (method.getAnnotation(CommandInfo.class) != null)
-				player.sendMessage(ChatColor.AQUA + "Description: " + method.getAnnotation(CommandInfo.class).description());
+			if (executor.getMethod().getAnnotation(CommandInfo.class) != null)
+				player.sendMessage(ChatColor.AQUA + "Description: " + executor.getMethod().getAnnotation(CommandInfo.class).description());
 			
 			StringBuilder str = new StringBuilder();
 			
-			for (String alias : method.getAnnotation(CommandID.class).triggers()) {
+			for (String alias : executor.getMethod().getAnnotation(CommandID.class).triggers()) {
 				if (str.length() > 0)
 					str.append(", ");
 				
@@ -145,8 +144,8 @@ public class InformationCommand extends Command {
 			
 			player.sendMessage(ChatColor.AQUA + "Aliases: " + str.toString());
 			
-			if (method.getAnnotation(CommandInfo.class) != null)
-				player.sendMessage(ChatColor.AQUA + "Usage: /titanchat " + method.getAnnotation(CommandInfo.class).usage());
+			if (executor.getMethod().getAnnotation(CommandInfo.class) != null)
+				player.sendMessage(ChatColor.AQUA + "Usage: /titanchat " + executor.getMethod().getAnnotation(CommandInfo.class).usage());
 		}
 	}
 	
