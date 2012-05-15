@@ -5,7 +5,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -50,10 +49,7 @@ public final class CommandManager {
 	
 	private static final Debugger db = new Debugger(4);
 	
-	private final List<Executor> linked;
-	
 	private Map<String, Executor> executors;
-	private final Map<String, Executor> NAME_MAP;
 	
 	/**
 	 * Initialises variables
@@ -67,9 +63,7 @@ public final class CommandManager {
 		if (getCommandDir().mkdir())
 			plugin.log(Level.INFO, "Creating commands directory");
 		
-		this.linked = new LinkedList<Executor>();
 		this.executors = new LinkedHashMap<String, Executor>();
-		this.NAME_MAP = new HashMap<String, Executor>();
 	}
 	
 	/**
@@ -82,26 +76,30 @@ public final class CommandManager {
 	 * @param args The arguments
 	 */
 	public void execute(Player player, String command, String[] args) {
-		Executor executor = getCommandExecutor(command);
-		
-		if (executor != null) {
+		for (Executor executor : executors.values()) {
 			if (executor.getMethod().getAnnotation(CommandID.class).requireChannel() && !plugin.enableChannels()) {
 				plugin.sendWarning(player, "This command requires channels to be enabled");
 				return;
 			}
 			
-			try {
-				executor.execute(player, args);
-				return;
-			} catch (IllegalAccessException e) {
-				plugin.log(Level.SEVERE, "An IllegalAccessException has occured while using command: " + executor.getName());
-				db.i(e.getLocalizedMessage());
-			} catch (IllegalArgumentException e) {
-				plugin.log(Level.SEVERE, "An IllgealArgumentException has occured while using command: " + executor.getName());
-				db.i(e.getLocalizedMessage());
-			} catch (InvocationTargetException e) {
-				plugin.log(Level.SEVERE, "An InvocationTargetException has occured while using command: " + executor.getName());
-				db.i(e.getLocalizedMessage());
+			for (String trigger : executor.getMethod().getAnnotation(CommandID.class).triggers()) {
+				db.i("Checking trigger \"" + trigger + "\" with command \"" + command + "\"");
+				
+				if (trigger.equalsIgnoreCase(command)) {
+					try {
+						executor.execute(player, args);
+						return;
+					} catch (IllegalAccessException e) {
+						plugin.log(Level.SEVERE, "An IllegalAccessException has occured while using command: " + executor.getName());
+						db.i(e.getLocalizedMessage());
+					} catch (IllegalArgumentException e) {
+						plugin.log(Level.SEVERE, "An IllgealArgumentException has occured while using command: " + executor.getName());
+						db.i(e.getLocalizedMessage());
+					} catch (InvocationTargetException e) {
+						plugin.log(Level.SEVERE, "An InvocationTargetException has occured while using command: " + executor.getName());
+						db.i(e.getLocalizedMessage());
+					}
+				}
 			}
 		}
 		
@@ -128,14 +126,14 @@ public final class CommandManager {
 	}
 	
 	/**
-	 * Gets the Executor by one of its triggers
+	 * Gets the Executor by its name
 	 * 
-	 * @param name The trigger
+	 * @param name The name
 	 * 
 	 * @return The Executor if it exists, otherwise null
 	 */
-	public Executor getCommandExecutor(String trigger) {
-		return executors.get(trigger.toLowerCase());
+	public Executor getCommandExecutor(String name) {
+		return executors.get(name.toLowerCase());
 	}
 	
 	/**
@@ -146,11 +144,7 @@ public final class CommandManager {
 	 * @return The Executor if exists, otherwise null
 	 */
 	public Executor getCommandExecutor(int exeNum) {
-		return new LinkedList<Executor>(linked).get(exeNum);
-	}
-	
-	public Executor getCommandExecutorByName(String name) {
-		return NAME_MAP.get(name);
+		return new LinkedList<Executor>(executors.values()).get(exeNum);
 	}
 	
 	/**
@@ -191,11 +185,7 @@ public final class CommandManager {
 		for (Method method : command.getClass().getMethods()) {
 			if (method.getAnnotation(CommandID.class) != null) {
 				db.i("Adding new executor: " + method.getAnnotation(CommandID.class).name());
-				Executor executor = new Executor(method, command);
-				NAME_MAP.put(method.getAnnotation(CommandID.class).name(), executor);
-				
-				for (String trigger : method.getAnnotation(CommandID.class).triggers())
-					executors.put(trigger.toLowerCase(), executor);
+				executors.put(method.getAnnotation(CommandID.class).name().toLowerCase(), new Executor(method, command));
 			}
 		}
 	}
@@ -205,23 +195,14 @@ public final class CommandManager {
 	 */
 	public void sortCommands() {
 		Map<String, Executor> executors = new LinkedHashMap<String, Executor>();
-		List<String> triggers = new ArrayList<String>(this.executors.keySet());
-		
-		Collections.sort(triggers);
-		
-		for (String trigger : triggers)
-			executors.put(trigger, getCommandExecutor(trigger));
-		
-		this.executors = executors;
-		
-		List<String> names = new ArrayList<String>(this.NAME_MAP.keySet());
+		List<String> names = new ArrayList<String>(this.executors.keySet());
 		
 		Collections.sort(names);
 		
-		linked.clear();
-		
 		for (String name : names)
-			linked.add(getCommandExecutorByName(name));
+			executors.put(name, getCommandExecutor(name));
+		
+		this.executors = executors;
 	}
 	
 	/**
@@ -229,6 +210,5 @@ public final class CommandManager {
 	 */
 	public void unload() {
 		executors.clear();
-		NAME_MAP.clear();
 	}
 }

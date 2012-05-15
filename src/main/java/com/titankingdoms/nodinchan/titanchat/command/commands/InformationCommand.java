@@ -121,7 +121,7 @@ public class InformationCommand extends Command {
 		} catch (IndexOutOfBoundsException e) {
 			plugin.getServer().dispatchCommand(player, "titanchat commands 1");
 		} catch (NumberFormatException e) {
-			Executor executor = cm.getCommandExecutorByName(args[0]);
+			Executor executor = cm.getCommandExecutor(args[0]);
 			
 			if (executor == null) {
 				plugin.sendWarning(player, "No info on command");
