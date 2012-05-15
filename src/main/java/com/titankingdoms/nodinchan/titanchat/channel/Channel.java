@@ -17,8 +17,8 @@ import org.bukkit.entity.Player;
 
 import com.nodinchan.ncloader.Loadable;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
-import com.titankingdoms.nodinchan.titanchat.events.MessageReceiveEvent;
-import com.titankingdoms.nodinchan.titanchat.events.MessageSendEvent;
+import com.titankingdoms.nodinchan.titanchat.event.MessageReceiveEvent;
+import com.titankingdoms.nodinchan.titanchat.event.MessageSendEvent;
 import com.titankingdoms.nodinchan.titanchat.util.Debugger;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
@@ -380,7 +380,7 @@ public class Channel extends Loadable {
 	 * @param message The message to be sent
 	 */
 	protected String sendMessage(Player sender, List<Player> recipants, String message) {
-		MessageSendEvent sendEvent = new MessageSendEvent(sender, recipants, message);
+		MessageSendEvent sendEvent = new MessageSendEvent(sender, this, recipants, message);
 		plugin.getServer().getPluginManager().callEvent(sendEvent);
 		
 		if (sendEvent.isCancelled()) { return ""; }

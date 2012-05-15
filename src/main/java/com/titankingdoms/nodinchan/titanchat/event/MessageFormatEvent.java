@@ -1,7 +1,6 @@
-package com.titankingdoms.nodinchan.titanchat.events;
+package com.titankingdoms.nodinchan.titanchat.event;
 
 import org.bukkit.entity.Player;
-import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
@@ -22,39 +21,29 @@ import org.bukkit.event.HandlerList;
  */
 
 /**
- * MessageReceiveEvent - Called when a Player is to recieve a message
+ * MessageFormatEvent - Called when a message formats
  * 
  * @author NodinChan
  *
  */
-public final class MessageReceiveEvent extends Event implements Cancellable {
+public final class MessageFormatEvent extends Event {
 	
 	private static final HandlerList handlers = new HandlerList();
 	
 	private final Player sender;
-	private final Player recipant;
 	
 	private String format;
-	private String message;
-	
-	private boolean cancelled = false;
 	
 	/**
-	 * Called when a Player is to recieve a message
+	 * Called when a message formats
 	 * 
 	 * @param sender The message sender
 	 * 
-	 * @param recipant The message recipant
-	 * 
 	 * @param format The format
-	 * 
-	 * @param message The message
 	 */
-	public MessageReceiveEvent(Player sender, Player recipant, String format, String message) {
+	public MessageFormatEvent(Player sender, String format) {
 		this.sender = sender;
-		this.recipant = recipant;
 		this.format = format;
-		this.message = message;
 	}
 	
 	/**
@@ -64,15 +53,6 @@ public final class MessageReceiveEvent extends Event implements Cancellable {
 	 */
 	public String getFormat() {
 		return format;
-	}
-	
-	/**
-	 * Gets the entire formatted message
-	 * 
-	 * @return The formatted message
-	 */
-	public String getFormattedMessage() {
-		return format.replace("%message", message);
 	}
 	
 	public static HandlerList getHandlerList() {
@@ -85,24 +65,6 @@ public final class MessageReceiveEvent extends Event implements Cancellable {
 	}
 	
 	/**
-	 * Gets the message
-	 * 
-	 * @return The message to be sent
-	 */
-	public String getMessage() {
-		return message;
-	}
-	
-	/**
-	 * Gets the message recipant
-	 * 
-	 * @return The recipant of the message
-	 */
-	public Player getRecipant() {
-		return recipant;
-	}
-	
-	/**
 	 * Gets the message sender
 	 * 
 	 * @return The sender of the message
@@ -112,34 +74,11 @@ public final class MessageReceiveEvent extends Event implements Cancellable {
 	}
 	
 	/**
-	 * Check if the event is canclled
-	 */
-	public boolean isCancelled() {
-		return cancelled;
-	}
-	
-	/**
 	 * Sets the format
 	 * 
 	 * @param format The new format
 	 */
 	public void setFormat(String format) {
 		this.format = format;
-	}
-	
-	/**
-	 * Sets the message
-	 * 
-	 * @param message The new message
-	 */
-	public void setMessage(String message) {
-		this.message = message;
-	}
-	
-	/**
-	 * Sets the event as cancelled
-	 */
-	public void setCancelled(boolean cancelled) {
-		this.cancelled = cancelled;
 	}
 }

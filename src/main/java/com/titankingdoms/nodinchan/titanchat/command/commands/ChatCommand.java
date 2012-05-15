@@ -12,8 +12,6 @@ import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
 import com.titankingdoms.nodinchan.titanchat.command.Command;
 import com.titankingdoms.nodinchan.titanchat.command.CommandID;
 import com.titankingdoms.nodinchan.titanchat.command.CommandInfo;
-import com.titankingdoms.nodinchan.titanchat.events.MessageReceiveEvent;
-import com.titankingdoms.nodinchan.titanchat.events.MessageSendEvent;
 import com.titankingdoms.nodinchan.titanchat.mail.MailManager.Mail;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
@@ -63,10 +61,7 @@ public class ChatCommand extends Command {
 			str.append(word);
 		}
 		
-		MessageSendEvent event = new MessageSendEvent(player, plugin.getServer().getOnlinePlayers(), str.toString());
-		plugin.getServer().getPluginManager().callEvent(event);
-		
-		plugin.getServer().broadcastMessage(plugin.getFormatHandler().broadcastFormat(player).replace("%message", event.getMessage()));
+		plugin.getServer().broadcastMessage(plugin.getFormatHandler().broadcastFormat(player).replace("%message", str.toString()));
 	}
 	
 	/**
@@ -103,19 +98,8 @@ public class ChatCommand extends Command {
 			}
 		}
 		
-		MessageSendEvent event = new MessageSendEvent(player, recipants, str.toString());
-		plugin.getServer().getPluginManager().callEvent(event);
-		
-		String format = plugin.getFormatHandler().emoteFormat(player);
-		
-		for (Player recipant : recipants) {
-			MessageReceiveEvent receiveEvent = new MessageReceiveEvent(player, recipant, format.replace("%action", "%message"), event.getMessage());
-			plugin.getServer().getPluginManager().callEvent(receiveEvent);
-			
-			if (receiveEvent.isCancelled()) { continue; }
-			
-			recipant.sendMessage(receiveEvent.getFormattedMessage());
-		}
+		for (Player recipant : recipants)
+			recipant.sendMessage(plugin.getFormatHandler().emoteFormat(player).replace("%action", str.toString()));
 		
 		if (cm.getChannel(player) == null)
 			player.sendMessage(ChatColor.GOLD + "Nobody hears you...");
@@ -219,15 +203,9 @@ public class ChatCommand extends Command {
 			str.append(word);
 		}
 		
-		MessageSendEvent event = new MessageSendEvent(player, new Player[] { plugin.getPlayer(args[0]) }, str.toString());
-		plugin.getServer().getPluginManager().callEvent(event);
-		
 		String format = plugin.getFormatHandler().whisperFormat(player);
 		
-		MessageReceiveEvent receiveEvent = new MessageReceiveEvent(player, plugin.getPlayer(args[0]), format, event.getMessage());
-		plugin.getServer().getPluginManager().callEvent(receiveEvent);
-		
-		player.sendMessage(ChatColor.DARK_PURPLE + "[You -> " + plugin.getPlayer(args[0]).getDisplayName() + "] " + event.getMessage());
-		plugin.getPlayer(args[0]).sendMessage(receiveEvent.getFormattedMessage());
+		player.sendMessage(ChatColor.DARK_PURPLE + "[You -> " + plugin.getPlayer(args[0]).getDisplayName() + "] " + format.replace("%message", str.toString()));
+		plugin.getPlayer(args[0]).sendMessage(format.replace("%message", str.toString()));
 	}
 }

@@ -11,9 +11,9 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
-import com.titankingdoms.nodinchan.titanchat.events.MessageFormatEvent;
-import com.titankingdoms.nodinchan.titanchat.events.MessageReceiveEvent;
-import com.titankingdoms.nodinchan.titanchat.events.MessageSendEvent;
+import com.titankingdoms.nodinchan.titanchat.event.MessageFormatEvent;
+import com.titankingdoms.nodinchan.titanchat.event.MessageReceiveEvent;
+import com.titankingdoms.nodinchan.titanchat.event.MessageSendEvent;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 

@@ -15,9 +15,9 @@ import org.bukkit.event.Listener;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.addon.Addon;
 import com.titankingdoms.nodinchan.titanchat.command.Command;
-import com.titankingdoms.nodinchan.titanchat.events.MessageFormatEvent;
-import com.titankingdoms.nodinchan.titanchat.events.MessageReceiveEvent;
-import com.titankingdoms.nodinchan.titanchat.events.MessageSendEvent;
+import com.titankingdoms.nodinchan.titanchat.event.MessageFormatEvent;
+import com.titankingdoms.nodinchan.titanchat.event.MessageReceiveEvent;
+import com.titankingdoms.nodinchan.titanchat.event.MessageSendEvent;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -201,7 +201,7 @@ public class CustomChannel extends Channel implements Listener {
 	
 	@Override
 	protected final String sendMessage(Player sender, List<Player> recipants, String message) {
-		MessageSendEvent sendEvent = new MessageSendEvent(sender, recipants, message);
+		MessageSendEvent sendEvent = new MessageSendEvent(sender, this, recipants, message);
 		plugin.getServer().getPluginManager().callEvent(sendEvent);
 		
 		if (sendEvent.isCancelled()) { return ""; }

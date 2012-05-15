@@ -1,4 +1,4 @@
-package com.titankingdoms.nodinchan.titanchat.events;
+package com.titankingdoms.nodinchan.titanchat.event;
 
 import java.util.Arrays;
 import java.util.List;
@@ -7,6 +7,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+
+import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -36,6 +38,8 @@ public final class MessageSendEvent extends Event implements Cancellable {
 	
 	private final Player sender;
 	
+	private final Channel sentFrom;
+	
 	private String message;
 	
 	private boolean cancelled = false;
@@ -51,8 +55,9 @@ public final class MessageSendEvent extends Event implements Cancellable {
 	 * 
 	 * @param message The message
 	 */
-	public MessageSendEvent(Player sender, List<Player> recipants, String message) {
+	public MessageSendEvent(Player sender, Channel sentFrom, List<Player> recipants, String message) {
 		this.sender = sender;
+		this.sentFrom = sentFrom;
 		this.message = message;
 		this.recipants = recipants;
 	}
@@ -66,8 +71,8 @@ public final class MessageSendEvent extends Event implements Cancellable {
 	 * 
 	 * @param message The message
 	 */
-	public MessageSendEvent(Player sender, Player[] recipants, String message) {
-		this(sender, Arrays.asList(recipants), message);
+	public MessageSendEvent(Player sender, Channel sentFrom, Player[] recipants, String message) {
+		this(sender, sentFrom, Arrays.asList(recipants), message);
 	}
 	
 	public static HandlerList getHandlerList() {
@@ -104,6 +109,15 @@ public final class MessageSendEvent extends Event implements Cancellable {
 	 */
 	public Player getSender() {
 		return sender;
+	}
+	
+	/**
+	 * Gets the Channel which the message was sent from
+	 * 
+	 * @return The Channel which sent the message
+	 */
+	public Channel getSentFrom() {
+		return sentFrom;
 	}
 	
 	/**

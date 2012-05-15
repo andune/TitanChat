@@ -14,7 +14,7 @@ import com.nodinchan.ncloader.LoadEvent;
 import com.titankingdoms.nodinchan.titanchat.addon.Addon;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
-import com.titankingdoms.nodinchan.titanchat.events.MessageSendEvent;
+import com.titankingdoms.nodinchan.titanchat.event.MessageSendEvent;
 
 /**
  * TitanChatListener - Event Listener of TitanChat
@@ -102,7 +102,7 @@ public class TitanChatListener implements Listener {
 		} else {
 			event.setFormat(plugin.getFormatHandler().format(player, null, true));
 			
-			MessageSendEvent sendEvent = new MessageSendEvent(player, plugin.getServer().getOnlinePlayers(), message);
+			MessageSendEvent sendEvent = new MessageSendEvent(player, null, plugin.getServer().getOnlinePlayers(), message);
 			plugin.getServer().getPluginManager().callEvent(sendEvent);
 			
 			if (sendEvent.isCancelled()) {

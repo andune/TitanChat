@@ -8,7 +8,7 @@ import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
 import com.titankingdoms.nodinchan.titanchat.channel.StandardChannel;
 import com.titankingdoms.nodinchan.titanchat.channel.Variables;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel.Type;
-import com.titankingdoms.nodinchan.titanchat.events.MessageFormatEvent;
+import com.titankingdoms.nodinchan.titanchat.event.MessageFormatEvent;
 import com.titankingdoms.nodinchan.titanchat.util.variable.Variable.IVariable;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
