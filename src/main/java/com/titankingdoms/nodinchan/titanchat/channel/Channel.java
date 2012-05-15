@@ -360,6 +360,17 @@ public class Channel extends Loadable {
 	}
 	
 	/**
+	 * Sends the line to all participants of the channel
+	 * 
+	 * @param line The line to be sent
+	 */
+	public void send(String line) {
+		for (String participant : participants)
+			if (plugin.getPlayer(participant) != null)
+				plugin.getPlayer(participant).sendMessage(line);
+	}
+	
+	/**
 	 * Called when a message is to be sent
 	 * 
 	 * @param sender The message sender

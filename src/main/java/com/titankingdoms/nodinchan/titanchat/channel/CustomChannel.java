@@ -225,4 +225,20 @@ public class CustomChannel extends Channel implements Listener {
 	protected final String sendMessage(Player sender, Player[] recipants, String message) {
 		return sendMessage(sender, Arrays.asList(recipants), message);
 	}
+	
+	@Override
+	public final void setSpecialType(Type type) {}
+	
+	@Override
+	public final void setSpecialType(String type) {
+		setSpecialType(Type.fromName(type));
+	}
+	
+	@Override
+	public final void setType(Type type) {}
+	
+	@Override
+	public final void setType(String type) {
+		setType(Type.fromName(type));
+	}
 }
