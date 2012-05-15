@@ -195,7 +195,7 @@ public final class CommandManager {
 				NAME_MAP.put(method.getAnnotation(CommandID.class).name(), executor);
 				
 				for (String trigger : method.getAnnotation(CommandID.class).triggers())
-					executors.put(trigger, executor);
+					executors.put(trigger.toLowerCase(), executor);
 			}
 		}
 	}
