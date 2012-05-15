@@ -469,7 +469,7 @@ public class Channel extends Loadable {
 	 * @param type The type
 	 */
 	public void setType(String type) {
-		setSpecialType(Type.fromName(type));
+		setType(Type.fromName(type));
 	}
 	
 	/**

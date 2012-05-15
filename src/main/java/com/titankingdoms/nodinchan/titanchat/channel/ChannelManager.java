@@ -254,15 +254,13 @@ public final class ChannelManager {
 	 * 
 	 * @return The Default Channels
 	 */
-	public List<Channel> getDefaultChannels() {
-		List<Channel> channels = new LinkedList<Channel>();
-		
+	public Channel getDefaultChannel() {
 		for (Channel channel : this.channels.values()) {
 			if (channel.getSpecialType().equals(Type.DEFAULT))
-				channels.add(channel);
+				return channel;
 		}
 		
-		return channels;
+		return null;
 	}
 	
 	/**
@@ -352,10 +350,8 @@ public final class ChannelManager {
 			}
 		}
 		
-		for (Channel channel : getDefaultChannels()) {
-			if (channel.getType().equals(Type.PUBLIC))
-				return channel;
-		}
+		if (getDefaultChannel().getType().equals(Type.PUBLIC))
+			return getDefaultChannel();
 		
 		return null;
 	}
