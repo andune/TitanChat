@@ -231,7 +231,7 @@ public final class ChannelManager {
 	 * @return The Channel if it exists, otherwise null
 	 */
 	public Channel getChannel(String name) {
-		return channels.get(name);
+		return channels.get(name.toLowerCase());
 	}
 
 	/**
@@ -557,7 +557,7 @@ public final class ChannelManager {
 		if (channel instanceof CustomChannel)
 			customChAmount++;
 		
-		channels.put(channel.getName(), channel);
+		channels.put(channel.getName().toLowerCase(), channel);
 	}
 	
 	/**
