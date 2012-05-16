@@ -95,6 +95,7 @@ public class Channel extends Loadable {
 		super(name);
 		this.plugin = TitanChat.getInstance();
 		this.type = type;
+		this.special = specialType;
 		this.global = false;
 		this.silenced = false;
 		this.adminlist = new ArrayList<String>();
@@ -120,7 +121,7 @@ public class Channel extends Loadable {
 			return false;
 		if (type.equals(Type.PUBLIC))
 			return true;
-		if (adminlist.contains(player.getName()) || whitelist.contains(player.getName()))
+		if (plugin.getChannelManager().getAdmins(this).contains(player.getName()) || whitelist.contains(player.getName()))
 			return true;
 		
 		return false;
@@ -138,7 +139,7 @@ public class Channel extends Loadable {
 			return false;
 		if (plugin.getPermsBridge().has(player, "TitanChat.ban.*") || plugin.getPermsBridge().has(player, "TitanChat.ban." + super.getName()))
 			return true;
-		if (adminlist.contains(player.getName()))
+		if (plugin.getChannelManager().getAdmins(this).contains(player.getName()))
 			return true;
 		
 		return false;
@@ -154,7 +155,7 @@ public class Channel extends Loadable {
 	public boolean canKick(Player player) {
 		if (plugin.getPermsBridge().has(player, "TitanChat.kick.*") || plugin.getPermsBridge().has(player, "TitanChat.kick." + super.getName()))
 			return true;
-		if (adminlist.contains(player.getName()))
+		if (plugin.getChannelManager().getAdmins(this).contains(player.getName()))
 			return true;
 		
 		return false;
@@ -170,7 +171,7 @@ public class Channel extends Loadable {
 	public boolean canMute(Player player) {
 		if (plugin.getPermsBridge().has(player, "TitanChat.silence") || plugin.getPermsBridge().has(player, "TitanChat.mute"))
 			return true;
-		if (adminlist.contains(player.getName()))
+		if (plugin.getChannelManager().getAdmins(this).contains(player.getName()))
 			return true;
 		
 		return false;
@@ -186,7 +187,7 @@ public class Channel extends Loadable {
 	public boolean canRank(Player player) {
 		if (plugin.getPermsBridge().has(player, "TitanChat.rank.*") || plugin.getPermsBridge().has(player, "TitanChat.rank." + super.getName()))
 			return true;
-		if (adminlist.contains(player.getName()))
+		if (plugin.getChannelManager().getAdmins(this).contains(player.getName()))
 			return true;
 		
 		return false;

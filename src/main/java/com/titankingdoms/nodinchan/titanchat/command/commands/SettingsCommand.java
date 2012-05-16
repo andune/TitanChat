@@ -87,7 +87,7 @@ public class SettingsCommand extends Command {
 							return;
 						}
 						
-						if (cm.getChannel(args[1]).getAdminList().contains(player.getName()) || TitanChat.getInstance().isStaff(player)) {
+						if (cm.getAdmins(cm.getChannel(args[1])).contains(player.getName()) || TitanChat.getInstance().isStaff(player)) {
 							((StandardChannel) cm.getChannel(args[1])).getVariables().setChatColour(args[0]);
 							cm.getChannel(args[1]).save();
 							
@@ -110,7 +110,7 @@ public class SettingsCommand extends Command {
 						return;
 					}
 					
-					if (channel.getAdminList().contains(player.getName()) || TitanChat.getInstance().isStaff(player)) {
+					if (cm.getAdmins(channel).contains(player.getName()) || TitanChat.getInstance().isStaff(player)) {
 						((StandardChannel) channel).getVariables().setChatColour(args[0]);
 						channel.save();
 						
@@ -207,7 +207,7 @@ public class SettingsCommand extends Command {
 							return;
 						}
 						
-						if (cm.getChannel(args[1]).getAdminList().contains(player.getName()) || TitanChat.getInstance().isStaff(player)) {
+						if (cm.getAdmins(cm.getChannel(args[1])).contains(player.getName()) || TitanChat.getInstance().isStaff(player)) {
 							((StandardChannel) cm.getChannel(args[1])).getVariables().setNameColour(args[0]);
 							cm.getChannel(args[1]).save();
 							
@@ -230,7 +230,7 @@ public class SettingsCommand extends Command {
 						return;
 					}
 					
-					if (channel.getAdminList().contains(player.getName()) || TitanChat.getInstance().isStaff(player)) {
+					if (cm.getAdmins(channel).contains(player.getName()) || TitanChat.getInstance().isStaff(player)) {
 						((StandardChannel) channel).getVariables().setNameColour(args[0]);
 						channel.save();
 						
@@ -253,7 +253,7 @@ public class SettingsCommand extends Command {
 							return;
 						}
 						
-						if (cm.getChannel(args[1]).getAdminList().contains(player.getName()) || TitanChat.getInstance().isStaff(player)) {
+						if (cm.getAdmins(cm.getChannel(args[1])).contains(player.getName()) || TitanChat.getInstance().isStaff(player)) {
 							((StandardChannel) cm.getChannel(args[1])).setPassword(args[0]);
 							cm.getChannel(args[1]).save();
 							
@@ -276,7 +276,7 @@ public class SettingsCommand extends Command {
 						return;
 					}
 					
-					if (channel.getAdminList().contains(player.getName()) || TitanChat.getInstance().isStaff(player)) {
+					if (cm.getAdmins(channel).contains(player.getName()) || TitanChat.getInstance().isStaff(player)) {
 						((StandardChannel) channel).setPassword(args[0]);
 						channel.save();
 						
@@ -299,7 +299,7 @@ public class SettingsCommand extends Command {
 							return;
 						}
 						
-						if (cm.getChannel(args[1]).getAdminList().contains(player.getName()) || TitanChat.getInstance().isStaff(player)) {
+						if (cm.getAdmins(cm.getChannel(args[1])).contains(player.getName()) || TitanChat.getInstance().isStaff(player)) {
 							((StandardChannel) cm.getChannel(args[1])).getVariables().setTag(args[0]);
 							cm.getChannel(args[1]).save();
 							
@@ -317,7 +317,7 @@ public class SettingsCommand extends Command {
 						return;
 					}
 					
-					if (channel.getAdminList().contains(player.getName()) || TitanChat.getInstance().isStaff(player)) {
+					if (cm.getAdmins(channel).contains(player.getName()) || TitanChat.getInstance().isStaff(player)) {
 						((StandardChannel) channel).getVariables().setTag(args[0]);
 						channel.save();
 						
@@ -335,7 +335,7 @@ public class SettingsCommand extends Command {
 				
 				try {
 					if (cm.exists(args[1])) {
-						if (cm.getChannel(args[1]).getAdminList().contains(player.getName()) || TitanChat.getInstance().isStaff(player)) {
+						if (cm.getAdmins(cm.getChannel(args[1])).contains(player.getName()) || TitanChat.getInstance().isStaff(player)) {
 							if (Type.fromName(args[0]) != null) {
 								switch (Type.fromName(args[0])) {
 								
@@ -387,7 +387,7 @@ public class SettingsCommand extends Command {
 						return;
 					}
 					
-					if (channel.getAdminList().contains(player.getName()) || TitanChat.getInstance().isStaff(player)) {
+					if (cm.getAdmins(channel).contains(player.getName()) || TitanChat.getInstance().isStaff(player)) {
 						if (Type.fromName(args[0]) != null) {
 							switch (Type.fromName(args[0])) {
 							

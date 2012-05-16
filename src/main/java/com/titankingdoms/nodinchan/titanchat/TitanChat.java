@@ -365,7 +365,7 @@ public final class TitanChat extends JavaPlugin {
 	 * @return True if the Player has TitanChat.admin
 	 */
 	public boolean isStaff(Player player) {
-		return permBridge.has(player, "TitanChat.admin");
+		return permBridge.has(player, "TitanChat.staff");
 	}
 	
 	/**

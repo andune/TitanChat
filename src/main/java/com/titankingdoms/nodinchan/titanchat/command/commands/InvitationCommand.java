@@ -97,7 +97,7 @@ public class InvitationCommand extends Command {
 			if (cm.exists(args[1])) {
 				Channel channel = cm.getChannel(args[1]);
 				
-				if (channel.getAdminList().contains(player.getName())) {
+				if (cm.getAdmins(channel).contains(player.getName())) {
 					if (plugin.getPlayer(args[0]) != null) {
 						channel.getInviteList().add(plugin.getPlayer(args[0]).getName());
 						cm.onInvite(channel, player, plugin.getPlayer(args[0]));

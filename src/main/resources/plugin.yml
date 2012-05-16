@@ -25,7 +25,7 @@ commands:
         permission: TitanChat.whisper
         usage: /<command> [player] [message]
 permissions:
-    TitanChat.admin:
+    TitanChat.staff:
         description: Access to everything
         default: op
         children:

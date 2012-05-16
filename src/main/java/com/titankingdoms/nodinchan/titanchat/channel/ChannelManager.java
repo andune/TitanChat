@@ -205,6 +205,25 @@ public final class ChannelManager {
 	}
 	
 	/**
+	 * Gets all admins of the Channel
+	 * 
+	 * @param channel The Channel
+	 * 
+	 * @return All admins of the Channel
+	 */
+	public List<String> getAdmins(Channel channel) {
+		List<String> admins = new ArrayList<String>();
+		admins.addAll(channel.getAdminList());
+		
+		for (Player player : plugin.getServer().getOnlinePlayers()) {
+			if (plugin.getPermsBridge().has(player, "TitanChat.admin." + channel.getName(), true) && !admins.contains(player.getName()))
+				admins.add(player.getName());
+		}
+		
+		return admins;
+	}
+	
+	/**
 	 * Gets the Channel of the given name
 	 * 
 	 * @param name The Channel name
