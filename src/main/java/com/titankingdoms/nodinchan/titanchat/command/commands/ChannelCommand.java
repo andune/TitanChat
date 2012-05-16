@@ -246,7 +246,8 @@ public class ChannelCommand extends Command {
 				}
 				break;
 			}
-		}
+			
+		} else { plugin.sendWarning(player, "No such channel"); }
 	}
 	
 	@CommandID(name = "Leave", triggers = { "leave", "part"})
