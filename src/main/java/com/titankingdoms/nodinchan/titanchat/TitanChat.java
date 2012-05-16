@@ -347,7 +347,7 @@ public final class TitanChat extends JavaPlugin {
 			
 		} catch (Exception e) { return false; }
 	}
-
+	
 	/**
 	 * Check if the Server is silenced
 	 * 
@@ -583,8 +583,6 @@ public final class TitanChat extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		log(Level.INFO, "is now disabling...");
-		
-		getServer().getScheduler().cancelTasks(this);
 		
 		log(Level.INFO, "Unloading managers...");
 

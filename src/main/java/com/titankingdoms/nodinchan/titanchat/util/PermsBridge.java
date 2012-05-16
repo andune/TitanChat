@@ -130,7 +130,10 @@ public final class PermsBridge implements Listener {
 			if (!permInfo.getPermission().startsWith("titanchat.g.prefix.") || !permInfo.getValue())
 				continue;
 			
-			prefix = getPermissionNode(permInfo.getPermission()).substring(19);
+			if (getPermission(permInfo.getPermission()) != null) {
+				prefix = getPermissionNode(permInfo.getPermission()).substring(19);
+				break;
+			}
 		}
 		
 		if (prefix.equals("") && using().equals(Permissions.PERMISSIONSEX)) {
@@ -175,8 +178,10 @@ public final class PermsBridge implements Listener {
 			if (!permInfo.getPermission().startsWith("titanchat.g.suffix.") || !permInfo.getValue())
 				continue;
 			
-			suffix = getPermissionNode(permInfo.getPermission()).substring(19);
-			break;
+			if (getPermission(permInfo.getPermission()) != null) {
+				suffix = getPermissionNode(permInfo.getPermission()).substring(19);
+				break;
+			}
 		}
 		
 		if (suffix.equals("") && using().equals(Permissions.PERMISSIONSEX)) {
@@ -220,7 +225,12 @@ public final class PermsBridge implements Listener {
 	 * @return The exact Permission Node
 	 */
 	public String getPermissionNode(String name) {
-		return plugin.getServer().getPluginManager().getPermission(name).getName();
+		org.bukkit.permissions.Permission permission = getPermission(name);
+		
+		if (permission != null)
+			return permission.getName();
+		else
+			return "";
 	}
 	
 	/**
@@ -241,8 +251,10 @@ public final class PermsBridge implements Listener {
 			if (!permInfo.getPermission().startsWith("titanchat.p.prefix.") || !permInfo.getValue())
 				continue;
 			
-			prefix = getPermissionNode(permInfo.getPermission()).substring(19);
-			break;
+			if (getPermission(permInfo.getPermission()) != null) {
+				prefix = getPermissionNode(permInfo.getPermission()).substring(19);
+				break;
+			}
 		}
 		
 		if (prefix.equals("") && using().equals(Permissions.PERMISSIONSEX)) {
@@ -282,8 +294,10 @@ public final class PermsBridge implements Listener {
 			if (!permInfo.getPermission().startsWith("titanchat.p.suffix.") || !permInfo.getValue())
 				continue;
 			
-			suffix = getPermissionNode(permInfo.getPermission()).substring(19);
-			break;
+			if (getPermission(permInfo.getPermission()) != null) {
+				suffix = getPermissionNode(permInfo.getPermission()).substring(19);
+				break;
+			}
 		}
 		
 		if (suffix.equals("") && using().equals(Permissions.PERMISSIONSEX)) {
