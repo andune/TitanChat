@@ -122,6 +122,15 @@ public class Debugger {
 	}
 	
 	/**
+	 * Check if Debugger is debugging
+	 * 
+	 * @return True if debugging
+	 */
+	public boolean isDebugging() {
+		return debugs();
+	}
+	
+	/**
 	 * Loads the Debugger
 	 * 
 	 * @param instance TitanChat
