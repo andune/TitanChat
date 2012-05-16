@@ -441,8 +441,13 @@ public class Channel extends Loadable {
 		this.silenced = silenced;
 	}
 	
+	/**
+	 * Sets the special type of the channel
+	 * 
+	 * @param type The special type
+	 */
 	public void setSpecialType(Type type) {
-		this.type = type;
+		this.special = type;
 	}
 	
 	/**
