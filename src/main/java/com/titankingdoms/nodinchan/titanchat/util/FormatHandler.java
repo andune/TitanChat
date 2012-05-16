@@ -240,11 +240,6 @@ public final class FormatHandler {
 			public String format(Object... params) {
 				String format = plugin.getConfig().getString("broadcast.player.format");
 				format = format.replace("%player", ((Player) params[0]).getDisplayName());
-				format = format.replace("%prefix", plugin.getPermsBridge().getPlayerPrefix((Player) params[0]));
-				format = format.replace("%suffix", plugin.getPermsBridge().getPlayerSuffix((Player) params[0]));
-				format = format.replace("%gprefix", plugin.getPermsBridge().getGroupPrefix((Player) params[0]));
-				format = format.replace("%gsuffix", plugin.getPermsBridge().getGroupSuffix((Player) params[0]));
-				
 				return plugin.getFormatHandler().colourise(format);
 			}
 		},
@@ -265,20 +260,12 @@ public final class FormatHandler {
 					format = "%tag %prefix%player%suffix&f: %message";
 					format = format.replace("%player", variables.getNameColour() + ((Player) params[0]).getDisplayName() + "&f");
 					format = format.replace("%tag", variables.getTag());
-					format = format.replace("%prefix", plugin.getPermsBridge().getPlayerPrefix((Player) params[0]));
-					format = format.replace("%suffix", plugin.getPermsBridge().getPlayerSuffix((Player) params[0]));
-					format = format.replace("%gprefix", plugin.getPermsBridge().getGroupPrefix((Player) params[0]));
-					format = format.replace("%gsuffix", plugin.getPermsBridge().getGroupSuffix((Player) params[0]));
 					format = format.replace("%message", variables.getChatColour() + "%message");
 					
 				} else {
 					format = variables.getFormat();
 					format = format.replace("%player", variables.getNameColour() + ((Player) params[0]).getDisplayName() + "&f");
 					format = format.replace("%tag", variables.getTag());
-					format = format.replace("%prefix", plugin.getPermsBridge().getPlayerPrefix((Player) params[0]));
-					format = format.replace("%suffix", plugin.getPermsBridge().getPlayerSuffix((Player) params[0]));
-					format = format.replace("%gprefix", plugin.getPermsBridge().getGroupPrefix((Player) params[0]));
-					format = format.replace("%gsuffix", plugin.getPermsBridge().getGroupSuffix((Player) params[0]));
 					format = format.replace("%message", variables.getChatColour() + "%message");
 				}
 				
@@ -293,19 +280,12 @@ public final class FormatHandler {
 				
 				if (plugin.useDefaultFormat()) {
 					format = "<%prefix&1$s%suffix&f> %2$s";
-					format = format.replace("%prefix", plugin.getPermsBridge().getPlayerPrefix((Player) params[0]));
-					format = format.replace("%suffix", plugin.getPermsBridge().getPlayerSuffix((Player) params[0]));
 					
 				} else {
 					format = plugin.getConfig().getString("formatting.format");
 					
 					format = format.replace("%player", "%1$s");
 					format = format.replace("%message", "%2$s");
-					
-					format = format.replace("%prefix", plugin.getPermsBridge().getPlayerPrefix((Player) params[0]));
-					format = format.replace("%suffix", plugin.getPermsBridge().getPlayerSuffix((Player) params[0]));
-					format = format.replace("%gprefix", plugin.getPermsBridge().getGroupPrefix((Player) params[0]));
-					format = format.replace("%gsuffix", plugin.getPermsBridge().getGroupSuffix((Player) params[0]));
 				}
 				
 				return plugin.getFormatHandler().colourise(format);
@@ -317,11 +297,6 @@ public final class FormatHandler {
 			public String format(Object... params) {
 				String format = plugin.getConfig().getString("emote.player.format");
 				format = format.replace("%player", ((Player) params[0]).getDisplayName());
-				format = format.replace("%prefix", plugin.getPermsBridge().getPlayerPrefix((Player) params[0]));
-				format = format.replace("%suffix", plugin.getPermsBridge().getPlayerSuffix((Player) params[0]));
-				format = format.replace("%gprefix", plugin.getPermsBridge().getGroupPrefix((Player) params[0]));
-				format = format.replace("%gsuffix", plugin.getPermsBridge().getGroupSuffix((Player) params[0]));
-				
 				return plugin.getFormatHandler().colourise(format);
 			}
 		},
@@ -331,11 +306,6 @@ public final class FormatHandler {
 			public String format(Object... params) {
 				String format = plugin.getConfig().getString("whisper.player.format");
 				format = format.replace("%player", ((Player) params[0]).getDisplayName());
-				format = format.replace("%prefix", plugin.getPermsBridge().getPlayerPrefix((Player) params[0]));
-				format = format.replace("%suffix", plugin.getPermsBridge().getPlayerSuffix((Player) params[0]));
-				format = format.replace("%gprefix", plugin.getPermsBridge().getGroupPrefix((Player) params[0]));
-				format = format.replace("%gsuffix", plugin.getPermsBridge().getGroupSuffix((Player) params[0]));
-				
 				return plugin.getFormatHandler().colourise(format);
 			}
 		};

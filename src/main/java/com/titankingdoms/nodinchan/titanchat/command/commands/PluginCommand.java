@@ -62,14 +62,17 @@ public class PluginCommand extends Command {
 			if (plugin.isStaff(player)) {
 				if (args[0].equalsIgnoreCase("none")) {
 					Debugger.disable();
+					plugin.sendInfo(player, "Debug activated");
 					
 				} else if (args[0].equalsIgnoreCase("all") || args[0].equalsIgnoreCase("full")) {
 					Debugger.enableAll();
+					plugin.sendInfo(player, "Debug activated");
 					
 				} else {
-					for (String id : args[0].split(",")) {
+					for (String id : args[0].split(","))
 						Debugger.enable(id);
-					}
+					
+					plugin.sendInfo(player, "Debug activated");
 				}
 				
 			} else { plugin.sendWarning(player, "You do not have permission"); }

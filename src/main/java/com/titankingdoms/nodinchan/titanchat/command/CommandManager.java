@@ -90,14 +90,20 @@ public final class CommandManager {
 						executor.execute(player, args);
 						return;
 					} catch (IllegalAccessException e) {
+						plugin.sendWarning(player, "An error seems to have occured, please check console");
 						plugin.log(Level.SEVERE, "An IllegalAccessException has occured while using command: " + executor.getName());
 						db.i(e.getLocalizedMessage());
 					} catch (IllegalArgumentException e) {
+						plugin.sendWarning(player, "An error seems to have occured, please check console");
 						plugin.log(Level.SEVERE, "An IllgealArgumentException has occured while using command: " + executor.getName());
 						db.i(e.getLocalizedMessage());
 					} catch (InvocationTargetException e) {
+						plugin.sendWarning(player, "An error seems to have occured, please check console");
 						plugin.log(Level.SEVERE, "An InvocationTargetException has occured while using command: " + executor.getName());
-						db.i(e.getLocalizedMessage());
+						for (StackTraceElement element : e.getStackTrace())
+							db.i(element.toString());
+						for (StackTraceElement element : e.getTargetException().getStackTrace())
+							db.i(element.toString());
 					}
 				}
 			}
