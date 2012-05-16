@@ -82,7 +82,7 @@ public class RankingCommand extends Command {
 				} else {
 					plugin.sendInfo(player, plugin.getOfflinePlayer(args[0]).getName() + " is offline");
 					cm.whitelistMember(plugin.getOfflinePlayer(args[0]), channel);
-					plugin.sendInfo(player, plugin.getPlayer(args[0]).getDisplayName() + " has been added to the Member List");
+					plugin.sendInfo(player, plugin.getOfflinePlayer(args[0]).getName() + " has been added to the Member List");
 				}
 				
 			} else { plugin.sendWarning(player, "You do not have permission"); }
