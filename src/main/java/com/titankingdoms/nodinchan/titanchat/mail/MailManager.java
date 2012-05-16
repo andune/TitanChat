@@ -363,7 +363,7 @@ public class MailManager implements Listener {
 			@Override
 			public void execute(Player player, String[] args) {
 				try {
-					com.titankingdoms.nodinchan.titanchat.mail.Mailbox.Mail mail = MailManager.getInstance().getMailbox(player.getName()).readMail(Integer.parseInt(args[0]));
+					com.titankingdoms.nodinchan.titanchat.mail.Mailbox.Mail mail = MailManager.getInstance().getMailbox(player.getName()).readMail(Integer.parseInt(args[0]) - 1);
 					player.sendMessage("Sender: " + mail.getSender());
 					player.sendMessage("Date: " + mail.getDateTime());
 					player.sendMessage("Title: " + mail.getTitle());
