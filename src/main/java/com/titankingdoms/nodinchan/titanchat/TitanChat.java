@@ -30,7 +30,6 @@ import com.nodinchan.ncloader.metrics.Metrics;
 import com.titankingdoms.nodinchan.titanchat.addon.AddonManager;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
 import com.titankingdoms.nodinchan.titanchat.command.CommandManager;
-import com.titankingdoms.nodinchan.titanchat.mail.MailManager;
 import com.titankingdoms.nodinchan.titanchat.util.Debugger;
 import com.titankingdoms.nodinchan.titanchat.util.FormatHandler;
 import com.titankingdoms.nodinchan.titanchat.util.PermsBridge;
@@ -71,7 +70,6 @@ public final class TitanChat extends JavaPlugin {
 	private ChannelManager chManager;
 	private CommandManager cmdManager;
 	private FormatHandler format;
-	private MailManager mail;
 	private PermsBridge permBridge;
 	private Variable variable;
 	
@@ -197,15 +195,6 @@ public final class TitanChat extends JavaPlugin {
 	@Override
 	public Logger getLogger() {
 		return log;
-	}
-
-	/**
-	 * Gets the MailManager
-	 * 
-	 * @return The MailManager
-	 */
-	public MailManager getMailManager() {
-		return mail;
 	}
 	
 	/**
@@ -589,7 +578,6 @@ public final class TitanChat extends JavaPlugin {
 		addonManager.unload();
 		chManager.unload();
 		cmdManager.unload();
-		mail.unload();
 		variable.unload();
 		
 		log(Level.INFO, "is now disabled");
@@ -626,7 +614,6 @@ public final class TitanChat extends JavaPlugin {
 		chManager = new ChannelManager(this);
 		cmdManager = new CommandManager(this);
 		format = new FormatHandler(this);
-		mail = new MailManager();
 		permBridge = new PermsBridge(this);
 		variable = new Variable();
 		
