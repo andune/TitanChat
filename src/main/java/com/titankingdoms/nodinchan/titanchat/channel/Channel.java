@@ -516,7 +516,7 @@ public class Channel extends Loadable {
 		static {
 			for (Type type : EnumSet.allOf(Type.class)) {
 				db.i("Adding Type: " + type.name);
-				NAME_MAP.put(type.name, type);
+				NAME_MAP.put(type.name.toLowerCase(), type);
 			}
 		}
 		
@@ -528,7 +528,7 @@ public class Channel extends Loadable {
 		 * @return The Type if found, otherwise null
 		 */
 		public static Type fromName(String name) {
-			return NAME_MAP.get(name);
+			return NAME_MAP.get(name.toLowerCase());
 		}
 		
 		/**

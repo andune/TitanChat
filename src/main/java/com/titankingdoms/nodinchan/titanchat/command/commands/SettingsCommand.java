@@ -52,7 +52,7 @@ public class SettingsCommand extends Command {
 	 * Set Command - Sets the channel settings
 	 */
 	@CommandID(name = "Set", triggers = "set")
-	@CommandInfo(description = "Sets the channel settings", usage = "set [setting] <value> <channel>")
+	@CommandInfo(description = "Sets the channel settings (\"/tc set help\" for more info)", usage = "set [setting] <value> <channel>")
 	public void set(Player player, String[] args) {
 		if (args.length < 1) {
 			plugin.getServer().dispatchCommand(player, "titanchat set help");
@@ -74,7 +74,7 @@ public class SettingsCommand extends Command {
 	 *
 	 */
 	public enum Settings {
-		CHCOLOUR("ChColour", new String[] { "chcolour", "chcolor" }, "Changes the chat display colour of the channel", "chcolour [colourcode] <channel>") {
+		CHCOLOUR("ChColour", new String[] { "chcolour", "chcolor" }, "chcolour [colourcode] <channel>") {
 			
 			@Override
 			public void execute(Player player, String[] args) {
@@ -120,7 +120,7 @@ public class SettingsCommand extends Command {
 				}
 			}
 		},
-		CONVERT("Convert", new String[] { "convert" }, "Toggles colour code converting", "convert <channel>") {
+		CONVERT("Convert", new String[] { "convert" }, "convert <channel>") {
 			
 			@Override
 			public void execute(Player player, String[] args) {
@@ -164,37 +164,22 @@ public class SettingsCommand extends Command {
 				}
 			}
 		},
-		HELP("Help", new String[] { "commands", "cmds", "help", "?" }, "Shows the setting command list", "help <setting>") {
+		HELP("Help", new String[] { "commands", "cmds", "help", "?" }, "help <setting>") {
 			
 			@Override
 			public void execute(Player player, String[] args) {
-				try {
-					Settings setting = Settings.fromName(args[0]);
-					player.sendMessage(ChatColor.AQUA + "=== " + setting.getName() + " Setting Command ===");
-					player.sendMessage(ChatColor.AQUA + "Description: " + setting.getDescription());
-					
-					StringBuilder str = new StringBuilder();
-					
-					for (String alias : setting.getAliases()) {
-						if (str.length() > 0)
-							str.append(" ");
-						
-						str.append(alias);
-					}
-					
-					player.sendMessage(ChatColor.AQUA + "Aliases: " + str.toString());
-					player.sendMessage(ChatColor.AQUA + "Usage: /titanchat set " + setting.getUsage());
-					
-				} catch (IndexOutOfBoundsException e) {
-					player.sendMessage(ChatColor.AQUA + "=== TitanChat Settings Command List ===");
-					for (Settings setting : Settings.values())
-						player.sendMessage(ChatColor.AQUA + setting.getName());
-					TitanChat.getInstance().sendInfo(player, "\"/titanchat set help [command]\" for more info");
-					
-				}
+				player.sendMessage(ChatColor.AQUA + "=== TitanChat Settings Command List ===");
+				player.sendMessage(ChatColor.AQUA + "chcolour [colourcode] <channel> : Changes the chat display colour of the channel");
+				player.sendMessage(ChatColor.AQUA + "convert <channel> : Toggles colour code converting");
+				player.sendMessage(ChatColor.AQUA + "help : Shows this help");
+				player.sendMessage(ChatColor.AQUA + "ncolour [colourcode] <channel> : Changes the name display colour of the channel");
+				player.sendMessage(ChatColor.AQUA + "password [password] <channel> : Sets the password of the channel");
+				player.sendMessage(ChatColor.AQUA + "tag [tag] <channel> : Sets the tag of the channel");
+				player.sendMessage(ChatColor.AQUA + "type [type] <channel> : Sets the Type of the channel");
+				player.sendMessage(ChatColor.AQUA + "specialtype [specialtype] <channel> : Sets the special Type of the channel");
 			}
 		},
-		NCOLOUR("NColour", new String[] { "ncolour", "ncolor" }, "Changes the name display colour of the channel", "ncolour [colourcode] <channel>") {
+		NCOLOUR("NColour", new String[] { "ncolour", "ncolor" }, "ncolour [colourcode] <channel>") {
 			
 			@Override
 			public void execute(Player player, String[] args) {
@@ -240,7 +225,7 @@ public class SettingsCommand extends Command {
 				}
 			}
 		},
-		PASSWORD("Password", new String[] { "password" }, "Sets the password of the channel", "password [password] <channel>") {
+		PASSWORD("Password", new String[] { "password" }, "password [password] <channel>") {
 			
 			@Override
 			public void execute(Player player, String[] args) {
@@ -286,7 +271,7 @@ public class SettingsCommand extends Command {
 				}
 			}
 		},
-		TAG("Tag", new String[] { "tag" }, "Sets the tag of the channel", "tag [tag] <channel>") {
+		TAG("Tag", new String[] { "tag" }, "tag [tag] <channel>") {
 			
 			@Override
 			public void execute(Player player, String[] args) {
@@ -327,7 +312,7 @@ public class SettingsCommand extends Command {
 				}
 			}
 		},
-		TYPE("Type", new String[] { "type" }, "Sets the type of the channel", "type [type] <channel>") {
+		TYPE("Type", new String[] { "type" }, "type [type] <channel>") {
 			
 			@Override
 			public void execute(Player player, String[] args) {
@@ -431,7 +416,7 @@ public class SettingsCommand extends Command {
 				}
 			}
 		},
-		SPECIALTYPE("SpecialType", new String[] { "specialtype" }, "Sets the special Type of the channel", "specialtype [type] <channel>") {
+		SPECIALTYPE("SpecialType", new String[] { "specialtype" }, "specialtype [type] <channel>") {
 			
 			@Override
 			public void execute(Player player, String[] args) {
@@ -535,8 +520,7 @@ public class SettingsCommand extends Command {
 				}
 			}
 		};
-
-		private String description;
+		
 		private String name;
 		private String[] triggers;
 		private String usage;
@@ -544,19 +528,18 @@ public class SettingsCommand extends Command {
 		private static Map<String, Settings> NAME_MAP = new HashMap<String, Settings>();
 		private static Map<String, Settings> TRIGGER_MAP = new HashMap<String, Settings>();
 		
-		private Settings(String name, String[] triggers, String description, String usage) {
+		private Settings(String name, String[] triggers, String usage) {
 			this.name = name;
 			this.triggers = triggers;
-			this.description = description;
 			this.usage = usage;
 		}
 		
 		static {
 			for (Settings setting : EnumSet.allOf(Settings.class)) {
-				NAME_MAP.put(setting.name, setting);
+				NAME_MAP.put(setting.name.toLowerCase(), setting);
 				
 				for (String trigger : setting.triggers)
-					TRIGGER_MAP.put(trigger, setting);
+					TRIGGER_MAP.put(trigger.toLowerCase(), setting);
 			}
 		}
 		
@@ -577,7 +560,7 @@ public class SettingsCommand extends Command {
 		 * @return The command if found, otherwise null
 		 */
 		public static Settings fromName(String name) {
-			return NAME_MAP.get(name);
+			return NAME_MAP.get(name.toLowerCase());
 		}
 		
 		/**
@@ -588,7 +571,7 @@ public class SettingsCommand extends Command {
 		 * @return The command if found, otherwise null
 		 */
 		public static Settings fromTrigger(String trigger) {
-			return TRIGGER_MAP.get(trigger);
+			return TRIGGER_MAP.get(trigger.toLowerCase());
 		}
 		
 		/**
@@ -601,30 +584,12 @@ public class SettingsCommand extends Command {
 		}
 		
 		/**
-		 * Gets the description of the command
-		 * 
-		 * @return The command description
-		 */
-		public String getDescription() {
-			return description;
-		}
-		
-		/**
 		 * Gets the name of the command
 		 * 
 		 * @return The command name
 		 */
 		public String getName() {
 			return name;
-		}
-		
-		/**
-		 * Gets the usage of the command
-		 * 
-		 * @return The command usage
-		 */
-		public String getUsage() {
-			return usage;
 		}
 		
 		/**
