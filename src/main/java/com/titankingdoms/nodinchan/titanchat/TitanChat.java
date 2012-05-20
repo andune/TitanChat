@@ -305,9 +305,9 @@ public final class TitanChat extends JavaPlugin {
 			}
 			
 			try {
-				Method method = URLClassLoader.class.getDeclaredMethod("addURL", new Class[] { URL.class });
+				Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
 				method.setAccessible(true);
-				method.invoke(sysLoader, new Object[] { lib.toURI().toURL() });
+				method.invoke(sysLoader, lib.toURI().toURL());
 				
 			} catch (Exception e) { return false; }
 			
