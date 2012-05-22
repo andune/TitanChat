@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 
@@ -140,6 +141,12 @@ public class TitanChatListener implements Listener {
 			plugin.sendWarning(event.getPlayer(), "All channels are silenced");
 		else if (channel != null && channel.isSilenced())
 			plugin.sendWarning(event.getPlayer(), channel.getName() + " is silenced");
+	}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+	public void onSignChange(SignChangeEvent event) {
+		for (int line = 0; line < 4; line++)
+			event.setLine(line, plugin.getFormatHandler().colourise(event.getLine(line)));
 	}
 	
 	private boolean voiceless(Player player, Channel channel) {
