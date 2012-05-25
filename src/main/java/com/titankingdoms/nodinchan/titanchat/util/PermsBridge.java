@@ -59,7 +59,7 @@ import de.bananaco.bpermissions.api.util.CalculableType;
  * @author NodinChan
  *
  */
-public final class PermsBridge implements Listener {
+public final class PermsBridge {
 	
 	private final TitanChat plugin;
 	
@@ -84,6 +84,24 @@ public final class PermsBridge implements Listener {
 		
 		for (String permission : plugin.getConfig().getStringList("permissions"))
 			plugin.getServer().getPluginManager().addPermission(new org.bukkit.permissions.Permission(permission, PermissionDefault.FALSE));
+		
+		if (plugin.getServer().getPluginManager().getPlugin("Vault") != null) {
+			RegisteredServiceProvider<Chat> chatProvider = plugin.getServer().getServicesManager().getRegistration(Chat.class);
+			
+			if (chatProvider != null)
+				chat = chatProvider.getProvider();
+			
+			db.i("Vault Chat Service is set up: " + (chat != null));
+			
+			RegisteredServiceProvider<Permission> permissionProvider = plugin.getServer().getServicesManager().getRegistration(Permission.class);
+			
+			if (permissionProvider != null)
+				perm = permissionProvider.getProvider();
+			
+			db.i("Vault Permission Service is set up: " + (perm != null));
+		}
+		
+		plugin.register(new PluginListener());
 	}
 	
 	/**
@@ -333,25 +351,6 @@ public final class PermsBridge implements Listener {
 	}
 	
 	/**
-	 * Initialises local Vault classes
-	 */
-	public void loadVault() {
-		RegisteredServiceProvider<Chat> chatProvider = plugin.getServer().getServicesManager().getRegistration(Chat.class);
-		
-		if (chatProvider != null)
-			chat = chatProvider.getProvider();
-		
-		db.i("Vault Chat Service is set up: " + (chat != null));
-		
-		RegisteredServiceProvider<Permission> permissionProvider = plugin.getServer().getServicesManager().getRegistration(Permission.class);
-		
-		if (permissionProvider != null)
-			perm = permissionProvider.getProvider();
-		
-		db.i("Vault Permission Service is set up: " + (perm != null));
-	}
-	
-	/**
 	 * Listens to the PluginDisableEvent
 	 * 
 	 * @param event PlayerDisableEvent
@@ -440,6 +439,61 @@ public final class PermsBridge implements Listener {
 	 */
 	public static boolean usingVault() {
 		return perm != null;
+	}
+	
+	public class PluginListener implements Listener {
+		
+		/**
+		 * Listens to the PluginDisableEvent
+		 * 
+		 * @param event PlayerDisableEvent
+		 */
+		@EventHandler(priority = EventPriority.MONITOR)
+		public void onPluginDisable(PluginDisableEvent event) {
+			if (permissionsPlugin != null) {
+				if (event.getPlugin().getName().equals(name)) {
+					permissionsPlugin = null;
+					if (!usingVault()) { plugin.log(Level.INFO, name + " unhooked"); }
+				}
+			}
+		}
+		
+		/**
+		 * Listens to the PluginEnableEvent
+		 * 
+		 * @param event PluginEnableEvent
+		 */
+		@EventHandler(priority = EventPriority.MONITOR)
+		public void onPluginEnable(PluginEnableEvent event) {
+			if (permissionsPlugin == null) {
+				Plugin perms = null;
+				
+				if (perms == null) {
+					if (exists("ru.tehkode.permissions.bukkit.PermissionsEx"))
+						perms = plugin.getServer().getPluginManager().getPlugin("PermissionsEx");
+					
+					else if (exists("de.bananaco.bpermissions.imp.Permissions"))
+						perms = plugin.getServer().getPluginManager().getPlugin("bPermissions");
+					
+					else if (exists("com.platymuus.bukkit.permissions.PermissionsPlugin"))
+						perms = plugin.getServer().getPluginManager().getPlugin("PermissionsBukkit");
+					
+					else if (exists("org.anjocaido.groupmanager.GroupManager"))
+						perms = plugin.getServer().getPluginManager().getPlugin("GroupManager");
+					
+					else if (exists("org.tyrannyofheaven.bukkit.zPermissions.ZPermissionsPlugin"))
+						perms = plugin.getServer().getPluginManager().getPlugin("zPermissions");
+				}
+				
+				if (perms != null) {
+					if (perms.isEnabled()) {
+						permissionsPlugin = perms;
+						name = permissionsPlugin.getName();
+					}
+					
+				} else { if (!usingVault() && !checked) { plugin.log(Level.INFO, name + " detected and hooked"); checked = true; } }
+			}
+		}
 	}
 	
 	/**
