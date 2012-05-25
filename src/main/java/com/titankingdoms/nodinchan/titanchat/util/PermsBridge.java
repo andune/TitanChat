@@ -23,6 +23,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.permissions.PermissionAttachmentInfo;
+import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.tyrannyofheaven.bukkit.zPermissions.ZPermissionsService;
@@ -82,23 +83,10 @@ public final class PermsBridge implements Listener {
 		this.plugin = plugin;
 		
 		for (String permission : plugin.getConfig().getStringList("permissions"))
-			plugin.getServer().getPluginManager().addPermission(new org.bukkit.permissions.Permission(permission));
+			plugin.getServer().getPluginManager().addPermission(new org.bukkit.permissions.Permission(permission, PermissionDefault.FALSE));
 		
-		if (plugin.getServer().getPluginManager().getPlugin("Vault") != null) {
-			RegisteredServiceProvider<Chat> chatProvider = plugin.getServer().getServicesManager().getRegistration(Chat.class);
-			
-			if (chatProvider != null)
-				chat = chatProvider.getProvider();
-			
-			db.i("Vault Chat Service is set up: " + (chat != null));
-			
-			RegisteredServiceProvider<Permission> permissionProvider = plugin.getServer().getServicesManager().getRegistration(Permission.class);
-			
-			if (permissionProvider != null)
-				perm = permissionProvider.getProvider();
-			
-			db.i("Vault Permission Service is set up: " + (perm != null));
-		}
+		if (plugin.getServer().getPluginManager().getPlugin("Vault") != null)
+			loadVault();
 	}
 	
 	/**
@@ -345,6 +333,25 @@ public final class PermsBridge implements Listener {
 	 */
 	public boolean has(Player player, String permission, boolean avoidWildcard) {
 		return using().has(player, permission, avoidWildcard);
+	}
+	
+	/**
+	 * Initialises local Vault classes
+	 */
+	public void loadVault() {
+		RegisteredServiceProvider<Chat> chatProvider = plugin.getServer().getServicesManager().getRegistration(Chat.class);
+		
+		if (chatProvider != null)
+			chat = chatProvider.getProvider();
+		
+		db.i("Vault Chat Service is set up: " + (chat != null));
+		
+		RegisteredServiceProvider<Permission> permissionProvider = plugin.getServer().getServicesManager().getRegistration(Permission.class);
+		
+		if (permissionProvider != null)
+			perm = permissionProvider.getProvider();
+		
+		db.i("Vault Permission Service is set up: " + (perm != null));
 	}
 	
 	/**

@@ -30,8 +30,6 @@ emote:
     server:
         enable: true
         format: '* &4Server &f%action'
-mail:
-    enable: true
 whisper:
     player:
         enable: true
