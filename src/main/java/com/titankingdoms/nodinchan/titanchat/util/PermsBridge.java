@@ -84,9 +84,6 @@ public final class PermsBridge implements Listener {
 		
 		for (String permission : plugin.getConfig().getStringList("permissions"))
 			plugin.getServer().getPluginManager().addPermission(new org.bukkit.permissions.Permission(permission, PermissionDefault.FALSE));
-		
-		if (plugin.getServer().getPluginManager().getPlugin("Vault") != null)
-			loadVault();
 	}
 	
 	/**

@@ -617,6 +617,9 @@ public final class TitanChat extends JavaPlugin {
 		permBridge = new PermsBridge(this);
 		variable = new Variable();
 		
+		if (getServer().getPluginManager().getPlugin("Vault") != null)
+			permBridge.loadVault();
+		
 		PluginManager pm = getServer().getPluginManager();
 		
 		Debugger.load(this);
