@@ -4,17 +4,21 @@
 # &4 (red), &5 (purple), &6 (gold), &7 (silver),               #
 # &8 (grey), &9 (blue), &a (light green), &b (aqua),           #
 # &c (light red), &d (light purple), &e (yellow), &f (white),  #
-# &k (magical)                                                 #
+# &k (magical), &l (bold), &m (strike through), &n (underline),#
+# &o (italic), &r (reset)                                      #
 #==============================================================#
 #                            TYPES                             #
-# default  - DEFAULT CHANNEL, PLAYERS SPAWNS IN IF NONE IS SET #
-#            WITH PERMISSIONS                                  #
 # password - PASSWORD PROTECTED CHANNEL, REQUIRES A PASSWORD TO#
 #            JOIN                                              #
 # private  - PRIVATE CHANNEL, ONLY ALLOWS WHITELISTED MEMBERS  #
 # public   - PUBLIC CHANNEL, ALLOWS ALL BUT BANNED             #
-# staff    - STAFF CHANNEL, PRIVATE AND ADMINS SPAWN IN HERE BY#
-#            DEFAULT UNLESS OVERRIDEN WITH PERMISSIONS         #
+#==============================================================#
+#                         SPECIAL TYPES                        #
+# default - DEFAULT CHANNEL, PLAYERS SPAWN IN HERE IF NONE IS  #
+#           SET WITH PERMISSIONS                               #
+# staff   - STAFF CHANNEL, MOSTLY PRIVATE AND ADMINS SPAWN IN  #
+#           HERE IF DEFAULT CHANNEL FOR THE PLAYER HAS NOT BEEN#
+#           SET                                                #
 #==============================================================#
 #                            CONFIG                            #
 # TAG                : Where you define the Channel Tag        #
@@ -23,6 +27,8 @@
 # NAME-DISPLAY-COLOUR: Where you define the colour of the      #
 #                      player name                             #
 # TYPE               : Where you define the type of the channel#
+# SPECIAL-TYPE       : Where you define the special type of the#
+#                      channel                                 #
 # GLOBAL             : Where you define whether the channel    #
 #                      sends the message server-wide           #
 # COLOUR-CODE        : Where you define whether the channel    #
