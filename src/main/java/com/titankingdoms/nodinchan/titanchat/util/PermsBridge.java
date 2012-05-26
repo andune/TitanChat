@@ -151,6 +151,7 @@ public final class PermsBridge {
 					if (perm.startsWith("TitanChat.g.prefix.")) {
 						prefix = perm.substring(19);
 						db.i("PermissionsEx permissions returned prefix: " + prefix);
+						break;
 					}
 				}
 			}
@@ -160,7 +161,7 @@ public final class PermsBridge {
 			prefix = using().getGroupPrefix(player);
 		
 		db.i("Returning: " + prefix);
-		return (prefix.equals("") || prefix == null) ? "" : prefix;
+		return (prefix == null || prefix.equals("")) ? "" : prefix;
 	}
 	
 	/**
@@ -197,6 +198,7 @@ public final class PermsBridge {
 					if (perm.startsWith("TitanChat.g.suffix.")) {
 						suffix = perm.substring(19);
 						db.i("PermissionsEx permissions returned suffix: " + suffix);
+						break;
 					}
 				}
 			}
@@ -206,7 +208,7 @@ public final class PermsBridge {
 			suffix = using().getGroupSuffix(player);
 		
 		db.i("Returning: " + suffix);
-		return (suffix.equals("") || suffix == null) ? "" : suffix;
+		return (suffix == null || suffix.equals("")) ? "" : suffix;
 	}
 	
 	/**
@@ -268,6 +270,7 @@ public final class PermsBridge {
 				if (perm.startsWith("TitanChat.p.prefix.")) {
 					prefix = perm.substring(19);
 					db.i("PermissionsEx permissions returned prefix: " + prefix);
+					break;
 				}
 			}
 		}
@@ -276,7 +279,7 @@ public final class PermsBridge {
 			prefix = using().getPlayerPrefix(player);
 		
 		db.i("Returning: " + prefix);
-		return (prefix.equals("") || prefix == null) ? getGroupPrefix(player) : prefix;
+		return (prefix == null || prefix.equals("")) ? getGroupPrefix(player) : prefix;
 	}
 	
 	/**
@@ -311,6 +314,7 @@ public final class PermsBridge {
 				if (perm.startsWith("TitanChat.p.suffix.")) {
 					suffix = perm.substring(19);
 					db.i("PermissionsEx permissions returned suffix: " + suffix);
+					break;
 				}
 			}
 		}
@@ -319,7 +323,7 @@ public final class PermsBridge {
 			suffix = using().getPlayerSuffix(player);
 		
 		db.i("Returning: " + suffix);
-		return (suffix.equals("") || suffix == null) ? getGroupSuffix(player) : suffix;
+		return (suffix == null || suffix.equals("")) ? getGroupSuffix(player) : suffix;
 	}
 	
 	/**
@@ -348,58 +352,6 @@ public final class PermsBridge {
 	 */
 	public boolean has(Player player, String permission, boolean avoidWildcard) {
 		return using().has(player, permission, avoidWildcard);
-	}
-	
-	/**
-	 * Listens to the PluginDisableEvent
-	 * 
-	 * @param event PlayerDisableEvent
-	 */
-	@EventHandler(priority = EventPriority.MONITOR)
-	public void onPluginDisable(PluginDisableEvent event) {
-		if (permissionsPlugin != null) {
-			if (event.getPlugin().getName().equals(name)) {
-				permissionsPlugin = null;
-				if (!usingVault()) { plugin.log(Level.INFO, name + " unhooked"); }
-			}
-		}
-	}
-	
-	/**
-	 * Listens to the PluginEnableEvent
-	 * 
-	 * @param event PluginEnableEvent
-	 */
-	@EventHandler(priority = EventPriority.MONITOR)
-	public void onPluginEnable(PluginEnableEvent event) {
-		if (permissionsPlugin == null) {
-			Plugin perms = null;
-			
-			if (perms == null) {
-				if (exists("ru.tehkode.permissions.bukkit.PermissionsEx"))
-					perms = plugin.getServer().getPluginManager().getPlugin("PermissionsEx");
-				
-				else if (exists("de.bananaco.bpermissions.imp.Permissions"))
-					perms = plugin.getServer().getPluginManager().getPlugin("bPermissions");
-				
-				else if (exists("com.platymuus.bukkit.permissions.PermissionsPlugin"))
-					perms = plugin.getServer().getPluginManager().getPlugin("PermissionsBukkit");
-				
-				else if (exists("org.anjocaido.groupmanager.GroupManager"))
-					perms = plugin.getServer().getPluginManager().getPlugin("GroupManager");
-				
-				else if (exists("org.tyrannyofheaven.bukkit.zPermissions.ZPermissionsPlugin"))
-					perms = plugin.getServer().getPluginManager().getPlugin("zPermissions");
-			}
-			
-			if (perms != null) {
-				if (perms.isEnabled()) {
-					permissionsPlugin = perms;
-					name = permissionsPlugin.getName();
-				}
-				
-			} else { if (!usingVault() && !checked) { plugin.log(Level.INFO, name + " detected and hooked"); checked = true; } }
-		}
 	}
 	
 	/**
