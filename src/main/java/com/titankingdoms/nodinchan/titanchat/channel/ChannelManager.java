@@ -415,7 +415,7 @@ public final class ChannelManager {
 		for (CustomChannel channel : loader.load()) { if (exists(channel.getName())) { continue; } register(channel); }
 		
 		for (String fileName : plugin.getChannelDir().list()) {
-			if (exists(fileName.replace(".yml", "")) || fileName.equals("README.yml"))
+			if (!fileName.endsWith(".yml") || exists(fileName.replace(".yml", "")))
 				continue;
 			
 			StandardChannel channel = loadChannel(fileName.replace(".yml", ""));

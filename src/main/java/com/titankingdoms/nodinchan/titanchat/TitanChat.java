@@ -606,7 +606,7 @@ public final class TitanChat extends JavaPlugin {
 			saveResource("channels/Password.yml", false);
 			saveResource("channels/Private.yml", false);
 			saveResource("channels/Public.yml", false);
-			saveResource("channels/README.yml", false);
+			saveResource("channels/README.txt", false);
 			saveResource("channels/Staff.yml", false);
 		}
 		
