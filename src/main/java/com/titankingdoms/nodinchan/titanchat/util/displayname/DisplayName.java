@@ -81,7 +81,7 @@ public class DisplayName {
 	 * @return The display name of the player if found, otherwise the name of the Player
 	 */
 	public String getDisplayName(String name) {
-		String displayname = getNickConfig().getString("name");
+		String displayname = getNickConfig().getString(name);
 		return (displayname != null) ? displayname : name;
 	}
 	
