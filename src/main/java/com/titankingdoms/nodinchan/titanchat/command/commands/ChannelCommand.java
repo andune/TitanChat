@@ -211,7 +211,7 @@ public class ChannelCommand extends Command {
 							
 						} else { plugin.sendWarning(player, "You are not on the whitelist"); }
 						
-					}
+					} else { plugin.sendWarning(player, "You do not have permission to join " + channel.getName()); }
 				}
 				
 				if (channel.canAccess(player)) {

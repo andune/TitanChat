@@ -115,9 +115,9 @@ public class Channel extends Loadable {
 	 * @return True if the Player has access
 	 */
 	public boolean canAccess(Player player) {
-		if (plugin.getPermsBridge().has(player, "TitanChat.access.*") || plugin.getPermsBridge().has(player, "TitanChat.access." + super.getName()))
+		if (plugin.getPermsBridge().has(player, "TitanChat.access.*") || plugin.getPermsBridge().has(player, "TitanChat.access." + getName()))
 			return true;
-		if (blacklist.contains(player.getName()))
+		if (blacklist.contains(player.getName()) || (special.equals(Type.STAFF) && !plugin.isStaff(player)))
 			return false;
 		if (type.equals(Type.PUBLIC))
 			return true;
@@ -137,7 +137,7 @@ public class Channel extends Loadable {
 	public boolean canBan(Player player) {
 		if (special.equals(Type.DEFAULT) || special.equals(Type.STAFF))
 			return false;
-		if (plugin.getPermsBridge().has(player, "TitanChat.ban.*") || plugin.getPermsBridge().has(player, "TitanChat.ban." + super.getName()))
+		if (plugin.getPermsBridge().has(player, "TitanChat.ban.*") || plugin.getPermsBridge().has(player, "TitanChat.ban." + getName()))
 			return true;
 		if (plugin.getChannelManager().getAdmins(this).contains(player.getName()))
 			return true;

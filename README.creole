@@ -87,6 +87,7 @@ TitanChat, a chat management and formatting plugin for Bukkit.
 * 19.05.12 - Fix enums
 * 23.05.12 - Added sign colour support
 * 26.05.12 - Updated for R3.0
+* 28.05.12 - Added display name support
 
 -----------------------------------------------------------------------------------------------------------------------
 

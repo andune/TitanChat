@@ -1,5 +1,5 @@
 name: TitanChat
-version: '3.5 Build #${build.number}'
+version: '3.6 Build #${build.number}'
 author: NodinChan
 website: http://dev.bukkit.org/server-mods/titanchat
 main: com.titankingdoms.nodinchan.titanchat.TitanChat
@@ -80,6 +80,14 @@ permissions:
             TitanChat.voice: true
     TitanChat.mute:
         description: Access to mute commands
+        default: op
+    TitanChat.nick.other:
+        description: Access to changing the display name of others
+        default: op
+        children:
+            TitanChat.nick: true
+    TitanChat.nick:
+        description: Access to changing the display name
         default: op
     TitanChat.voice:
         description: Access to chat at all times

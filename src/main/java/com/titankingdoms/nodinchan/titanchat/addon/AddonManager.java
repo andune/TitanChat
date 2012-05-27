@@ -52,11 +52,9 @@ public final class AddonManager {
 	
 	/**
 	 * Initialises variables
-	 * 
-	 * @param plugin TitanChat
 	 */
-	public AddonManager(TitanChat plugin) {
-		this.plugin = plugin;
+	public AddonManager() {
+		this.plugin = TitanChat.getInstance();
 		AddonManager.instance = this;
 		
 		if (getAddonDir().mkdir())

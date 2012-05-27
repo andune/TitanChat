@@ -37,13 +37,8 @@ public final class FormatHandler {
 	
 	private static TitanChat plugin;
 	
-	/**
-	 * Initialises variables
-	 * 
-	 * @param plugin TitanChat
-	 */
-	public FormatHandler(TitanChat plugin) {
-		FormatHandler.plugin = plugin;
+	public FormatHandler() {
+		FormatHandler.plugin = TitanChat.getInstance();
 	}
 	
 	/**

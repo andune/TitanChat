@@ -53,11 +53,9 @@ public final class CommandManager {
 	
 	/**
 	 * Initialises variables
-	 * 
-	 * @param plugin TitanChat
 	 */
-	public CommandManager(TitanChat plugin) {
-		this.plugin = plugin;
+	public CommandManager() {
+		this.plugin = TitanChat.getInstance();
 		CommandManager.instance = this;
 		
 		if (getCommandDir().mkdir())

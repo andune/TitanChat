@@ -26,13 +26,14 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.nodinchan.ncloader.metrics.Metrics;
 import com.titankingdoms.nodinchan.titanchat.addon.AddonManager;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
 import com.titankingdoms.nodinchan.titanchat.command.CommandManager;
+import com.titankingdoms.nodinchan.titanchat.metrics.Metrics;
 import com.titankingdoms.nodinchan.titanchat.util.Debugger;
 import com.titankingdoms.nodinchan.titanchat.util.FormatHandler;
 import com.titankingdoms.nodinchan.titanchat.util.PermsBridge;
+import com.titankingdoms.nodinchan.titanchat.util.displayname.DisplayName;
 import com.titankingdoms.nodinchan.titanchat.util.variable.Variable;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
@@ -69,6 +70,7 @@ public final class TitanChat extends JavaPlugin {
 	private AddonManager addonManager;
 	private ChannelManager chManager;
 	private CommandManager cmdManager;
+	private DisplayName displayname;
 	private FormatHandler format;
 	private PermsBridge permBridge;
 	private Variable variable;
@@ -172,6 +174,15 @@ public final class TitanChat extends JavaPlugin {
 	}
 	
 	/**
+	 * Gets the DisplayName manager
+	 * 
+	 * @return The DisplayName manager
+	 */
+	public DisplayName getDisplayNameManager() {
+		return displayname;
+	}
+	
+	/**
 	 * Gets the FormatHandler
 	 * 
 	 * @return The FormatHandler
@@ -205,7 +216,14 @@ public final class TitanChat extends JavaPlugin {
 	 * @return The OfflinePlayer with the name
 	 */
 	public OfflinePlayer getOfflinePlayer(String name) {
-		return getServer().getOfflinePlayer(name);
+		OfflinePlayer player = getServer().getOfflinePlayer(name);
+		
+		if (!player.hasPlayedBefore()) {
+			if (displayname.fromDisplayName(name) != null)
+				player = displayname.fromDisplayName(name);
+		}
+		
+		return player;
 	}
 	
 	/**
@@ -610,11 +628,12 @@ public final class TitanChat extends JavaPlugin {
 			saveResource("channels/Staff.yml", false);
 		}
 		
-		addonManager = new AddonManager(this);
-		chManager = new ChannelManager(this);
-		cmdManager = new CommandManager(this);
-		format = new FormatHandler(this);
-		permBridge = new PermsBridge(this);
+		addonManager = new AddonManager();
+		chManager = new ChannelManager();
+		cmdManager = new CommandManager();
+		displayname = new DisplayName();
+		format = new FormatHandler();
+		permBridge = new PermsBridge();
 		variable = new Variable();
 		
 		PluginManager pm = getServer().getPluginManager();

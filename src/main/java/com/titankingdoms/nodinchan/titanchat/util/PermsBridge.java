@@ -76,14 +76,14 @@ public final class PermsBridge {
 	
 	/**
 	 * Initialises variables
-	 * 
-	 * @param plugin TitanChat
 	 */
-	public PermsBridge(TitanChat plugin) {
-		this.plugin = plugin;
+	public PermsBridge() {
+		this.plugin = TitanChat.getInstance();
 		
-		for (String permission : plugin.getConfig().getStringList("permissions"))
-			plugin.getServer().getPluginManager().addPermission(new org.bukkit.permissions.Permission(permission, PermissionDefault.FALSE));
+		if (plugin.getConfig().get("permissions") != null) {
+			for (String permission : plugin.getConfig().getStringList("permissions"))
+				plugin.getServer().getPluginManager().addPermission(new org.bukkit.permissions.Permission(permission, PermissionDefault.FALSE));
+		}
 		
 		if (plugin.getServer().getPluginManager().getPlugin("Vault") != null) {
 			RegisteredServiceProvider<Chat> chatProvider = plugin.getServer().getServicesManager().getRegistration(Chat.class);

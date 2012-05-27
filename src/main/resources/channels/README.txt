@@ -16,6 +16,7 @@
 #                         SPECIAL TYPES                        #
 # default - DEFAULT CHANNEL, PLAYERS SPAWN IN HERE IF NONE IS  #
 #           SET WITH PERMISSIONS                               #
+# none    - NO SPECIAL TYPE                                    #
 # staff   - STAFF CHANNEL, MOSTLY PRIVATE AND ADMINS SPAWN IN  #
 #           HERE IF DEFAULT CHANNEL FOR THE PLAYER HAS NOT BEEN#
 #           SET                                                #

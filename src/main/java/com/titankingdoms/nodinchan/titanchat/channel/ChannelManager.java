@@ -65,11 +65,9 @@ public final class ChannelManager {
 	
 	/**
 	 * Initialises variables
-	 * 
-	 * @param plugin TitanChat
 	 */
-	public ChannelManager(TitanChat plugin) {
-		this.plugin = plugin;
+	public ChannelManager() {
+		this.plugin = TitanChat.getInstance();
 		ChannelManager.instance = this;
 		
 		if (getCustomChannelDir().mkdir())

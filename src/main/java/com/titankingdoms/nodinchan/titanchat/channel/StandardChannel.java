@@ -138,7 +138,7 @@ public final class StandardChannel extends Channel {
 			}
 		}
 		
-		return sendMessage(player, recipants, (variables.convert()) ? plugin.getFormatHandler().colourise(message) : plugin.getFormatHandler().decolourise(message));
+		return sendMessage(player, recipants, (plugin.getPermsBridge().has(player, "TitanChat.convert") || variables.convert()) ? plugin.getFormatHandler().colourise(message) : plugin.getFormatHandler().decolourise(message));
 	}
 	
 	/**
