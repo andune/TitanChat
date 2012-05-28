@@ -17,13 +17,14 @@ import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.persistence.PersistenceException;
+
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
-import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.titankingdoms.nodinchan.titanchat.addon.AddonManager;
@@ -34,6 +35,7 @@ import com.titankingdoms.nodinchan.titanchat.util.Debugger;
 import com.titankingdoms.nodinchan.titanchat.util.FormatHandler;
 import com.titankingdoms.nodinchan.titanchat.util.PermsBridge;
 import com.titankingdoms.nodinchan.titanchat.util.displayname.DisplayName;
+import com.titankingdoms.nodinchan.titanchat.util.displayname.DisplayNameChanger;
 import com.titankingdoms.nodinchan.titanchat.util.variable.Variable;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
@@ -70,7 +72,7 @@ public final class TitanChat extends JavaPlugin {
 	private AddonManager addonManager;
 	private ChannelManager chManager;
 	private CommandManager cmdManager;
-	private DisplayName displayname;
+	private DisplayNameChanger displayname;
 	private FormatHandler format;
 	private PermsBridge permBridge;
 	private Variable variable;
@@ -173,12 +175,17 @@ public final class TitanChat extends JavaPlugin {
 		return cmdManager;
 	}
 	
+	@Override
+	public List<Class<?>> getDatabaseClasses() {
+		return Arrays.asList(new Class<?>[] { DisplayName.class });
+	}
+	
 	/**
-	 * Gets the DisplayName manager
+	 * Gets the DisplayNameChanger
 	 * 
-	 * @return The DisplayName manager
+	 * @return The DisplayNameChanger of TitanChat
 	 */
-	public DisplayName getDisplayNameManager() {
+	public DisplayNameChanger getDisplayNameChanger() {
 		return displayname;
 	}
 	
@@ -217,12 +224,6 @@ public final class TitanChat extends JavaPlugin {
 	 */
 	public OfflinePlayer getOfflinePlayer(String name) {
 		OfflinePlayer player = getServer().getOfflinePlayer(name);
-		
-		if (!player.hasPlayedBefore()) {
-			if (displayname.fromDisplayName(name) != null)
-				player = displayname.fromDisplayName(name);
-		}
-		
 		return player;
 	}
 	
@@ -596,6 +597,7 @@ public final class TitanChat extends JavaPlugin {
 		addonManager.unload();
 		chManager.unload();
 		cmdManager.unload();
+		displayname.unload();
 		variable.unload();
 		
 		log(Level.INFO, "is now disabled");
@@ -611,9 +613,7 @@ public final class TitanChat extends JavaPlugin {
 		if (!initMetrics())
 			log(Level.WARNING, "Failed to hook into Metrics");
 		
-		File config = new File(getDataFolder(), "config.yml");
-		
-		if (!config.exists()) {
+		if (!new File(getDataFolder(), "config.yml").exists()) {
 			log(Level.INFO, "Loading default config");
 			saveResource("config.yml", false);
 		}
@@ -628,19 +628,28 @@ public final class TitanChat extends JavaPlugin {
 			saveResource("channels/Staff.yml", false);
 		}
 		
+		try {
+			getDatabase().find(DisplayName.class).findRowCount();
+			
+		} catch (PersistenceException e) {
+			log(Level.INFO, "Setting up display name database...");
+			installDDL();
+		}
+		
 		addonManager = new AddonManager();
 		chManager = new ChannelManager();
 		cmdManager = new CommandManager();
-		displayname = new DisplayName();
+		displayname = new DisplayNameChanger();
 		format = new FormatHandler();
 		permBridge = new PermsBridge();
 		variable = new Variable();
 		
-		PluginManager pm = getServer().getPluginManager();
-		
 		Debugger.load(this);
 		
 		register(new TitanChatListener(this));
+		
+		for (Player player : getServer().getOnlinePlayers())
+			displayname.apply(player);
 		
 		addonManager.load();
 		try { chManager.load(); } catch (Exception e) {}
@@ -649,7 +658,7 @@ public final class TitanChat extends JavaPlugin {
 		
 		if (chManager.getDefaultChannel() == null && enableChannels()) {
 			log(Level.SEVERE, "A default channel is not defined");
-			pm.disablePlugin(this);
+			getServer().getPluginManager().disablePlugin(this);
 			return;
 		}
 		

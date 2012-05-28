@@ -201,41 +201,4 @@ public class InformationCommand extends Command {
 	public void list(Player player, String[] args) {
 		player.sendMessage(ChatColor.AQUA + "Channels: " + plugin.createList(cm.getAccessList(player)));
 	}
-	
-	@CommandID(name = "Nick", triggers = "nick")
-	@CommandInfo(description = "Changes the nickname", usage = "nick <displayname> <player>")
-	public void nick(Player player, String[] args) {
-		try {
-			Player target = plugin.getPlayer(args[1]);
-			
-			if (plugin.getPermsBridge().has(player, "TitanChat.nick.other")) {
-				if (target != null) {
-					String oldname = plugin.getDisplayNameManager().getDisplayName(target);
-					plugin.getDisplayNameManager().setDisplayName(target, args[0]);
-					plugin.sendInfo(player, oldname + " is now known as " + plugin.getDisplayNameManager().getDisplayName(target));
-					plugin.sendInfo(target, player.getDisplayName() + " changed your display name");
-					plugin.sendInfo(target, "You are now known as " + plugin.getDisplayNameManager().getDisplayName(target));
-					
-				} else {
-					String oldname = plugin.getDisplayNameManager().getDisplayName(args[1]);
-					plugin.getDisplayNameManager().setDisplayName(args[1], args[0]);
-					plugin.sendInfo(player, oldname + " is now known as " + plugin.getDisplayNameManager().getDisplayName(args[1]));
-				}
-				
-			} else { plugin.sendWarning(player, "You do not have permission"); }
-			
-		} catch (IndexOutOfBoundsException e) {
-			try {
-				if (plugin.getPermsBridge().has(player, "TitanChat.nick")) {
-					plugin.getDisplayNameManager().setDisplayName(player, args[0]);
-					plugin.sendInfo(player, "You are now known as " + plugin.getDisplayNameManager().getDisplayName(player));
-					
-				} else { plugin.sendWarning(player, "You do not have permission"); }
-				
-			} catch (IndexOutOfBoundsException e1) {
-				plugin.getDisplayNameManager().unsetDisplayName(player);
-				plugin.sendInfo(player, "Your display name has been removed");
-			}
-		}
-	}
 }
