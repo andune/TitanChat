@@ -20,7 +20,7 @@ public class DisplayNameChanger {
 	public void apply(Player player) {
 		DisplayName display = plugin.getDatabase().find(DisplayName.class).where().ieq("name", player.getName()).findUnique();
 		
-		if (display == null) {
+		if (display == null && !player.getDisplayName().equals(player.getName())) {
 			display = new DisplayName();
 			display.setName(player.getName());
 			display.setDisplayName(player.getDisplayName());
