@@ -1,0 +1,12 @@
+tag: '[S]'
+chat-display-colour: '&4'
+name-display-colour: '&4'
+type: public
+special-type: staff
+global: false
+colour-code: true
+password: ''
+format: ''
+messages:
+    join: true
+    leave: true
