@@ -26,17 +26,6 @@ public class DisplayNameChanger {
 			display.setDisplayName(player.getDisplayName());
 		}
 		
-		for (Player other : plugin.getServer().getOnlinePlayers()) {
-			if (other.equals(player))
-				continue;
-			
-			if (other.getDisplayName().equals(display.getDisplayName())) {
-				display.setDisplayName(player.getName());
-				plugin.sendWarning(player, "Your display name is already being used");
-				break;
-			}
-		}
-		
 		if (display.getDisplayName().length() > 16)
 			player.setPlayerListName(display.getDisplayName().substring(0, 16));
 		else
@@ -54,15 +43,21 @@ public class DisplayNameChanger {
 		DisplayName display = plugin.getDatabase().find(DisplayName.class).where().ieq("name", player.getName()).findUnique();
 		
 		if (display != null) {
-			if (player.getDisplayName().equals(player.getName()))
+			if (player.getDisplayName().equals(player.getName())) {
 				plugin.getDatabase().delete(display);
-			else
+				return;
+				
+			} else
 				display.setDisplayName(player.getDisplayName());
 			
 		} else {
-			display = new DisplayName();
-			display.setName(player.getName());
-			display.setDisplayName(player.getDisplayName());
+			if (!player.getDisplayName().equals(player.getName())) {
+				display = new DisplayName();
+				display.setName(player.getName());
+				display.setDisplayName(player.getDisplayName());
+				
+			} else
+				return;
 		}
 		
 		plugin.getDatabase().save(display);
