@@ -7,7 +7,7 @@ import com.avaje.ebean.validation.NotEmpty;
 
 @Entity
 @Table(name = "display_names")
-public final class DisplayName {
+public class DisplayName {
 	
 	@NotEmpty
 	private String displayname;
