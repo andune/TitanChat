@@ -86,21 +86,6 @@ public class PluginCommand extends Command {
 	@CommandID(name = "Reload", triggers = "reload")
 	@CommandInfo(description = "Reloads the config", usage = "reload")
 	public void reload(Player player, String[] args) {
-		if (player == null) {
-			plugin.log(Level.INFO, "Reloading configs...");
-			plugin.reloadConfig();
-			am.unload();
-			chm.unload();
-			cmdm.unload();
-			var.unload();
-			am.load();
-			chm.load();
-			cmdm.load();
-			format.load();
-			plugin.log(Level.INFO, "Configs reloaded");
-			return;
-		}
-		
 		if (plugin.isStaff(player)) {
 			plugin.log(Level.INFO, "Reloading configs...");
 			plugin.sendInfo(player, "Reloading configs...");

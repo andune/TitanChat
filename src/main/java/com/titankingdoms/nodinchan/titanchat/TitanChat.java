@@ -420,7 +420,17 @@ public final class TitanChat extends JavaPlugin {
 			
 			if (!(sender instanceof Player)) {
 				if (args[0].equalsIgnoreCase("reload")) {
-					try { cmdManager.execute(null, "reload", new String[0]); } catch (Exception e) { e.printStackTrace(); }
+					log(Level.INFO, "Reloading configs...");
+					reloadConfig();
+					addonManager.unload();
+					chManager.unload();
+					cmdManager.unload();
+					variable.unload();
+					addonManager.load();
+					chManager.load();
+					cmdManager.load();
+					format.load();
+					log(Level.INFO, "Configs reloaded");
 					return true;
 				}
 				
