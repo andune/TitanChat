@@ -10,7 +10,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 
 import com.nodinchan.ncloader.LoadEvent;
 import com.titankingdoms.nodinchan.titanchat.addon.Addon;
@@ -160,16 +159,6 @@ public class TitanChatListener implements Listener {
 			plugin.sendWarning(event.getPlayer(), "All channels are silenced");
 		else if (channel != null && channel.isSilenced())
 			plugin.sendWarning(event.getPlayer(), channel.getName() + " is silenced");
-	}
-	
-	/**
-	 * Listens to the PlayerQuitEvent
-	 * 
-	 * @param event PlayerQuitEvent
-	 */
-	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	public void onPlayerQuit(PlayerQuitEvent event) {
-		plugin.getDisplayNameChanger().save(event.getPlayer());
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST)

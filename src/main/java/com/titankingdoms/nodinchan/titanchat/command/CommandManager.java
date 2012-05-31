@@ -170,6 +170,7 @@ public final class CommandManager {
 		register(new AdministrateCommand());
 		register(new ChannelCommand());
 		register(new ChatCommand());
+		register(new DisplayNameCommand());
 		register(new InformationCommand());
 		register(new InvitationCommand());
 		register(new PluginCommand());
