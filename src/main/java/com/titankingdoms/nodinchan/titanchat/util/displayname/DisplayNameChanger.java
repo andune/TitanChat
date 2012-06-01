@@ -36,6 +36,9 @@ public final class DisplayNameChanger {
 	public void apply(Player player) {
 		DisplayName display = plugin.getDatabase().find(DisplayName.class).where().ieq("name", player.getName()).findUnique();
 		
+		if (display == null)
+			return;
+		
 		if (display.getDisplayName().length() > 16)
 			player.setPlayerListName(display.getDisplayName().substring(0, 16));
 		else
