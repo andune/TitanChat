@@ -455,6 +455,9 @@ public class Channel extends Loadable {
 	 * @param type The special type
 	 */
 	public void setSpecialType(Type type) {
+		if (!type.isSpecial() || type.equals(Type.CUSTOM))
+			type = Type.NONE;
+		
 		this.special = type;
 	}
 	
@@ -464,6 +467,9 @@ public class Channel extends Loadable {
 	 * @param type The special type
 	 */
 	public void setSpecialType(String type) {
+		if (Type.fromName(type) == null)
+			type = "none";
+		
 		setSpecialType(Type.fromName(type));
 	}
 	
@@ -473,6 +479,9 @@ public class Channel extends Loadable {
 	 * @param type The type
 	 */
 	public void setType(Type type) {
+		if (type.isSpecial() || type.equals(Type.CUSTOM))
+			type = Type.UNKNOWN;
+		
 		this.type = type;
 	}
 	
@@ -482,6 +491,9 @@ public class Channel extends Loadable {
 	 * @param type The type
 	 */
 	public void setType(String type) {
+		if (Type.fromName(type) == null)
+			type = "unknown";
+		
 		setType(Type.fromName(type));
 	}
 	

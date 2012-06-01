@@ -188,6 +188,10 @@ public class ChannelCommand extends Command {
 						
 					} else { plugin.sendWarning(player, "You do not have permission to join " + channel.getName()); }
 					break;
+					
+				default:
+					plugin.sendWarning(player, "Invalid special type set for Channel " + channel.getName());
+					break;
 				}
 				break;
 				
@@ -212,13 +216,12 @@ public class ChannelCommand extends Command {
 						} else { plugin.sendWarning(player, "You are not on the whitelist"); }
 						
 					} else { plugin.sendWarning(player, "You do not have permission to join " + channel.getName()); }
-				}
-				
-				if (channel.canAccess(player)) {
-					cm.chSwitch(player, channel);
-					plugin.sendInfo(player, "You have switched channels");
+					break;
 					
-				} else { plugin.sendWarning(player, "You are not on the whitelist"); }
+				default:
+					plugin.sendWarning(player, "Invalid special type set for Channel " + channel.getName());
+					break;
+				}
 				break;
 				
 			case PUBLIC:
@@ -243,6 +246,11 @@ public class ChannelCommand extends Command {
 						plugin.sendInfo(player, "You have switched channels");
 						
 					} else { plugin.sendWarning(player, "You do not have permission to join " + channel.getName()); }
+					break;
+					
+				default:
+					plugin.sendWarning(player, "Invalid special type set for Channel " + channel.getName());
+					break;
 				}
 				break;
 			}
