@@ -405,7 +405,7 @@ public class Channel extends Loadable {
 			
 			if (receiveEvent.isCancelled()) { continue; }
 			
-			String[] lines = plugin.getFormatHandler().regroup(receiveEvent.getMessage());
+			String[] lines = plugin.getFormatHandler().regroup(format, receiveEvent.getMessage());
 			
 			for (int line = 0; line < lines.length; line++) {
 				if (line < 1)

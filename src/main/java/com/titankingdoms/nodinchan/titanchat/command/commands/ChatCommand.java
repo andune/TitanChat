@@ -60,11 +60,13 @@ public class ChatCommand extends Command {
 			str.append(word);
 		}
 		
-		String[] lines = plugin.getFormatHandler().regroup(str.toString());
+		String format = plugin.getFormatHandler().broadcastFormat(player);
+		
+		String[] lines = plugin.getFormatHandler().regroup(format, str.toString());
 		
 		for (int line = 0; line < lines.length; line++) {
 			if (line < 1)
-				plugin.getServer().broadcastMessage(plugin.getFormatHandler().broadcastFormat(player).replace("%message", lines[0]));
+				plugin.getServer().broadcastMessage(format.replace("%message", lines[0]));
 			else
 				plugin.getServer().broadcastMessage(lines[line]);
 		}
@@ -104,15 +106,17 @@ public class ChatCommand extends Command {
 			}
 		}
 		
-		String[] lines = plugin.getFormatHandler().regroup(str.toString());
+		String format = plugin.getFormatHandler().emoteFormat(player);
+		
+		String[] lines = plugin.getFormatHandler().regroup(format, str.toString());
 		
 		for (Player recipant : recipants) {
-			recipant.sendMessage(plugin.getFormatHandler().emoteFormat(player).replace("%action", lines[0]));
+			recipant.sendMessage(format.replace("%action", lines[0]));
 			recipant.sendMessage(Arrays.copyOfRange(lines, 1, lines.length));
 		}
 		
 		for (Player recipant : recipants)
-			recipant.sendMessage(plugin.getFormatHandler().emoteFormat(player).replace("%action", str.toString()));
+			recipant.sendMessage(format.replace("%action", str.toString()));
 		
 		if (cm.getChannel(player) == null)
 			player.sendMessage(ChatColor.GOLD + "Nobody hears you...");
@@ -194,7 +198,7 @@ public class ChatCommand extends Command {
 		
 		String format = plugin.getFormatHandler().whisperFormat(player);
 		
-		String[] lines = plugin.getFormatHandler().regroup(str.toString());
+		String[] lines = plugin.getFormatHandler().regroup(format, str.toString());
 		
 		player.sendMessage(ChatColor.DARK_PURPLE + "[You -> " + plugin.getPlayer(args[0]).getDisplayName() + "] " + format.replace("%message", lines[0]));
 		plugin.getPlayer(args[0]).sendMessage(format.replace("%message", lines[0]));

@@ -451,7 +451,7 @@ public final class TitanChat extends JavaPlugin {
 						str.append(word);
 					}
 					
-					String[] lines = getFormatHandler().regroup(str.toString());
+					String[] lines = getFormatHandler().regroup(message, str.toString());
 					
 					for (int line = 0; line < lines.length; line++) {
 						if (line < 1)
@@ -491,7 +491,7 @@ public final class TitanChat extends JavaPlugin {
 					str.append(word);
 				}
 				
-				String[] lines = getFormatHandler().regroup(str.toString());
+				String[] lines = getFormatHandler().regroup(message, str.toString());
 				
 				for (int line = 0; line < lines.length; line++) {
 					if (line < 1)
@@ -535,7 +535,7 @@ public final class TitanChat extends JavaPlugin {
 					str.append(word);
 				}
 				
-				String[] lines = getFormatHandler().regroup(str.toString());
+				String[] lines = getFormatHandler().regroup(message, str.toString());
 				
 				for (int line = 0; line < lines.length; line++) {
 					if (line < 1)
@@ -591,7 +591,7 @@ public final class TitanChat extends JavaPlugin {
 				}
 				
 				if (getPlayer(args[0]) != null) {
-					String[] lines = getFormatHandler().regroup(str.toString());
+					String[] lines = getFormatHandler().regroup(message, str.toString());
 					getPlayer(args[0]).sendMessage(message.replace("%message", lines[0]));
 					getPlayer(args[0]).sendMessage(Arrays.copyOfRange(lines, 1, lines.length));
 					getPlayer(args[0]).sendMessage(message.replace("%message", getFormatHandler().colourise(str.toString())));

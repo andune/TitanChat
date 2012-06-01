@@ -85,11 +85,11 @@ public class InformationCommand extends Command {
 	}
 	
 	/**
-	 * Commands Command - Shows the command list
+	 * Help Command - Shows the command list
 	 */
-	@CommandID(name = "Commands", triggers = { "commands", "cmds", "help", "?" }, requireChannel = false)
-	@CommandInfo(description = "Shows the command list", usage = "commands <page/command>")
-	public void commands(Player player, String[] args) {
+	@CommandID(name = "Help", triggers = { "help", "?", "commands", "cmds" }, requireChannel = false)
+	@CommandInfo(description = "Shows the command list", usage = "help <page/command>")
+	public void help(Player player, String[] args) {
 		CommandManager cm = plugin.getCommandManager();
 		
 		try {
@@ -106,13 +106,24 @@ public class InformationCommand extends Command {
 			
 			if (page + 1 > 0 || page + 1 <= numPages) {
 				player.sendMessage(ChatColor.AQUA + "=== TitanChat Command List (" + (page + 1) + "/" + numPages + ") ===");
-				for (int cmdNum = start; cmdNum < end; cmdNum++)
-					player.sendMessage(ChatColor.AQUA + plugin.getCommandManager().getCommandExecutor(cmdNum).getMethod().getAnnotation(CommandID.class).name());
+				
+				for (int cmdNum = start; cmdNum < end; cmdNum++) {
+					Executor executor = plugin.getCommandManager().getCommandExecutor(cmdNum);
+					
+					String name = executor.getMethod().getAnnotation(CommandID.class).name();
+					String description = "";
+					
+					if (executor.getMethod().getAnnotation(CommandInfo.class) != null)
+						description += " - " + executor.getMethod().getAnnotation(CommandInfo.class).description();
+					
+					player.sendMessage(ChatColor.AQUA + name + description);
+				}
+				
 				plugin.sendInfo(player, "Arguments: [NECESSARY] <OPTIONAL>");
 				plugin.sendInfo(player, "\"/titanchat commands [command]\" for more info");
 				
 			} else {
-				player.sendMessage(ChatColor.AQUA + "TitanChat Commands");
+				player.sendMessage(ChatColor.AQUA + "=== TitanChat Command List ===");
 				player.sendMessage(ChatColor.AQUA + "Command: /titanchat [command] [arguments]");
 				player.sendMessage(ChatColor.AQUA + "Alias: /tc command [arguments]");
 				plugin.sendInfo(player, "\"/titanchat commands [page]\" for command list");

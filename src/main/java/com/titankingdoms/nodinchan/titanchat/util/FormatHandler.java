@@ -218,22 +218,50 @@ public final class FormatHandler {
 	 * 
 	 * @return The splitted line
 	 */
-	public String[] regroup(String line) {
+	public String[] regroup(String format, String line) {
 		List<String> lines = new ArrayList<String>();
 		
 		while (line.length() > 119) {
+			if (lines.size() < 1) {
+				if (format.contains("%message") || format.contains("%action")) {
+					int index = format.indexOf("%message");
+					
+					if (index < 0)
+						index = format.indexOf("%action");
+					
+					if (line.charAt(119 - index) != ' ') {
+						int end = line.lastIndexOf(" ", 119 - index);
+						
+						if (end != -1) {
+							lines.add(line.substring(0, end).trim());
+							line = line.substring(end).trim();
+						}
+						
+					} else {
+						lines.add(line.substring(0, 119 - index).trim());
+						line = line.substring(119 - index).trim();
+					}
+					
+					continue;
+				}
+			}
+			
 			if (line.charAt(119) != ' ') {
 				int end = line.lastIndexOf(" ", 119);
 				
 				if (end != -1) {
-					lines.add(line.substring(0, end));
-					line = line.substring(118);
+					lines.add(line.substring(0, end).trim());
+					line = line.substring(end).trim();
 				}
+				
+			} else {
+				lines.add(line.substring(0, 119).trim());
+				line = line.substring(119).trim();
 			}
 		}
 		
 		if (line.length() > 0)
-			lines.add(line);
+			lines.add(line.trim());
 		
 		return lines.toArray(new String[lines.size()]);
 	}

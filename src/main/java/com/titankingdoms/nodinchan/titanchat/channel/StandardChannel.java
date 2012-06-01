@@ -79,14 +79,14 @@ public final class StandardChannel extends Channel {
 	
 	@Override
 	public void join(Player player) {
-		super.join(player);
-		
 		if (variables.enableJoinMessages() && plugin.enableJoinMessage()) {
 			for (String participant : super.getParticipants()) {
-				if (plugin.getPlayer(participant) != null && !plugin.getPlayer(participant).equals(player))
+				if (plugin.getPlayer(participant) != null)
 					plugin.sendInfo(plugin.getPlayer(participant), player.getDisplayName() + " has joined the channel");
 			}
 		}
+		
+		super.join(player);
 	}
 	
 	@Override
