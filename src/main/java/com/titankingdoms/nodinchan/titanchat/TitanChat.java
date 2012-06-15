@@ -460,7 +460,9 @@ public final class TitanChat extends JavaPlugin {
 							getServer().broadcastMessage(lines[line]);
 					}
 					
-					getLogger().info("<Server> " + getFormatHandler().decolourise(message.replace("%message", message.replace("%message", str.toString()))));
+					String console = "<" + ChatColor.RED + "Server" + ChatColor.RESET + "> ";
+					
+					getServer().getConsoleSender().sendMessage(console + message.replace("%message", message.replace("%message", str.toString())));
 					return true;
 				}
 				
@@ -500,7 +502,9 @@ public final class TitanChat extends JavaPlugin {
 						getServer().broadcastMessage(lines[line]);
 				}
 				
-				getLogger().info("<Server> " + getFormatHandler().decolourise(message.replace("%message", message.replace("%message", str.toString()))));
+				String console = "<" + ChatColor.RED + "Server" + ChatColor.RESET + "> ";
+				
+				getServer().getConsoleSender().sendMessage(console + message.replace("%message", message.replace("%message", str.toString())));
 				return true;
 			}
 			
@@ -544,7 +548,9 @@ public final class TitanChat extends JavaPlugin {
 						getServer().broadcastMessage(getFormatHandler().colourise(lines[line]));
 				}
 				
-				getLogger().info("* Server " + getFormatHandler().decolourise(str.toString()));
+				String console = "* " + ChatColor.RED + "Server " + ChatColor.RESET;
+				
+				getServer().getConsoleSender().sendMessage(console + str.toString());
 				return true;
 			}
 			

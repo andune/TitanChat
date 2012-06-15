@@ -332,13 +332,13 @@ public final class FormatHandler {
 				String format = "";
 				
 				if (plugin.useDefaultFormat()) {
-					format = "<%prefix&1$s%suffix&f> %2$s";
+					format = "<%prefix%player%suffix&f> %message";
 					
 				} else {
 					format = plugin.getConfig().getString("formatting.format");
 					
-					format = format.replace("%player", "%1$s");
-					format = format.replace("%message", "%2$s");
+					format = format.replace("%player", ((Player) params[0]).getDisplayName());
+					format = format.replace("%message", plugin.getConfig().getString("channels.chat-display-colour") + "%message");
 				}
 				
 				return plugin.getFormatHandler().colourise(format);

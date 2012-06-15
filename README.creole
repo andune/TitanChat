@@ -33,7 +33,7 @@ TitanChat, a chat management and formatting plugin for Bukkit.
 
 === Dependecies
 
-* CraftBukkit 1.2.5-R3.0
+* CraftBukkit 1.2.5-R4.0
 
 ==== Optional
 
@@ -90,6 +90,7 @@ TitanChat, a chat management and formatting plugin for Bukkit.
 * 28.05.12 - Added display name support
 * 29.05.12 - Improving display name support and stopped chat from being cut apart by Minecraft
 * 31.05.12 - Added 3 display name related commands
+* 15.06.12 - Slight changes and update to R4.0
 
 -----------------------------------------------------------------------------------------------------------------------
 

@@ -1,8 +1,5 @@
 package com.titankingdoms.nodinchan.titanchat;
 
-import java.util.logging.Level;
-
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -76,9 +73,9 @@ public class TitanChatListener implements Listener {
 		Player player = event.getPlayer();
 		String message = event.getMessage();
 		
+		event.setCancelled(true);
+		
 		if (plugin.enableChannels()) {
-			event.setCancelled(true);
-			
 			String quickMessage = plugin.getConfig().getString("channels.quick-message");
 			
 			if (message.startsWith(quickMessage) && !message.substring(quickMessage.length()).startsWith(" ")) {
@@ -94,7 +91,7 @@ public class TitanChatListener implements Listener {
 					String log = channel.sendMessage(player, message.substring(message.split(" ")[0].length()));
 					
 					if (!log.equals(""))
-						Bukkit.getLogger().log(Level.INFO, log);
+						plugin.getServer().getConsoleSender().sendMessage(log);
 					
 				} else { plugin.sendWarning(player, "No such channel"); }
 				
@@ -114,11 +111,9 @@ public class TitanChatListener implements Listener {
 			String log = channel.sendMessage(player, message);
 			
 			if (!log.equals(""))
-				Bukkit.getLogger().log(Level.INFO, log);
+				plugin.getServer().getConsoleSender().sendMessage(log);
 			
 		} else {
-			event.setFormat(plugin.getFormatHandler().format(player, null, true));
-			
 			MessageSendEvent sendEvent = new MessageSendEvent(player, null, plugin.getServer().getOnlinePlayers(), message);
 			plugin.getServer().getPluginManager().callEvent(sendEvent);
 			
@@ -127,9 +122,15 @@ public class TitanChatListener implements Listener {
 				return;
 			}
 			
-			String colour = plugin.getConfig().getString("channels.chat-display-colour");
+			String format = plugin.getFormatHandler().format(player, null, true);
 			
-			event.setMessage(plugin.getFormatHandler().colourise(colour + sendEvent.getMessage()));
+			String log = format.replace("%message", plugin.getFormatHandler().colourise(sendEvent.getMessage()));
+			
+			for (Player recipant : plugin.getServer().getOnlinePlayers())
+				recipant.sendMessage(log);
+			
+			if (!log.equals(""))
+				plugin.getServer().getConsoleSender().sendMessage(log);
 		}
 	}
 	
