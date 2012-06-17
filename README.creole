@@ -91,6 +91,7 @@ TitanChat, a chat management and formatting plugin for Bukkit.
 * 29.05.12 - Improving display name support and stopped chat from being cut apart by Minecraft
 * 31.05.12 - Added 3 display name related commands
 * 15.06.12 - Slight changes and update to R4.0
+* 17.06.12 - Nc-LoaderLib update
 
 -----------------------------------------------------------------------------------------------------------------------
 

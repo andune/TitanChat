@@ -107,7 +107,7 @@
         <dependency>
         	<groupId>com.nodinchan</groupId>
         	<artifactId>NC-LoaderLib</artifactId>
-        	<version>1.6</version>
+        	<version>1.8</version>
         	<type>jar</type>
         	<scope>system</scope>
         	<systemPath>${project.basedir}/lib/NC-LoaderLib.jar</systemPath>

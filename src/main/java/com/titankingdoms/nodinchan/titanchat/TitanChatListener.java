@@ -8,10 +8,7 @@ import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 
-import com.nodinchan.ncloader.LoadEvent;
-import com.titankingdoms.nodinchan.titanchat.addon.Addon;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
-import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
 import com.titankingdoms.nodinchan.titanchat.event.MessageSendEvent;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
@@ -47,20 +44,6 @@ public class TitanChatListener implements Listener {
 	 */
 	public TitanChatListener(TitanChat plugin) {
 		this.plugin = plugin;
-	}
-	
-	/**
-	 * Listens to the LoadEvent
-	 * 
-	 * @param event LoadEvent
-	 */
-	@EventHandler(priority = EventPriority.MONITOR)
-	public void onLoad(LoadEvent event) {
-		if (event.getLoadable() instanceof Addon && event.getPlugin() instanceof TitanChat)
-			plugin.getAddonManager().setJarFile((Addon) event.getLoadable(), event.getJarFile());
-		
-		if (event.getLoadable() instanceof CustomChannel && event.getPlugin() instanceof TitanChat)
-			plugin.getChannelManager().setJarFile((CustomChannel) event.getLoadable(), event.getJarFile());
 	}
 	
 	/**

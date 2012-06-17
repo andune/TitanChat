@@ -44,10 +44,6 @@ import com.titankingdoms.nodinchan.titanchat.event.MessageSendEvent;
 public class CustomChannel extends Channel implements Listener {
 
 	protected final TitanChat plugin;
-	
-	private CustomChannel instance;
-	
-	private final ChannelManager manager;
 
 	private Logger log = Logger.getLogger("TitanLog");
 	
@@ -57,7 +53,6 @@ public class CustomChannel extends Channel implements Listener {
 	public CustomChannel(String name) {
 		super(name, Type.CUSTOM, Type.NONE);
 		this.plugin = TitanChat.getInstance();
-		this.manager = plugin.getChannelManager();
 	}
 	
 	/**
@@ -121,26 +116,6 @@ public class CustomChannel extends Channel implements Listener {
 	 */
 	public Logger getLogger() {
 		return log;
-	}
-	
-	/**
-	 * Gets the file from the JAR file
-	 * 
-	 * @param fileName The name of the file
-	 * 
-	 * @return The file if found, otherwise null
-	 */
-	public final InputStream getResource(String fileName) {
-		return manager.getResource(instance, fileName);
-	}
-	
-	/**
-	 * Initialises the CustomChannel instance
-	 * 
-	 * @param channel
-	 */
-	public void init(CustomChannel channel) {
-		this.instance = channel;
 	}
 	
 	/**

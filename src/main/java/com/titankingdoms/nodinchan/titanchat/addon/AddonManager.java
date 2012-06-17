@@ -1,15 +1,8 @@
 package com.titankingdoms.nodinchan.titanchat.addon;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 import java.util.logging.Level;
 
 import com.nodinchan.ncloader.Loader;
@@ -48,8 +41,6 @@ public final class AddonManager {
 	
 	private List<Addon> addons;
 	
-	private final Map<Addon, JarFile> jarFiles;
-	
 	/**
 	 * Initialises variables
 	 */
@@ -61,7 +52,6 @@ public final class AddonManager {
 			plugin.log(Level.INFO, "Creating addon directory...");
 		
 		this.addons = new ArrayList<Addon>();
-		this.jarFiles = new HashMap<Addon, JarFile>();
 	}
 	
 	/**
@@ -99,32 +89,6 @@ public final class AddonManager {
 	}
 	
 	/**
-	 * Gets resource out of the JAR file of an Addon
-	 * 
-	 * @param addon The Addon 
-	 * 
-	 * @param fileName The file to look for
-	 * 
-	 * @return The file if found, otherwise null
-	 */
-	public InputStream getResource(Addon addon, String fileName) {
-		try {
-			JarFile jarFile = jarFiles.get(addon);
-			Enumeration<JarEntry> entries = jarFile.entries();
-			
-			while (entries.hasMoreElements()) {
-				JarEntry element = entries.nextElement();
-				
-				if (element.getName().equalsIgnoreCase(fileName))
-					return jarFile.getInputStream(element);
-			}
-			
-		} catch (IOException e) {}
-		
-		return null;
-	}
-	
-	/**
 	 * Loads the Addons
 	 */
 	public void load() {
@@ -155,17 +119,6 @@ public final class AddonManager {
 	}
 	
 	/**
-	 * Saves the JAR files of the Addons for future use
-	 * 
-	 * @param addon The Addon
-	 * 
-	 * @param jarFile The JAR file of the Addon
-	 */
-	public void setJarFile(Addon addon, JarFile jarFile) {
-		jarFiles.put(addon, jarFile);
-	}
-	
-	/**
 	 * Unloads the AddonManager and all Addons
 	 */
 	public void unload() {
@@ -173,6 +126,5 @@ public final class AddonManager {
 			addon.unload();
 		
 		addons.clear();
-		jarFiles.clear();
 	}
 }

@@ -1,18 +1,13 @@
 package com.titankingdoms.nodinchan.titanchat.channel;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 import java.util.logging.Level;
 
 import org.bukkit.OfflinePlayer;
@@ -61,7 +56,6 @@ public final class ChannelManager {
 	
 	private final Map<Channel, Map<String, List<String>>> channelInvitors;
 	private Map<String, Channel> channels;
-	private final Map<CustomChannel, JarFile> jarFiles;
 	
 	/**
 	 * Initialises variables
@@ -77,7 +71,6 @@ public final class ChannelManager {
 		this.linked = new LinkedList<Channel>();
 		this.channelInvitors = new HashMap<Channel, Map<String, List<String>>>();
 		this.channels = new LinkedHashMap<String, Channel>();
-		this.jarFiles = new HashMap<CustomChannel, JarFile>();
 	}
 	
 	/**
@@ -320,32 +313,6 @@ public final class ChannelManager {
 	}
 	
 	/**
-	 * Gets resource out of the JAR file of an Channel
-	 * 
-	 * @param channel The Channel
-	 * 
-	 * @param fileName The file to look for
-	 * 
-	 * @return The file if found, otherwise null
-	 */
-	public InputStream getResource(CustomChannel channel, String fileName) {
-		try {
-			JarFile jarFile = jarFiles.get(channel);
-			Enumeration<JarEntry> entries = jarFile.entries();
-			
-			while (entries.hasMoreElements()) {
-				JarEntry element = entries.nextElement();
-				
-				if (element.getName().equalsIgnoreCase(fileName))
-					return jarFile.getInputStream(element);
-			}
-			
-		} catch (IOException e) {}
-		
-		return null;
-	}
-	
-	/**
 	 * Gets the Spawn Channel of the Player
 	 * 
 	 * @param player The Player to check
@@ -559,17 +526,6 @@ public final class ChannelManager {
 	}
 	
 	/**
-	 * Saves the JAR files of the Channels for future use
-	 * 
-	 * @param channel The Channel
-	 * 
-	 * @param jarFile The JAR file of the Channel
-	 */
-	public void setJarFile(CustomChannel channel, JarFile jarFile) {
-		jarFiles.put(channel, jarFile);
-	}
-	
-	/**
 	 * Sorts the Channels
 	 */
 	public void sortChannels() {
@@ -596,7 +552,6 @@ public final class ChannelManager {
 			channel.save();
 		
 		channels.clear();
-		jarFiles.clear();
 		channelAmount = 0;
 		customChAmount = 0;
 	}

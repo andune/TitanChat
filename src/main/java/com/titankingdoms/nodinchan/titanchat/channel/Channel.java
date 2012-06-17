@@ -227,6 +227,7 @@ public class Channel extends Loadable {
 	 * 
 	 * @return The config
 	 */
+	@Override
 	public FileConfiguration getConfig() {
 		if (config == null) { reloadConfig(); }
 		return config;
@@ -334,8 +335,9 @@ public class Channel extends Loadable {
 	/**
 	 * Reloads the config
 	 */
+	@Override
 	public void reloadConfig() {
-		if (configFile == null) { configFile = new File(plugin.getChannelDir(), super.getName() + ".yml"); }
+		if (configFile == null) { configFile = new File(plugin.getChannelDir(), getName() + ".yml"); }
 		
 		config = YamlConfiguration.loadConfiguration(configFile);
 		
@@ -355,6 +357,7 @@ public class Channel extends Loadable {
 	/**
 	 * Saves the config
 	 */
+	@Override
 	public void saveConfig() {
 		if (configFile == null || config == null) { return; }
 		try { config.save(configFile); } catch (IOException e) { plugin.log(Level.SEVERE, "Could not save config to " + configFile); }
