@@ -1,5 +1,6 @@
 package com.titankingdoms.nodinchan.titanchat.util;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -19,13 +20,13 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.event.server.PluginEnableEvent;
-import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.tyrannyofheaven.bukkit.zPermissions.ZPermissionsService;
 
+import com.nodinchan.dynamic.permission.PermissionManager;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 
 import ru.tehkode.permissions.PermissionGroup;
@@ -79,9 +80,12 @@ public final class PermsBridge {
 		this.plugin = TitanChat.getInstance();
 		
 		if (plugin.getConfig().get("permissions") != null) {
+			PermissionManager permManager = new PermissionManager(plugin);
+			
 			for (String permission : plugin.getConfig().getStringList("permissions"))
-				plugin.getServer().getPluginManager().addPermission(new Permission(permission, PermissionDefault.FALSE));
-		}
+				permManager.register(permission, PermissionDefault.FALSE);
+			
+		} else { plugin.getConfig().set("permissions", new  ArrayList<String>()); }
 		
 		if (plugin.getServer().getPluginManager().getPlugin("Vault") != null) {
 			RegisteredServiceProvider<net.milkbowl.vault.chat.Chat> chatProvider = plugin.getServer().getServicesManager().getRegistration(net.milkbowl.vault.chat.Chat.class);
