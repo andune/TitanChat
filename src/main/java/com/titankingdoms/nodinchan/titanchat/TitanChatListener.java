@@ -62,22 +62,9 @@ public class TitanChatListener implements Listener {
 			String quickMessage = plugin.getConfig().getString("channels.quick-message");
 			
 			if (message.startsWith(quickMessage) && !message.substring(quickMessage.length()).startsWith(" ")) {
-				Channel channel = plugin.getChannelManager().getChannel(message.split(" ")[0].substring(quickMessage.length()));
-				
-				if (channel != null) {
-					if (!channel.canAccess(player))
-						return;
-					
-					if (voiceless(player, channel))
-						return;
-					
-					String log = channel.sendMessage(player, message.substring(message.split(" ")[0].length()));
-					
-					if (!log.equals(""))
-						plugin.getServer().getConsoleSender().sendMessage(log);
-					
-				} else { plugin.sendWarning(player, "No such channel"); }
-				
+				String channel = message.split(" ")[0].substring(quickMessage.length());
+				String msg = message.substring(message.split(" ")[0].length());
+				plugin.getServer().dispatchCommand(player, "titanchat send " + channel + msg);
 				return;
 			}
 			

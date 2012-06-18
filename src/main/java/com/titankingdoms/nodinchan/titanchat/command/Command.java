@@ -52,9 +52,9 @@ public class Command extends Loadable implements Listener {
 	 * 
 	 * @param name the command's name
 	 */
-	public final void invalidArgLength(Player player, String trigger) {
+	public final void invalidArgLength(Player player, String name) {
 		plugin.sendWarning(player, "Invalid Argument Length");
-		Executor executor = plugin.getCommandManager().getCommandExecutor(trigger);
+		Executor executor = plugin.getCommandManager().getCommandExecutor(name);
 		
 		if (executor.getMethod().getAnnotation(CommandInfo.class) != null)
 			plugin.sendInfo(player, "Usage: /titanchat " + executor.getMethod().getAnnotation(CommandInfo.class).usage());

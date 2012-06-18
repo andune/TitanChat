@@ -49,7 +49,12 @@ public class ChatCommand extends Command {
 	@CommandID(name = "Broadcast", triggers = { "broadcast", "bc" }, requireChannel = false)
 	@CommandInfo(description = "Broadcasts the message globally", usage = "broadcast [message]")
 	public void broadcast(Player player, String[] args) {
-		if (args.length < 1 || !plugin.getPermsBridge().has(player, "TitanChat.broadcast")) { return; }
+		if (args.length < 1) { invalidArgLength(player, "Broadcast"); return; }
+		
+		if (!plugin.getPermsBridge().has(player, "TitanChat.broadcast")) {
+			plugin.sendWarning(player, "You do not have permission");
+			return;
+		}
 		
 		StringBuilder str = new StringBuilder();
 		
@@ -78,7 +83,12 @@ public class ChatCommand extends Command {
 	@CommandID(name = "Emote", triggers = { "me", "em" })
 	@CommandInfo(description = "Action emote shown in channel", usage = "me [action]")
 	public void emote(Player player, String[] args) {
-		if (args.length < 1 || !plugin.getPermsBridge().has(player, "TitanChat.me")) { return; }
+		if (args.length < 1) { invalidArgLength(player, "Emote"); return; }
+		
+		if (!plugin.getPermsBridge().has(player, "TitanChat.me")) {
+			plugin.sendWarning(player, "You do not have permission");
+			return;
+		}
 		
 		StringBuilder str = new StringBuilder();
 		
@@ -123,10 +133,39 @@ public class ChatCommand extends Command {
 	}
 	
 	/**
+	 * Send Command - Sends a message to the channel
+	 */
+	@CommandID(name = "Send", triggers = "send")
+	@CommandInfo(description = "Sends a message to the channel", usage = "send [channel] [message]")
+	public void send(Player player, String[] args) {
+		if (args.length < 2) { invalidArgLength(player, "Send"); return; }
+		
+		if (cm.exists(args[0])) {
+			if (!cm.getChannel(args[0]).canAccess(player))
+				return;
+			
+			if (voiceless(player, cm.getChannel(args[0])))
+				return;
+			
+			StringBuilder str = new StringBuilder();
+			
+			for (String arg : Arrays.copyOfRange(args, 1, args.length)) {
+				if (str.length() > 0)
+					str.append(" ");
+				
+				str.append(arg);
+			}
+			
+			cm.getChannel(args[0]).sendMessage(player, str.toString());
+			
+		} else { plugin.sendWarning(player, "No such channel"); }
+	}
+	
+	/**
 	 * Silence Command - Silences the channel/server
 	 */
 	@CommandID(name = "Silence", triggers = "silence", requireChannel = false)
-	@CommandInfo(description = "Silences the channel/server", usage = "silence [channel]")
+	@CommandInfo(description = "Silences the channel/server", usage = "silence <channel>")
 	public void silence(Player player, String[] args) {
 		if (plugin.getPermsBridge().has(player, "TitanChat.silence")) {
 			if (!plugin.enableChannels()) {
@@ -174,10 +213,15 @@ public class ChatCommand extends Command {
 	/**
 	 * Whisper Command - Whisper messages to players
 	 */
-	@CommandID(name = "whisper", triggers = { "whisper", "w" })
+	@CommandID(name = "Whisper", triggers = { "whisper", "w" })
 	@CommandInfo(description = "Whisper messages to players", usage = "whisper [player] [message]")
 	public void whisper(Player player, String[] args) {
-		if (args.length < 2 || !plugin.getPermsBridge().has(player, "TitanChat.whisper")) { return; }
+		if (args.length < 2) { invalidArgLength(player, "Whisper"); return; }
+		
+		if (!plugin.getPermsBridge().has(player, "TitanChat.whisper")) {
+			plugin.sendWarning(player, "You do not have permission");
+			return;
+		}
 		
 		if (plugin.getPlayer(args[0]) == null) {
 			plugin.sendWarning(player, "Player not online");
@@ -204,5 +248,32 @@ public class ChatCommand extends Command {
 		plugin.getPlayer(args[0]).sendMessage(format.replace("%message", lines[0]));
 		player.sendMessage(Arrays.copyOfRange(lines, 1, lines.length));
 		plugin.getPlayer(args[0]).sendMessage(Arrays.copyOfRange(lines, 1, lines.length));
+	}
+	
+	private boolean voiceless(Player player, Channel channel) {
+		if (plugin.getPermsBridge().has(player, "TitanChat.voice"))
+			return false;
+		
+		if (plugin.isSilenced()) {
+			plugin.sendWarning(player, "The server is silenced");
+			return true;
+		}
+		
+		if (channel.isSilenced()) {
+			plugin.sendWarning(player, "The channel is silenced");
+			return true;
+		}
+		
+		if (channel.getMuteList().contains(player.getName())) {
+			plugin.sendWarning(player, "You have been muted");
+			return true;
+		}
+		
+		if (plugin.getChannelManager().isMuted(player)) {
+			plugin.sendWarning(player, "You have been muted");
+			return true;
+		}
+		
+		return false;
 	}
 }

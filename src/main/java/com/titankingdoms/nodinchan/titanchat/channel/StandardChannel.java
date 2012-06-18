@@ -122,6 +122,7 @@ public final class StandardChannel extends Channel {
 	@Override
 	public String sendMessage(Player player, String message) {
 		List<Player> recipants = new ArrayList<Player>();
+		recipants.add(player);
 		
 		if (super.isGlobal())
 			recipants.addAll(Arrays.asList(plugin.getServer().getOnlinePlayers()));

@@ -522,6 +522,7 @@ public final class ChannelManager {
 		if (channel instanceof CustomChannel)
 			customChAmount++;
 		
+		plugin.getCommandManager().getDynamic().load(channel);
 		channels.put(channel.getName().toLowerCase(), channel);
 	}
 	

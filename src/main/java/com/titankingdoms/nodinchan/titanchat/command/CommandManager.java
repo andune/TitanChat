@@ -5,16 +5,20 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.nodinchan.ncloader.Loader;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
+import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.command.Command.Executor;
 import com.titankingdoms.nodinchan.titanchat.command.commands.*;
 import com.titankingdoms.nodinchan.titanchat.util.Debugger;
@@ -51,6 +55,8 @@ public final class CommandManager {
 	
 	private Map<String, Executor> executors;
 	
+	private Dynamic dynamic;
+	
 	/**
 	 * Initialises variables
 	 */
@@ -62,6 +68,8 @@ public final class CommandManager {
 			plugin.log(Level.INFO, "Creating commands directory");
 		
 		this.executors = new LinkedHashMap<String, Executor>();
+		
+		try { this.dynamic = new Dynamic(plugin); } catch (Exception e) { e.printStackTrace(); }
 	}
 	
 	/**
@@ -155,6 +163,15 @@ public final class CommandManager {
 	}
 	
 	/**
+	 * Gets the dynamic command registrator
+	 * 
+	 * @return The dynamic command registrator
+	 */
+	public Dynamic getDynamic() {
+		return dynamic;
+	}
+	
+	/**
 	 * Gets an instance of this
 	 * 
 	 * @return CommandManager instance
@@ -218,5 +235,78 @@ public final class CommandManager {
 	 */
 	public void unload() {
 		executors.clear();
+	}
+	
+	/**
+	 * Dynamic - For dynamic command registration of channels
+	 * 
+	 * @author NodinChan
+	 *
+	 */
+	public final class Dynamic implements CommandExecutor {
+		
+		private final TitanChat plugin;
+		
+		private final com.nodinchan.dynamic.command.CommandManager dynamic;
+		
+		private final Map<String, Channel> joinCommand;
+		private final Map<String, Channel> sendCommand;
+		
+		public Dynamic(TitanChat plugin) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+			this.plugin = plugin;
+			this.dynamic = new com.nodinchan.dynamic.command.CommandManager(plugin);
+			this.joinCommand = new HashMap<String, Channel>();
+			this.sendCommand = new HashMap<String, Channel>();
+		}
+		
+		/**
+		 * Loads the commands for the Channel
+		 * 
+		 * @param channel The Channel to be loaded
+		 */
+		public void load(Channel channel) {
+			if (!channel.getConfig().getString("commands.join").equals("")) {
+				String cmd = channel.getConfig().getString("commands.join");
+				com.nodinchan.dynamic.command.Command command = dynamic.register(cmd);
+				command.setExecutor(this);
+				command.setDescription("Joins the channel");
+				command.setUsage("/<command>");
+			}
+			
+			if (!channel.getConfig().getString("commands.message").equals("")) {
+				String cmd = channel.getConfig().getString("commands.message");
+				com.nodinchan.dynamic.command.Command command = dynamic.register(cmd);
+				command.setExecutor(this);
+				command.setDescription("Sends a message to the channel");
+				command.setUsage("/<command>");
+			}
+		}
+		
+		public boolean onCommand(CommandSender sender, org.bukkit.command.Command cmd, String label, String[] args) {
+			for (String join : joinCommand.keySet()) {
+				if (cmd.getName().equalsIgnoreCase(join)) {
+					plugin.getServer().dispatchCommand(sender, "titanchat join " + joinCommand.get(join).getName());
+					return true;
+				}
+			}
+			
+			for (String send : sendCommand.keySet()) {
+				if (cmd.getName().equalsIgnoreCase(send)) {
+					StringBuilder str = new StringBuilder();
+					
+					for (String arg : args) {
+						if (str.length() > 0)
+							str.append(" ");
+						
+						str.append(arg);
+					}
+					
+					plugin.getServer().dispatchCommand(sender, "titanchat send " + sendCommand.get(send).getName() + " " + str.toString());
+					return true;
+				}
+			}
+			
+			return false;
+		}
 	}
 }
