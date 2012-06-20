@@ -55,7 +55,7 @@ public class PluginCommand extends Command {
 	/**
 	 * Debug Command - Toggles the debug
 	 */
-	@CommandID(name = "Debug", triggers = "debug")
+	@CommandID(name = "Debug", aliases = "debug")
 	@CommandInfo(description = "Toggles the debug", usage = "debug [type]")
 	public void debug(Player player, String[] args) {
 		try {
@@ -83,7 +83,7 @@ public class PluginCommand extends Command {
 	/**
 	 * Reload Command - Reloads the config
 	 */
-	@CommandID(name = "Reload", triggers = "reload")
+	@CommandID(name = "Reload", aliases = "reload")
 	@CommandInfo(description = "Reloads the config", usage = "reload")
 	public void reload(Player player, String[] args) {
 		if (plugin.isStaff(player)) {

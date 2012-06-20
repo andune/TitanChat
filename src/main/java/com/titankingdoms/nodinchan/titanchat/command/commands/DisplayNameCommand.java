@@ -41,7 +41,7 @@ public class DisplayNameCommand extends Command {
 	/**
 	 * Name Command - Checks the real name of you or the Player
 	 */
-	@CommandID(name = "Name", triggers = "name")
+	@CommandID(name = "Name", aliases = "name")
 	@CommandInfo(description = "Checks the real name of you or the Player", usage = "name <player>")
 	public void name(Player player, String[] args) {
 		try {
@@ -62,7 +62,7 @@ public class DisplayNameCommand extends Command {
 	/**
 	 * Nick Command - Changes your or your target's display name
 	 */
-	@CommandID(name = "Nick", triggers = "nick")
+	@CommandID(name = "Nick", aliases = "nick")
 	@CommandInfo(description = "Sets your or your target's display name", usage = "nick [displayname] <player>")
 	public void nick(Player player, String[] args) {
 		if (args.length < 1) { invalidArgLength(player, "Nick"); return; }
@@ -148,7 +148,7 @@ public class DisplayNameCommand extends Command {
 	/**
 	 * Reset Command - Resets your or your target's display name
 	 */
-	@CommandID(name = "Reset", triggers = "reset")
+	@CommandID(name = "Reset", aliases = "reset")
 	@CommandInfo(description = "Resets your or your target's display name", usage = "reset <player>")
 	public void reset(Player player, String[] args) {
 		try {

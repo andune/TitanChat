@@ -44,7 +44,7 @@ public class ChannelCommand extends Command {
 	/**
 	 * Create Command - Creates a new channel
 	 */
-	@CommandID(name = "Create", triggers = { "create", "c" })
+	@CommandID(name = "Create", aliases = { "create", "c" })
 	@CommandInfo(description = "Creates a new channel", usage = "create [channel]")
 	public void create(Player player, String[] args) {
 		try {
@@ -74,7 +74,7 @@ public class ChannelCommand extends Command {
 	/**
 	 * Delete Command - Deletes the channel
 	 */
-	@CommandID(name = "Delete", triggers = { "delete", "d" })
+	@CommandID(name = "Delete", aliases = { "delete", "d" })
 	@CommandInfo(description = "Deletes the channel", usage = "delete [channel]")
 	public void delete(Player player, String[] args) {
 		try {
@@ -94,7 +94,7 @@ public class ChannelCommand extends Command {
 	/**
 	 * Follow Command - Follows the channel
 	 */
-	@CommandID(name = "Follow", triggers = "follow")
+	@CommandID(name = "Follow", aliases = "follow")
 	@CommandInfo(description = "Follows the channel", usage = "follow [channel]")
 	public void follow(Player player, String[] args) {
 		try {
@@ -120,7 +120,7 @@ public class ChannelCommand extends Command {
 	/**
 	 * Join Command - Joins the channel
 	 */
-	@CommandID(name = "Join", triggers = { "join", "j" })
+	@CommandID(name = "Join", aliases = { "join", "j" })
 	@CommandInfo(description = "Joins the channel", usage = "join [channel] <password>")
 	public void join(Player player, String[] args) {
 		if (args.length < 1) { invalidArgLength(player, "Join"); return; }
@@ -258,7 +258,7 @@ public class ChannelCommand extends Command {
 		} else { plugin.sendWarning(player, "No such channel"); }
 	}
 	
-	@CommandID(name = "Leave", triggers = { "leave", "part"})
+	@CommandID(name = "Leave", aliases = { "leave", "part"})
 	@CommandInfo(description = "Leaves the channel you are in", usage = "leave")
 	public void leave(Player player, String[] args) {
 		Channel channel = cm.getChannel(player);
@@ -273,7 +273,7 @@ public class ChannelCommand extends Command {
 	/**
 	 * Unfollow Command - Unfollows the channel
 	 */
-	@CommandID(name = "Unfollow", triggers = "unfollow")
+	@CommandID(name = "Unfollow", aliases = "unfollow")
 	@CommandInfo(description = "Unfollows the channel", usage = "unfollow [channel]")
 	public void unfollow(Player player, String[] args) {
 		try {

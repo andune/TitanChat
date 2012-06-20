@@ -258,21 +258,21 @@ public final class TitanChat extends JavaPlugin {
 	}
 
 	/**
-	 * Initialises the NC-LoaderLib
+	 * Initialises the NCLib
 	 * 
 	 * @return True if the Lib is initialised
 	 */
-	private boolean initLoaderLib() {
+	private boolean initLib() {
 		try {
 			File destination = new File(getDataFolder().getParentFile().getParentFile(), "lib");
 			destination.mkdirs();
 			
-			File lib = new File(destination, "NC-LoaderLib.jar");
+			File lib = new File(destination, "NCLib.jar");
 			
 			boolean download = false;
 			
 			if (!lib.exists()) {
-				System.out.println("Missing NC-Loader lib");
+				System.out.println("Missing NC lib");
 				download = true;
 				
 			} else {
@@ -292,15 +292,15 @@ public final class TitanChat extends JavaPlugin {
 				
 				if (!download) {
 					if (version == 0) {
-						System.out.println("NC-Loader lib outdated");
+						System.out.println("NC lib outdated");
 						download = true;
 						
 					} else {
-						HttpURLConnection urlConnection = (HttpURLConnection) new URL("http://www.nodinchan.com/NC-LoaderLib/version.yml").openConnection();
+						HttpURLConnection urlConnection = (HttpURLConnection) new URL("http://www.nodinchan.com/NCLib/version.yml").openConnection();
 						BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
 						
-						if (Double.parseDouble(reader.readLine().replace("NC-LoaderLib Version ", "").trim()) > version) {
-							System.out.println("NC-Loader lib outdated");
+						if (Double.parseDouble(reader.readLine().replace("NC Version ", "").trim()) > version) {
+							System.out.println("NC lib outdated");
 							download = true;
 						}
 					}
@@ -308,12 +308,12 @@ public final class TitanChat extends JavaPlugin {
 			}
 			
 			if (download) {
-				System.out.println("Downloading NC-Loader lib...");
-				URL url = new URL("http://www.nodinchan.com/NC-LoaderLib/NC-LoaderLib.jar");
+				System.out.println("Downloading NC lib...");
+				URL url = new URL("http://www.nodinchan.com/NCLib/NCLib.jar");
 				ReadableByteChannel rbc = Channels.newChannel(url.openStream());
 				FileOutputStream output = new FileOutputStream(lib);
 				output.getChannel().transferFrom(rbc, 0, 1 << 24);
-				System.out.println("Downloaded NC-Loader lib");
+				System.out.println("Downloaded NC lib");
 			}
 			
 			URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
@@ -653,7 +653,7 @@ public final class TitanChat extends JavaPlugin {
 		File config = new File(getDataFolder(), "config.yml");
 		
 		if (!config.exists()) {
-			log(Level.INFO, "Loading default config");
+			log(Level.INFO, "Loading default config...");
 			saveResource("config.yml", false);
 		}
 		
@@ -712,7 +712,7 @@ public final class TitanChat extends JavaPlugin {
 		instance = this;
 		NAME = "TitanChat " + instance.toString().split(" ")[1];
 		
-		if (!initLoaderLib())
+		if (!initLib())
 			log(Level.WARNING, "Failed to initialise Loader lib");
 	}
 	

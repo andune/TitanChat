@@ -46,7 +46,7 @@ public class InformationCommand extends Command {
 	/**
 	 * ColourCodes Command - Lists out avalable colour codes and respective colours
 	 */
-	@CommandID(name = "ColourCodes", triggers = { "colourcodes", "colorcodes", "colours", "colors", "codes" }, requireChannel = false)
+	@CommandID(name = "ColourCodes", aliases = { "colourcodes", "colorcodes", "colours", "colors", "codes" }, requireChannel = false)
 	@CommandInfo(description = "Lists out avalable colour codes and respective colours", usage = "colourcodes")
 	public void colourcodes(Player player, String[] args) {
 		String black = plugin.getFormatHandler().colourise("&0") + "&0";
@@ -87,7 +87,7 @@ public class InformationCommand extends Command {
 	/**
 	 * Help Command - Shows the command list
 	 */
-	@CommandID(name = "Help", triggers = { "help", "?", "commands", "cmds" }, requireChannel = false)
+	@CommandID(name = "Help", aliases = { "help", "?", "commands", "cmds" }, requireChannel = false)
 	@CommandInfo(description = "Shows the command list", usage = "help <page/command>")
 	public void help(Player player, String[] args) {
 		CommandManager cm = plugin.getCommandManager();
@@ -146,7 +146,7 @@ public class InformationCommand extends Command {
 			
 			StringBuilder str = new StringBuilder();
 			
-			for (String alias : executor.getMethod().getAnnotation(CommandID.class).triggers()) {
+			for (String alias : executor.getMethod().getAnnotation(CommandID.class).aliases()) {
 				if (str.length() > 0)
 					str.append(", ");
 				
@@ -163,7 +163,7 @@ public class InformationCommand extends Command {
 	/**
 	 * Info Command - Gets the participants and followers of the channel
 	 */
-	@CommandID(name = "Info", triggers = "info")
+	@CommandID(name = "Info", aliases = "info")
 	@CommandInfo(description = "Gets the participants and followers of the channel", usage = "info <channel>")
 	public void info(Player player, String[] args) {
 		try {
@@ -207,7 +207,7 @@ public class InformationCommand extends Command {
 	/**
 	 * List Command - Lists all channels you have access to
 	 */
-	@CommandID(name = "List", triggers = "list")
+	@CommandID(name = "List", aliases = "list")
 	@CommandInfo(description = "Lists all channels you have access to", usage = "list")
 	public void list(Player player, String[] args) {
 		player.sendMessage(ChatColor.AQUA + "Channels: " + plugin.createList(cm.getAccessList(player)));

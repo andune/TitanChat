@@ -15,7 +15,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
-import com.nodinchan.ncloader.Loadable;
+import com.nodinchan.nclib.loader.Loadable;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.event.MessageReceiveEvent;
 import com.titankingdoms.nodinchan.titanchat.event.MessageSendEvent;

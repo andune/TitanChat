@@ -16,7 +16,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.nodinchan.ncloader.Loader;
+import com.nodinchan.nclib.loader.Loader;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.command.Command.Executor;
@@ -53,7 +53,8 @@ public final class CommandManager {
 	
 	private static final Debugger db = new Debugger(4);
 	
-	private Map<String, Executor> executors;
+	private final Map<String, String> aliases;
+	private final Map<String, Executor> executors;
 	
 	private Dynamic dynamic;
 	
@@ -68,6 +69,7 @@ public final class CommandManager {
 			plugin.log(Level.INFO, "Creating commands directory");
 		
 		this.executors = new LinkedHashMap<String, Executor>();
+		this.aliases = new LinkedHashMap<String, String>();
 		
 		try { this.dynamic = new Dynamic(plugin); } catch (Exception e) { e.printStackTrace(); }
 	}
@@ -82,14 +84,16 @@ public final class CommandManager {
 	 * @param args The arguments
 	 */
 	public void execute(Player player, String command, String[] args) {
-		for (Executor executor : executors.values()) {
+		if (aliases.get(command.toLowerCase()) != null) {
+			Executor executor = getCommandExecutor(command);
+			
 			if (executor.getMethod().getAnnotation(CommandID.class).requireChannel() && !plugin.enableChannels()) {
 				if (player != null)
 					plugin.sendWarning(player, "This command requires channels to be enabled");
 				return;
 			}
 			
-			for (String trigger : executor.getMethod().getAnnotation(CommandID.class).triggers()) {
+			for (String trigger : executor.getMethod().getAnnotation(CommandID.class).aliases()) {
 				db.i("Checking trigger \"" + trigger + "\" with command \"" + command + "\"");
 				
 				if (trigger.equalsIgnoreCase(command)) {
@@ -147,7 +151,15 @@ public final class CommandManager {
 	 * 
 	 * @return The Executor if it exists, otherwise null
 	 */
-	public Executor getCommandExecutor(String name) {
+	public Executor getCommandExecutor(String alias) {
+		if (alias == null)
+			return null;
+		
+		String name = aliases.get(alias.toLowerCase());
+		
+		if (name == null)
+			return null;
+		
 		return executors.get(name.toLowerCase());
 	}
 	
@@ -210,7 +222,14 @@ public final class CommandManager {
 		for (Method method : command.getClass().getMethods()) {
 			if (method.getAnnotation(CommandID.class) != null) {
 				db.i("Adding new executor: " + method.getAnnotation(CommandID.class).name());
-				executors.put(method.getAnnotation(CommandID.class).name().toLowerCase(), new Executor(method, command));
+				
+				Executor executor = new Executor(method, command);
+				executors.put(method.getAnnotation(CommandID.class).name().toLowerCase(), executor);
+				
+				aliases.put(executor.getName(), executor.getName());
+				
+				for (String alias : method.getAnnotation(CommandID.class).aliases())
+					aliases.put(alias.toLowerCase(), executor.getName());
 			}
 		}
 	}
@@ -227,7 +246,8 @@ public final class CommandManager {
 		for (String name : names)
 			executors.put(name, getCommandExecutor(name));
 		
-		this.executors = executors;
+		this.executors.clear();
+		this.executors.putAll(executors);
 	}
 	
 	/**
@@ -247,14 +267,14 @@ public final class CommandManager {
 		
 		private final TitanChat plugin;
 		
-		private final com.nodinchan.dynamic.command.CommandManager dynamic;
+		private final com.nodinchan.nclib.command.CommandManager dynamic;
 		
 		private final Map<String, Channel> joinCommand;
 		private final Map<String, Channel> sendCommand;
 		
 		public Dynamic(TitanChat plugin) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
 			this.plugin = plugin;
-			this.dynamic = new com.nodinchan.dynamic.command.CommandManager(plugin);
+			this.dynamic = new com.nodinchan.nclib.command.CommandManager(plugin);
 			this.joinCommand = new HashMap<String, Channel>();
 			this.sendCommand = new HashMap<String, Channel>();
 		}
@@ -267,7 +287,7 @@ public final class CommandManager {
 		public void load(Channel channel) {
 			if (!channel.getConfig().getString("commands.join").equals("")) {
 				String cmd = channel.getConfig().getString("commands.join");
-				com.nodinchan.dynamic.command.Command command = dynamic.register(cmd);
+				com.nodinchan.nclib.command.PluginCommand command = dynamic.register(cmd);
 				command.setExecutor(this);
 				command.setDescription("Joins the channel");
 				command.setUsage("/<command>");
@@ -275,7 +295,7 @@ public final class CommandManager {
 			
 			if (!channel.getConfig().getString("commands.message").equals("")) {
 				String cmd = channel.getConfig().getString("commands.message");
-				com.nodinchan.dynamic.command.Command command = dynamic.register(cmd);
+				com.nodinchan.nclib.command.PluginCommand command = dynamic.register(cmd);
 				command.setExecutor(this);
 				command.setDescription("Sends a message to the channel");
 				command.setUsage("/<command>");

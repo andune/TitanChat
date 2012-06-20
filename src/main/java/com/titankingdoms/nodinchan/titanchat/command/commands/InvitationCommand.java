@@ -41,7 +41,7 @@ public class InvitationCommand extends Command {
 	/**
 	 * Accept Command - Accepts the channel join invitation and joins the channel
 	 */
-	@CommandID(name = "Accept", triggers = "accept")
+	@CommandID(name = "Accept", aliases = "accept")
 	@CommandInfo(description = "Accepts the channel join invitation and joins the channel", usage = "accept [channel]")
 	public void accept(Player player, String[] args) {
 		try {
@@ -65,7 +65,7 @@ public class InvitationCommand extends Command {
 	/**
 	 * Decline Command - Declines the channel join invitation
 	 */
-	@CommandID(name = "Decline", triggers = "decline")
+	@CommandID(name = "Decline", aliases = "decline")
 	@CommandInfo(description = "Declines the channel join invitation", usage = "decline [channel]")
 	public void decline(Player player, String[] args) {
 		try {
@@ -88,7 +88,7 @@ public class InvitationCommand extends Command {
 	/**
 	 * Invite Command - Invites the player to join the channel
 	 */
-	@CommandID(name = "Invite", triggers = "invite")
+	@CommandID(name = "Invite", aliases = "invite")
 	@CommandInfo(description = "Invites the player to join the channel", usage = "invite [player] <channel>")
 	public void invite(Player player, String[] args) {
 		if (args.length < 1) { invalidArgLength(player, "Invite"); }

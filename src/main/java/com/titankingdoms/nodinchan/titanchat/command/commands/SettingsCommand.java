@@ -51,7 +51,7 @@ public class SettingsCommand extends Command {
 	/**
 	 * Set Command - Sets the channel settings
 	 */
-	@CommandID(name = "Set", triggers = "set")
+	@CommandID(name = "Set", aliases = "set")
 	@CommandInfo(description = "Sets the channel settings (\"/tc set help\" for more info)", usage = "set [setting] <value> <channel>")
 	public void set(Player player, String[] args) {
 		if (args.length < 1) {

@@ -40,7 +40,7 @@ public @interface CommandID {
 	 * 
 	 * @return The Command triggers
 	 */
-	String[] triggers();
+	String[] aliases();
 	
 	/**
 	 * Check if the Command requires Channels to be enabled

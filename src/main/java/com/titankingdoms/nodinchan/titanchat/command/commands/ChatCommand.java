@@ -46,7 +46,7 @@ public class ChatCommand extends Command {
 	/**
 	 * Broadcast Command - Broadcasts the message globally
 	 */
-	@CommandID(name = "Broadcast", triggers = { "broadcast", "bc" }, requireChannel = false)
+	@CommandID(name = "Broadcast", aliases = { "broadcast", "bc" }, requireChannel = false)
 	@CommandInfo(description = "Broadcasts the message globally", usage = "broadcast [message]")
 	public void broadcast(Player player, String[] args) {
 		if (args.length < 1) { invalidArgLength(player, "Broadcast"); return; }
@@ -80,7 +80,7 @@ public class ChatCommand extends Command {
 	/**
 	 * Emote Command - Action emote shown in channel
 	 */
-	@CommandID(name = "Emote", triggers = { "me", "em" })
+	@CommandID(name = "Emote", aliases = { "me", "em" })
 	@CommandInfo(description = "Action emote shown in channel", usage = "me [action]")
 	public void emote(Player player, String[] args) {
 		if (args.length < 1) { invalidArgLength(player, "Emote"); return; }
@@ -135,7 +135,7 @@ public class ChatCommand extends Command {
 	/**
 	 * Send Command - Sends a message to the channel
 	 */
-	@CommandID(name = "Send", triggers = "send")
+	@CommandID(name = "Send", aliases = "send")
 	@CommandInfo(description = "Sends a message to the channel", usage = "send [channel] [message]")
 	public void send(Player player, String[] args) {
 		if (args.length < 2) { invalidArgLength(player, "Send"); return; }
@@ -164,7 +164,7 @@ public class ChatCommand extends Command {
 	/**
 	 * Silence Command - Silences the channel/server
 	 */
-	@CommandID(name = "Silence", triggers = "silence", requireChannel = false)
+	@CommandID(name = "Silence", aliases = "silence", requireChannel = false)
 	@CommandInfo(description = "Silences the channel/server", usage = "silence <channel>")
 	public void silence(Player player, String[] args) {
 		if (plugin.getPermsBridge().has(player, "TitanChat.silence")) {
@@ -213,7 +213,7 @@ public class ChatCommand extends Command {
 	/**
 	 * Whisper Command - Whisper messages to players
 	 */
-	@CommandID(name = "Whisper", triggers = { "whisper", "w" })
+	@CommandID(name = "Whisper", aliases = { "whisper", "w" })
 	@CommandInfo(description = "Whisper messages to players", usage = "whisper [player] [message]")
 	public void whisper(Player player, String[] args) {
 		if (args.length < 2) { invalidArgLength(player, "Whisper"); return; }
