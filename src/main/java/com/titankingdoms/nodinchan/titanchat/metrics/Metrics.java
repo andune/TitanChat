@@ -186,6 +186,19 @@ public class Metrics {
     }
     
     /**
+     * Add a Graph object to Metrics that represents data for the plugin that should be sent to the backend
+     *
+     * @param graph
+     */
+    public void addGraph(final Graph graph) {
+        if (graph == null) {
+            throw new IllegalArgumentException("Graph cannot be null");
+        }
+        
+        graphs.add(graph);
+    }
+    
+    /**
      * Adds a custom data plotter to the default graph
      *
      * @param plotter
@@ -234,6 +247,10 @@ public class Metrics {
                             if (isOptOut() && taskId > 0) {
                                 plugin.getServer().getScheduler().cancelTask(taskId);
                                 taskId = -1;
+                                // Tell all plotters to stop gathering information.
+                                for (Graph graph : graphs){
+                                    graph.onOptOut();
+                                }
                             }
                         }
 
@@ -346,7 +363,7 @@ public class Metrics {
 
             while (iter.hasNext()) {
                 final Graph graph = iter.next();
-                
+
                 for (Plotter plotter : graph.getPlotters()) {
                     // The key name to send to the metrics server
                     // The format is C-GRAPHNAME-PLOTTERNAME where separator - is defined at the top
@@ -524,6 +541,11 @@ public class Metrics {
             final Graph graph = (Graph) object;
             return graph.name.equals(name);
         }
+        
+        /**
+         * Called when the server owner decides to opt-out of Metrics while the server is running.
+         */
+        protected void onOptOut(){}
     }
     
     /**
@@ -576,7 +598,7 @@ public class Metrics {
         
         @Override
         public int hashCode() {
-            return getColumnName().hashCode() + getValue();
+            return getColumnName().hashCode();
         }
         
         @Override
