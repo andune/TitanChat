@@ -695,7 +695,7 @@ public final class TitanChat extends JavaPlugin {
 			displayname.apply(player);
 		
 		addonManager.load();
-		try { chManager.load(); } catch (Exception e) {}
+		try { chManager.load(); } catch (Exception e) { log(Level.WARNING, "Channels failed to load"); }
 		cmdManager.load();
 		format.load();
 		

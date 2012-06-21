@@ -291,6 +291,7 @@ public final class CommandManager {
 				command.setExecutor(this);
 				command.setDescription("Joins the channel");
 				command.setUsage("/<command>");
+				joinCommand.put(cmd.toLowerCase(), channel);
 			}
 			
 			if (!channel.getConfig().getString("commands.message").equals("")) {
@@ -299,31 +300,28 @@ public final class CommandManager {
 				command.setExecutor(this);
 				command.setDescription("Sends a message to the channel");
 				command.setUsage("/<command>");
+				sendCommand.put(cmd.toLowerCase(), channel);
 			}
 		}
 		
 		public boolean onCommand(CommandSender sender, org.bukkit.command.Command cmd, String label, String[] args) {
-			for (String join : joinCommand.keySet()) {
-				if (cmd.getName().equalsIgnoreCase(join)) {
-					plugin.getServer().dispatchCommand(sender, "titanchat join " + joinCommand.get(join).getName());
-					return true;
-				}
+			if (joinCommand.get(cmd.getName().toLowerCase()) != null) {
+				plugin.getServer().dispatchCommand(sender, "titanchat join " + joinCommand.get(cmd.getName().toLowerCase()).getName());
+				return true;
 			}
 			
-			for (String send : sendCommand.keySet()) {
-				if (cmd.getName().equalsIgnoreCase(send)) {
-					StringBuilder str = new StringBuilder();
+			if (sendCommand.get(cmd.getName().toLowerCase()) != null) {
+				StringBuilder str = new StringBuilder();
+				
+				for (String arg : args) {
+					if (str.length() > 0)
+						str.append(" ");
 					
-					for (String arg : args) {
-						if (str.length() > 0)
-							str.append(" ");
-						
-						str.append(arg);
-					}
-					
-					plugin.getServer().dispatchCommand(sender, "titanchat send " + sendCommand.get(send).getName() + " " + str.toString());
-					return true;
+					str.append(arg);
 				}
+				
+				plugin.getServer().dispatchCommand(sender, "titanchat send " + sendCommand.get(cmd.getName().toLowerCase()).getName() + " " + str.toString());
+				return true;
 			}
 			
 			return false;

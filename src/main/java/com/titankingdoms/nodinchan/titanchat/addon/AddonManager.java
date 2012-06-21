@@ -96,6 +96,9 @@ public final class AddonManager {
 		for (Addon addon : loader.load()) { register(addon); }
 		addons = loader.sort(addons);
 		
+		if (addons.size() < 1)
+			return;
+		
 		StringBuilder str = new StringBuilder();
 		
 		for (Addon addon : addons) {
