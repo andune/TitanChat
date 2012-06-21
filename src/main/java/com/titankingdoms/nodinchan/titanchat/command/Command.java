@@ -6,7 +6,7 @@ import java.lang.reflect.Method;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 
-import com.nodinchan.nclib.loader.Loadable;
+import com.nodinchan.ncbukkit.loader.Loadable;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.addon.Addon;
 import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;

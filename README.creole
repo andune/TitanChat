@@ -94,6 +94,7 @@ TitanChat, a chat management and formatting plugin for Bukkit.
 * 17.06.12 - Nc-LoaderLib update
 * 18.06.12 - Channels now have a dynamic join and send command
 * 20.06.12 - Minor changes to command handling
+* 21.06.12 - Release v3.6
 
 -----------------------------------------------------------------------------------------------------------------------
 

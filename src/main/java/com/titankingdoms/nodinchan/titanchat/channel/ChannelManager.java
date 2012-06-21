@@ -13,7 +13,7 @@ import java.util.logging.Level;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
-import com.nodinchan.nclib.loader.Loader;
+import com.nodinchan.ncbukkit.loader.Loader;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel.Type;
 import com.titankingdoms.nodinchan.titanchat.util.Debugger;

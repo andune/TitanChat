@@ -18,6 +18,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.persistence.PersistenceException;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -26,6 +27,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import com.titankingdoms.nodinchan.titanchat.addon.AddonManager;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
@@ -267,12 +271,12 @@ public final class TitanChat extends JavaPlugin {
 			File destination = new File(getDataFolder().getParentFile().getParentFile(), "lib");
 			destination.mkdirs();
 			
-			File lib = new File(destination, "NCLib.jar");
+			File lib = new File(destination, "NC-BukkitLib.jar");
 			
 			boolean download = false;
 			
 			if (!lib.exists()) {
-				System.out.println("Missing NC lib");
+				System.out.println("Missing NC-Bukkit lib");
 				download = true;
 				
 			} else {
@@ -292,15 +296,15 @@ public final class TitanChat extends JavaPlugin {
 				
 				if (!download) {
 					if (version == 0) {
-						System.out.println("NC lib outdated");
+						System.out.println("NC-Bukkit lib outdated");
 						download = true;
 						
 					} else {
-						HttpURLConnection urlConnection = (HttpURLConnection) new URL("http://www.nodinchan.com/NCLib/version.yml").openConnection();
+						HttpURLConnection urlConnection = (HttpURLConnection) new URL("http://www.nodinchan.com/NC-BukkitLib/version.yml").openConnection();
 						BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
 						
-						if (Double.parseDouble(reader.readLine().replace("NC Version ", "").trim()) > version) {
-							System.out.println("NC lib outdated");
+						if (Double.parseDouble(reader.readLine().replace("NC-BukkitLib Version ", "").trim()) > version) {
+							System.out.println("NC-Bukkit lib outdated");
 							download = true;
 						}
 					}
@@ -308,12 +312,12 @@ public final class TitanChat extends JavaPlugin {
 			}
 			
 			if (download) {
-				System.out.println("Downloading NC lib...");
-				URL url = new URL("http://www.nodinchan.com/NCLib/NCLib.jar");
+				System.out.println("Downloading NC-Bukkit lib...");
+				URL url = new URL("http://www.nodinchan.com/NC-BukkitLib/NC-BukkitLib.jar");
 				ReadableByteChannel rbc = Channels.newChannel(url.openStream());
 				FileOutputStream output = new FileOutputStream(lib);
 				output.getChannel().transferFrom(rbc, 0, 1 << 24);
-				System.out.println("Downloaded NC lib");
+				System.out.println("Downloaded NC-Bukkit lib");
 			}
 			
 			URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
@@ -685,7 +689,7 @@ public final class TitanChat extends JavaPlugin {
 		
 		Debugger.load(this);
 		
-		register(new TitanChatListener(this));
+		register(new TitanChatListener());
 		
 		for (Player player : getServer().getOnlinePlayers())
 			displayname.apply(player);
@@ -787,6 +791,32 @@ public final class TitanChat extends JavaPlugin {
 	public void setSilenced(boolean silenced) {
 		db.i("Setting silenced to " + silenced);
 		this.silenced = silenced;
+	}
+	
+	/**
+	 * Checks for an update
+	 * 
+	 * @return The value of the new version
+	 */
+	protected double updateCheck() {
+		URL url;
+		try {
+			url = new URL("http://dev.bukkit.org/server-mods/titanchat/files.rss");
+			
+			Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(url.openConnection().getInputStream());
+			doc.getDocumentElement().normalize();
+			
+			Node node = doc.getElementsByTagName("item").item(0);
+			
+			if (node.getNodeType() == 1) {
+				Element element = (Element) node;
+				Element name = (Element) element.getElementsByTagName("title").item(0);
+				return Double.valueOf(name.getChildNodes().item(0).getNodeValue().split(" ")[1].trim().substring(1));
+			}
+			
+		} catch (Exception e) {}
+		
+		return Double.valueOf(getDescription().getVersion().trim().split(" ")[0].trim().substring(1));
 	}
 	
 	/**

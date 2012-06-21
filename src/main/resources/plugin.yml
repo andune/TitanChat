@@ -30,6 +30,7 @@ permissions:
         description: Access to everything
         default: op
         children:
+            TitanChat.update: true
             TitanChat.create: true
             TitanChat.delete: true
             TitanChat.broadcast: true
@@ -41,6 +42,9 @@ permissions:
             TitanChat.rank.*: true
             TitanChat.convert: true
             TitanChat.whisper: true
+    TitanChat.update:
+        description: Will be notified of updates
+        default: op
     TitanChat.create:
         description: Access to channel creation
         default: op

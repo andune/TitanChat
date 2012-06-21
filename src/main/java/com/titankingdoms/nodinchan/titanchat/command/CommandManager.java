@@ -16,7 +16,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.nodinchan.nclib.loader.Loader;
+import com.nodinchan.ncbukkit.loader.Loader;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.command.Command.Executor;
@@ -267,14 +267,14 @@ public final class CommandManager {
 		
 		private final TitanChat plugin;
 		
-		private final com.nodinchan.nclib.command.CommandManager dynamic;
+		private final com.nodinchan.ncbukkit.command.CommandManager dynamic;
 		
 		private final Map<String, Channel> joinCommand;
 		private final Map<String, Channel> sendCommand;
 		
 		public Dynamic(TitanChat plugin) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
 			this.plugin = plugin;
-			this.dynamic = new com.nodinchan.nclib.command.CommandManager(plugin);
+			this.dynamic = new com.nodinchan.ncbukkit.command.CommandManager(plugin);
 			this.joinCommand = new HashMap<String, Channel>();
 			this.sendCommand = new HashMap<String, Channel>();
 		}
@@ -287,7 +287,7 @@ public final class CommandManager {
 		public void load(Channel channel) {
 			if (!channel.getConfig().getString("commands.join").equals("")) {
 				String cmd = channel.getConfig().getString("commands.join");
-				com.nodinchan.nclib.command.PluginCommand command = dynamic.register(cmd);
+				com.nodinchan.ncbukkit.command.PluginCommand command = dynamic.register(cmd);
 				command.setExecutor(this);
 				command.setDescription("Joins the channel");
 				command.setUsage("/<command>");
@@ -295,7 +295,7 @@ public final class CommandManager {
 			
 			if (!channel.getConfig().getString("commands.message").equals("")) {
 				String cmd = channel.getConfig().getString("commands.message");
-				com.nodinchan.nclib.command.PluginCommand command = dynamic.register(cmd);
+				com.nodinchan.ncbukkit.command.PluginCommand command = dynamic.register(cmd);
 				command.setExecutor(this);
 				command.setDescription("Sends a message to the channel");
 				command.setUsage("/<command>");

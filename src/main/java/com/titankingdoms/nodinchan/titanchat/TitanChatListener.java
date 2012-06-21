@@ -35,15 +35,20 @@ import com.titankingdoms.nodinchan.titanchat.event.MessageSendEvent;
  */
 public class TitanChatListener implements Listener {
 
-	private TitanChat plugin;
+	private final TitanChat plugin;
+	
+	private final double currentVer;
+	private final double newVer;
 	
 	/**
 	 * Listens to events and act accordingly
 	 * 
 	 * @param plugin TitanChat
 	 */
-	public TitanChatListener(TitanChat plugin) {
-		this.plugin = plugin;
+	public TitanChatListener() {
+		this.plugin = TitanChat.getInstance();
+		this.currentVer = Double.valueOf(plugin.getDescription().getVersion().trim().split(" ")[0].trim().substring(1));
+		this.newVer = plugin.updateCheck();
 	}
 	
 	/**
@@ -112,6 +117,13 @@ public class TitanChatListener implements Listener {
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		plugin.getDisplayNameChanger().apply(event.getPlayer());
+		
+		if (plugin.getPermsBridge().has(event.getPlayer(), "TitanChat.update")) {
+			if (newVer > currentVer) {
+				event.getPlayer().sendMessage(newVer + " is out! You are running " + currentVer);
+				event.getPlayer().sendMessage("Update at http://dev.bukkit.org/server-mods/titanchat/");
+			}
+		}
 		
 		if (!plugin.enableChannels())
 			return;

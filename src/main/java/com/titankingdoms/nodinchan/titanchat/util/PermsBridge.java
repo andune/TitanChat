@@ -26,7 +26,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.tyrannyofheaven.bukkit.zPermissions.ZPermissionsService;
 
-import com.nodinchan.nclib.permission.PermissionManager;
+import com.nodinchan.ncbukkit.permission.PermissionManager;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 
 import ru.tehkode.permissions.PermissionGroup;
