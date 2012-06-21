@@ -1,5 +1,6 @@
 package com.titankingdoms.nodinchan.titanchat;
 
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -120,8 +121,9 @@ public class TitanChatListener implements Listener {
 		
 		if (plugin.getPermsBridge().has(event.getPlayer(), "TitanChat.update")) {
 			if (newVer > currentVer) {
-				event.getPlayer().sendMessage(newVer + " is out! You are running " + currentVer);
-				event.getPlayer().sendMessage("Update at http://dev.bukkit.org/server-mods/titanchat/");
+				String message = ChatColor.GOLD + "%new" + ChatColor.DARK_PURPLE + " is out! You are running " + ChatColor.GOLD + "%current";
+				event.getPlayer().sendMessage(message.replace("%new", newVer + "").replace("%current", currentVer + ""));
+				event.getPlayer().sendMessage(ChatColor.DARK_PURPLE + "Update at " + ChatColor.BLUE + "http://dev.bukkit.org/server-mods/titanchat/");
 			}
 		}
 		

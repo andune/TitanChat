@@ -816,7 +816,7 @@ public final class TitanChat extends JavaPlugin {
 			
 		} catch (Exception e) {}
 		
-		return Double.valueOf(getDescription().getVersion().trim().split(" ")[0].trim().substring(1));
+		return Double.valueOf(getDescription().getVersion().trim().split(" ")[0].trim());
 	}
 	
 	/**
