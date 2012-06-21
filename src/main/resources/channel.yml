@@ -1,0 +1,15 @@
+tag: '[]'
+chat-display-colour: ''
+name-display-colour: ''
+type: public
+special-type: none
+global: true
+colour-code: false
+password: ''
+format: ''
+messages:
+    join: true
+    leave: true
+commands:
+    join: ''
+    message: ''
