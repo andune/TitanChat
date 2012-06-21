@@ -42,4 +42,8 @@
 #                      channel join messages                   #
 # MESSAGES.LEAVE     : Where you define if the channel sends   #
 #                      channel leave messages                  #
+# COMMANDS.JOIN      : Where you define the shortcut command of#
+#                      joining the channel                     #
+# COMMANDS.MESSAGE   : Where you define the shortcut command of#
+#                      sending messages to the channel         #
 #==============================================================#

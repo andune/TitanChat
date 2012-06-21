@@ -10,3 +10,6 @@ format: ''
 messages:
     join: true
     leave: true
+commands:
+    join: 'jpr'
+    message: 'spr'
