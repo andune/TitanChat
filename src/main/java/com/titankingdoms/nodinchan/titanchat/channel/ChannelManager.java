@@ -388,6 +388,8 @@ public final class ChannelManager {
 			if (channel == null)
 				continue;
 			
+			plugin.getCommandManager().getDynamic().load(channel);
+			
 			register(channel);
 		}
 		

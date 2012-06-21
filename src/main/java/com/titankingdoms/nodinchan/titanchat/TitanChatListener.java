@@ -48,7 +48,7 @@ public class TitanChatListener implements Listener {
 	 */
 	public TitanChatListener() {
 		this.plugin = TitanChat.getInstance();
-		this.currentVer = Double.valueOf(plugin.getDescription().getVersion().trim().split(" ")[0].trim().substring(1));
+		this.currentVer = Double.valueOf(plugin.getDescription().getVersion().trim().split(" ")[0].trim());
 		this.newVer = plugin.updateCheck();
 	}
 	
