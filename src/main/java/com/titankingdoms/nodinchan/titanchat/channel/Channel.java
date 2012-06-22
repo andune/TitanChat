@@ -352,7 +352,9 @@ public class Channel extends Loadable {
 	/**
 	 * Called when TitanChat disables
 	 */
-	public void save() {}
+	public void save() {
+		saveMembershipRoles();
+	}
 	
 	/**
 	 * Saves the config
@@ -361,6 +363,17 @@ public class Channel extends Loadable {
 	public void saveConfig() {
 		if (configFile == null || config == null) { return; }
 		try { config.save(configFile); } catch (IOException e) { plugin.log(Level.SEVERE, "Could not save config to " + configFile); }
+	}
+	
+	/**
+	 * Saves the admins, whitelist, blacklist and followers of the channel
+	 */
+	public void saveMembershipRoles() {
+		getConfig().set("admins", getAdminList());
+		getConfig().set("whitelist", getWhiteList());
+		getConfig().set("blacklist", getBlackList());
+		getConfig().set("followers", getFollowerList());
+		saveConfig();
 	}
 	
 	/**

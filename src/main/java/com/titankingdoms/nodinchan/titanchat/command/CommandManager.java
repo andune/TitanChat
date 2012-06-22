@@ -212,6 +212,20 @@ public final class CommandManager {
 	}
 	
 	/**
+	 * Reloads the CommandManager and all commands
+	 */
+	public void postReload() {
+		load();
+	}
+	
+	/**
+	 * Reloads the CommandManager and all commands
+	 */
+	public void preReload() {
+		unload();
+	}
+	
+	/**
 	 * Registers the Command
 	 * 
 	 * @param command The Command to be registered

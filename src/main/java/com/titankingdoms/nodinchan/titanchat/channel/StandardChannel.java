@@ -112,11 +112,7 @@ public final class StandardChannel extends Channel {
 		getConfig().set("colour-code", variables.convert());
 		getConfig().set("password", "");
 		getConfig().set("format", variables.getFormat());
-		getConfig().set("admins", super.getAdminList());
-		getConfig().set("whitelist", super.getWhiteList());
-		getConfig().set("blacklist", super.getBlackList());
-		getConfig().set("followers", super.getFollowerList());
-		saveConfig();
+		super.save();
 	}
 	
 	@Override

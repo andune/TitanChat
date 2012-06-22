@@ -516,6 +516,25 @@ public final class ChannelManager {
 	}
 	
 	/**
+	 * Reloads the ChannelManager and all channels
+	 */
+	public void postReload() {
+		load();
+	}
+	
+	/**
+	 * Reloads the ChannelManager and all channels
+	 */
+	public void preReload() {
+		for (Channel channel : channels.values())
+			channel.saveMembershipRoles();
+		
+		channels.clear();
+		channelAmount = 0;
+		customChAmount = 0;
+	}
+	
+	/**
 	 * Registers the Custom Channel
 	 * 
 	 * @param channel The Custom Channel to be registered

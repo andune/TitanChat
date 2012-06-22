@@ -112,6 +112,20 @@ public final class AddonManager {
 	}
 	
 	/**
+	 * Reloads the AddonManager and all Addons
+	 */
+	public void postReload() {
+		load();
+	}
+	
+	/**
+	 * Reloads the AddonManager and all Addons
+	 */
+	public void preReload() {
+		unload();
+	}
+	
+	/**
 	 * Registers the Addon
 	 * 
 	 * @param addon The Addon to register
