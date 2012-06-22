@@ -288,19 +288,25 @@ public final class CommandManager {
 			if (!channel.getConfig().getString("commands.join").equals("")) {
 				String cmd = channel.getConfig().getString("commands.join");
 				com.nodinchan.ncbukkit.command.PluginCommand command = dynamic.register(cmd);
-				command.setExecutor(this);
-				command.setDescription("Joins the channel");
-				command.setUsage("/<command>");
-				joinCommand.put(cmd.toLowerCase(), channel);
+				
+				if (command != null) {
+					command.setExecutor(this);
+					command.setDescription("Joins the channel");
+					command.setUsage("/<command>");
+					joinCommand.put(cmd.toLowerCase(), channel);
+				}
 			}
 			
 			if (!channel.getConfig().getString("commands.message").equals("")) {
 				String cmd = channel.getConfig().getString("commands.message");
 				com.nodinchan.ncbukkit.command.PluginCommand command = dynamic.register(cmd);
-				command.setExecutor(this);
-				command.setDescription("Sends a message to the channel");
-				command.setUsage("/<command>");
-				sendCommand.put(cmd.toLowerCase(), channel);
+				
+				if (command != null) {
+					command.setExecutor(this);
+					command.setDescription("Sends a message to the channel");
+					command.setUsage("/<command>");
+					sendCommand.put(cmd.toLowerCase(), channel);
+				}
 			}
 		}
 		
