@@ -1,5 +1,6 @@
 package com.titankingdoms.nodinchan.titanchat;
 
+import java.io.File;
 import java.util.logging.Level;
 
 import com.titankingdoms.nodinchan.titanchat.addon.AddonManager;
@@ -53,8 +54,15 @@ public class TitanChatManager {
 		chManager = new ChannelManager();
 		cmdManager = new CommandManager();
 		
-		addonManager.load();
-		try { chManager.load(); } catch (Exception e) { e.printStackTrace(); plugin.log(Level.WARNING, "Channels failed to load"); }
-		cmdManager.load();
+		File destination = new File(plugin.getDataFolder().getParentFile().getParentFile(), "lib");
+		destination.mkdirs();
+		
+		File lib = new File(destination, "NC-BukkitLib.jar");
+		
+		if (lib.exists()) {
+			addonManager.load();
+			try { chManager.load(); } catch (Exception e) { e.printStackTrace(); plugin.log(Level.WARNING, "Channels failed to load"); }
+			cmdManager.load();
+		}
 	}
 }

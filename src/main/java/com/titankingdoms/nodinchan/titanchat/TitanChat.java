@@ -689,7 +689,7 @@ public final class TitanChat extends JavaPlugin {
 			saveResource("config.yml", false);
 		}
 		
-		if (getConfig().getBoolean("auto-update-lib")) {
+		if (getConfig().getBoolean("auto-library-update")) {
 			try {
 				File destination = new File(getDataFolder().getParentFile().getParentFile(), "lib");
 				destination.mkdirs();
