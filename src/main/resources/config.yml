@@ -8,6 +8,7 @@
 # &l (bold), &m (underlined), &n (striked), &o (italic)        #
 #==============================================================#
 
+auto-update-library: true
 channels:
     enable-channels: true
     chat-display-colour: '&f'
