@@ -3,8 +3,8 @@ package com.titankingdoms.nodinchan.titanchat.command.commands;
 import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.command.Command;
-import com.titankingdoms.nodinchan.titanchat.command.CommandID;
-import com.titankingdoms.nodinchan.titanchat.command.CommandInfo;
+import com.titankingdoms.nodinchan.titanchat.command.info.CommandID;
+import com.titankingdoms.nodinchan.titanchat.command.info.CommandInfo;
 import com.titankingdoms.nodinchan.titanchat.util.displayname.DisplayName;
 import com.titankingdoms.nodinchan.titanchat.util.displayname.DisplayNameChanger;
 

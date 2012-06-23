@@ -21,6 +21,7 @@ import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.command.Command.Executor;
 import com.titankingdoms.nodinchan.titanchat.command.commands.*;
+import com.titankingdoms.nodinchan.titanchat.command.info.CommandID;
 import com.titankingdoms.nodinchan.titanchat.util.Debugger;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
@@ -246,6 +247,10 @@ public final class CommandManager {
 					aliases.put(alias.toLowerCase(), executor.getName());
 			}
 		}
+	}
+	
+	public void registerUpdateCommand() {
+		register(new UpdateCommand());
 	}
 	
 	/**

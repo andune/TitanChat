@@ -1,5 +1,9 @@
 package com.titankingdoms.nodinchan.titanchat;
 
+import java.net.URL;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -8,6 +12,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.event.MessageSendEvent;
@@ -39,7 +46,7 @@ public class TitanChatListener implements Listener {
 	private final TitanChat plugin;
 	
 	private final double currentVer;
-	private final double newVer;
+	private double newVer;
 	
 	/**
 	 * Listens to events and act accordingly
@@ -49,7 +56,7 @@ public class TitanChatListener implements Listener {
 	public TitanChatListener() {
 		this.plugin = TitanChat.getInstance();
 		this.currentVer = Double.valueOf(plugin.getDescription().getVersion().trim().split(" ")[0].trim());
-		this.newVer = plugin.updateCheck();
+		updateCheck();
 	}
 	
 	/**
@@ -150,6 +157,31 @@ public class TitanChatListener implements Listener {
 	public void onSignChange(SignChangeEvent event) {
 		for (int line = 0; line < 4; line++)
 			event.setLine(line, plugin.getFormatHandler().colourise(event.getLine(line)));
+	}
+	
+	/**
+	 * Checks for an update
+	 * 
+	 * @return The value of the new version
+	 */
+	public void updateCheck() {
+		try {
+			URL url = new URL("http://dev.bukkit.org/server-mods/titanchat/files.rss");
+			
+			Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(url.openConnection().getInputStream());
+			doc.getDocumentElement().normalize();
+			
+			Node node = doc.getElementsByTagName("item").item(0);
+			
+			if (node.getNodeType() == 1) {
+				Element element = (Element) node;
+				Element name = (Element) element.getElementsByTagName("title").item(0);
+				this.newVer = Double.valueOf(name.getChildNodes().item(0).getNodeValue().split(" ")[1].trim().substring(1));
+			}
+			
+		} catch (Exception e) {}
+		
+		this.newVer = Double.valueOf(plugin.getDescription().getVersion().trim().split(" ")[0].trim());
 	}
 	
 	private boolean voiceless(Player player, Channel channel) {
