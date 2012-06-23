@@ -77,13 +77,13 @@ public final class FormatHandler {
 	 * @return True if converts
 	 */
 	public boolean colours(String name) {
-		if (plugin.getChannelManager().getChannel(name).getSpecialType().equals(Type.STAFF))
+		if (plugin.getManager().getChannelManager().getChannel(name).getSpecialType().equals(Type.STAFF))
 			return true;
 		
-		if (plugin.getChannelManager().getChannel(name) instanceof CustomChannel)
+		if (plugin.getManager().getChannelManager().getChannel(name) instanceof CustomChannel)
 			return true;
 		
-		return ((StandardChannel) plugin.getChannelManager().getChannel(name)).getVariables().convert();
+		return ((StandardChannel) plugin.getManager().getChannelManager().getChannel(name)).getVariables().convert();
 	}
 	
 	/**
@@ -302,12 +302,12 @@ public final class FormatHandler {
 			public String format(Object... params) {
 				String format = "";
 				
-				if (plugin.getChannelManager().getChannel((String) params[1]) instanceof CustomChannel) {
-					CustomChannel channel = (CustomChannel) plugin.getChannelManager().getChannel((String) params[1]);
+				if (plugin.getManager().getChannelManager().getChannel((String) params[1]) instanceof CustomChannel) {
+					CustomChannel channel = (CustomChannel) plugin.getManager().getChannelManager().getChannel((String) params[1]);
 					return channel.format((Player) params[0], channel.getFormat());
 				}
 				
-				Variables variables = ((StandardChannel) plugin.getChannelManager().getChannel((String) params[1])).getVariables();
+				Variables variables = ((StandardChannel) plugin.getManager().getChannelManager().getChannel((String) params[1])).getVariables();
 				
 				if (plugin.useDefaultFormat()) {
 					format = "%tag %prefix%player%suffix&f: %message";

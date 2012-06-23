@@ -130,7 +130,7 @@ public final class StandardChannel extends Channel {
 					recipants.add(plugin.getPlayer(name));
 			}
 			
-			for (String name : plugin.getChannelManager().getFollowers(this)) {
+			for (String name : plugin.getManager().getChannelManager().getFollowers(this)) {
 				if (plugin.getPlayer(name) != null && !recipants.contains(plugin.getPlayer(name)))
 					recipants.add(plugin.getPlayer(name));
 			}

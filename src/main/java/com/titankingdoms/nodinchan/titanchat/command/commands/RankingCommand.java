@@ -36,7 +36,7 @@ public class RankingCommand extends Command {
 	private ChannelManager cm;
 	
 	public RankingCommand() {
-		this.cm = plugin.getChannelManager();
+		this.cm = plugin.getManager().getChannelManager();
 	}
 	
 	/**

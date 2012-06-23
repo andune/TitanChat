@@ -45,9 +45,9 @@ public class PluginCommand extends Command {
 	private Variable var;
 	
 	public PluginCommand() {
-		this.am = plugin.getAddonManager();
-		this.chm = plugin.getChannelManager();
-		this.cmdm = plugin.getCommandManager();
+		this.am = plugin.getManager().getAddonManager();
+		this.chm = plugin.getManager().getChannelManager();
+		this.cmdm = plugin.getManager().getCommandManager();
 		this.format = plugin.getFormatHandler();
 		this.var = plugin.getVariableManager();
 	}

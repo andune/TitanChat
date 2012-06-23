@@ -45,7 +45,7 @@ public class SettingsCommand extends Command {
 	private static ChannelManager cm;
 	
 	public SettingsCommand() {
-		SettingsCommand.cm = plugin.getChannelManager();
+		SettingsCommand.cm = plugin.getManager().getChannelManager();
 	}
 	
 	/**

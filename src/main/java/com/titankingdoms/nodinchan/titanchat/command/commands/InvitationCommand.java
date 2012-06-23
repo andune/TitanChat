@@ -35,7 +35,7 @@ public class InvitationCommand extends Command {
 	private ChannelManager cm;
 	
 	public InvitationCommand() {
-		this.cm = plugin.getChannelManager();
+		this.cm = plugin.getManager().getChannelManager();
 	}
 	
 	/**

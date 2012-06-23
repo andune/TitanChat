@@ -142,7 +142,7 @@ public final class CommandManager {
 	 * @return The Command directory
 	 */
 	public File getCommandDir() {
-		return new File(TitanChat.getInstance().getAddonManager().getAddonDir(), "commands");
+		return new File(plugin.getManager().getAddonManager().getAddonDir(), "commands");
 	}
 	
 	/**
@@ -247,10 +247,6 @@ public final class CommandManager {
 					aliases.put(alias.toLowerCase(), executor.getName());
 			}
 		}
-	}
-	
-	public void registerUpdateCommand() {
-		register(new UpdateCommand());
 	}
 	
 	/**

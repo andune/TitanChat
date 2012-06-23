@@ -27,9 +27,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.titankingdoms.nodinchan.titanchat.addon.AddonManager;
-import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
-import com.titankingdoms.nodinchan.titanchat.command.CommandManager;
 import com.titankingdoms.nodinchan.titanchat.metrics.Metrics;
 import com.titankingdoms.nodinchan.titanchat.util.Debugger;
 import com.titankingdoms.nodinchan.titanchat.util.FormatHandler;
@@ -71,9 +68,7 @@ public final class TitanChat extends JavaPlugin {
 	
 	private TitanChatListener listener;
 	
-	private AddonManager addonManager;
-	private ChannelManager chManager;
-	private CommandManager cmdManager;
+	private TitanChatManager manager;
 	private DisplayNameChanger displayname;
 	private FormatHandler format;
 	private PermsBridge permBridge;
@@ -142,39 +137,12 @@ public final class TitanChat extends JavaPlugin {
 	}
 	
 	/**
-	 * Gets the AddonManager
-	 * 
-	 * @return The AddonManager
-	 */
-	public AddonManager getAddonManager() {
-		return addonManager;
-	}
-	
-	/**
 	 * Gets the Channel directory
 	 * 
 	 * @return The Channel directory
 	 */
 	public File getChannelDir() {
 		return new File(getDataFolder(), "channels");
-	}
-	
-	/**
-	 * Gets the ChannelManager
-	 * 
-	 * @return The ChannelManager
-	 */
-	public ChannelManager getChannelManager() {
-		return chManager;
-	}
-	
-	/**
-	 * Gets the CommandManager
-	 * 
-	 * @return The CommandManager
-	 */
-	public CommandManager getCommandManager() {
-		return cmdManager;
 	}
 	
 	@Override
@@ -224,6 +192,15 @@ public final class TitanChat extends JavaPlugin {
 	@Override
 	public Logger getLogger() {
 		return log;
+	}
+	
+	/**
+	 * Gets the manager that manages other managers
+	 * 
+	 * @return The TitanChatManager
+	 */
+	public TitanChatManager getManager() {
+		return manager;
 	}
 	
 	/**
@@ -349,17 +326,90 @@ public final class TitanChat extends JavaPlugin {
 				return true;
 			}
 			
+			if (args[0].equalsIgnoreCase("update")) {
+				try {
+					File destination = new File(getDataFolder().getParentFile().getParentFile(), "lib");
+					destination.mkdirs();
+					
+					File lib = new File(destination, "NC-BukkitLib.jar");
+					
+					boolean download = false;
+					
+					if (!lib.exists()) {
+						System.out.println("Missing NC-Bukkit lib");
+						download = true;
+						
+					} else {
+						JarFile jarFile = new JarFile(lib);
+						
+						double version = 0;
+						
+						if (jarFile.getEntry("version.yml") != null) {
+							JarEntry element = jarFile.getJarEntry("version.yml");
+							BufferedReader reader = new BufferedReader(new InputStreamReader(jarFile.getInputStream(element)));
+							version = Double.parseDouble(reader.readLine().substring(9).trim());
+							
+						} else {
+							System.out.println("Missing version.yml");
+							download = true;
+						}
+						
+						if (version == 0) {
+							System.out.println("NC-Bukkit lib outdated");
+							download = true;
+							
+						} else {
+							HttpURLConnection urlConnection = (HttpURLConnection) new URL("http://www.nodinchan.com/NC-BukkitLib/version.yml").openConnection();
+							BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+							
+							if (Double.parseDouble(reader.readLine().replace("NC-BukkitLib Version ", "").trim()) > version) {
+								System.out.println("NC-Bukkit lib outdated");
+								download = true;
+							}
+						}
+					}
+					
+					if (download) {
+						System.out.println("Downloading NC-Bukkit lib...");
+						URL libURL = new URL("http://www.nodinchan.com/NC-BukkitLib/NC-BukkitLib.jar");
+						ReadableByteChannel rbc = Channels.newChannel(libURL.openStream());
+						FileOutputStream output = new FileOutputStream(lib);
+						output.getChannel().transferFrom(rbc, 0, 1 << 24);
+						System.out.println("Downloaded NC-Bukkit lib");
+					}
+					
+					URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
+					
+					for (URL url : sysLoader.getURLs()) {
+						if (url.sameFile(lib.toURI().toURL()))
+							return true;
+					}
+					
+					try {
+						Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
+						method.setAccessible(true);
+						method.invoke(sysLoader, lib.toURI().toURL());
+						
+					} catch (Exception e) { return true; }
+					
+					return true;
+					
+				} catch (Exception e) { e.printStackTrace(); }
+				
+				return true;
+			}
+			
 			if (!(sender instanceof Player)) {
 				if (args[0].equalsIgnoreCase("reload")) {
 					log(Level.INFO, "Reloading configs...");
 					reloadConfig();
-					addonManager.unload();
-					chManager.unload();
-					cmdManager.unload();
+					manager.getAddonManager().preReload();
+					manager.getChannelManager().preReload();
+					manager.getCommandManager().preReload();
 					variable.unload();
-					addonManager.load();
-					chManager.load();
-					cmdManager.load();
+					manager.getAddonManager().postReload();
+					manager.getChannelManager().postReload();
+					manager.getCommandManager().postReload();
 					format.load();
 					log(Level.INFO, "Configs reloaded");
 					return true;
@@ -402,7 +452,7 @@ public final class TitanChat extends JavaPlugin {
 			}
 
 			db.i("CommandManager executing command:");
-			cmdManager.execute((Player) sender, args[0], Arrays.copyOfRange(args, 1, args.length));
+			manager.getCommandManager().execute((Player) sender, args[0], Arrays.copyOfRange(args, 1, args.length));
 			return true;
 		}
 		
@@ -445,7 +495,7 @@ public final class TitanChat extends JavaPlugin {
 			}
 			
 			if (permBridge.has((Player) sender, "TitanChat.broadcast"))
-				try { cmdManager.execute((Player) sender, "broadcast", args); } catch (Exception e) {}
+				try { manager.getCommandManager().execute((Player) sender, "broadcast", args); } catch (Exception e) {}
 			else
 				sendWarning((Player) sender, "You do not have permission");
 			
@@ -491,7 +541,7 @@ public final class TitanChat extends JavaPlugin {
 			}
 			
 			if (permBridge.has((Player) sender, "TitanChat.emote.server"))
-				try { cmdManager.execute((Player) sender, "me", args); } catch (Exception e) {}
+				try { manager.getCommandManager().execute((Player) sender, "me", args); } catch (Exception e) {}
 			else
 				sendWarning((Player) sender, "You do not have permission");
 			
@@ -543,7 +593,7 @@ public final class TitanChat extends JavaPlugin {
 			}
 			
 			if (permBridge.has((Player) sender, "TitanChat.whisper"))
-				try { cmdManager.execute((Player) sender, "whisper", args); } catch (Exception e) {}
+				try { manager.getCommandManager().execute((Player) sender, "whisper", args); } catch (Exception e) {}
 			else
 				sendWarning((Player) sender, "You do not have permission");
 			
@@ -561,10 +611,10 @@ public final class TitanChat extends JavaPlugin {
 		log(Level.INFO, "is now disabling...");
 		
 		log(Level.INFO, "Unloading managers...");
-
-		addonManager.unload();
-		chManager.unload();
-		cmdManager.unload();
+		
+		manager.getAddonManager().unload();
+		manager.getChannelManager().unload();
+		manager.getCommandManager().unload();
 		displayname.unload();
 		variable.unload();
 		
@@ -599,9 +649,7 @@ public final class TitanChat extends JavaPlugin {
 			installDDL();
 		}
 		
-		addonManager = new AddonManager();
-		chManager = new ChannelManager();
-		cmdManager = new CommandManager();
+		manager = new TitanChatManager();
 		displayname = new DisplayNameChanger();
 		format = new FormatHandler();
 		permBridge = new PermsBridge();
@@ -614,18 +662,14 @@ public final class TitanChat extends JavaPlugin {
 		for (Player player : getServer().getOnlinePlayers())
 			displayname.apply(player);
 		
-		addonManager.load();
-		try { chManager.load(); } catch (Exception e) { e.printStackTrace(); log(Level.WARNING, "Channels failed to load"); }
-		cmdManager.load();
+		manager.load();
 		format.load();
 		
-		if (chManager.getDefaultChannel() == null && enableChannels()) {
+		if (manager.getChannelManager().getDefaultChannel() == null && enableChannels()) {
 			log(Level.SEVERE, "A default channel is not defined");
 			getServer().getPluginManager().disablePlugin(this);
 			return;
 		}
-		
-		cmdManager.registerUpdateCommand();
 		
 		log(Level.INFO, "is now enabled");
 	}

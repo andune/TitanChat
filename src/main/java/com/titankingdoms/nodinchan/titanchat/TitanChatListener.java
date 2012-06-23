@@ -81,7 +81,7 @@ public class TitanChatListener implements Listener {
 				return;
 			}
 			
-			Channel channel = plugin.getChannelManager().getChannel(player);
+			Channel channel = plugin.getManager().getChannelManager().getChannel(player);
 			
 			if (channel == null) {
 				plugin.sendWarning(player, "You are not in a channel, please join one to chat");
@@ -137,10 +137,10 @@ public class TitanChatListener implements Listener {
 		if (!plugin.enableChannels())
 			return;
 		
-		if (plugin.getChannelManager().getChannel(event.getPlayer()) != null)
+		if (plugin.getManager().getChannelManager().getChannel(event.getPlayer()) != null)
 			return;
 		
-		Channel channel = plugin.getChannelManager().getSpawnChannel(event.getPlayer());
+		Channel channel = plugin.getManager().getChannelManager().getSpawnChannel(event.getPlayer());
 		
 		if (channel != null)
 			channel.join(event.getPlayer());
@@ -203,7 +203,7 @@ public class TitanChatListener implements Listener {
 			return true;
 		}
 		
-		if (plugin.getChannelManager().isMuted(player)) {
+		if (plugin.getManager().getChannelManager().isMuted(player)) {
 			plugin.sendWarning(player, "You have been muted");
 			return true;
 		}

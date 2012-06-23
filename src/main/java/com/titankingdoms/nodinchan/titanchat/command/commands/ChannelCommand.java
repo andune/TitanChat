@@ -38,7 +38,7 @@ public class ChannelCommand extends Command {
 	private ChannelManager cm;
 	
 	public ChannelCommand() {
-		this.cm = plugin.getChannelManager();
+		this.cm = plugin.getManager().getChannelManager();
 	}
 	
 	/**
@@ -50,17 +50,20 @@ public class ChannelCommand extends Command {
 		try {
 			if (plugin.getConfig().getInt("channels.channel-limit") < 0) {
 				if (plugin.getPermsBridge().has(player, "TitanChat.create")) {
-					if (!cm.exists(args[0])) {
-						plugin.getChannelManager().createChannel(player, args[0]);
+					if (cm.nameCheck(args[0])) {
+						if (!cm.exists(args[0])) {
+							cm.createChannel(player, args[0]);
+							
+						} else { plugin.sendWarning(player, "Channel already exists"); }
 						
-					} else { plugin.sendWarning(player, "Channel already exists"); }
+					} else { plugin.sendWarning(player, "Channel names cannot contain \\, /, :. *, ?, \", <, > or |"); }
 					
 				} else { plugin.sendWarning(player, "You do not have permission"); }
 				
-			} else if (plugin.getChannelManager().getChannelAmount() < plugin.getConfig().getInt("channel-limit")) {
+			} else if (cm.getChannelAmount() < plugin.getConfig().getInt("channel-limit")) {
 				if (plugin.getPermsBridge().has(player, "TitanChat.create")) {
 					if (!cm.exists(args[0])) {
-						plugin.getChannelManager().createChannel(player, args[0]);
+						cm.createChannel(player, args[0]);
 						
 					} else { plugin.sendWarning(player, "Channel already exists"); }
 					
@@ -81,7 +84,7 @@ public class ChannelCommand extends Command {
 			if (plugin.getPermsBridge().has(player, "TitanChat.delete")) {
 				if (cm.exists(args[0])) {
 					if (!cm.getChannel(args[0]).getSpecialType().equals(Type.DEFAULT) || !cm.getChannel(args[0]).getSpecialType().equals(Type.STAFF))
-						plugin.getChannelManager().deleteChannel(player, args[0]);
+						cm.deleteChannel(player, args[0]);
 					else { plugin.sendWarning(player, "You cannot delete this channel"); }
 					
 				} else { plugin.sendWarning(player, "Channel does not exists"); }

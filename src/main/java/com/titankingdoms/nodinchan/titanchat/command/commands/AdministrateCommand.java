@@ -37,7 +37,7 @@ public class AdministrateCommand extends Command {
 	private ChannelManager cm;
 	
 	public AdministrateCommand() {
-		this.cm = plugin.getChannelManager();
+		this.cm = plugin.getManager().getChannelManager();
 	}
 	
 	/**
@@ -253,7 +253,7 @@ public class AdministrateCommand extends Command {
 		if (!plugin.enableChannels()) {
 			if (plugin.getPermsBridge().has(player, "TitanChat.mute")) {
 				if (plugin.getPlayer(args[0]) != null) {
-					plugin.getChannelManager().mute(plugin.getPlayer(args[0]), true);
+					cm.mute(plugin.getPlayer(args[0]), true);
 					plugin.getServer().broadcastMessage("[TitanChat] " + ChatColor.GOLD + plugin.getPlayer(args[0]).getDisplayName() + " has been muted");
 					
 				} else { plugin.sendWarning(player, "Player not online"); }
@@ -400,7 +400,7 @@ public class AdministrateCommand extends Command {
 		if (!plugin.enableChannels()) {
 			if (plugin.getPermsBridge().has(player, "TitanChat.mute")) {
 				if (plugin.getPlayer(args[0]) != null) {
-					plugin.getChannelManager().mute(plugin.getPlayer(args[0]), false);
+					cm.mute(plugin.getPlayer(args[0]), false);
 					plugin.getServer().broadcastMessage("[TitanChat] " + ChatColor.GOLD + plugin.getPlayer(args[0]).getDisplayName() + " has been unmuted");
 					
 				} else { plugin.sendWarning(player, "Player not online"); }

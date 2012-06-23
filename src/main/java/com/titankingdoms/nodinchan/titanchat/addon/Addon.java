@@ -73,7 +73,7 @@ public class Addon extends Loadable implements Listener {
 	 * @param command The Command to register
 	 */
 	public final void register(Command command) {
-		plugin.getCommandManager().register(command);
+		plugin.getManager().getCommandManager().register(command);
 	}
 	
 	/**
@@ -82,7 +82,7 @@ public class Addon extends Loadable implements Listener {
 	 * @param channel The Custom Channel to register
 	 */
 	public final void register(CustomChannel channel) {
-		plugin.getChannelManager().register(channel);
+		plugin.getManager().getChannelManager().register(channel);
 	}
 	
 	/**

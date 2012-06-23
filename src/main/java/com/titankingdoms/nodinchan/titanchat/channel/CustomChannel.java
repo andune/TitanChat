@@ -124,7 +124,7 @@ public class CustomChannel extends Channel implements Listener {
 	 * @param addon the addon to register
 	 */
 	public final void register(Addon addon) {
-		plugin.getAddonManager().register(addon);
+		plugin.getManager().getAddonManager().register(addon);
 	}
 	
 	/**
@@ -133,7 +133,7 @@ public class CustomChannel extends Channel implements Listener {
 	 * @param command the command to register
 	 */
 	public final void register(Command command) {
-		plugin.getCommandManager().register(command);
+		plugin.getManager().getCommandManager().register(command);
 	}
 	
 	/**
@@ -154,7 +154,7 @@ public class CustomChannel extends Channel implements Listener {
 	 * Reloads the config
 	 */
 	public final void reloadConfig() {
-		if (configFile == null) { configFile = new File(new File(plugin.getAddonManager().getAddonDir(), super.getName()), "config.yml"); }
+		if (configFile == null) { configFile = new File(new File(plugin.getManager().getAddonManager().getAddonDir(), super.getName()), "config.yml"); }
 		
 		config = YamlConfiguration.loadConfiguration(configFile);
 		

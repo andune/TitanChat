@@ -121,7 +121,7 @@ public class Channel extends Loadable {
 			return false;
 		if (type.equals(Type.PUBLIC))
 			return true;
-		if (plugin.getChannelManager().getAdmins(this).contains(player.getName()) || whitelist.contains(player.getName()))
+		if (plugin.getManager().getChannelManager().getAdmins(this).contains(player.getName()) || whitelist.contains(player.getName()))
 			return true;
 		
 		return false;
@@ -139,7 +139,7 @@ public class Channel extends Loadable {
 			return false;
 		if (plugin.getPermsBridge().has(player, "TitanChat.ban.*") || plugin.getPermsBridge().has(player, "TitanChat.ban." + getName()))
 			return true;
-		if (plugin.getChannelManager().getAdmins(this).contains(player.getName()))
+		if (plugin.getManager().getChannelManager().getAdmins(this).contains(player.getName()))
 			return true;
 		
 		return false;
@@ -155,7 +155,7 @@ public class Channel extends Loadable {
 	public boolean canKick(Player player) {
 		if (plugin.getPermsBridge().has(player, "TitanChat.kick.*") || plugin.getPermsBridge().has(player, "TitanChat.kick." + super.getName()))
 			return true;
-		if (plugin.getChannelManager().getAdmins(this).contains(player.getName()))
+		if (plugin.getManager().getChannelManager().getAdmins(this).contains(player.getName()))
 			return true;
 		
 		return false;
@@ -171,7 +171,7 @@ public class Channel extends Loadable {
 	public boolean canMute(Player player) {
 		if (plugin.getPermsBridge().has(player, "TitanChat.silence") || plugin.getPermsBridge().has(player, "TitanChat.mute"))
 			return true;
-		if (plugin.getChannelManager().getAdmins(this).contains(player.getName()))
+		if (plugin.getManager().getChannelManager().getAdmins(this).contains(player.getName()))
 			return true;
 		
 		return false;
@@ -187,7 +187,7 @@ public class Channel extends Loadable {
 	public boolean canRank(Player player) {
 		if (plugin.getPermsBridge().has(player, "TitanChat.rank.*") || plugin.getPermsBridge().has(player, "TitanChat.rank." + super.getName()))
 			return true;
-		if (plugin.getChannelManager().getAdmins(this).contains(player.getName()))
+		if (plugin.getManager().getChannelManager().getAdmins(this).contains(player.getName()))
 			return true;
 		
 		return false;

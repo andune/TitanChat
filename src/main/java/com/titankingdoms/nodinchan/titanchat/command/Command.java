@@ -56,7 +56,7 @@ public class Command extends Loadable implements Listener {
 	 */
 	public final void invalidArgLength(Player player, String name) {
 		plugin.sendWarning(player, "Invalid Argument Length");
-		Executor executor = plugin.getCommandManager().getCommandExecutor(name);
+		Executor executor = plugin.getManager().getCommandManager().getCommandExecutor(name);
 		
 		if (executor.getMethod().getAnnotation(CommandInfo.class) != null)
 			plugin.sendInfo(player, "Usage: /titanchat " + executor.getMethod().getAnnotation(CommandInfo.class).usage());
@@ -68,7 +68,7 @@ public class Command extends Loadable implements Listener {
 	 * @param addon the addon to register
 	 */
 	public final void register(Addon addon) {
-		plugin.getAddonManager().register(addon);
+		plugin.getManager().getAddonManager().register(addon);
 	}
 	
 	/**
@@ -77,7 +77,7 @@ public class Command extends Loadable implements Listener {
 	 * @param channel the channel to register
 	 */
 	public final void register(CustomChannel channel) {
-		plugin.getChannelManager().register(channel);
+		plugin.getManager().getChannelManager().register(channel);
 	}
 	
 	/**

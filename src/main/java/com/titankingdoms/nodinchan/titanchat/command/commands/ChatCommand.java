@@ -40,7 +40,7 @@ public class ChatCommand extends Command {
 	private ChannelManager cm;
 	
 	public ChatCommand() {
-		this.cm = plugin.getChannelManager();
+		this.cm = plugin.getManager().getChannelManager();
 	}
 	
 	/**
@@ -269,7 +269,7 @@ public class ChatCommand extends Command {
 			return true;
 		}
 		
-		if (plugin.getChannelManager().isMuted(player)) {
+		if (cm.isMuted(player)) {
 			plugin.sendWarning(player, "You have been muted");
 			return true;
 		}

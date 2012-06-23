@@ -256,7 +256,7 @@ public final class ChannelManager {
 	 * @return The Custom Channel directory
 	 */
 	public File getCustomChannelDir() {
-		return new File(plugin.getAddonManager().getAddonDir(), "channels");
+		return new File(plugin.getManager().getAddonManager().getAddonDir(), "channels");
 	}
 
 	/**
@@ -388,7 +388,7 @@ public final class ChannelManager {
 			if (channel == null)
 				continue;
 			
-			plugin.getCommandManager().getDynamic().load(channel);
+			plugin.getManager().getCommandManager().getDynamic().load(channel);
 			
 			register(channel);
 		}
@@ -473,6 +473,22 @@ public final class ChannelManager {
 			muted.remove(player.getName());
 	}
 	
+	public boolean nameCheck(String name) {
+		if (name.contains("\\") || name.contains("|") || name.contains("/"))
+			return false;
+		
+		if (name.contains(":") || name.contains("?"))
+			return false;
+		
+		if (name.contains("*") || name.contains("\""))
+			return false;
+		
+		if (name.contains("<") || name.contains(">"))
+			return false;
+		
+		return true;
+	}
+	
 	/**
 	 * Called when a Player is invited to join a Channel
 	 * 
@@ -543,7 +559,7 @@ public final class ChannelManager {
 		if (channel instanceof CustomChannel)
 			customChAmount++;
 		
-		plugin.getCommandManager().getDynamic().load(channel);
+		plugin.getManager().getCommandManager().getDynamic().load(channel);
 		channels.put(channel.getName().toLowerCase(), channel);
 	}
 	

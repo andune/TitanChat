@@ -40,7 +40,7 @@ public class InformationCommand extends Command {
 	private ChannelManager cm;
 	
 	public InformationCommand() {
-		this.cm = plugin.getChannelManager();
+		this.cm = plugin.getManager().getChannelManager();
 	}
 	
 	/**
@@ -90,7 +90,7 @@ public class InformationCommand extends Command {
 	@CommandID(name = "Help", aliases = { "help", "?", "commands", "cmds" }, requireChannel = false)
 	@CommandInfo(description = "Shows the command list", usage = "help <page/command>")
 	public void help(Player player, String[] args) {
-		CommandManager cm = plugin.getCommandManager();
+		CommandManager cm = plugin.getManager().getCommandManager();
 		
 		try {
 			int page = Integer.parseInt(args[0]) - 1;
@@ -108,7 +108,7 @@ public class InformationCommand extends Command {
 				player.sendMessage(ChatColor.AQUA + "=== TitanChat Command List (" + (page + 1) + "/" + numPages + ") ===");
 				
 				for (int cmdNum = start; cmdNum < end; cmdNum++) {
-					Executor executor = plugin.getCommandManager().getCommandExecutor(cmdNum);
+					Executor executor = plugin.getManager().getCommandManager().getCommandExecutor(cmdNum);
 					
 					String name = executor.getMethod().getAnnotation(CommandID.class).name();
 					String description = "";
