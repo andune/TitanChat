@@ -325,7 +325,7 @@ public final class ChannelManager {
 				return channel;
 		}
 		
-		if (getStaffChannels().size() > 0) {
+		if (getStaffChannels() != null && getStaffChannels().size() > 0) {
 			if (plugin.isStaff(player)) {
 				for (Channel channel : getStaffChannels()) {
 					if (channel.getType().equals(Type.PUBLIC))
@@ -334,7 +334,7 @@ public final class ChannelManager {
 			}
 		}
 		
-		if (getDefaultChannel().getType().equals(Type.PUBLIC))
+		if (getDefaultChannel() != null && getDefaultChannel().getType().equals(Type.PUBLIC))
 			return getDefaultChannel();
 		
 		return null;

@@ -25,7 +25,7 @@ public class UpdateCommand extends Command {
 	@CommandInfo(description = "Checks for an update of the library", usage = "update")
 	public void update(Player player, String[] args) {
 		try {
-			File destination = new File(getDataFolder().getParentFile().getParentFile(), "lib");
+			File destination = new File(plugin.getDataFolder().getParentFile().getParentFile(), "lib");
 			destination.mkdirs();
 			
 			File lib = new File(destination, "NC-BukkitLib.jar");
