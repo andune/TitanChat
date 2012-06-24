@@ -28,6 +28,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -268,20 +271,7 @@ public final class TitanChat extends JavaPlugin {
 		boolean inPlugins = false;
 		boolean download = false;
 		
-		Element element = null;
-		
 		try {
-			URL rss = new URL("http://dev.bukkit.org/server-mods/nc-bukkitlib/files.rss");
-			
-			Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(rss.openConnection().getInputStream());
-			doc.getDocumentElement().normalize();
-			
-			Node node = doc.getElementsByTagName("item").item(0);
-			
-			if (node.getNodeType() == 1)
-				element = (Element) node;
-			else
-				throw new Exception();
 			
 			if (libPlugin == null) {
 				getLogger().log(Level.INFO, "Missing NC-Bukkit lib");
@@ -290,10 +280,20 @@ public final class TitanChat extends JavaPlugin {
 				
 			} else {
 				double currentVer = Double.parseDouble(libPlugin.getDescription().getVersion());
-				double newVer = 0.0;
+				double newVer = currentVer;
 				
-				Element name = (Element) element.getElementsByTagName("title").item(0);
-				newVer = Double.parseDouble(name.getChildNodes().item(0).getNodeValue().split(" ")[1].trim().substring(1));
+				URL rss = new URL("http://dev.bukkit.org/server-mods/nc-bukkitlib/files.rss");
+				
+				Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(rss.openConnection().getInputStream());
+				doc.getDocumentElement().normalize();
+				
+				Node node = doc.getElementsByTagName("item").item(0);
+				
+				if (node.getNodeType() == 1) {
+					Element element = (Element) node;
+					Element name = (Element) element.getElementsByTagName("title").item(0);
+					newVer = Double.parseDouble(name.getChildNodes().item(0).getNodeValue().split(" ")[1].trim().substring(1));
+				}
 				
 				if (newVer > currentVer) {
 					getLogger().log(Level.INFO, "NC-Bukkit lib outdated");
@@ -302,25 +302,41 @@ public final class TitanChat extends JavaPlugin {
 			}
 			
 			if (download) {
+				System.out.println("Downloading NC-Bukkit lib...");
+				
+				String dl_link = "";
+				
+				URL url = new URL("http://bukget.org/api/plugin/nc-bukkitlib");
+				
+				JSONObject jsonPlugin = (JSONObject) new JSONParser().parse(new InputStreamReader(url.openStream()));
+				JSONArray versions = (JSONArray) jsonPlugin.get("versions");
+				
+				for (int ver = 0; ver < versions.size(); ver++) {
+					JSONObject version = (JSONObject) versions.get(ver);
+					
+					if (version.get("type").equals("Release")) {
+						dl_link = (String) version.get("dl_link");
+						break;
+					}
+				}
+				
+				if (dl_link == null)
+					throw new Exception();
+				
+				URL link = new URL(dl_link);
+				ReadableByteChannel rbc = Channels.newChannel(link.openStream());
+				
 				if (inPlugins) {
-					getLogger().log(Level.INFO, "Downloading NC-Bukkit lib...");
-					URL url = new URL(element.getElementsByTagName("link").item(0).getChildNodes().item(0).getNodeValue());
-					ReadableByteChannel rbc = Channels.newChannel(url.openStream());
 					FileOutputStream output = new FileOutputStream(pluginLib);
 					output.getChannel().transferFrom(rbc, 0, 1 << 24);
-					getLogger().log(Level.INFO, "Downloaded NC-Bukkit lib");
 					pm.loadPlugin(pluginLib);
 					
 				} else {
-					System.out.println("Downloading NC-Bukkit lib...");
-					URL url = new URL(element.getElementsByTagName("link").item(0).getChildNodes().item(0).getNodeValue());
-					ReadableByteChannel rbc = Channels.newChannel(url.openStream());
 					FileOutputStream output = new FileOutputStream(lib);
 					output.getChannel().transferFrom(rbc, 0, 1 << 24);
-					getLogger().log(Level.INFO, "Downloaded NC-Bukkit lib");
-					getLogger().log(Level.INFO, "NC-BukkitLib downloaded into the lib folder");
-					getLogger().log(Level.INFO, "Please replace the one in the plugins folder and restart server");
 				}
+				
+				getLogger().log(Level.INFO, "Downloaded NC-Bukkit lib");
 			}
 			
 		} catch (Exception e) {
