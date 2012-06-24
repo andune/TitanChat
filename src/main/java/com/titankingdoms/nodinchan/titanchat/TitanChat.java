@@ -309,6 +309,7 @@ public final class TitanChat extends JavaPlugin {
 					FileOutputStream output = new FileOutputStream(pluginLib);
 					output.getChannel().transferFrom(rbc, 0, 1 << 24);
 					getLogger().log(Level.INFO, "Downloaded NC-Bukkit lib");
+					pm.loadPlugin(pluginLib);
 					
 				} else {
 					System.out.println("Downloading NC-Bukkit lib...");
