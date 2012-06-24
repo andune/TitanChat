@@ -5,6 +5,7 @@ website: http://dev.bukkit.org/server-mods/titanchat
 main: com.titankingdoms.nodinchan.titanchat.TitanChat
 prefix: TitanChat
 database: true
+depend: [NC-BukkitLib]
 softdepend: [Vault]
 commands:
     titanchat:
