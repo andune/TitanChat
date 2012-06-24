@@ -164,7 +164,7 @@ public class TitanChatListener implements Listener {
 	 * 
 	 * @return The value of the new version
 	 */
-	public void updateCheck() {
+	protected void updateCheck() {
 		try {
 			URL url = new URL("http://dev.bukkit.org/server-mods/titanchat/files.rss");
 			
