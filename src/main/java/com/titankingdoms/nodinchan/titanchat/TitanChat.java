@@ -18,7 +18,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.persistence.PersistenceException;
-import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -31,9 +30,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
 import com.nodinchan.ncbukkit.NCBL;
 import com.titankingdoms.nodinchan.titanchat.metrics.Metrics;
@@ -272,6 +268,10 @@ public final class TitanChat extends JavaPlugin {
 		boolean download = false;
 		
 		try {
+			URL url = new URL("http://bukget.org/api/plugin/nc-bukkitlib");
+			
+			JSONObject jsonPlugin = (JSONObject) new JSONParser().parse(new InputStreamReader(url.openStream()));
+			JSONArray versions = (JSONArray) jsonPlugin.get("versions");
 			
 			if (libPlugin == null) {
 				getLogger().log(Level.INFO, "Missing NC-Bukkit lib");
@@ -282,17 +282,13 @@ public final class TitanChat extends JavaPlugin {
 				double currentVer = Double.parseDouble(libPlugin.getDescription().getVersion());
 				double newVer = currentVer;
 				
-				URL rss = new URL("http://dev.bukkit.org/server-mods/nc-bukkitlib/files.rss");
-				
-				Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(rss.openConnection().getInputStream());
-				doc.getDocumentElement().normalize();
-				
-				Node node = doc.getElementsByTagName("item").item(0);
-				
-				if (node.getNodeType() == 1) {
-					Element element = (Element) node;
-					Element name = (Element) element.getElementsByTagName("title").item(0);
-					newVer = Double.parseDouble(name.getChildNodes().item(0).getNodeValue().split(" ")[1].trim().substring(1));
+				for (int ver = 0; ver < versions.size(); ver++) {
+					JSONObject version = (JSONObject) versions.get(ver);
+					
+					if (version.get("type").equals("Release")) {
+						newVer = Double.parseDouble(((String) version.get("name")).split(" ")[1].trim().substring(1));
+						break;
+					}
 				}
 				
 				if (newVer > currentVer) {
@@ -305,11 +301,6 @@ public final class TitanChat extends JavaPlugin {
 				System.out.println("Downloading NC-Bukkit lib...");
 				
 				String dl_link = "";
-				
-				URL url = new URL("http://bukget.org/api/plugin/nc-bukkitlib");
-				
-				JSONObject jsonPlugin = (JSONObject) new JSONParser().parse(new InputStreamReader(url.openStream()));
-				JSONArray versions = (JSONArray) jsonPlugin.get("versions");
 				
 				for (int ver = 0; ver < versions.size(); ver++) {
 					JSONObject version = (JSONObject) versions.get(ver);
@@ -339,9 +330,7 @@ public final class TitanChat extends JavaPlugin {
 				getLogger().log(Level.INFO, "Downloaded NC-Bukkit lib");
 			}
 			
-		} catch (Exception e) {
-			System.out.println("Failed to check for library update");
-		}
+		} catch (Exception e) { System.out.println("Failed to check for library update"); }
 	}
 	
 	/**
