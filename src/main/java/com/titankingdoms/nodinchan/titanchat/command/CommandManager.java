@@ -287,7 +287,7 @@ public final class CommandManager {
 		private final Map<String, Channel> joinCommand;
 		private final Map<String, Channel> sendCommand;
 		
-		public Dynamic(TitanChat plugin) throws IllegalArgumentException, IllegalAccessException, NoSuchFieldException, SecurityException {
+		public Dynamic(TitanChat plugin) throws Exception {
 			this.plugin = plugin;
 			this.dynamic = new com.nodinchan.ncbukkit.command.CommandManager(plugin);
 			this.joinCommand = new HashMap<String, Channel>();
@@ -302,7 +302,7 @@ public final class CommandManager {
 		public void load(Channel channel) {
 			if (!channel.getConfig().getString("commands.join").equals("")) {
 				String cmd = channel.getConfig().getString("commands.join");
-				com.nodinchan.ncbukkit.command.PluginCommand command = dynamic.register(cmd);
+				com.nodinchan.ncbukkit.command.PluginCommand command = dynamic.registerCommand(cmd);
 				
 				if (command != null) {
 					command.setExecutor(this);
@@ -314,7 +314,7 @@ public final class CommandManager {
 			
 			if (!channel.getConfig().getString("commands.message").equals("")) {
 				String cmd = channel.getConfig().getString("commands.message");
-				com.nodinchan.ncbukkit.command.PluginCommand command = dynamic.register(cmd);
+				com.nodinchan.ncbukkit.command.PluginCommand command = dynamic.registerCommand(cmd);
 				
 				if (command != null) {
 					command.setExecutor(this);

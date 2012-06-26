@@ -56,6 +56,7 @@ public final class ChannelManager {
 	
 	private final Map<Channel, Map<String, List<String>>> channelInvitors;
 	private Map<String, Channel> channels;
+	private final Map<String, Channel> tags;
 	
 	/**
 	 * Initialises variables
@@ -71,6 +72,7 @@ public final class ChannelManager {
 		this.linked = new LinkedList<Channel>();
 		this.channelInvitors = new HashMap<Channel, Map<String, List<String>>>();
 		this.channels = new LinkedHashMap<String, Channel>();
+		this.tags = new HashMap<String, Channel>();
 	}
 	
 	/**
@@ -178,6 +180,17 @@ public final class ChannelManager {
 	}
 	
 	/**
+	 * Check if a Channel with that tag exists
+	 * 
+	 * @param tag The Channel tag
+	 * 
+	 * @return True if the Channel exists
+	 */
+	public boolean existsAsTag(String tag) {
+		return getChannelByTag(tag) != null;
+	}
+	
+	/**
 	 * Creates a list of Channels that can be accessed by the Player
 	 * 
 	 * @param player The Player to check
@@ -251,6 +264,17 @@ public final class ChannelManager {
 	}
 	
 	/**
+	 * Gets the Channel by its tag
+	 * 
+	 * @param tag The Channel tag
+	 * 
+	 * @return The channel if it exists, otherwise null
+	 */
+	public Channel getChannelByTag(String tag) {
+		return tags.get(tag.toLowerCase());
+	}
+	
+	/**
 	 * Gets the Custom Channel directory
 	 * 
 	 * @return The Custom Channel directory
@@ -282,6 +306,17 @@ public final class ChannelManager {
 	 */
 	public String getExact(String name) {
 		return getChannel(name).getName();
+	}
+	
+	/**
+	 * Gets the exact name of the Channel of the given tag
+	 * 
+	 * @param tag The Channel tag
+	 * 
+	 * @return The exact name of the Channel
+	 */
+	public String getExactByTag(String tag) {
+		return getChannelByTag(tag).getName();
 	}
 	
 	/**
@@ -391,6 +426,11 @@ public final class ChannelManager {
 			plugin.getManager().getCommandManager().getDynamic().load(channel);
 			
 			register(channel);
+			
+			if (existsAsTag(channel.getVariables().getTag()))
+				continue;
+			
+			registerTag(channel);
 		}
 		
 		sortChannels();
@@ -542,25 +582,30 @@ public final class ChannelManager {
 	 * Reloads the ChannelManager and all channels
 	 */
 	public void preReload() {
-		for (Channel channel : channels.values())
-			channel.saveMembershipRoles();
-		
 		channels.clear();
 		channelAmount = 0;
 		customChAmount = 0;
 	}
 	
 	/**
-	 * Registers the Custom Channel
+	 * Registers the Channel
 	 * 
-	 * @param channel The Custom Channel to be registered
+	 * @param channel The Channel to be registered
 	 */
 	public void register(Channel channel) {
 		if (channel instanceof CustomChannel)
 			customChAmount++;
 		
-		plugin.getManager().getCommandManager().getDynamic().load(channel);
 		channels.put(channel.getName().toLowerCase(), channel);
+	}
+	
+	/**
+	 * Registers the tag of the Channel
+	 * 
+	 * @param channel The Channel to have its tag registered
+	 */
+	private void registerTag(StandardChannel channel) {
+		tags.put(channel.getVariables().getTag().toLowerCase(), channel);
 	}
 	
 	/**

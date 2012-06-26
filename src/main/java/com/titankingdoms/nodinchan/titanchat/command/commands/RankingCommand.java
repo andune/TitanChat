@@ -64,7 +64,28 @@ public class RankingCommand extends Command {
 					
 				} else { plugin.sendWarning(player, "You do not have permission"); }
 				
-			} else { plugin.sendWarning(player, "No such channel"); }
+			} else {
+				if (args[1].toLowerCase().startsWith("tag:")) {
+					if (cm.existsAsTag(args[1].substring(4))) {
+						Channel channel = cm.getChannelByTag(args[1].substring(4));
+						
+						if (channel.canRank(player)) {
+							if (plugin.getPlayer(args[0]) != null) {
+								cm.whitelistMember(plugin.getPlayer(args[0]), channel);
+								plugin.sendInfo(player, plugin.getPlayer(args[0]).getDisplayName() + " has been added to the Member List");
+								
+							} else {
+								plugin.sendInfo(player, plugin.getOfflinePlayer(args[0]).getName() + " is offline");
+								cm.whitelistMember(plugin.getOfflinePlayer(args[0]), channel);
+								plugin.sendInfo(player, plugin.getPlayer(args[0]).getDisplayName() + " has been added to the Member List");
+							}
+							
+						} else { plugin.sendWarning(player, "You do not have permission"); }
+						
+					} else { plugin.sendWarning(player, "No such channel"); }
+					
+				} else { plugin.sendWarning(player, "No such channel"); }
+			}
 			
 		} catch (IndexOutOfBoundsException e) {
 			Channel channel = cm.getChannel(player);
@@ -129,7 +150,43 @@ public class RankingCommand extends Command {
 					
 				} else { plugin.sendWarning(player, "You do not have permission"); }
 				
-			} else { plugin.sendWarning(player, "No such channel"); }
+			} else {
+				if (args[1].toLowerCase().startsWith("tag:")) {
+					if (cm.existsAsTag(args[1].substring(4))) {
+						Channel channel = cm.getChannelByTag(args[1].substring(4));
+						
+						if (channel.canRank(player)) {
+							if (plugin.getPlayer(args[0]) != null) {
+								Player targetPlayer = plugin.getPlayer(args[0]);
+								
+								if (channel.getAdminList().contains(targetPlayer.getName())) {
+									channel.getAdminList().remove(targetPlayer.getName());
+									channel.save();
+									
+									plugin.sendInfo(targetPlayer, "You have been demoted in " + channel.getName());
+									plugin.sendInfo(channel.getParticipants(), targetPlayer.getDisplayName() + " has been demoted");
+									
+								} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " is not an Admin"); }
+								
+							} else {
+								OfflinePlayer targetPlayer = plugin.getOfflinePlayer(args[0]);
+								plugin.sendInfo(player, targetPlayer.getName() + " is offline");
+								
+								if (channel.getAdminList().contains(targetPlayer.getName())) {
+									channel.getAdminList().remove(targetPlayer.getName());
+									channel.save();
+									
+									plugin.sendInfo(channel.getParticipants(), targetPlayer.getName() + " has been demoted");
+									
+								} else { plugin.sendWarning(player, targetPlayer.getName() + " is not an Admin"); }
+							}
+							
+						} else { plugin.sendWarning(player, "You do not have permission"); }
+						
+					} else { plugin.sendWarning(player, "No such channel"); }
+					
+				} else { plugin.sendWarning(player, "No such channel"); }
+			}
 			
 		} catch (IndexOutOfBoundsException e) {
 			Channel channel = cm.getChannel(player);
@@ -206,7 +263,40 @@ public class RankingCommand extends Command {
 					
 				} else { plugin.sendWarning(player, "You do not have permission"); }
 				
-			} else { plugin.sendWarning(player, "No such channel"); }
+			} else {
+				if (args[1].toLowerCase().startsWith("tag:")) {
+					if (cm.existsAsTag(args[1].substring(4))) {
+						Channel channel = cm.getChannelByTag(args[1].substring(4));
+						
+						if (channel.canRank(player)) {
+							if (plugin.getPlayer(args[0]) != null) {
+								Player targetPlayer = plugin.getPlayer(args[0]);
+								
+								if (!channel.getAdminList().contains(player.getName())) {
+									cm.assignAdmin(targetPlayer, channel);
+									plugin.sendInfo(player, targetPlayer.getDisplayName() + " has been promoted");
+									plugin.sendInfo(channel.getParticipants(), targetPlayer.getDisplayName() + " has been promoted");
+									
+								} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " is already an Admin"); }
+								
+							} else {
+								OfflinePlayer targetPlayer = plugin.getOfflinePlayer(args[0]);
+								plugin.sendInfo(player, targetPlayer.getName() + " is offline");
+								
+								if (!channel.getAdminList().contains(player.getName())) {
+									cm.assignAdmin(targetPlayer, channel);
+									plugin.sendInfo(player, targetPlayer.getName() + " has been promoted");
+									plugin.sendInfo(channel.getParticipants(), targetPlayer.getName() + " has been promoted");
+									
+								} else { plugin.sendWarning(player, targetPlayer.getName() + " is already an Admin"); }
+							}
+							
+						} else { plugin.sendWarning(player, "You do not have permission"); }
+						
+					} else { plugin.sendWarning(player, "No such channel"); }
+					
+				} else { plugin.sendWarning(player, "No such channel"); }
+			}
 			
 		} catch (IndexOutOfBoundsException e) {
 			Channel channel = cm.getChannel(player);

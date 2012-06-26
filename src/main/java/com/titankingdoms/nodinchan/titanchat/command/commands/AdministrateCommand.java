@@ -87,7 +87,50 @@ public class AdministrateCommand extends Command {
 					
 				} else { plugin.sendWarning(player, "You do not have permission"); }
 				
-			} else { plugin.sendWarning(player, "No such channel"); }
+			} else {
+				if (args[1].toLowerCase().startsWith(":tag")) {
+					if (cm.existsAsTag(args[1].substring(4))) {
+						Channel channel = cm.getChannelByTag(args[1].substring(4));
+						
+						if (channel.canBan(player)) {
+							if (plugin.getPlayer(args[0]) != null) {
+								Player targetPlayer = plugin.getPlayer(args[0]);
+								
+								if (!channel.getBlackList().contains(player.getName())) {
+									channel.getAdminList().remove(targetPlayer.getName());
+									channel.getWhiteList().remove(targetPlayer.getName());
+									channel.getBlackList().add(targetPlayer.getName());
+									channel.save();
+									
+									if (channel.equals(cm.getChannel(targetPlayer)))
+										cm.chSwitch(targetPlayer, cm.getSpawnChannel(targetPlayer));
+									
+									plugin.sendWarning(targetPlayer, "You have been banned from " + channel.getName());
+									plugin.sendInfo(channel.getParticipants(), targetPlayer.getDisplayName() + " has been banned");
+									
+								} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " has already been banned"); }
+								
+							} else {
+								OfflinePlayer targetPlayer = plugin.getPlayer(args[0]);
+								plugin.sendInfo(player, targetPlayer.getName() + " is offline");
+								
+								if (!channel.getBlackList().contains(player.getName())) {
+									channel.getAdminList().remove(targetPlayer.getName());
+									channel.getWhiteList().remove(targetPlayer.getName());
+									channel.getBlackList().add(targetPlayer.getName());
+									channel.save();
+									
+									plugin.sendInfo(channel.getParticipants(), targetPlayer.getName() + " has been banned");
+									
+								} else { plugin.sendWarning(player, targetPlayer.getName() + " has already been banned"); }
+							}
+							
+						} else { plugin.sendWarning(player, "You do not have permission"); }
+						
+					} else { plugin.sendWarning(player, "No such channel"); }
+					
+				} else { plugin.sendWarning(player, "No such channel"); }
+			}
 			
 		} catch (IndexOutOfBoundsException e) {
 			Channel channel = cm.getChannel(player);
@@ -161,7 +204,30 @@ public class AdministrateCommand extends Command {
 					
 				} else { plugin.sendWarning(player, "You do not have permission"); }
 				
-			} else { plugin.sendWarning(player, "No such channel"); }
+			} else {
+				if (args[1].toLowerCase().startsWith("tag:")) {
+					if (cm.existsAsTag(args[1].substring(4))) {
+						Channel channel = cm.getChannelByTag(args[1].substring(4));
+						
+						if (plugin.getPermsBridge().has(player, "TitanChat.force")) {
+							if (plugin.getPlayer(args[0]) != null) {
+								Player targetPlayer = plugin.getPlayer(args[0]);
+								
+								if (!channel.equals(cm.getChannel(targetPlayer))) {
+									cm.chSwitch(targetPlayer, channel);
+									plugin.sendInfo(player, "You have forced " + targetPlayer.getDisplayName() + " to join the channel");
+									plugin.sendInfo(targetPlayer, "You have been forced to join " + channel.getName());
+									
+								} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " is already in the channel"); }
+								
+							} else { plugin.sendWarning(player, "Player not online"); }
+							
+						} else { plugin.sendWarning(player, "You do not have permission"); }
+						
+					} else { plugin.sendWarning(player, "No such channel"); }
+					
+				} else { plugin.sendWarning(player, "No such channel"); }
+			}
 			
 		} catch (IndexOutOfBoundsException e) {
 			Channel channel = cm.getChannel(player);
@@ -215,7 +281,30 @@ public class AdministrateCommand extends Command {
 					
 				} else { plugin.sendWarning(player, "You do not have permission"); }
 				
-			} else { plugin.sendWarning(player, "No such channel"); }
+			} else {
+				if (args[1].toLowerCase().startsWith("tag:")) {
+					if (cm.existsAsTag(args[1].substring(4))) {
+						Channel channel = cm.getChannelByTag(args[1].substring(4));
+						
+						if (channel.canKick(player)) {
+							if (plugin.getPlayer(args[0]) != null) {
+								Player targetPlayer = plugin.getPlayer(args[0]);
+								
+								if (channel.getParticipants().contains(targetPlayer.getName())) {
+									cm.chSwitch(targetPlayer, cm.getSpawnChannel(targetPlayer));
+									plugin.sendWarning(targetPlayer, "You have been kicked from " + channel.getName());
+									plugin.sendInfo(channel.getParticipants(), targetPlayer.getDisplayName() + " has been kicked");
+									
+								} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " is not on the channel"); }
+								
+							} else { plugin.sendWarning(player, "Player not online"); }
+							
+						} else { plugin.sendWarning(player, "You do not have permission"); }
+						
+					} else { plugin.sendWarning(player, "No such channel"); }
+					
+				} else { plugin.sendWarning(player, "No such channel"); }
+			}
 			
 		} catch (IndexOutOfBoundsException e) {
 			Channel channel = cm.getChannel(player);
@@ -282,7 +371,30 @@ public class AdministrateCommand extends Command {
 					
 				} else { plugin.sendWarning(player, "You do not have permission"); }
 				
-			} else { plugin.sendWarning(player, "No such channel"); }
+			} else {
+				if (args[1].toLowerCase().startsWith("tag:")) {
+					if (cm.existsAsTag(args[1].substring(4))) {
+						Channel channel = cm.getChannelByTag(args[1].substring(4));
+						
+						if (channel.canMute(player)) {
+							if (plugin.getPlayer(args[0]) != null) {
+								Player targetPlayer = plugin.getPlayer(args[0]);
+								
+								if (!channel.getMuteList().contains(targetPlayer.getName())) {
+									channel.getMuteList().add(targetPlayer.getName());
+									plugin.sendWarning(targetPlayer, "You have been muted on " + channel.getName());
+									plugin.sendInfo(channel.getParticipants(), targetPlayer.getDisplayName() + " has been muted");
+									
+								} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " has already been muted"); }
+								
+							} else { plugin.sendWarning(player, "Player not online"); }
+							
+						} else { plugin.sendWarning(player, "You do not have permission"); }
+						
+					} else { plugin.sendWarning(player, "No such channel"); }
+					
+				} else { plugin.sendWarning(player, "No such channel"); }
+			}
 			
 		} catch (IndexOutOfBoundsException e) {
 			Channel channel = cm.getChannel(player);
@@ -349,7 +461,43 @@ public class AdministrateCommand extends Command {
 					
 				} else { plugin.sendWarning(player, "You do not have permission"); }
 				
-			} else { plugin.sendWarning(player, "No such channel"); }
+			} else {
+				if (args[1].toLowerCase().startsWith("tag:")) {
+					if (cm.existsAsTag(args[1].substring(4))) {
+						Channel channel = cm.getChannelByTag(args[1].substring(4));
+						
+						if (channel.canBan(player)) {
+							if (plugin.getPlayer(args[0]) != null) {
+								Player targetPlayer = plugin.getPlayer(args[0]);
+								
+								if (channel.getBlackList().contains(targetPlayer.getName())) {
+									channel.getBlackList().remove(targetPlayer.getName());
+									
+									cm.whitelistMember(targetPlayer, channel);
+									plugin.sendInfo(targetPlayer, "You have been unbanned from " + channel.getName());
+									plugin.sendInfo(channel.getParticipants(), targetPlayer.getDisplayName() + "has been unbanned");
+									
+								} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " has not been banned"); }
+								
+							} else {
+								OfflinePlayer targetPlayer = plugin.getOfflinePlayer(args[0]);
+								plugin.sendInfo(player, targetPlayer.getName() + " is offline");
+								
+								if (channel.getBlackList().contains(targetPlayer.getName())) {
+									channel.getBlackList().remove(targetPlayer.getName());
+									
+									cm.whitelistMember(targetPlayer, channel);
+									plugin.sendInfo(channel.getParticipants(), targetPlayer.getName() + "has been unbanned");
+									
+								} else { plugin.sendWarning(player, targetPlayer.getName() + " has not been banned"); }
+							}
+							
+						} else { plugin.sendWarning(player, "You do not have permission"); }
+						
+					} else { plugin.sendWarning(player, "No such channel"); }
+					
+				} else { plugin.sendWarning(player, "No such channel"); }
+			}
 			
 		} catch (IndexOutOfBoundsException e) {
 			Channel channel = cm.getChannel(player);
@@ -425,16 +573,33 @@ public class AdministrateCommand extends Command {
 							
 						} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " has not been muted"); }
 						
-					} else {
-						plugin.sendWarning(player, "Player not online");
-					}
+					} else { plugin.sendWarning(player, "Player not online"); }
 					
-				} else {
-					plugin.sendWarning(player, "You do not have permission");
-				}
+				} else { plugin.sendWarning(player, "You do not have permission"); }
 				
 			} else {
-				plugin.sendWarning(player, "No such channel");
+				if (args[1].toLowerCase().startsWith("tag:")) {
+					if (cm.existsAsTag(args[1].substring(4))) {
+						Channel channel = cm.getChannelByTag(args[1].substring(4));
+						
+						if (channel.canMute(player)) {
+							if (plugin.getPlayer(args[0]) != null) {
+								Player targetPlayer = plugin.getPlayer(args[0]);
+								
+								if (channel.getMuteList().contains(targetPlayer.getName())) {
+									channel.getMuteList().remove(targetPlayer.getName());
+									plugin.sendInfo(targetPlayer, "You have been unmuted on " + channel.getName());
+									plugin.sendInfo(channel.getParticipants(), targetPlayer.getDisplayName() + " has been unmuted");
+									
+								} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " has not been muted"); }
+								
+							} else { plugin.sendWarning(player, "Player not online"); }
+							
+						} else { plugin.sendWarning(player, "You do not have permission"); }
+						
+					} else { plugin.sendWarning(player, "No such channel"); }
+					
+				} else { plugin.sendWarning(player, "No such channel"); }
 			}
 			
 		} catch (IndexOutOfBoundsException e) {
@@ -456,13 +621,9 @@ public class AdministrateCommand extends Command {
 						
 					} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " has not been muted"); }
 					
-				} else {
-					plugin.sendWarning(player, "Player not online");
-				}
+				} else { plugin.sendWarning(player, "Player not online"); }
 				
-			} else {
-				plugin.sendWarning(player, "You do not have permission");
-			}
+			} else { plugin.sendWarning(player, "You do not have permission"); }
 		}
 	}
 }

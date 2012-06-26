@@ -95,7 +95,26 @@ public class SettingsCommand extends Command {
 							
 						} else { TitanChat.getInstance().sendWarning(player, "You do not have permission"); }
 						
-					} else { TitanChat.getInstance().sendWarning(player, "No such channel"); }
+					} else {
+						if (args[1].toLowerCase().startsWith("tag:")) {
+							if (cm.existsAsTag(args[1].substring(4))) {
+								if (cm.getChannelByTag(args[1].substring(4)) instanceof CustomChannel) {
+									TitanChat.getInstance().sendInfo(player, "Command does not support Custom Channels");
+									return;
+								}
+								
+								if (cm.getAdmins(cm.getChannelByTag(args[1].substring(4))).contains(player.getName()) || TitanChat.getInstance().isStaff(player)) {
+									((StandardChannel) cm.getChannelByTag(args[1].substring(4))).getVariables().setChatColour(args[0]);
+									cm.getChannelByTag(args[1].substring(4)).save();
+									
+									TitanChat.getInstance().sendInfo(player, "You have changed the colour to " + args[0]);
+									
+								} else { TitanChat.getInstance().sendWarning(player, "You do not have permission"); }
+								
+							} else { TitanChat.getInstance().sendWarning(player, "No such channel"); }
+							
+						} else { TitanChat.getInstance().sendWarning(player, "No such channel"); }
+					}
 					
 				} catch (IndexOutOfBoundsException e) {
 					Channel channel = cm.getChannel(player);
@@ -139,7 +158,26 @@ public class SettingsCommand extends Command {
 							
 						} else { TitanChat.getInstance().sendWarning(player, "You do not have permission"); }
 						
-					} else { TitanChat.getInstance().sendWarning(player, "No such channel"); }
+					} else {
+						if (args[0].toLowerCase().startsWith("tag:")) {
+							if (cm.existsAsTag(args[0].substring(4))) {
+								if (cm.getChannelByTag(args[0].substring(4)) instanceof CustomChannel) {
+									TitanChat.getInstance().sendInfo(player, "Command does not support Custom Channels");
+									return;
+								}
+								
+								if (TitanChat.getInstance().getPermsBridge().has(player, "TitanChat.convert") || cm.getChannelByTag(args[0].substring(4)).getAdminList().contains(player.getName())) {
+									((StandardChannel) cm.getChannelByTag(args[0].substring(4))).getVariables().setConvert((((StandardChannel) cm.getChannelByTag(args[0].substring(4))).getVariables().convert()) ? false : true);
+									cm.getChannelByTag(args[0].substring(4)).save();
+									
+									TitanChat.getInstance().sendInfo(player, "The channel now " + ((((StandardChannel) cm.getChannelByTag(args[0].substring(4))).getVariables().convert()) ? "converts" : "ignores") + " colour codes");
+									
+								} else { TitanChat.getInstance().sendWarning(player, "You do not have permission"); }
+								
+							} else { TitanChat.getInstance().sendWarning(player, "No such channel"); }
+							
+						} else { TitanChat.getInstance().sendWarning(player, "No such channel"); }
+					}
 					
 				} catch (IndexOutOfBoundsException e) {
 					Channel channel = cm.getChannel(player);
@@ -200,7 +238,26 @@ public class SettingsCommand extends Command {
 							
 						} else { TitanChat.getInstance().sendWarning(player, "You do not have permission"); }
 						
-					} else { TitanChat.getInstance().sendWarning(player, "No such channel"); }
+					} else {
+						if (args[1].toLowerCase().startsWith("tag:")) {
+							if (cm.existsAsTag(args[1].substring(4))) {
+								if (cm.getChannelByTag(args[1].substring(4)) instanceof CustomChannel) {
+									TitanChat.getInstance().sendInfo(player, "Command does not support Custom Channels");
+									return;
+								}
+								
+								if (cm.getAdmins(cm.getChannelByTag(args[1].substring(4))).contains(player.getName()) || TitanChat.getInstance().isStaff(player)) {
+									((StandardChannel) cm.getChannelByTag(args[1].substring(4))).getVariables().setNameColour(args[0]);
+									cm.getChannelByTag(args[1].substring(4)).save();
+									
+									TitanChat.getInstance().sendInfo(player, "You have changed the colour to " + args[0]);
+									
+								} else { TitanChat.getInstance().sendWarning(player, "You do not have permission"); }
+								
+							} else { TitanChat.getInstance().sendWarning(player, "No such channel"); }
+							
+						} else { TitanChat.getInstance().sendWarning(player, "No such channel"); }
+					}
 					
 				} catch (IndexOutOfBoundsException e) {
 					Channel channel = cm.getChannel(player);
@@ -246,7 +303,26 @@ public class SettingsCommand extends Command {
 							
 						} else { TitanChat.getInstance().sendWarning(player, "You do not have permission"); }
 						
-					} else { TitanChat.getInstance().sendWarning(player, "No such channel"); }
+					} else {
+						if (args[1].toLowerCase().startsWith("tag:")) {
+							if (cm.existsAsTag(args[1].substring(4))) {
+								if (cm.getChannelByTag(args[1].substring(4)) instanceof CustomChannel) {
+									TitanChat.getInstance().sendInfo(player, "Command does not support Custom Channels");
+									return;
+								}
+								
+								if (cm.getAdmins(cm.getChannelByTag(args[1].substring(4))).contains(player.getName()) || TitanChat.getInstance().isStaff(player)) {
+									((StandardChannel) cm.getChannelByTag(args[1].substring(4))).setPassword(args[0]);
+									cm.getChannelByTag(args[1].substring(4)).save();
+									
+									TitanChat.getInstance().sendInfo(player, "You have changed the password of " + cm.getChannelByTag(args[1].substring(4)).getName() + " to " + args[0]);
+									
+								} else { TitanChat.getInstance().sendWarning(player, "You do not have permission"); }
+								
+							} else { TitanChat.getInstance().sendWarning(player, "No such channel"); }
+							
+						} else { TitanChat.getInstance().sendWarning(player, "No such channel"); }
+					}
 					
 				} catch (IndexOutOfBoundsException e) {
 					Channel channel = cm.getChannel(player);
@@ -292,7 +368,26 @@ public class SettingsCommand extends Command {
 							
 						} else { TitanChat.getInstance().sendWarning(player, "You do not have permission"); }
 						
-					} else { TitanChat.getInstance().sendWarning(player, "No such channel"); }
+					} else {
+						if (args[1].toLowerCase().startsWith("tag:")) {
+							if (cm.existsAsTag(args[1].substring(4))) {
+								if (cm.getChannelByTag(args[1].substring(4)) instanceof CustomChannel) {
+									TitanChat.getInstance().sendInfo(player, "Command does not support Custom Channels");
+									return;
+								}
+								
+								if (cm.getAdmins(cm.getChannelByTag(args[1].substring(4))).contains(player.getName()) || TitanChat.getInstance().isStaff(player)) {
+									((StandardChannel) cm.getChannelByTag(args[1].substring(4))).getVariables().setTag(args[0]);
+									cm.getChannelByTag(args[1].substring(4)).save();
+									
+									TitanChat.getInstance().sendInfo(player, "You have changed the settings");
+									
+								} else { TitanChat.getInstance().sendWarning(player, "You do not have permission"); }
+								
+							} else { TitanChat.getInstance().sendWarning(player, "No such channel"); }
+							
+						} else { TitanChat.getInstance().sendWarning(player, "No such channel"); }
+					}
 					
 				} catch (IndexOutOfBoundsException e) {
 					Channel channel = cm.getChannel(player);
@@ -344,25 +439,47 @@ public class SettingsCommand extends Command {
 								
 							} else {
 								TitanChat.getInstance().sendWarning(player, "Type does not exist");
-								
-								StringBuilder str = new StringBuilder();
-								
-								for (Type type : Type.values()) {
-									if (type.isSpecial())
-										continue;
-									
-									if (str.length() > 0)
-										str.append(", ");
-									
-									str.append(type.getName());
-								}
-								
-								TitanChat.getInstance().sendInfo(player, "Available types: " + str.toString());
+								TitanChat.getInstance().sendInfo(player, "Available types: password, private, public");
 							}
 							
 						} else { TitanChat.getInstance().sendWarning(player, "You do not have permission"); }
 						
-					} else { TitanChat.getInstance().sendWarning(player, "No such channel"); }
+					} else {
+						if (args[1].startsWith("tag:")) {
+							if (cm.existsAsTag(args[1].substring(4))) {
+								if (cm.getAdmins(cm.getChannelByTag(args[1].substring(4))).contains(player.getName()) || TitanChat.getInstance().isStaff(player)) {
+									if (Type.fromName(args[0]) != null) {
+										switch (Type.fromName(args[0])) {
+										
+										case CUSTOM:
+										case DEFAULT:
+										case NONE:
+										case STAFF:
+										case UNKNOWN:
+											TitanChat.getInstance().sendInfo(player, "This Type is not available as a Channel Type");
+											break;
+											
+										case PASSWORD:
+										case PRIVATE:
+										case PUBLIC:
+											cm.getChannelByTag(args[1].substring(4)).setType(args[0]);
+											cm.getChannelByTag(args[1].substring(4)).save();
+											
+											TitanChat.getInstance().sendInfo(player, "The channel is now " + Type.fromName(args[0]).getName());
+											break;
+										}
+										
+									} else {
+										TitanChat.getInstance().sendWarning(player, "Type does not exist");
+										TitanChat.getInstance().sendInfo(player, "Available types: password, private, public");
+									}
+									
+								} else { TitanChat.getInstance().sendWarning(player, "You do not have permission"); }
+								
+							} else { TitanChat.getInstance().sendWarning(player, "No such channel"); }
+							
+						} else { TitanChat.getInstance().sendWarning(player, "No such channel"); }
+					}
 					
 				} catch (IndexOutOfBoundsException e) {
 					Channel channel = cm.getChannel(player);
@@ -448,25 +565,47 @@ public class SettingsCommand extends Command {
 								
 							} else {
 								TitanChat.getInstance().sendWarning(player, "Type does not exist");
-								
-								StringBuilder str = new StringBuilder();
-								
-								for (Type type : Type.values()) {
-									if (!type.isSpecial())
-										continue;
-									
-									if (str.length() > 0)
-										str.append(", ");
-									
-									str.append(type.getName());
-								}
-								
-								TitanChat.getInstance().sendInfo(player, "Available types: " + str.toString());
+								TitanChat.getInstance().sendInfo(player, "Available types: default, none, staff");
 							}
 							
 						} else { TitanChat.getInstance().sendWarning(player, "You do not have permission"); }
 						
-					} else { TitanChat.getInstance().sendWarning(player, "No such channel"); }
+					} else {
+						if (args[1].toLowerCase().startsWith("tag:")) {
+							if (cm.existsAsTag(args[1].substring(4))) {
+								if (TitanChat.getInstance().isStaff(player)) {
+									if (Type.fromName(args[0]) != null) {
+										switch (Type.fromName(args[0])) {
+										
+										case CUSTOM:
+										case PASSWORD:
+										case PRIVATE:
+										case PUBLIC:
+										case UNKNOWN:
+											TitanChat.getInstance().sendInfo(player, "This Type is not available as a Channel Type");
+											break;
+											
+										case DEFAULT:
+										case NONE:
+										case STAFF:
+											cm.getChannelByTag(args[1].substring(4)).setSpecialType(args[0]);
+											cm.getChannelByTag(args[1].substring(4)).save();
+											
+											TitanChat.getInstance().sendInfo(player, "The channel is now " + Type.fromName(args[0]).getName());
+											break;
+										}
+										
+									} else {
+										TitanChat.getInstance().sendWarning(player, "Type does not exist");
+										TitanChat.getInstance().sendInfo(player, "Available types: default, none, staff");
+									}
+									
+								} else { TitanChat.getInstance().sendWarning(player, "You do not have permission"); }
+								
+							} else { TitanChat.getInstance().sendWarning(player, "No such channel"); }
+							
+						} else { TitanChat.getInstance().sendWarning(player, "No such channel"); }
+					}
 					
 				} catch (IndexOutOfBoundsException e) {
 					Channel channel = cm.getChannel(player);

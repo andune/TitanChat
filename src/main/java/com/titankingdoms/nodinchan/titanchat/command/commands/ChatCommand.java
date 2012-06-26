@@ -158,7 +158,30 @@ public class ChatCommand extends Command {
 			
 			cm.getChannel(args[0]).sendMessage(player, str.toString());
 			
-		} else { plugin.sendWarning(player, "No such channel"); }
+		} else {
+			if (args[0].toLowerCase().startsWith("tag:")) {
+				if (cm.existsAsTag(args[0].substring(4))) {
+					if (!cm.getChannelByTag(args[0].substring(4)).canAccess(player))
+						return;
+					
+					if (voiceless(player, cm.getChannelByTag(args[0].substring(4))))
+						return;
+					
+					StringBuilder str = new StringBuilder();
+					
+					for (String arg : Arrays.copyOfRange(args, 1, args.length)) {
+						if (str.length() > 0)
+							str.append(" ");
+						
+						str.append(arg);
+					}
+					
+					cm.getChannelByTag(args[0].substring(4)).sendMessage(player, str.toString());
+					
+				} else { plugin.sendWarning(player, "No such channel"); }
+				
+			} else { plugin.sendWarning(player, "No such channel"); }
+		}
 	}
 	
 	/**
@@ -194,7 +217,23 @@ public class ChatCommand extends Command {
 					}
 					
 				} else {
-					plugin.sendWarning(player, "No such channel");
+					if (args[0].toLowerCase().startsWith("tag:")) {
+						if (cm.existsAsTag(args[0].substring(4))) {
+							Channel channel = cm.getChannelByTag(args[0].substring(4));
+							channel.setSilenced((channel.isSilenced()) ? false : true);
+							
+							for (String participant : cm.getChannel(args[0]).getParticipants()) {
+								if (plugin.getPlayer(participant) != null) {
+									if (channel.isSilenced())
+										plugin.sendWarning(plugin.getPlayer(participant), "The channel has been silenced");
+									else
+										plugin.sendInfo(plugin.getPlayer(participant), "The channel is no longer silenced");
+								}
+							}
+							
+						} else { plugin.sendWarning(player, "No such channel"); }
+						
+					} else { plugin.sendWarning(player, "No such channel"); }
 				}
 				
 			} catch (IndexOutOfBoundsException e) {

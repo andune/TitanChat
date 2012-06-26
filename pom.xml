@@ -7,7 +7,7 @@
     <groupId>com.titankingdoms.dev</groupId>
     <artifactId>TitanChat</artifactId>
     <name>TitanChat</name>
-    <version>v3.6</version>
+    <version>v3.7</version>
 
     <description>TitanChat, a chat management and formatting plugin.</description>
     <build>
@@ -107,7 +107,7 @@
         <dependency>
         	<groupId>com.nodinchan</groupId>
         	<artifactId>NC-BukkitLib</artifactId>
-        	<version>1.9</version>
+        	<version>2.1</version>
         	<type>jar</type>
         	<scope>system</scope>
         	<systemPath>${project.basedir}/lib/NC-BukkitLib.jar</systemPath>

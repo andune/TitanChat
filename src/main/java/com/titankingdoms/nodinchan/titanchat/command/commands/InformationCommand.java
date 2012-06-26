@@ -188,7 +188,33 @@ public class InformationCommand extends Command {
 					player.sendMessage(ChatColor.AQUA + "Followers: " + plugin.createList(cm.getFollowers(channel)));
 				}
 				
-			} else { plugin.sendWarning(player, "No such channel"); }
+			} else {
+				if (args[0].toLowerCase().startsWith("tag:")) {
+					if (cm.existsAsTag(args[0].substring(4))) {
+						Channel channel = cm.getChannelByTag(args[0].substring(4));
+						
+						if (channel.canAccess(player)) {
+							player.sendMessage(ChatColor.AQUA + "=== " + channel.getName() + " ===");
+
+							List<String> offline = new ArrayList<String>();
+							List<String> online = new ArrayList<String>();
+							
+							for (String participant : channel.getParticipants()) {
+								if (plugin.getPlayer(participant) != null)
+									online.add(participant);
+								else
+									offline.add(participant);
+							}
+							
+							player.sendMessage(ChatColor.AQUA + "Online participants: " + plugin.createList(online));
+							player.sendMessage(ChatColor.AQUA + "Offline participants: " + plugin.createList(offline));
+							player.sendMessage(ChatColor.AQUA + "Followers: " + plugin.createList(cm.getFollowers(channel)));
+						}
+						
+					} else { plugin.sendWarning(player, "No such channel"); }
+					
+				} else { plugin.sendWarning(player, "No such channel"); }
+			}
 			
 		} catch (IndexOutOfBoundsException e) {
 			Channel channel = cm.getChannel(player);

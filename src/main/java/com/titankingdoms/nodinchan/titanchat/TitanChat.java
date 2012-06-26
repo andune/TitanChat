@@ -1,19 +1,13 @@
 package com.titankingdoms.nodinchan.titanchat;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Method;
-import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.Arrays;
 import java.util.List;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -415,75 +409,7 @@ public final class TitanChat extends JavaPlugin {
 			}
 			
 			if (args[0].equalsIgnoreCase("update")) {
-				try {
-					File destination = new File(getDataFolder().getParentFile().getParentFile(), "lib");
-					destination.mkdirs();
-					
-					File lib = new File(destination, "NC-BukkitLib.jar");
-					
-					boolean download = false;
-					
-					if (!lib.exists()) {
-						System.out.println("Missing NC-Bukkit lib");
-						download = true;
-						
-					} else {
-						JarFile jarFile = new JarFile(lib);
-						
-						double version = 0;
-						
-						if (jarFile.getEntry("version.yml") != null) {
-							JarEntry element = jarFile.getJarEntry("version.yml");
-							BufferedReader reader = new BufferedReader(new InputStreamReader(jarFile.getInputStream(element)));
-							version = Double.parseDouble(reader.readLine().substring(9).trim());
-							
-						} else {
-							System.out.println("Missing version.yml");
-							download = true;
-						}
-						
-						if (version == 0) {
-							System.out.println("NC-Bukkit lib outdated");
-							download = true;
-							
-						} else {
-							HttpURLConnection urlConnection = (HttpURLConnection) new URL("http://www.nodinchan.com/NC-BukkitLib/version.yml").openConnection();
-							BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-							
-							if (Double.parseDouble(reader.readLine().replace("NC-BukkitLib Version ", "").trim()) > version) {
-								System.out.println("NC-Bukkit lib outdated");
-								download = true;
-							}
-						}
-					}
-					
-					if (download) {
-						System.out.println("Downloading NC-Bukkit lib...");
-						URL libURL = new URL("http://www.nodinchan.com/NC-BukkitLib/NC-BukkitLib.jar");
-						ReadableByteChannel rbc = Channels.newChannel(libURL.openStream());
-						FileOutputStream output = new FileOutputStream(lib);
-						output.getChannel().transferFrom(rbc, 0, 1 << 24);
-						System.out.println("Downloaded NC-Bukkit lib");
-					}
-					
-					URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
-					
-					for (URL url : sysLoader.getURLs()) {
-						if (url.sameFile(lib.toURI().toURL()))
-							return true;
-					}
-					
-					try {
-						Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
-						method.setAccessible(true);
-						method.invoke(sysLoader, lib.toURI().toURL());
-						
-					} catch (Exception e) { return true; }
-					
-					return true;
-					
-				} catch (Exception e) { e.printStackTrace(); }
-				
+				updateLib();
 				return true;
 			}
 			
@@ -777,9 +703,8 @@ public final class TitanChat extends JavaPlugin {
 			saveResource("config.yml", false);
 		}
 		
-		if (getConfig().getBoolean("auto-library-update")) {
+		if (getConfig().getBoolean("auto-library-update"))
 			updateLib();
-		}
 	}
 	
 	/**

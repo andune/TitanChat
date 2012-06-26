@@ -57,7 +57,24 @@ public class InvitationCommand extends Command {
 					
 				} else { plugin.sendWarning(player, "You did not receive any invitations from this channel"); }
 						
-			} else { plugin.sendWarning(player, "No such channel"); }
+			} else {
+				if (args[0].toLowerCase().startsWith("tag:")) {
+					if (cm.existsAsTag(args[0].substring(4))) {
+						Channel channel = cm.getChannelByTag(args[0].substring(4));
+						
+						if (channel.getInviteList().contains(player.getName())) {
+							channel.getInviteList().remove(player.getName());
+							cm.onInviteRespond(channel, player, true);
+							
+							cm.chSwitch(player, channel);
+							plugin.sendInfo(player, "You have accepted the invitation");
+							
+						} else { plugin.sendWarning(player, "You did not receive any invitations from this channel"); }
+						
+					} else { plugin.sendWarning(player, "No such channel"); }
+					
+				} else { plugin.sendWarning(player, "No such channel"); }
+			}
 			
 		} catch (IndexOutOfBoundsException e) { invalidArgLength(player, "Accept"); }
 	}
@@ -80,7 +97,23 @@ public class InvitationCommand extends Command {
 					
 				} else { plugin.sendWarning(player, "You did not receive any invitations from this channel"); }
 				
-			} else { plugin.sendWarning(player, "No such channel"); }
+			} else {
+				if (args[0].toLowerCase().startsWith("tag:")) {
+					if (cm.existsAsTag(args[0].substring(4))) {
+						Channel channel = cm.getChannelByTag(args[0].substring(4));
+						
+						if (channel.getInviteList().contains(player.getName())) {
+							channel.getInviteList().remove(player.getName());
+							cm.onInviteRespond(channel, player, false);
+							
+							plugin.sendInfo(player, "You have declined the invitation");
+							
+						} else { plugin.sendWarning(player, "You did not receive any invitations from this channel"); }
+						
+					} else { plugin.sendWarning(player, "No such channel"); }
+					
+				} else { plugin.sendWarning(player, "No such channel"); }
+			}
 			
 		} catch (IndexOutOfBoundsException e) { invalidArgLength(player, "Decline"); }
 	}
@@ -109,7 +142,27 @@ public class InvitationCommand extends Command {
 					
 				} else { plugin.sendWarning(player, "You do not have permission to invite players on this channel"); }
 				
-			} else { plugin.sendWarning(player, "No such channel"); }
+			} else {
+				if (args[1].toLowerCase().startsWith("tag:")) {
+					if (cm.existsAsTag(args[1].substring(4))) {
+						Channel channel = cm.getChannelByTag(args[1].substring(4));
+						
+						if (cm.getAdmins(channel).contains(player.getName())) {
+							if (plugin.getPlayer(args[0]) != null) {
+								channel.getInviteList().add(plugin.getPlayer(args[0]).getName());
+								cm.onInvite(channel, player, plugin.getPlayer(args[0]));
+								
+								plugin.sendInfo(player, "You have invited " + plugin.getPlayer(args[0]).getName());
+								plugin.sendInfo(plugin.getPlayer(args[0]), "You have been invited to chat on " + channel.getName());
+								
+							} else { plugin.sendWarning(player, "Player not online"); }
+							
+						} else { plugin.sendWarning(player, "You do not have permission to invite players on this channel"); }
+						
+					} else { plugin.sendWarning(player, "No such channel"); }
+					
+				} else { plugin.sendWarning(player, "No such channel"); }
+			}
 			
 		} catch (IndexOutOfBoundsException e) {
 			Channel channel = cm.getChannel(player);

@@ -87,7 +87,17 @@ public class ChannelCommand extends Command {
 						cm.deleteChannel(player, args[0]);
 					else { plugin.sendWarning(player, "You cannot delete this channel"); }
 					
-				} else { plugin.sendWarning(player, "Channel does not exists"); }
+				} else {
+					if (args[0].toLowerCase().startsWith("tag:")) {
+						if (cm.existsAsTag(args[0].substring(4))) {
+							if (!cm.getChannelByTag(args[0].substring(4)).getSpecialType().equals(Type.DEFAULT) || !cm.getChannelByTag(args[0].substring(4)).getSpecialType().equals(Type.STAFF))
+								cm.deleteChannel(player, cm.getExactByTag(args[0].substring(4)));
+							else { plugin.sendWarning(player, "You cannot delete this channel"); }
+							
+						} else { plugin.sendWarning(player, "No such channel"); }
+						
+					} else { plugin.sendWarning(player, "No such channel"); }
+				}
 				
 			} else { plugin.sendWarning(player, "You do not have permission to delete channels"); }
 			
@@ -115,7 +125,26 @@ public class ChannelCommand extends Command {
 					
 				} else { plugin.sendWarning(player, "You do not have permission"); }
 				
-			} else { plugin.sendWarning(player, "No such channel"); }
+			} else {
+				if (args[0].toLowerCase().startsWith("tag:")) {
+					if (cm.existsAsTag(args[0].substring(4))) {
+						Channel channel = cm.getChannelByTag(args[0].substring(4));
+						
+						if (channel.canAccess(player)) {
+							if (!channel.getFollowerList().contains(player.getName())) {
+								channel.getFollowerList().add(player.getName());
+								channel.save();
+								
+								plugin.sendInfo(player, "You have followed " + channel.getName());
+								
+							} else { plugin.sendWarning(player, "You are already following " + channel.getName()); }
+							
+						} else { plugin.sendWarning(player, "You do not have permission"); }
+						
+					} else { plugin.sendWarning(player, "No such channel"); }
+					
+				} else { plugin.sendWarning(player, "No such channel"); }
+			}
 			
 		} catch (IndexOutOfBoundsException e) { invalidArgLength(player, "Follow"); }
 	}
@@ -258,7 +287,142 @@ public class ChannelCommand extends Command {
 				break;
 			}
 			
-		} else { plugin.sendWarning(player, "No such channel"); }
+		} else {
+			if (args[0].toLowerCase().startsWith("tag:")) {
+				if (cm.existsAsTag(args[0].substring(4))) {
+					Channel ch = cm.getChannelByTag(args[0].substring(4));
+					String password = "";
+					
+					if (ch.equals(cm.getChannel(player))) { plugin.sendWarning(player, "You are already on the channel"); return; }
+					
+					try { password = args[1]; } catch (IndexOutOfBoundsException e) {}
+					
+					if (ch instanceof CustomChannel) {
+						if (ch.canAccess(player)) {
+							cm.chSwitch(player, ch);
+							plugin.sendInfo(player, "You have switched channels");
+							
+						} else { plugin.sendWarning(player, "You do not have permission to join " + ch.getName()); }
+						
+						return;
+					}
+					
+					StandardChannel channel = (StandardChannel) ch;
+					
+					switch (channel.getType()) {
+					
+					case PASSWORD:
+						switch (channel.getSpecialType()) {
+						
+						case DEFAULT:
+							if (!password.equals("")) {
+								if (channel.correctPassword(password)) {
+									cm.chSwitch(player, channel);
+									plugin.sendInfo(player, "You have switched channels");
+									
+								} else { plugin.sendWarning(player, "Incorrect password"); }
+								
+							} else { plugin.sendWarning(player, "You need to enter a password"); }
+							break;
+							
+						case NONE:
+							if (!password.equals("")) {
+								if (channel.correctPassword(password)) {
+									if (channel.canAccess(player)) {
+										cm.chSwitch(player, channel);
+										plugin.sendInfo(player, "You have switched channels");
+										
+									} else { plugin.sendWarning(player, "You are banned on this channel"); }
+									
+								} else { plugin.sendWarning(player, "Incorrect password"); }
+								
+							} else { plugin.sendWarning(player, "You need to enter a password"); }
+							break;
+							
+						case STAFF:
+							if (plugin.isStaff(player)) {
+								if (!password.equals("")) {
+									if (channel.correctPassword(password)) {
+										cm.chSwitch(player, channel);
+										plugin.sendInfo(player, "You have switched channels");
+											
+									} else { plugin.sendWarning(player, "Incorrect password"); }
+										
+								} else { plugin.sendWarning(player, "You need to enter a password"); }
+								
+							} else { plugin.sendWarning(player, "You do not have permission to join " + channel.getName()); }
+							break;
+							
+						default:
+							plugin.sendWarning(player, "Invalid special type set for Channel " + channel.getName());
+							break;
+						}
+						break;
+						
+					case PRIVATE:
+						switch (channel.getSpecialType()) {
+						
+						case DEFAULT:
+						case NONE:
+							if (channel.canAccess(player)) {
+								cm.chSwitch(player, channel);
+								plugin.sendInfo(player, "You have switched channels");
+								
+							} else { plugin.sendWarning(player, "You are not on the whitelist"); }
+							break;
+							
+						case STAFF:
+							if (plugin.isStaff(player)) {
+								if (channel.canAccess(player)) {
+									cm.chSwitch(player, channel);
+									plugin.sendInfo(player, "You have switched channels");
+									
+								} else { plugin.sendWarning(player, "You are not on the whitelist"); }
+								
+							} else { plugin.sendWarning(player, "You do not have permission to join " + channel.getName()); }
+							break;
+							
+						default:
+							plugin.sendWarning(player, "Invalid special type set for Channel " + channel.getName());
+							break;
+						}
+						break;
+						
+					case PUBLIC:
+						switch (channel.getSpecialType()) {
+						
+						case DEFAULT:
+							cm.chSwitch(player, channel);
+							plugin.sendInfo(player, "You have switched channels");
+							break;
+							
+						case NONE:
+							if (channel.canAccess(player)) {
+								cm.chSwitch(player, channel);
+								plugin.sendInfo(player, "You have switched channels");
+								
+							} else { plugin.sendWarning(player, "You are banned on this channel"); }
+							break;
+							
+						case STAFF:
+							if (plugin.isStaff(player)) {
+								cm.chSwitch(player, channel);
+								plugin.sendInfo(player, "You have switched channels");
+								
+							} else { plugin.sendWarning(player, "You do not have permission to join " + channel.getName()); }
+							break;
+							
+						default:
+							plugin.sendWarning(player, "Invalid special type set for Channel " + channel.getName());
+							break;
+						}
+						break;
+					}
+					
+				} else { plugin.sendWarning(player, "No such channel"); }
+				
+			} else { plugin.sendWarning(player, "No such channel"); }
+		}
 	}
 	
 	@CommandID(name = "Leave", aliases = { "leave", "part"})
@@ -295,7 +459,27 @@ public class ChannelCommand extends Command {
 					
 				} else { plugin.sendWarning(player, "You are not following " + channel.getName()); }
 				
-			} else { plugin.sendWarning(player, "No such channel"); }
+			} else {
+				if (args[0].toLowerCase().startsWith("tag:")) {
+					if (cm.existsAsTag(args[0].substring(4))) {
+						Channel channel = cm.getChannelByTag(args[0].substring(4));
+						
+						if (cm.getFollowers(channel).contains(player.getName())) {
+							if (channel.getFollowerList().contains(player.getName()))
+								channel.getFollowerList().remove(player.getName());
+							else
+								plugin.getPermsBridge().removePermission(player, "TitanChat.follow." + channel.getName());
+							
+							channel.save();
+							
+							plugin.sendInfo(player, "You have unfollowed " + channel.getName());
+							
+						} else { plugin.sendWarning(player, "You are not following " + channel.getName()); }
+						
+					} else { plugin.sendWarning(player, "No such channel"); }
+					
+				} else { plugin.sendWarning(player, "No such channel"); }
+			}
 			
 		} catch (IndexOutOfBoundsException e) { invalidArgLength(player, "Unfollow"); }
 	}
