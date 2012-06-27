@@ -645,6 +645,9 @@ public final class TitanChat extends JavaPlugin {
 		if (!initMetrics())
 			log(Level.WARNING, "Failed to hook into Metrics");
 		
+		if (getServer().getPluginManager().getPlugin("NC-BukkitLib") != null)
+			((NCBL) getServer().getPluginManager().getPlugin("NC-BukkitLib")).hook(this);
+		
 		if (getChannelDir().mkdir()) {
 			log(Level.INFO, "Creating channel directory...");
 			saveResource("channels/Default.yml", false);
