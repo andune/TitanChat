@@ -1,0 +1,114 @@
+name: TitanChat
+version: '3.7 Build #${build.number}'
+author: NodinChan
+website: http://dev.bukkit.org/server-mods/titanchat
+main: com.titankingdoms.nodinchan.titanchat.TitanChat
+prefix: TitanChat
+database: true
+softdepend: [NC-BukkitLib, Vault]
+commands:
+    titanchat:
+        description: TitanChat Commands
+        aliases: tc
+        usage: /<command> [action] [argument]
+    broadcast:
+        description: Broadcast Command
+        aliases: bc
+        permission: TitanChat.broadcast
+        usage: /<command> [message]
+    me:
+        description: Emote Command
+        aliases: em
+        permission: TitanChat.emote.server
+        usage: /<command> [action]
+    whisper:
+        description: Whisper Command
+        aliases: w
+        permission: TitanChat.whisper
+        usage: /<command> [player] [message]
+permissions:
+    TitanChat.staff:
+        description: Access to everything
+        default: op
+        children:
+            TitanChat.update: true
+            TitanChat.create: true
+            TitanChat.delete: true
+            TitanChat.broadcast: true
+            TitanChat.emote.server: true
+            TitanChat.silence.server: true
+            TitanChat.force: true
+            TitanChat.access.*: true
+            TitanChat.mod: true
+            TitanChat.rank.*: true
+            TitanChat.convert: true
+            TitanChat.whisper: true
+    TitanChat.update:
+        description: Will be notified of updates
+        default: op
+    TitanChat.create:
+        description: Access to channel creation
+        default: op
+    TitanChat.delete:
+        description: Access to channel deletion
+        default: op
+    TitanChat.nick:
+        description: Access to all nick related commands
+        default: op
+        children:
+            TitanChat.nick.change: true
+            TitanChat.nick.reset: true
+            TitanChat.nick.check: true
+    TitanChat.nick.change:
+        description: Access to the nick changing command
+        default: op
+    TitanChat.nick.reset:
+        description: Access to the nick reset command
+        default: op
+    TitanChat.nick.check:
+        description: Access to the nick check command
+        default: op
+    TitanChat.broadcast:
+        description: Access to broadcast command
+        default: op
+    TitanChat.emote.server:
+        description: Access to server-wide emote broadcast
+        default: op
+        children:
+            TitanChat.emote: true
+    TitanChat.emote:
+        description: Access to channel emote broadcast
+        default: true
+    TitanChat.silence.server:
+        description: Access to server silence
+        default: op
+        children:
+            TitanChat.silence: true
+    TitanChat.silence:
+        description: Access to channel silence
+        default: op
+        children:
+            TitanChat.mute: true
+    TitanChat.force:
+        description: Access to forcing channel joins
+        default: op
+    TitanChat.mod:
+        description: Access to moderation perms, has voice
+        default: op
+        children:
+            TitanChat.ban.*: true
+            TitanChat.kick.*: true
+            TitanChat.mute: true
+            TitanChat.voice: true
+    TitanChat.mute:
+        description: Access to mute commands
+        default: op
+    TitanChat.voice:
+        description: Access to chat at all times
+        default: op
+    TitanChat.convert:
+        description: Access to colour code conversion and its command
+        default: op
+    TitanChat.whisper:
+        description: Access to whisper command
+        default: true

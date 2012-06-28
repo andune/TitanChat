@@ -1,0 +1,49 @@
+#==============================================================#
+#                         COLOUR CODES                         #
+# &0 (black), &1 (dark blue), &2 (green), &3 (dark aqua),      #
+# &4 (red), &5 (purple), &6 (gold), &7 (silver),               #
+# &8 (grey), &9 (blue), &a (light green), &b (aqua),           #
+# &c (light red), &d (light purple), &e (yellow), &f (white),  #
+# &k (magical)                                                 #
+# &l (bold), &m (underlined), &n (striked), &o (italic)        #
+#==============================================================#
+
+auto-library-update: true
+channels:
+    enable-channels: true
+    chat-display-colour: '&f'
+    channel-limit: -1
+    quick-message: '@'
+    messages:
+        join: true
+        leave: true
+broadcast:
+    player:
+        enable: true
+        format: '[&cBroadcast&f] %player: %message'
+    server:
+        enable: true
+        format: '<&4Server&f> %message'
+emote:
+    player:
+        enable: true
+        format: '* %player %action'
+    server:
+        enable: true
+        format: '* &4Server &f%action'
+whisper:
+    player:
+        enable: true
+        format: '&5%player whispers: %message'
+    server:
+        enable: true
+        format: '&5Server whispers: %message'
+formatting:
+    use-built-in: true
+    format: "%tag %prefix%player%suffix: %message"
+permissions:
+- TitanChat.g.prefix.[&7User&f]
+- TitanChat.g.prefix.[&4Admin&f]
+- 'TitanChat.p.suffix. the &6Member&f'
+- 'TitanChat.p.suffix. the &4Owner&f'
+debug: none
