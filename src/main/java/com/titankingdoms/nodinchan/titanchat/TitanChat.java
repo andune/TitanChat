@@ -245,91 +245,6 @@ public final class TitanChat extends JavaPlugin {
 	}
 	
 	/**
-	 * Checks for update of the library
-	 */
-	private void updateLib() {
-		PluginManager pm = getServer().getPluginManager();
-		
-		NCBL libPlugin = (NCBL) pm.getPlugin("NC-BukkitLib");
-		
-		File destination = new File(getDataFolder().getParentFile().getParentFile(), "lib");
-		destination.mkdirs();
-		
-		File lib = new File(destination, "NC-BukkitLib.jar");
-		File pluginLib = new File(getDataFolder().getParentFile(), "NC-BukkitLib.jar");
-		
-		boolean inPlugins = false;
-		boolean download = false;
-		
-		try {
-			URL url = new URL("http://bukget.org/api/plugin/nc-bukkitlib");
-			
-			JSONObject jsonPlugin = (JSONObject) new JSONParser().parse(new InputStreamReader(url.openStream()));
-			JSONArray versions = (JSONArray) jsonPlugin.get("versions");
-			
-			if (libPlugin == null) {
-				getLogger().log(Level.WARNING, "Missing NC-Bukkit lib");
-				inPlugins = true;
-				download = true;
-				
-			} else {
-				double currentVer = libPlugin.getVersion();
-				double newVer = currentVer;
-				
-				for (int ver = 0; ver < versions.size(); ver++) {
-					JSONObject version = (JSONObject) versions.get(ver);
-					
-					if (version.get("type").equals("Release")) {
-						newVer = Double.parseDouble(((String) version.get("name")).split(" ")[1].trim().substring(1));
-						break;
-					}
-				}
-				
-				if (newVer > currentVer) {
-					getLogger().log(Level.WARNING, "NC-Bukkit lib outdated");
-					download = true;
-				}
-			}
-			
-			if (download) {
-				getLogger().log(Level.INFO, "Downloading NC-Bukkit lib");
-				
-				String dl_link = "";
-				
-				for (int ver = 0; ver < versions.size(); ver++) {
-					JSONObject version = (JSONObject) versions.get(ver);
-					
-					if (version.get("type").equals("Release")) {
-						dl_link = (String) version.get("dl_link");
-						break;
-					}
-				}
-				
-				if (dl_link == null)
-					throw new Exception();
-				
-				URL link = new URL(dl_link);
-				ReadableByteChannel rbc = Channels.newChannel(link.openStream());
-				
-				if (inPlugins) {
-					FileOutputStream output = new FileOutputStream(pluginLib);
-					output.getChannel().transferFrom(rbc, 0, 1 << 24);
-					libPlugin = (NCBL) pm.loadPlugin(pluginLib);
-					
-				} else {
-					FileOutputStream output = new FileOutputStream(lib);
-					output.getChannel().transferFrom(rbc, 0, 1 << 24);
-				}
-				
-				libPlugin.hook(this);
-				
-				getLogger().log(Level.INFO, "Downloaded NC-Bukkit lib");
-			}
-			
-		} catch (Exception e) { getLogger().log(Level.WARNING, "Failed to check for library update"); }
-	}
-	
-	/**
 	 * Initialises Metrics
 	 * 
 	 * @return True is Metrics is initialised
@@ -780,6 +695,91 @@ public final class TitanChat extends JavaPlugin {
 	public void setSilenced(boolean silenced) {
 		db.i("Setting silenced to " + silenced);
 		this.silenced = silenced;
+	}
+	
+	/**
+	 * Checks for update of the library
+	 */
+	private void updateLib() {
+		PluginManager pm = getServer().getPluginManager();
+		
+		NCBL libPlugin = (NCBL) pm.getPlugin("NC-BukkitLib");
+		
+		File destination = new File(getDataFolder().getParentFile().getParentFile(), "lib");
+		destination.mkdirs();
+		
+		File lib = new File(destination, "NC-BukkitLib.jar");
+		File pluginLib = new File(getDataFolder().getParentFile(), "NC-BukkitLib.jar");
+		
+		boolean inPlugins = false;
+		boolean download = false;
+		
+		try {
+			URL url = new URL("http://bukget.org/api/plugin/nc-bukkitlib");
+			
+			JSONObject jsonPlugin = (JSONObject) new JSONParser().parse(new InputStreamReader(url.openStream()));
+			JSONArray versions = (JSONArray) jsonPlugin.get("versions");
+			
+			if (libPlugin == null) {
+				getLogger().log(Level.WARNING, "Missing NC-Bukkit lib");
+				inPlugins = true;
+				download = true;
+				
+			} else {
+				double currentVer = libPlugin.getVersion();
+				double newVer = currentVer;
+				
+				for (int ver = 0; ver < versions.size(); ver++) {
+					JSONObject version = (JSONObject) versions.get(ver);
+					
+					if (version.get("type").equals("Release")) {
+						newVer = Double.parseDouble(((String) version.get("name")).split(" ")[1].trim().substring(1));
+						break;
+					}
+				}
+				
+				if (newVer > currentVer) {
+					getLogger().log(Level.WARNING, "NC-Bukkit lib outdated");
+					download = true;
+				}
+			}
+			
+			if (download) {
+				getLogger().log(Level.INFO, "Downloading NC-Bukkit lib");
+				
+				String dl_link = "";
+				
+				for (int ver = 0; ver < versions.size(); ver++) {
+					JSONObject version = (JSONObject) versions.get(ver);
+					
+					if (version.get("type").equals("Release")) {
+						dl_link = (String) version.get("dl_link");
+						break;
+					}
+				}
+				
+				if (dl_link == null)
+					throw new Exception();
+				
+				URL link = new URL(dl_link);
+				ReadableByteChannel rbc = Channels.newChannel(link.openStream());
+				
+				if (inPlugins) {
+					FileOutputStream output = new FileOutputStream(pluginLib);
+					output.getChannel().transferFrom(rbc, 0, 1 << 24);
+					libPlugin = (NCBL) pm.loadPlugin(pluginLib);
+					
+				} else {
+					FileOutputStream output = new FileOutputStream(lib);
+					output.getChannel().transferFrom(rbc, 0, 1 << 24);
+				}
+				
+				libPlugin.hook(this);
+				
+				getLogger().log(Level.INFO, "Downloaded NC-Bukkit lib");
+			}
+			
+		} catch (Exception e) { getLogger().log(Level.WARNING, "Failed to check for library update"); }
 	}
 	
 	/**
