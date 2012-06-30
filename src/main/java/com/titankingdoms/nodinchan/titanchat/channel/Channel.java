@@ -423,12 +423,8 @@ public class Channel extends Loadable {
 			
 			String[] lines = plugin.getFormatHandler().regroup(format, receiveEvent.getMessage());
 			
-			for (int line = 0; line < lines.length; line++) {
-				if (line < 1)
-					receiveEvent.getRecipant().sendMessage(receiveEvent.getFormat().replace("%message", lines[0]));
-				else
-					receiveEvent.getRecipant().sendMessage(lines[line]);
-			}
+			receiveEvent.getRecipant().sendMessage(receiveEvent.getFormat().replace("%message", lines[0]));
+			receiveEvent.getRecipant().sendMessage(Arrays.copyOfRange(lines, 1, lines.length));
 		}
 		
 		return format.replace("%message", sendEvent.getMessage());

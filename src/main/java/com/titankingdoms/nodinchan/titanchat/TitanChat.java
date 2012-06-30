@@ -410,12 +410,10 @@ public final class TitanChat extends JavaPlugin {
 					
 					String[] lines = getFormatHandler().regroup(message, str.toString());
 					
-					for (int line = 0; line < lines.length; line++) {
-						if (line < 1)
-							getServer().broadcastMessage(getFormatHandler().colourise(message.replace("%message", lines[0])));
-						else
-							getServer().broadcastMessage(lines[line]);
-					}
+					getServer().broadcastMessage(getFormatHandler().colourise(message.replace("%message", lines[0])));
+					
+					for (int line = 1; line < lines.length; line++)
+						getServer().broadcastMessage(lines[line]);
 					
 					String console = "<" + ChatColor.RED + "Server" + ChatColor.RESET + "> ";
 					
@@ -452,12 +450,10 @@ public final class TitanChat extends JavaPlugin {
 				
 				String[] lines = getFormatHandler().regroup(message, str.toString());
 				
-				for (int line = 0; line < lines.length; line++) {
-					if (line < 1)
-						getServer().broadcastMessage(getFormatHandler().colourise(message.replace("%message", lines[0])));
-					else
-						getServer().broadcastMessage(lines[line]);
-				}
+				getServer().broadcastMessage(getFormatHandler().colourise(message.replace("%message", lines[0])));
+				
+				for (int line = 1; line < lines.length; line++)
+					getServer().broadcastMessage(lines[line]);
 				
 				String console = "<" + ChatColor.RED + "Server" + ChatColor.RESET + "> ";
 				
@@ -498,12 +494,10 @@ public final class TitanChat extends JavaPlugin {
 				
 				String[] lines = getFormatHandler().regroup(message, str.toString());
 				
-				for (int line = 0; line < lines.length; line++) {
-					if (line < 1)
-						getServer().broadcastMessage(getFormatHandler().colourise(message.replace("%action", lines[0])));
-					else
-						getServer().broadcastMessage(getFormatHandler().colourise(lines[line]));
-				}
+				getServer().broadcastMessage(getFormatHandler().colourise(message.replace("%action", lines[0])));
+				
+				for (int line = 1; line < lines.length; line++)
+					getServer().broadcastMessage(getFormatHandler().colourise(lines[line]));
 				
 				String console = "* " + ChatColor.RED + "Server " + ChatColor.RESET;
 				

@@ -69,12 +69,10 @@ public class ChatCommand extends Command {
 		
 		String[] lines = plugin.getFormatHandler().regroup(format, str.toString());
 		
-		for (int line = 0; line < lines.length; line++) {
-			if (line < 1)
-				plugin.getServer().broadcastMessage(format.replace("%message", lines[0]));
-			else
-				plugin.getServer().broadcastMessage(lines[line]);
-		}
+		plugin.getServer().broadcastMessage(format.replace("%message", lines[0]));
+		
+		for (int line = 1; line < lines.length; line++)
+			plugin.getServer().broadcastMessage(lines[line]);
 	}
 	
 	/**
