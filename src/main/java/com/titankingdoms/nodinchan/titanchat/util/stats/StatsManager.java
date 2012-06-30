@@ -24,27 +24,12 @@ import com.titankingdoms.nodinchan.titanchat.event.MessageSendEvent;
 
 public final class StatsManager implements Listener {
 	
-	private long caps = 0;
 	private long chars = 0;
 	private long lines = 0;
-	private long questions = 0;
-	private long exclaimation = 0;
 	private long words = 0;
-	
-	public long getCaps() {
-		return caps;
-	}
 	
 	public long getCharacters() {
 		return chars;
-	}
-	
-	public long getExclaimation() {
-		return exclaimation;
-	}
-	
-	public long getQuestions() {
-		return questions;
 	}
 	
 	public long getLines() {
@@ -57,24 +42,8 @@ public final class StatsManager implements Listener {
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onMessageSend(MessageSendEvent event) {
-		char[] characters = event.getMessage().toCharArray();
-		
-		long caps = 0;
-		
-		for (char character : characters)
-			if (Character.isUpperCase(character))
-				caps++;
-		
-		this.caps += caps;
-		this.chars += characters.length;
+		this.chars += event.getMessage().toCharArray().length;
 		this.lines++;
-		
-		if (event.getMessage().contains("?"))
-			this.questions++;
-		
-		if (event.getMessage().contains("!"))
-			this.exclaimation++;
-		
 		this.words += event.getMessage().split(" ").length;
 	}
 }

@@ -39,12 +39,7 @@ public final class DisplayNameChanger {
 		if (display == null)
 			return;
 		
-		if (display.getDisplayName().length() > 16)
-			player.setPlayerListName(display.getDisplayName().substring(0, 16));
-		else
-			player.setPlayerListName(display.getDisplayName());
-		
-		player.setDisplayName(display.getDisplayName());
+		set(player, display.getDisplayName());
 	}
 	
 	/**
@@ -59,20 +54,15 @@ public final class DisplayNameChanger {
 			if (player.getDisplayName().equals(player.getName())) {
 				plugin.getDatabase().delete(display);
 				return;
-				
-			} else
-				display.setDisplayName(player.getDisplayName());
+			}
 			
-		} else {
-			if (!player.getDisplayName().equals(player.getName())) {
-				display = new DisplayName();
-				display.setName(player.getName());
-				display.setDisplayName(player.getDisplayName());
-				
-			} else
-				return;
-		}
+		} else if (!player.getDisplayName().equals(player.getName())) {
+			display = new DisplayName();
+			display.setName(player.getName());
+			
+		} else { return; }
 		
+		display.setDisplayName(player.getDisplayName());
 		plugin.getDatabase().save(display);
 	}
 	
@@ -85,10 +75,9 @@ public final class DisplayNameChanger {
 	 */
 	public void set(Player player, String displayname) {
 		if (displayname.length() > 16)
-			player.setPlayerListName(displayname.substring(0, 16));
-		else
-			player.setPlayerListName(displayname);
+			displayname = displayname.substring(0, 16);
 		
+		player.setPlayerListName(displayname);
 		player.setDisplayName(displayname);
 	}
 	

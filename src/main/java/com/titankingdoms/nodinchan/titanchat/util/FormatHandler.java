@@ -10,7 +10,6 @@ import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
 import com.titankingdoms.nodinchan.titanchat.channel.StandardChannel;
 import com.titankingdoms.nodinchan.titanchat.channel.Variables;
-import com.titankingdoms.nodinchan.titanchat.channel.Channel.Type;
 import com.titankingdoms.nodinchan.titanchat.event.MessageFormatEvent;
 import com.titankingdoms.nodinchan.titanchat.util.variable.Variable.IVariable;
 
@@ -67,23 +66,6 @@ public final class FormatHandler {
 	 */
 	public String colourise(String text) {
 		return text.replaceAll("(&([a-f0-9A-Fk-oK-OrR]))", "\u00A7$2");
-	}
-	
-	/**
-	 * Check if Channel convert colours
-	 * 
-	 * @param name The Channel name
-	 * 
-	 * @return True if converts
-	 */
-	public boolean colours(String name) {
-		if (plugin.getManager().getChannelManager().getChannel(name).getSpecialType().equals(Type.STAFF))
-			return true;
-		
-		if (plugin.getManager().getChannelManager().getChannel(name) instanceof CustomChannel)
-			return true;
-		
-		return ((StandardChannel) plugin.getManager().getChannelManager().getChannel(name)).getVariables().convert();
 	}
 	
 	/**
@@ -290,16 +272,17 @@ public final class FormatHandler {
 		BROADCAST {
 			
 			@Override
-			public String format(Object... params) {
+			protected String format(Object... params) {
 				String format = plugin.getConfig().getString("broadcast.player.format");
 				format = format.replace("%player", ((Player) params[0]).getDisplayName());
+				format = format.replace("%name", ((Player) params[0]).getName());
 				return plugin.getFormatHandler().colourise(format);
 			}
 		},
 		CHANNEL {
 			
 			@Override
-			public String format(Object... params) {
+			protected String format(Object... params) {
 				String format = "";
 				
 				if (plugin.getManager().getChannelManager().getChannel((String) params[1]) instanceof CustomChannel) {
@@ -312,12 +295,14 @@ public final class FormatHandler {
 				if (plugin.useDefaultFormat()) {
 					format = "%tag %prefix%player%suffix&f: %message";
 					format = format.replace("%player", variables.getNameColour() + ((Player) params[0]).getDisplayName() + "&f");
+					format = format.replace("%name", variables.getNameColour() + ((Player) params[0]).getName() + "&f");
 					format = format.replace("%tag", variables.getTag());
 					format = format.replace("%message", variables.getChatColour() + "%message");
 					
 				} else {
 					format = variables.getFormat();
 					format = format.replace("%player", variables.getNameColour() + ((Player) params[0]).getDisplayName() + "&f");
+					format = format.replace("%name", variables.getNameColour() + ((Player) params[0]).getName() + "&f");
 					format = format.replace("%tag", variables.getTag());
 					format = format.replace("%message", variables.getChatColour() + "%message");
 				}
@@ -328,7 +313,7 @@ public final class FormatHandler {
 		DEFAULT {
 			
 			@Override
-			public String format(Object... params) {
+			protected String format(Object... params) {
 				String format = "";
 				
 				if (plugin.useDefaultFormat()) {
@@ -338,6 +323,7 @@ public final class FormatHandler {
 					format = plugin.getConfig().getString("formatting.format");
 					
 					format = format.replace("%player", ((Player) params[0]).getDisplayName());
+					format = format.replace("%name", ((Player) params[0]).getName());
 					format = format.replace("%message", plugin.getConfig().getString("channels.chat-display-colour") + "%message");
 				}
 				
@@ -347,18 +333,20 @@ public final class FormatHandler {
 		EMOTE {
 			
 			@Override
-			public String format(Object... params) {
+			protected String format(Object... params) {
 				String format = plugin.getConfig().getString("emote.player.format");
 				format = format.replace("%player", ((Player) params[0]).getDisplayName());
+				format = format.replace("%name", ((Player) params[0]).getName());
 				return plugin.getFormatHandler().colourise(format);
 			}
 		},
 		WHISPER {
 			
 			@Override
-			public String format(Object... params) {
+			protected String format(Object... params) {
 				String format = plugin.getConfig().getString("whisper.player.format");
 				format = format.replace("%player", ((Player) params[0]).getDisplayName());
+				format = format.replace("%name", ((Player) params[0]).getName());
 				return plugin.getFormatHandler().colourise(format);
 			}
 		};
@@ -370,6 +358,6 @@ public final class FormatHandler {
 		 * 
 		 * @return The format
 		 */
-		public abstract String format(Object... params);
+		protected abstract String format(Object... params);
 	}
 }

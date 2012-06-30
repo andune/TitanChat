@@ -224,8 +224,7 @@ public final class TitanChat extends JavaPlugin {
 	 * @return The Player with the name
 	 */
 	public Player getPlayer(String name) {
-		OfflinePlayer player = getOfflinePlayer(name);
-		return (player.isOnline()) ? player.getPlayer() : null;
+		return getServer().getPlayer(name);
 	}
 	
 	/**
@@ -274,30 +273,6 @@ public final class TitanChat extends JavaPlugin {
 				@Override
 				public int getValue() {
 					return (int) stats.getWords();
-				}
-			});
-			
-			metricsStats.addPlotter(new Plotter("Capital Characters") {
-				
-				@Override
-				public int getValue() {
-					return (int) stats.getCaps();
-				}
-			});
-			
-			metricsStats.addPlotter(new Plotter("Questions") {
-				
-				@Override
-				public int getValue() {
-					return (int) stats.getQuestions();
-				}
-			});
-			
-			metricsStats.addPlotter(new Plotter("Excaimations") {
-				
-				@Override
-				public int getValue() {
-					return (int) stats.getExclaimation();
 				}
 			});
 			
@@ -383,10 +358,10 @@ public final class TitanChat extends JavaPlugin {
 					manager.getChannelManager().preReload();
 					manager.getCommandManager().preReload();
 					variable.unload();
+					format.load();
 					manager.getAddonManager().postReload();
 					manager.getChannelManager().postReload();
 					manager.getCommandManager().postReload();
-					format.load();
 					log(Level.INFO, "Configs reloaded");
 					return true;
 				}

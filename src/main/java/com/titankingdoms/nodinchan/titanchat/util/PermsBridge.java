@@ -419,35 +419,38 @@ public final class PermsBridge {
 		 */
 		@EventHandler(priority = EventPriority.MONITOR)
 		public void onPluginEnable(PluginEnableEvent event) {
-			if (permissionsPlugin == null) {
-				Plugin perms = null;
-				
-				if (perms == null) {
-					if (exists("ru.tehkode.permissions.bukkit.PermissionsEx"))
-						perms = plugin.getServer().getPluginManager().getPlugin("PermissionsEx");
+			if (!checked) {
+				if (permissionsPlugin == null) {
+					Plugin perms = null;
 					
-					else if (exists("de.bananaco.bpermissions.imp.Permissions"))
-						perms = plugin.getServer().getPluginManager().getPlugin("bPermissions");
-					
-					else if (exists("com.platymuus.bukkit.permissions.PermissionsPlugin"))
-						perms = plugin.getServer().getPluginManager().getPlugin("PermissionsBukkit");
-					
-					else if (exists("org.anjocaido.groupmanager.GroupManager"))
-						perms = plugin.getServer().getPluginManager().getPlugin("GroupManager");
-					
-					else if (exists("org.tyrannyofheaven.bukkit.zPermissions.ZPermissionsPlugin"))
-						perms = plugin.getServer().getPluginManager().getPlugin("zPermissions");
-				}
-				
-				if (perms != null) {
-					if (perms.isEnabled()) {
-						permissionsPlugin = perms;
-						name = permissionsPlugin.getName();
+					if (perms == null) {
+						if (exists("ru.tehkode.permissions.bukkit.PermissionsEx"))
+							perms = plugin.getServer().getPluginManager().getPlugin("PermissionsEx");
+						
+						else if (exists("de.bananaco.bpermissions.imp.Permissions"))
+							perms = plugin.getServer().getPluginManager().getPlugin("bPermissions");
+						
+						else if (exists("com.platymuus.bukkit.permissions.PermissionsPlugin"))
+							perms = plugin.getServer().getPluginManager().getPlugin("PermissionsBukkit");
+						
+						else if (exists("org.anjocaido.groupmanager.GroupManager"))
+							perms = plugin.getServer().getPluginManager().getPlugin("GroupManager");
+						
+						else if (exists("org.tyrannyofheaven.bukkit.zPermissions.ZPermissionsPlugin"))
+							perms = plugin.getServer().getPluginManager().getPlugin("zPermissions");
 					}
 					
-				} else { if (!usingVault() && !checked) { plugin.log(Level.INFO, name + " detected and hooked"); checked = true; } }
+					if (perms != null) {
+						if (perms.isEnabled()) {
+							permissionsPlugin = perms;
+							name = permissionsPlugin.getName();
+							checked = true;
+						}
+						
+					} else { checked = true; }
+				}
 				
-			} else { if (!usingVault() && !checked) { plugin.log(Level.INFO, name + " detected and hooked"); checked = true; } }
+			} else if (!usingVault()) {  plugin.log(Level.INFO, name + " detected and hooked"); }
 		}
 	}
 	

@@ -94,10 +94,10 @@ public class PluginCommand extends Command {
 			chm.preReload();
 			cmdm.preReload();
 			var.unload();
+			format.load();
 			am.postReload();
 			chm.postReload();
 			cmdm.postReload();
-			format.load();
 			plugin.log(Level.INFO, "Configs reloaded");
 			plugin.sendInfo(player, "Configs reloaded");
 			
