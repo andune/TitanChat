@@ -24,7 +24,7 @@ import com.avaje.ebean.validation.NotEmpty;
  */
 
 @Entity
-@Table(name = "display_Names")
+@Table(name = "display_names")
 public class DisplayName {
 	
 	@Id
@@ -32,13 +32,13 @@ public class DisplayName {
 	private int id;
 	
 	@NotEmpty
-	private String DisplayName;
+	private String displayname;
 	
 	@NotEmpty
-	private String Name;
+	private String name;
 	
 	public String getDisplayName() {
-		return DisplayName;
+		return displayname;
 	}
 	
 	public int getId() {
@@ -46,18 +46,18 @@ public class DisplayName {
 	}
 	
 	public String getName() {
-		return Name;
+		return name;
 	}
 	
-	public void setDisplayName(String DisplayName) {
-		this.DisplayName = DisplayName;
+	public void setDisplayName(String displayname) {
+		this.displayname = displayname;
 	}
 	
 	public void setId(int id) {
 		this.id = id;
 	}
 	
-	public void setName(String Name) {
-		this.Name = Name;
+	public void setName(String name) {
+		this.name = name;
 	}
 }

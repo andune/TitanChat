@@ -446,7 +446,8 @@ public final class PermsBridge {
 					}
 					
 				} else { if (!usingVault() && !checked) { plugin.log(Level.INFO, name + " detected and hooked"); checked = true; } }
-			}
+				
+			} else { if (!usingVault() && !checked) { plugin.log(Level.INFO, name + " detected and hooked"); checked = true; } }
 		}
 	}
 	

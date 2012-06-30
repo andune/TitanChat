@@ -27,11 +27,14 @@ import org.json.simple.parser.JSONParser;
 
 import com.nodinchan.ncbukkit.NCBL;
 import com.titankingdoms.nodinchan.titanchat.metrics.Metrics;
+import com.titankingdoms.nodinchan.titanchat.metrics.Metrics.Graph;
+import com.titankingdoms.nodinchan.titanchat.metrics.Metrics.Plotter;
 import com.titankingdoms.nodinchan.titanchat.util.Debugger;
 import com.titankingdoms.nodinchan.titanchat.util.FormatHandler;
 import com.titankingdoms.nodinchan.titanchat.util.PermsBridge;
 import com.titankingdoms.nodinchan.titanchat.util.displayname.DisplayName;
 import com.titankingdoms.nodinchan.titanchat.util.displayname.DisplayNameChanger;
+import com.titankingdoms.nodinchan.titanchat.util.stats.StatsManager;
 import com.titankingdoms.nodinchan.titanchat.util.variable.Variable;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
@@ -65,12 +68,11 @@ public final class TitanChat extends JavaPlugin {
 	private static final Logger log = Logger.getLogger("TitanLog");
 	private static final Debugger db = new Debugger(1);
 	
-	private TitanChatListener listener;
-	
 	private TitanChatManager manager;
 	private DisplayNameChanger displayname;
 	private FormatHandler format;
 	private PermsBridge permBridge;
+	private StatsManager stats;
 	private Variable variable;
 	
 	private boolean silenced = false;
@@ -177,15 +179,6 @@ public final class TitanChat extends JavaPlugin {
 	}
 	
 	/**
-	 * Gets the TitanChat listener
-	 * 
-	 * @return The TitanChatListener
-	 */
-	public TitanChatListener getListener() {
-		return listener;
-	}
-	
-	/**
 	 * Gets the Logger of the plugin
 	 */
 	@Override
@@ -257,6 +250,58 @@ public final class TitanChat extends JavaPlugin {
 			
 			if (metrics.isOptOut())
 				return true;
+			
+			Graph metricsStats = metrics.createGraph("Stats");
+			
+			metricsStats.addPlotter(new Plotter("Characters") {
+				
+				@Override
+				public int getValue() {
+					return (int) stats.getCharacters();
+				}
+			});
+			
+			metricsStats.addPlotter(new Plotter("Lines") {
+				
+				@Override
+				public int getValue() {
+					return (int) stats.getLines();
+				}
+			});
+			
+			metricsStats.addPlotter(new Plotter("Words") {
+				
+				@Override
+				public int getValue() {
+					return (int) stats.getWords();
+				}
+			});
+			
+			metricsStats.addPlotter(new Plotter("Capital Characters") {
+				
+				@Override
+				public int getValue() {
+					return (int) stats.getCaps();
+				}
+			});
+			
+			metricsStats.addPlotter(new Plotter("Questions") {
+				
+				@Override
+				public int getValue() {
+					return (int) stats.getQuestions();
+				}
+			});
+			
+			metricsStats.addPlotter(new Plotter("Excaimations") {
+				
+				@Override
+				public int getValue() {
+					return (int) stats.getExclaimation();
+				}
+			});
+			
+			metrics.addGraph(metricsStats);
 			
 			return metrics.start();
 			
@@ -559,6 +604,17 @@ public final class TitanChat extends JavaPlugin {
 	public void onEnable() {
 		log(Level.INFO, "is now enabling...");
 		
+		try {
+			getDatabase().find(DisplayName.class).findRowCount();
+			
+		} catch (PersistenceException e) {
+			log(Level.INFO, "Setting up display name database...");
+			installDDL();
+		}
+		
+		displayname = new DisplayNameChanger();
+		stats = new StatsManager();
+		
 		if (!initMetrics())
 			log(Level.WARNING, "Failed to hook into Metrics");
 		
@@ -572,23 +628,15 @@ public final class TitanChat extends JavaPlugin {
 			saveResource("channels/Staff.yml", false);
 		}
 		
-		try {
-			getDatabase().find(DisplayName.class).findRowCount();
-			
-		} catch (PersistenceException e) {
-			log(Level.INFO, "Setting up display name database...");
-			installDDL();
-		}
-		
 		manager = new TitanChatManager();
-		displayname = new DisplayNameChanger();
 		format = new FormatHandler();
 		permBridge = new PermsBridge();
 		variable = new Variable();
 		
 		Debugger.load(this);
 		
-		register(listener = new TitanChatListener());
+		register(new TitanChatListener());
+		register(stats);
 		
 		for (Player player : getServer().getOnlinePlayers())
 			displayname.apply(player);

@@ -99,6 +99,7 @@ TitanChat, a chat management and formatting plugin for Bukkit.
 * 23.06.12 - Made downloading NC-BukkitLib non-automatic due to new Bukkit rule
 * 26.06.12 - Made channel tags avaiable for usage in commands and now uses NC-BukkitLib v2.1
 * 28.06.12 - Improved the nick change command and added permission checks to the display name commands
+* 30.06.12 - Made use of Metrics Graphs
 
 -----------------------------------------------------------------------------------------------------------------------
 
