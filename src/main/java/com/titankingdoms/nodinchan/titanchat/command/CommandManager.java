@@ -302,26 +302,12 @@ public final class CommandManager {
 		public void load(Channel channel) {
 			if (!channel.getConfig().getString("commands.join").equals("")) {
 				String cmd = channel.getConfig().getString("commands.join");
-				com.nodinchan.ncbukkit.command.PluginCommand command = dynamic.registerCommand(cmd);
-				
-				if (command != null) {
-					command.setExecutor(this);
-					command.setDescription("Joins the channel");
-					command.setUsage("/<command>");
-					joinCommand.put(cmd.toLowerCase(), channel);
-				}
+				registerJoin(cmd, channel);
 			}
 			
 			if (!channel.getConfig().getString("commands.message").equals("")) {
 				String cmd = channel.getConfig().getString("commands.message");
-				com.nodinchan.ncbukkit.command.PluginCommand command = dynamic.registerCommand(cmd);
-				
-				if (command != null) {
-					command.setExecutor(this);
-					command.setDescription("Sends a message to the channel");
-					command.setUsage("/<command>");
-					sendCommand.put(cmd.toLowerCase(), channel);
-				}
+				registerSend(cmd, channel);
 			}
 		}
 		
@@ -346,6 +332,28 @@ public final class CommandManager {
 			}
 			
 			return false;
+		}
+		
+		public void registerJoin(String cmd, Channel channel) {
+			com.nodinchan.ncbukkit.command.PluginCommand command = dynamic.registerCommand(cmd);
+			
+			if (command != null) {
+				command.setExecutor(this);
+				command.setDescription("Joins the channel");
+				command.setUsage("/<command>");
+				joinCommand.put(cmd.toLowerCase(), channel);
+			}
+		}
+		
+		public void registerSend(String cmd, Channel channel) {
+			com.nodinchan.ncbukkit.command.PluginCommand command = dynamic.registerCommand(cmd);
+			
+			if (command != null) {
+				command.setExecutor(this);
+				command.setDescription("Sends a message to the channel");
+				command.setUsage("/<command>");
+				sendCommand.put(cmd.toLowerCase(), channel);
+			}
 		}
 	}
 }

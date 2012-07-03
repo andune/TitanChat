@@ -1,13 +1,16 @@
 package com.titankingdoms.nodinchan.titanchat.command.commands;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
+import com.titankingdoms.nodinchan.titanchat.addon.Addon;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
+import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
 import com.titankingdoms.nodinchan.titanchat.command.Command;
 import com.titankingdoms.nodinchan.titanchat.command.CommandManager;
 import com.titankingdoms.nodinchan.titanchat.command.info.CommandID;
@@ -44,7 +47,44 @@ public class InformationCommand extends Command {
 	}
 	
 	/**
-	 * ColourCodes Command - Lists out avalable colour codes and respective colours
+	 * Addons Command - Lists out all addons
+	 */
+	@CommandID(name = "Addons", aliases = "addons", requireChannel = false)
+	@CommandInfo(description = "Lists out all addons", usage = "addons")
+	public void addons(Player player, String args) {
+		StringBuilder addons = new StringBuilder();
+		
+		for (Addon addon : plugin.getManager().getAddonManager().getAddons()) {
+			if (addons.length() > 0)
+				addons.append(", ");
+			
+			addons.append(addon.getName());
+		}
+		
+		String[] addonLines = plugin.getFormatHandler().regroup("Addons: %message", addons.toString());
+		
+		StringBuilder channels = new StringBuilder();
+		
+		for (Channel channel : plugin.getManager().getChannelManager().getChannels()) {
+			if (!(channel instanceof CustomChannel))
+				continue;
+			
+			if (channels.length() > 0)
+				channels.append(", ");
+			
+			channels.append(channel.getName());
+		}
+		
+		String[] channelLines = plugin.getFormatHandler().regroup("Custom Channels: %message", channels.toString());
+		
+		player.sendMessage("Addons: " + addonLines[0]);
+		player.sendMessage(Arrays.copyOfRange(addonLines, 1, addonLines.length));
+		player.sendMessage("Custom Channels: " + channelLines[0]);
+		player.sendMessage(Arrays.copyOfRange(channelLines, 1, channelLines.length));
+	}
+	
+	/**
+	 * ColourCodes Command - Lists out available colour codes and respective colours
 	 */
 	@CommandID(name = "ColourCodes", aliases = { "colourcodes", "colorcodes", "colours", "colors", "codes" }, requireChannel = false)
 	@CommandInfo(description = "Lists out avalable colour codes and respective colours", usage = "colourcodes")

@@ -2,6 +2,7 @@ package com.titankingdoms.nodinchan.titanchat.channel;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -272,6 +273,15 @@ public final class ChannelManager {
 	 */
 	public Channel getChannelByTag(String tag) {
 		return tags.get(tag.toLowerCase());
+	}
+	
+	/**
+	 * Gets an unmodifiable list of channels
+	 * 
+	 * @return An unmodifiable view of channels
+	 */
+	public List<Channel> getChannels() {
+		return Collections.unmodifiableList(Arrays.asList(channels.values().toArray(new Channel[0])));
 	}
 	
 	/**

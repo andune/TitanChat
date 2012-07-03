@@ -55,6 +55,11 @@ public class CustomChannel extends Channel implements Listener {
 		this.plugin = TitanChat.getInstance();
 	}
 	
+	@Override
+	public boolean canAccess(Player player) {
+		return true;
+	}
+	
 	/**
 	 * Colourise the line of text
 	 * 
@@ -96,7 +101,9 @@ public class CustomChannel extends Channel implements Listener {
 	 * @return The config
 	 */
 	public final FileConfiguration getConfig() {
-		if (config == null) { reloadConfig(); }
+		if (config == null)
+			reloadConfig();
+		
 		return config;
 	}
 	
@@ -154,7 +161,8 @@ public class CustomChannel extends Channel implements Listener {
 	 * Reloads the config
 	 */
 	public final void reloadConfig() {
-		if (configFile == null) { configFile = new File(new File(plugin.getManager().getAddonManager().getAddonDir(), super.getName()), "config.yml"); }
+		if (configFile == null)
+			configFile = new File(new File(plugin.getManager().getChannelManager().getCustomChannelDir(), super.getName()), "config.yml");
 		
 		config = YamlConfiguration.loadConfiguration(configFile);
 		

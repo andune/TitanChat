@@ -32,13 +32,13 @@ public class DisplayName {
 	private int id;
 	
 	@NotEmpty
-	private String displayname;
+	private String DisplayName;
 	
 	@NotEmpty
-	private String name;
+	private String Name;
 	
 	public String getDisplayName() {
-		return displayname;
+		return DisplayName;
 	}
 	
 	public int getId() {
@@ -46,18 +46,18 @@ public class DisplayName {
 	}
 	
 	public String getName() {
-		return name;
+		return Name;
 	}
 	
-	public void setDisplayName(String displayname) {
-		this.displayname = displayname;
+	public void setDisplayName(String DisplayName) {
+		this.DisplayName = DisplayName;
 	}
 	
 	public void setId(int id) {
 		this.id = id;
 	}
 	
-	public void setName(String name) {
-		this.name = name;
+	public void setName(String Name) {
+		this.Name = Name;
 	}
 }

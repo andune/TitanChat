@@ -2,6 +2,7 @@ package com.titankingdoms.nodinchan.titanchat.addon;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -77,6 +78,15 @@ public final class AddonManager {
 	 */
 	public File getAddonDir() {
 		return new File(plugin.getDataFolder(), "addons");
+	}
+	
+	/**
+	 * Gets an unmodifiable list of addons
+	 * 
+	 * @return An unmodifiable view of addons
+	 */
+	public List<Addon> getAddons() {
+		return Collections.unmodifiableList(addons);
 	}
 	
 	/**
