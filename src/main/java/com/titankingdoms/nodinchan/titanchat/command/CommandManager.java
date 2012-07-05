@@ -133,7 +133,7 @@ public final class CommandManager {
 	 * @return The amount of commands
 	 */
 	public int getCommandAmount() {
-		return executors.size();
+		return executors.values().size();
 	}
 	
 	/**
@@ -207,7 +207,7 @@ public final class CommandManager {
 		register(new RankingCommand());
 		register(new SettingsCommand());
 		
-		for (Command command : new Loader<Command>(plugin, getCommandDir(), new Object[0]).load()) { register(command); }
+		for (Command command : new Loader<Command>(plugin, getCommandDir()).load()) { register(command); }
 		
 		sortCommands();
 	}
@@ -259,7 +259,7 @@ public final class CommandManager {
 		Collections.sort(names);
 		
 		for (String name : names)
-			executors.put(name, getCommandExecutor(name));
+			executors.put(name, this.executors.get(name.toLowerCase()));
 		
 		this.executors.clear();
 		this.executors.putAll(executors);

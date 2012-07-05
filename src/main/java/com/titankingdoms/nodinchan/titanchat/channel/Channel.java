@@ -194,6 +194,18 @@ public class Channel extends Loadable {
 	}
 	
 	/**
+	 * Sends a message to the Player if joining is denied
+	 * 
+	 * @param player The Player to send to
+	 */
+	public void deny(Player player, String message) {
+		if (message != null && !message.equals(""))
+			plugin.sendWarning(player, message);
+		else
+			plugin.sendWarning(player, "You do not have access to the channel");
+	}
+	
+	/**
 	 * Check if a Channel equals another
 	 */
 	@Override

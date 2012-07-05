@@ -59,6 +59,20 @@ public final class StandardChannel extends Channel {
 		return this.password.equals(password);
 	}
 	
+	@Override
+	public void deny(Player player, String message) {
+		if (message != null && !message.equals(""))
+			plugin.sendWarning(player, message);
+		else if (getType().equals(Type.PASSWORD))
+			plugin.sendWarning(player, "Incorrect password");
+		else if (getType().equals(Type.PRIVATE))
+			plugin.sendWarning(player, "You have not been whitelisted for the channel");
+		else if (getType().equals(Type.PUBLIC))
+			plugin.sendWarning(player, "You have been banned on the channel");
+		else
+			super.deny(player, message);
+	}
+	
 	/**
 	 * Gets the password of the channel
 	 * 

@@ -151,10 +151,10 @@ public class InformationCommand extends Command {
 					Executor executor = plugin.getManager().getCommandManager().getCommandExecutor(cmdNum);
 					
 					String name = executor.getName();
-					String description = "";
+					String description = " - ";
 					
 					if (executor.getMethod().getAnnotation(CommandInfo.class) != null)
-						description += " - " + executor.getMethod().getAnnotation(CommandInfo.class).description();
+						description += executor.getMethod().getAnnotation(CommandInfo.class).description();
 					
 					player.sendMessage(ChatColor.AQUA + name + description);
 				}

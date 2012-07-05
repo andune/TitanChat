@@ -170,7 +170,7 @@ public class ChannelCommand extends Command {
 					cm.chSwitch(player, ch);
 					plugin.sendInfo(player, "You have switched channels");
 					
-				} else { plugin.sendWarning(player, "You do not have permission to join " + ch.getName()); }
+				} else { ch.deny(player, "You do not have permission to join " + ch.getName()); }
 				
 				return;
 			}
@@ -188,9 +188,9 @@ public class ChannelCommand extends Command {
 							cm.chSwitch(player, channel);
 							plugin.sendInfo(player, "You have switched channels");
 							
-						} else { plugin.sendWarning(player, "Incorrect password"); }
+						} else { channel.deny(player, null); }
 						
-					} else { plugin.sendWarning(player, "You need to enter a password"); }
+					} else { channel.deny(player, "You need to enter a password"); }
 					break;
 					
 				case NONE:
@@ -200,11 +200,11 @@ public class ChannelCommand extends Command {
 								cm.chSwitch(player, channel);
 								plugin.sendInfo(player, "You have switched channels");
 								
-							} else { plugin.sendWarning(player, "You are banned on this channel"); }
+							} else { channel.deny(player, "You are banned on this channel"); }
 							
-						} else { plugin.sendWarning(player, "Incorrect password"); }
+						} else { channel.deny(player, null); }
 						
-					} else { plugin.sendWarning(player, "You need to enter a password"); }
+					} else { channel.deny(player, "You need to enter a password"); }
 					break;
 					
 				case STAFF:
@@ -214,15 +214,15 @@ public class ChannelCommand extends Command {
 								cm.chSwitch(player, channel);
 								plugin.sendInfo(player, "You have switched channels");
 									
-							} else { plugin.sendWarning(player, "Incorrect password"); }
+							} else { channel.deny(player, null); }
 								
-						} else { plugin.sendWarning(player, "You need to enter a password"); }
+						} else { channel.deny(player, "You need to enter a password"); }
 						
-					} else { plugin.sendWarning(player, "You do not have permission to join " + channel.getName()); }
+					} else { channel.deny(player, "You do not have permission to join " + channel.getName()); }
 					break;
 					
 				default:
-					plugin.sendWarning(player, "Invalid special type set for Channel " + channel.getName());
+					channel.deny(player, "Invalid special type set for Channel " + channel.getName());
 					break;
 				}
 				break;
@@ -236,7 +236,7 @@ public class ChannelCommand extends Command {
 						cm.chSwitch(player, channel);
 						plugin.sendInfo(player, "You have switched channels");
 						
-					} else { plugin.sendWarning(player, "You are not on the whitelist"); }
+					} else { channel.deny(player, null); }
 					break;
 					
 				case STAFF:
@@ -245,13 +245,13 @@ public class ChannelCommand extends Command {
 							cm.chSwitch(player, channel);
 							plugin.sendInfo(player, "You have switched channels");
 							
-						} else { plugin.sendWarning(player, "You are not on the whitelist"); }
+						} else { channel.deny(player, null); }
 						
-					} else { plugin.sendWarning(player, "You do not have permission to join " + channel.getName()); }
+					} else { channel.deny(player, "You do not have permission to join " + channel.getName()); }
 					break;
 					
 				default:
-					plugin.sendWarning(player, "Invalid special type set for Channel " + channel.getName());
+					channel.deny(player, "Invalid special type set for Channel " + channel.getName());
 					break;
 				}
 				break;
@@ -269,7 +269,7 @@ public class ChannelCommand extends Command {
 						cm.chSwitch(player, channel);
 						plugin.sendInfo(player, "You have switched channels");
 						
-					} else { plugin.sendWarning(player, "You are banned on this channel"); }
+					} else { channel.deny(player, null); }
 					break;
 					
 				case STAFF:
@@ -277,11 +277,11 @@ public class ChannelCommand extends Command {
 						cm.chSwitch(player, channel);
 						plugin.sendInfo(player, "You have switched channels");
 						
-					} else { plugin.sendWarning(player, "You do not have permission to join " + channel.getName()); }
+					} else { channel.deny(player, "You do not have permission to join " + channel.getName()); }
 					break;
 					
 				default:
-					plugin.sendWarning(player, "Invalid special type set for Channel " + channel.getName());
+					channel.deny(player, "Invalid special type set for Channel " + channel.getName());
 					break;
 				}
 				break;
@@ -302,7 +302,7 @@ public class ChannelCommand extends Command {
 							cm.chSwitch(player, ch);
 							plugin.sendInfo(player, "You have switched channels");
 							
-						} else { plugin.sendWarning(player, "You do not have permission to join " + ch.getName()); }
+						} else { ch.deny(player, "You do not have permission to join " + ch.getName()); }
 						
 						return;
 					}
@@ -320,9 +320,9 @@ public class ChannelCommand extends Command {
 									cm.chSwitch(player, channel);
 									plugin.sendInfo(player, "You have switched channels");
 									
-								} else { plugin.sendWarning(player, "Incorrect password"); }
+								} else { channel.deny(player, null); }
 								
-							} else { plugin.sendWarning(player, "You need to enter a password"); }
+							} else { channel.deny(player, "You need to enter a password"); }
 							break;
 							
 						case NONE:
@@ -332,11 +332,11 @@ public class ChannelCommand extends Command {
 										cm.chSwitch(player, channel);
 										plugin.sendInfo(player, "You have switched channels");
 										
-									} else { plugin.sendWarning(player, "You are banned on this channel"); }
+									} else { channel.deny(player, "You are banned on this channel"); }
 									
-								} else { plugin.sendWarning(player, "Incorrect password"); }
+								} else { channel.deny(player, null); }
 								
-							} else { plugin.sendWarning(player, "You need to enter a password"); }
+							} else { channel.deny(player, "You need to enter a password"); }
 							break;
 							
 						case STAFF:
@@ -346,15 +346,15 @@ public class ChannelCommand extends Command {
 										cm.chSwitch(player, channel);
 										plugin.sendInfo(player, "You have switched channels");
 											
-									} else { plugin.sendWarning(player, "Incorrect password"); }
+									} else { channel.deny(player, null); }
 										
-								} else { plugin.sendWarning(player, "You need to enter a password"); }
+								} else { channel.deny(player, "You need to enter a password"); }
 								
-							} else { plugin.sendWarning(player, "You do not have permission to join " + channel.getName()); }
+							} else { channel.deny(player, "You do not have permission to join " + channel.getName()); }
 							break;
 							
 						default:
-							plugin.sendWarning(player, "Invalid special type set for Channel " + channel.getName());
+							channel.deny(player, "Invalid special type set for Channel " + channel.getName());
 							break;
 						}
 						break;
@@ -368,7 +368,7 @@ public class ChannelCommand extends Command {
 								cm.chSwitch(player, channel);
 								plugin.sendInfo(player, "You have switched channels");
 								
-							} else { plugin.sendWarning(player, "You are not on the whitelist"); }
+							} else { channel.deny(player, null); }
 							break;
 							
 						case STAFF:
@@ -377,13 +377,13 @@ public class ChannelCommand extends Command {
 									cm.chSwitch(player, channel);
 									plugin.sendInfo(player, "You have switched channels");
 									
-								} else { plugin.sendWarning(player, "You are not on the whitelist"); }
+								} else { channel.deny(player, null); }
 								
-							} else { plugin.sendWarning(player, "You do not have permission to join " + channel.getName()); }
+							} else { channel.deny(player, "You do not have permission to join " + channel.getName()); }
 							break;
 							
 						default:
-							plugin.sendWarning(player, "Invalid special type set for Channel " + channel.getName());
+							channel.deny(player, "Invalid special type set for Channel " + channel.getName());
 							break;
 						}
 						break;
@@ -401,7 +401,7 @@ public class ChannelCommand extends Command {
 								cm.chSwitch(player, channel);
 								plugin.sendInfo(player, "You have switched channels");
 								
-							} else { plugin.sendWarning(player, "You are banned on this channel"); }
+							} else { channel.deny(player, null); }
 							break;
 							
 						case STAFF:
@@ -409,11 +409,11 @@ public class ChannelCommand extends Command {
 								cm.chSwitch(player, channel);
 								plugin.sendInfo(player, "You have switched channels");
 								
-							} else { plugin.sendWarning(player, "You do not have permission to join " + channel.getName()); }
+							} else { channel.deny(player, "You do not have permission to join " + channel.getName()); }
 							break;
 							
 						default:
-							plugin.sendWarning(player, "Invalid special type set for Channel " + channel.getName());
+							channel.deny(player, "Invalid special type set for Channel " + channel.getName());
 							break;
 						}
 						break;
