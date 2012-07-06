@@ -87,7 +87,7 @@ public class CustomChannel extends Channel implements Listener {
 	 * 
 	 * @param sender The sender of the message
 	 * 
-	 * @param message The message to format
+	 * @param format The message to format
 	 * 
 	 * @return The formatted message
 	 */

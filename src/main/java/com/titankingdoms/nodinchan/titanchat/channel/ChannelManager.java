@@ -497,14 +497,11 @@ public final class ChannelManager {
 	 */
 	public void loadChannelVariables(StandardChannel channel) {
 		Variables variables = channel.getVariables();
-		variables.setChatColour(channel.getConfig().getString("chat-display-colour"));
-		variables.setConvert(channel.getConfig().getBoolean("colour-code"));
-		
-		if (channel.getConfig().getString("format") != null)
-			variables.setFormat(channel.getConfig().getString("format"));
-		
-		variables.setNameColour(channel.getConfig().getString("name-display-colour"));
-		variables.setTag(channel.getConfig().getString("tag"));
+		variables.setChatColour(channel.getConfig().getString("chat-display-colour", ""));
+		variables.setConvert(channel.getConfig().getBoolean("colour-code", false));
+		variables.setFormat(channel.getConfig().getString("format", plugin.getConfig().getString("formatting.format", "")));
+		variables.setNameColour(channel.getConfig().getString("name-display-colour", ""));
+		variables.setTag(channel.getConfig().getString("tag", ""));
 	}
 	
 	/**

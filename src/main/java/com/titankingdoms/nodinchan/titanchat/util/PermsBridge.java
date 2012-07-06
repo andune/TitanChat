@@ -109,7 +109,7 @@ public final class PermsBridge {
 	/**
 	 * Check if a package exists
 	 * 
-	 * @param packages The file path
+	 * @param pkg The file path
 	 * 
 	 * @return True if the package exists
 	 */

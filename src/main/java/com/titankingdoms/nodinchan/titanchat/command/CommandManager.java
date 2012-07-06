@@ -146,9 +146,9 @@ public final class CommandManager {
 	}
 	
 	/**
-	 * Gets the Executor by its name
+	 * Gets the Executor by its alias
 	 * 
-	 * @param name The name
+	 * @param alias The alias
 	 * 
 	 * @return The Executor if it exists, otherwise null
 	 */

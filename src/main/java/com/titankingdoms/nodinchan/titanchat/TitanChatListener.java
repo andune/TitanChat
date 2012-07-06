@@ -50,8 +50,6 @@ public class TitanChatListener implements Listener {
 	
 	/**
 	 * Listens to events and act accordingly
-	 * 
-	 * @param plugin TitanChat
 	 */
 	public TitanChatListener() {
 		this.plugin = TitanChat.getInstance();
@@ -161,8 +159,6 @@ public class TitanChatListener implements Listener {
 	
 	/**
 	 * Checks for an update
-	 * 
-	 * @return The value of the new version
 	 */
 	protected void updateCheck() {
 		try {

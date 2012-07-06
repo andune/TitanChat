@@ -43,7 +43,7 @@ public class Debugger {
 	/**
 	 * Debug constructor
 	 * 
-	 * @param i The debug id to check
+	 * @param id The debug id to check
 	 */
 	public Debugger(int id) {
 		this.id = id;
