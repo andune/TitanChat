@@ -1,8 +1,5 @@
 package com.titankingdoms.nodinchan.titanchat.command;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 
@@ -10,8 +7,6 @@ import com.nodinchan.ncbukkit.loader.Loadable;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.addon.Addon;
 import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
-import com.titankingdoms.nodinchan.titanchat.command.info.CommandID;
-import com.titankingdoms.nodinchan.titanchat.command.info.CommandInfo;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -35,14 +30,14 @@ import com.titankingdoms.nodinchan.titanchat.command.info.CommandInfo;
  * @author NodinChan
  *
  */
-public class Command extends Loadable implements Listener {
+public class CommandBase extends Loadable implements Listener {
 
 	protected final TitanChat plugin;
 	
 	/**
 	 * Initialises variables
 	 */
-	public Command() {
+	public CommandBase() {
 		super("");
 		this.plugin = TitanChat.getInstance();
 	}
@@ -58,8 +53,8 @@ public class Command extends Loadable implements Listener {
 		plugin.sendWarning(player, "Invalid Argument Length");
 		Executor executor = plugin.getManager().getCommandManager().getCommandExecutor(name);
 		
-		if (executor.getMethod().getAnnotation(CommandInfo.class) != null)
-			plugin.sendInfo(player, "Usage: /titanchat " + executor.getMethod().getAnnotation(CommandInfo.class).usage());
+		if (!executor.getUsage().equals(""))
+			plugin.sendInfo(player, "Usage: /titanchat " + executor.getUsage());
 	}
 	
 	/**
@@ -87,84 +82,5 @@ public class Command extends Loadable implements Listener {
 	 */
 	public final void register(Listener listener) {
 		plugin.register(listener);
-	}
-	
-	/**
-	 * Executor - Represents each command method in a Command
-	 * 
-	 * @author NodinChan
-	 *
-	 */
-	public static final class Executor {
-		
-		private final Method method;
-		
-		private final Command command;
-		
-		private final String name;
-		
-		public Executor(Method method, Command command) {
-			this.method = method;
-			this.command = command;
-			this.name = method.getAnnotation(CommandID.class).name();
-		}
-		
-		@Override
-		public boolean equals(Object object) {
-			if (object instanceof Executor)
-				if (((Executor) object).getMethod().equals(method))
-					if (((Executor) object).getCommand().equals(command))
-						if (((Method) object).getName().equals(name))
-							return true;
-			
-			return false;
-		}
-		
-		/**
-		 * Executes the command
-		 * 
-		 * @param player The command sender
-		 * 
-		 * @param args The command arguments
-		 * 
-		 * @throws InvocationTargetException 
-		 * @throws IllegalArgumentException 
-		 * @throws IllegalAccessException 
-		 */
-		public void execute(Player player, String[] args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-			method.invoke(command, player, args);
-		}
-		
-		/**
-		 * Gets the Command
-		 * 
-		 * @return The Command
-		 */
-		public Command getCommand() {
-			return command;
-		}
-		
-		/**
-		 * Gets the method
-		 * 
-		 * @return The Method
-		 */
-		public Method getMethod() {
-			return method;
-		}
-		
-		/**
-		 * Gets the name of the command
-		 * 
-		 * @return The command name
-		 */
-		public String getName() {
-			return name;
-		}
-		
-		@Override
-		public String toString() {
-			return "Command:" + name;
-		}
 	}
 }

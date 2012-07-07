@@ -4,9 +4,8 @@ import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
-import com.titankingdoms.nodinchan.titanchat.command.Command;
-import com.titankingdoms.nodinchan.titanchat.command.info.CommandID;
-import com.titankingdoms.nodinchan.titanchat.command.info.CommandInfo;
+import com.titankingdoms.nodinchan.titanchat.command.CommandBase;
+import com.titankingdoms.nodinchan.titanchat.command.info.*;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -30,7 +29,7 @@ import com.titankingdoms.nodinchan.titanchat.command.info.CommandInfo;
  * @author NodinChan
  *
  */
-public class InvitationCommand extends Command {
+public class InvitationCommand extends CommandBase {
 
 	private ChannelManager cm;
 	
@@ -41,8 +40,9 @@ public class InvitationCommand extends Command {
 	/**
 	 * Accept Command - Accepts the channel join invitation and joins the channel
 	 */
-	@CommandID(name = "Accept", aliases = "accept")
-	@CommandInfo(description = "Accepts the channel join invitation and joins the channel", usage = "accept [channel]")
+	@ChCommand
+	@Description("Accepts the channel join invitation and joins the channel")
+	@Usage("accept [channel]")
 	public void accept(Player player, String[] args) {
 		try {
 			if (cm.exists(args[0])) {
@@ -82,8 +82,9 @@ public class InvitationCommand extends Command {
 	/**
 	 * Decline Command - Declines the channel join invitation
 	 */
-	@CommandID(name = "Decline", aliases = "decline")
-	@CommandInfo(description = "Declines the channel join invitation", usage = "decline [channel]")
+	@ChCommand
+	@Description("Declines the channel join invitation")
+	@Usage("decline [channel]")
 	public void decline(Player player, String[] args) {
 		try {
 			if (cm.exists(args[0])) {
@@ -121,8 +122,9 @@ public class InvitationCommand extends Command {
 	/**
 	 * Invite Command - Invites the player to join the channel
 	 */
-	@CommandID(name = "Invite", aliases = "invite")
-	@CommandInfo(description = "Invites the player to join the channel", usage = "invite [player] <channel>")
+	@ChCommand
+	@Description("Invites the player to join the channel")
+	@Usage("invite [player] <channel>")
 	public void invite(Player player, String[] args) {
 		if (args.length < 1) { invalidArgLength(player, "Invite"); }
 		

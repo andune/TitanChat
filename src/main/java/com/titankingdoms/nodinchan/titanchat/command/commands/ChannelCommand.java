@@ -7,9 +7,8 @@ import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
 import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
 import com.titankingdoms.nodinchan.titanchat.channel.StandardChannel;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel.Type;
-import com.titankingdoms.nodinchan.titanchat.command.Command;
-import com.titankingdoms.nodinchan.titanchat.command.info.CommandID;
-import com.titankingdoms.nodinchan.titanchat.command.info.CommandInfo;
+import com.titankingdoms.nodinchan.titanchat.command.CommandBase;
+import com.titankingdoms.nodinchan.titanchat.command.info.*;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -33,7 +32,7 @@ import com.titankingdoms.nodinchan.titanchat.command.info.CommandInfo;
  * @author NodinChan
  *
  */
-public class ChannelCommand extends Command {
+public class ChannelCommand extends CommandBase {
 
 	private ChannelManager cm;
 	
@@ -44,8 +43,10 @@ public class ChannelCommand extends Command {
 	/**
 	 * Create Command - Creates a new channel
 	 */
-	@CommandID(name = "Create", aliases = { "create", "c" })
-	@CommandInfo(description = "Creates a new channel", usage = "create [channel]")
+	@ChCommand
+	@Aliases("c")
+	@Description("Creates a new channel")
+	@Usage("create [channel]")
 	public void create(Player player, String[] args) {
 		try {
 			if (plugin.getConfig().getInt("channels.channel-limit") < 0) {
@@ -77,14 +78,17 @@ public class ChannelCommand extends Command {
 	/**
 	 * Delete Command - Deletes the channel
 	 */
-	@CommandID(name = "Delete", aliases = { "delete", "d" })
-	@CommandInfo(description = "Deletes the channel", usage = "delete [channel]")
+	@ChCommand
+	@Aliases("d")
+	@Description("Deletes the channel")
+	@Usage("delete [channel]")
 	public void delete(Player player, String[] args) {
 		try {
 			if (plugin.getPermsBridge().has(player, "TitanChat.delete")) {
 				if (cm.exists(args[0])) {
 					if (!cm.getChannel(args[0]).getSpecialType().equals(Type.DEFAULT) || !cm.getChannel(args[0]).getSpecialType().equals(Type.STAFF))
 						cm.deleteChannel(player, args[0]);
+					
 					else { plugin.sendWarning(player, "You cannot delete this channel"); }
 					
 				} else {
@@ -92,6 +96,7 @@ public class ChannelCommand extends Command {
 						if (cm.existsAsTag(args[0].substring(4))) {
 							if (!cm.getChannelByTag(args[0].substring(4)).getSpecialType().equals(Type.DEFAULT) || !cm.getChannelByTag(args[0].substring(4)).getSpecialType().equals(Type.STAFF))
 								cm.deleteChannel(player, cm.getExactByTag(args[0].substring(4)));
+							
 							else { plugin.sendWarning(player, "You cannot delete this channel"); }
 							
 						} else { plugin.sendWarning(player, "No such channel"); }
@@ -107,8 +112,9 @@ public class ChannelCommand extends Command {
 	/**
 	 * Follow Command - Follows the channel
 	 */
-	@CommandID(name = "Follow", aliases = "follow")
-	@CommandInfo(description = "Follows the channel", usage = "follow [channel]")
+	@ChCommand
+	@Description("Follows the channel")
+	@Usage("follow [channel]")
 	public void follow(Player player, String[] args) {
 		try {
 			if (cm.exists(args[0])) {
@@ -152,8 +158,10 @@ public class ChannelCommand extends Command {
 	/**
 	 * Join Command - Joins the channel
 	 */
-	@CommandID(name = "Join", aliases = { "join", "j" })
-	@CommandInfo(description = "Joins the channel", usage = "join [channel] <password>")
+	@ChCommand
+	@Aliases("j")
+	@Description("Joins the channel")
+	@Usage("join [channel] <password>")
 	public void join(Player player, String[] args) {
 		if (args.length < 1) { invalidArgLength(player, "Join"); return; }
 		
@@ -170,7 +178,7 @@ public class ChannelCommand extends Command {
 					cm.chSwitch(player, ch);
 					plugin.sendInfo(player, "You have switched channels");
 					
-				} else { ch.deny(player, "You do not have permission to join " + ch.getName()); }
+				} else { ch.deny(player, null); }
 				
 				return;
 			}
@@ -425,8 +433,13 @@ public class ChannelCommand extends Command {
 		}
 	}
 	
-	@CommandID(name = "Leave", aliases = { "leave", "part"})
-	@CommandInfo(description = "Leaves the channel you are in", usage = "leave")
+	/**
+	 * Leave Command - Leaves the channel you are in
+	 */
+	@ChCommand
+	@Aliases("part")
+	@Description("Leaves the channel you are in")
+	@Usage("leave")
 	public void leave(Player player, String[] args) {
 		Channel channel = cm.getChannel(player);
 		
@@ -440,8 +453,9 @@ public class ChannelCommand extends Command {
 	/**
 	 * Unfollow Command - Unfollows the channel
 	 */
-	@CommandID(name = "Unfollow", aliases = "unfollow")
-	@CommandInfo(description = "Unfollows the channel", usage = "unfollow [channel]")
+	@ChCommand
+	@Description("Unfollows the channel")
+	@Usage("unfollow [channel]")
 	public void unfollow(Player player, String[] args) {
 		try {
 			if (cm.exists(args[0])) {

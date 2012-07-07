@@ -1,9 +1,16 @@
 package com.titankingdoms.nodinchan.titanchat.event;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.bukkit.entity.Player;
-import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+
+import com.titankingdoms.nodinchan.titanchat.event.MessageSendEvent.Message;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -22,56 +29,81 @@ import org.bukkit.event.HandlerList;
  */
 
 /**
- * MessageReceiveEvent - Called when a Player is to recieve a message
+ * MessageReceiveEvent - Called when Players will receive the message
  * 
  * @author NodinChan
  *
  */
-public final class MessageReceiveEvent extends Event implements Cancellable {
+public final class MessageReceiveEvent extends Event {
 	
 	private static final HandlerList handlers = new HandlerList();
 	
 	private final Player sender;
-	private final Player recipant;
 	
-	private String format;
-	private String message;
+	private final Message message;
 	
-	private boolean cancelled = false;
+	private final Map<Player, Message> messages;
+	private final Map<Player, Boolean> cancelled;
 	
 	/**
-	 * Called when a Player is to recieve a message
+	 * Called when Players will receive the message
 	 * 
 	 * @param sender The message sender
 	 * 
-	 * @param recipant The message recipant
-	 * 
-	 * @param format The format
+	 * @param recipants The message recipants
 	 * 
 	 * @param message The message
 	 */
-	public MessageReceiveEvent(Player sender, Player recipant, String format, String message) {
+	public MessageReceiveEvent(Player sender, List<Player> recipants, Message message) {
 		this.sender = sender;
-		this.recipant = recipant;
-		this.format = format;
 		this.message = message;
+		this.messages = new HashMap<Player, Message>();
+		this.cancelled = new HashMap<Player, Boolean>();
+		
+		for (Player recipant : recipants) {
+			messages.put(recipant, message.clone());
+			cancelled.put(recipant, false);
+		}
 	}
 	
 	/**
-	 * Gets the format
+	 * Called when Players will receive the message
 	 * 
-	 * @return The format of the message
+	 * @param sender The message sender
+	 * 
+	 * @param recipants The message recipants
+	 * 
+	 * @param message The message
 	 */
-	public String getFormat() {
-		return format;
+	public MessageReceiveEvent(Player sender, Player[] recipants, Message message) {
+		this(sender, Arrays.asList(recipants), message);
 	}
 	
 	/**
-	 * Gets the entire formatted message
+	 * Gets the format to be used for the player
+	 * 
+	 * @param recipant The recipant of the message
+	 * 
+	 * @return The format to be used
+	 */
+	public String getFormat(Player recipant) {
+		if (messages.containsKey(recipant))
+			return messages.get(recipant).getFormat();
+		
+		return message.getFormat();
+	}
+	
+	/**
+	 * Gets the entire formatted message to be sent to the player
+	 * 
+	 * @param recipant The recipant of the message
 	 * 
 	 * @return The formatted message
 	 */
-	public String getFormattedMessage() {
+	public String getFormattedMessage(Player recipant) {
+		String format = getFormat(recipant);
+		String message = getMessage(recipant);
+		
 		return format.replace("%message", message);
 	}
 	
@@ -85,21 +117,32 @@ public final class MessageReceiveEvent extends Event implements Cancellable {
 	}
 	
 	/**
-	 * Gets the message
+	 * Gets the message to be sent to the player
+	 * 
+	 * @param recipant The recipant of the message
 	 * 
 	 * @return The message to be sent
 	 */
-	public String getMessage() {
-		return message;
+	public String getMessage(Player recipant) {
+		if (messages.containsKey(recipant))
+			return messages.get(recipant).getMessage();
+		
+		return message.getMessage();
 	}
 	
 	/**
-	 * Gets the message recipant
+	 * Gets the recipants of the message
 	 * 
-	 * @return The recipant of the message
+	 * @return The list of recipants
 	 */
-	public Player getRecipant() {
-		return recipant;
+	public List<Player> getRecipants() {
+		List<Player> recipants = new ArrayList<Player>(messages.keySet());
+		
+		for (Player recipant : messages.keySet())
+			if (cancelled.containsKey(recipant) && cancelled.get(recipant))
+				recipants.add(recipant);
+		
+		return recipants;
 	}
 	
 	/**
@@ -112,34 +155,51 @@ public final class MessageReceiveEvent extends Event implements Cancellable {
 	}
 	
 	/**
-	 * Check if the event is canclled
+	 * Check if the event should be cancelled for the player
+	 * 
+	 * @param recipant The message recipant
+	 * 
+	 * @return True if cancelled
 	 */
-	public boolean isCancelled() {
-		return cancelled;
+	public boolean isCancelled(Player recipant) {
+		if (cancelled.containsKey(recipant))
+			return cancelled.get(recipant);
+		
+		return true;
 	}
 	
 	/**
-	 * Sets the format
+	 * Cancels the event for the player
+	 * 
+	 * @param recipant The message recipant
+	 * 
+	 * @param cancelled Set to true to cancel
+	 */
+	public void setCancelled(Player recipant, boolean cancelled) {
+		this.cancelled.put(recipant, cancelled);
+	}
+	
+	/**
+	 * Sets the format to be used for the player
+	 * 
+	 * @param recipant The message recipant
 	 * 
 	 * @param format The new format
 	 */
-	public void setFormat(String format) {
-		this.format = format;
+	public void setFormat(Player recipant, String format) {
+		if (messages.containsKey(recipant))
+			messages.get(recipant).setFormat(format);
 	}
 	
 	/**
-	 * Sets the message
+	 * Sets the message to be sent to the player
+	 * 
+	 * @param recipant The message recipant
 	 * 
 	 * @param message The new message
 	 */
-	public void setMessage(String message) {
-		this.message = message;
-	}
-	
-	/**
-	 * Sets the event as cancelled
-	 */
-	public void setCancelled(boolean cancelled) {
-		this.cancelled = cancelled;
+	public void setMessage(Player recipant, String message) {
+		if (messages.containsKey(recipant))
+			messages.get(recipant).setMessage(message);
 	}
 }

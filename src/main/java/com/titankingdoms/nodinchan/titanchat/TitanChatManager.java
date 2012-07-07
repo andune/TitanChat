@@ -17,6 +17,9 @@ public class TitanChatManager {
 	
 	public TitanChatManager() {
 		this.plugin = TitanChat.getInstance();
+		addonManager = new AddonManager();
+		chManager = new ChannelManager();
+		cmdManager = new CommandManager();
 	}
 	
 	/**
@@ -50,10 +53,6 @@ public class TitanChatManager {
 	 * Loads the AddonManager, ChannelManager and CommandManager
 	 */
 	public void load() {
-		addonManager = new AddonManager();
-		chManager = new ChannelManager();
-		cmdManager = new CommandManager();
-		
 		NCBL ncbl = (NCBL) plugin.getServer().getPluginManager().getPlugin("NC-BukkitLib");
 		
 		if (ncbl != null) {
@@ -61,5 +60,14 @@ public class TitanChatManager {
 			try { chManager.load(); } catch (Exception e) { e.printStackTrace(); plugin.log(Level.WARNING, "Channels failed to load"); }
 			cmdManager.load();
 		}
+	}
+	
+	public void reload() {
+		addonManager.preReload();
+		chManager.preReload();
+		cmdManager.preReload();
+		addonManager.postReload();
+		chManager.postReload();
+		cmdManager.postReload();
 	}
 }

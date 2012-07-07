@@ -6,9 +6,8 @@ import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
-import com.titankingdoms.nodinchan.titanchat.command.Command;
-import com.titankingdoms.nodinchan.titanchat.command.info.CommandID;
-import com.titankingdoms.nodinchan.titanchat.command.info.CommandInfo;
+import com.titankingdoms.nodinchan.titanchat.command.CommandBase;
+import com.titankingdoms.nodinchan.titanchat.command.info.*;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -32,7 +31,7 @@ import com.titankingdoms.nodinchan.titanchat.command.info.CommandInfo;
  * @author NodinChan
  *
  */
-public class AdministrateCommand extends Command {
+public class AdministrateCommand extends CommandBase {
 
 	private ChannelManager cm;
 	
@@ -43,10 +42,12 @@ public class AdministrateCommand extends Command {
 	/**
 	 * Ban Command - Bans the player from the channel
 	 */
-	@CommandID(name = "Ban", aliases = { "ban", "b" })
-	@CommandInfo(description = "Bans the player from the channel", usage = "ban [player] <channel>")
+	@ChCommand
+	@Aliases("b")
+	@Description("Bans the player from the channel")
+	@Usage("ban [player] <channel>")
 	public void ban(Player player, String[] args) {
-		if (args.length < 1) { invalidArgLength(player, "Ban"); return; }
+		if (args.length < 1) { invalidArgLength(player, "ban"); return; }
 		
 		try {
 			if (cm.exists(args[1])) {
@@ -57,16 +58,7 @@ public class AdministrateCommand extends Command {
 						Player targetPlayer = plugin.getPlayer(args[0]);
 						
 						if (!channel.getBlackList().contains(player.getName())) {
-							channel.getAdminList().remove(targetPlayer.getName());
-							channel.getWhiteList().remove(targetPlayer.getName());
-							channel.getBlackList().add(targetPlayer.getName());
-							channel.save();
-							
-							if (channel.equals(cm.getChannel(targetPlayer)))
-								cm.chSwitch(targetPlayer, cm.getSpawnChannel(targetPlayer));
-							
-							plugin.sendWarning(targetPlayer, "You have been banned from " + channel.getName());
-							plugin.sendInfo(channel.getParticipants(), targetPlayer.getDisplayName() + " has been banned");
+							ban(player, targetPlayer, channel, true);
 							
 						} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " has already been banned"); }
 						
@@ -75,12 +67,7 @@ public class AdministrateCommand extends Command {
 						plugin.sendInfo(player, targetPlayer.getName() + " is offline");
 						
 						if (!channel.getBlackList().contains(player.getName())) {
-							channel.getAdminList().remove(targetPlayer.getName());
-							channel.getWhiteList().remove(targetPlayer.getName());
-							channel.getBlackList().add(targetPlayer.getName());
-							channel.save();
-							
-							plugin.sendInfo(channel.getParticipants(), targetPlayer.getName() + " has been banned");
+							ban(player, targetPlayer, channel, false);
 							
 						} else { plugin.sendWarning(player, targetPlayer.getName() + " has already been banned"); }
 					}
@@ -97,16 +84,7 @@ public class AdministrateCommand extends Command {
 								Player targetPlayer = plugin.getPlayer(args[0]);
 								
 								if (!channel.getBlackList().contains(player.getName())) {
-									channel.getAdminList().remove(targetPlayer.getName());
-									channel.getWhiteList().remove(targetPlayer.getName());
-									channel.getBlackList().add(targetPlayer.getName());
-									channel.save();
-									
-									if (channel.equals(cm.getChannel(targetPlayer)))
-										cm.chSwitch(targetPlayer, cm.getSpawnChannel(targetPlayer));
-									
-									plugin.sendWarning(targetPlayer, "You have been banned from " + channel.getName());
-									plugin.sendInfo(channel.getParticipants(), targetPlayer.getDisplayName() + " has been banned");
+									ban(player, targetPlayer, channel, true);
 									
 								} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " has already been banned"); }
 								
@@ -115,12 +93,7 @@ public class AdministrateCommand extends Command {
 								plugin.sendInfo(player, targetPlayer.getName() + " is offline");
 								
 								if (!channel.getBlackList().contains(player.getName())) {
-									channel.getAdminList().remove(targetPlayer.getName());
-									channel.getWhiteList().remove(targetPlayer.getName());
-									channel.getBlackList().add(targetPlayer.getName());
-									channel.save();
-									
-									plugin.sendInfo(channel.getParticipants(), targetPlayer.getName() + " has been banned");
+									ban(player, targetPlayer, channel, false);
 									
 								} else { plugin.sendWarning(player, targetPlayer.getName() + " has already been banned"); }
 							}
@@ -177,13 +150,30 @@ public class AdministrateCommand extends Command {
 		}
 	}
 	
+	private void ban(Player player, OfflinePlayer targetPlayer, Channel channel, boolean online) {
+		channel.getAdminList().remove(targetPlayer.getName());
+		channel.getWhiteList().remove(targetPlayer.getName());
+		channel.getBlackList().add(targetPlayer.getName());
+		channel.save();
+		
+		if (online) {
+			if (channel.equals(cm.getChannel(targetPlayer.getPlayer())))
+				cm.chSwitch(targetPlayer.getPlayer(), cm.getSpawnChannel(targetPlayer.getPlayer()));
+			
+			plugin.sendWarning(targetPlayer.getPlayer(), "You have been banned from " + channel.getName());
+		}
+		
+		plugin.sendInfo(channel.getParticipants(), targetPlayer.getPlayer().getDisplayName() + " has been banned");
+	}
+	
 	/**
 	 * Force Command - Forces the player to join the channel
 	 */
-	@CommandID(name = "Force", aliases = "force")
-	@CommandInfo(description = "Forces the player to join the channel", usage = "force [player] <channel>")
+	@ChCommand
+	@Description("Forces the player to join the channel")
+	@Usage("force [player] <channel>")
 	public void force(Player player, String[] args) {
-		if (args.length < 1) { invalidArgLength(player, "Force"); }
+		if (args.length < 1) { invalidArgLength(player, "force"); }
 		
 		try {
 			if (cm.exists(args[1])) {
@@ -194,9 +184,7 @@ public class AdministrateCommand extends Command {
 						Player targetPlayer = plugin.getPlayer(args[0]);
 						
 						if (!channel.equals(cm.getChannel(targetPlayer))) {
-							cm.chSwitch(targetPlayer, channel);
-							plugin.sendInfo(player, "You have forced " + targetPlayer.getDisplayName() + " to join the channel");
-							plugin.sendInfo(targetPlayer, "You have been forced to join " + channel.getName());
+							force(player, targetPlayer, channel);
 							
 						} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " is already in the channel"); }
 						
@@ -214,9 +202,7 @@ public class AdministrateCommand extends Command {
 								Player targetPlayer = plugin.getPlayer(args[0]);
 								
 								if (!channel.equals(cm.getChannel(targetPlayer))) {
-									cm.chSwitch(targetPlayer, channel);
-									plugin.sendInfo(player, "You have forced " + targetPlayer.getDisplayName() + " to join the channel");
-									plugin.sendInfo(targetPlayer, "You have been forced to join " + channel.getName());
+									force(player, targetPlayer, channel);
 									
 								} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " is already in the channel"); }
 								
@@ -242,9 +228,7 @@ public class AdministrateCommand extends Command {
 					Player targetPlayer = plugin.getPlayer(args[0]);
 					
 					if (!channel.equals(cm.getChannel(targetPlayer))) {
-						cm.chSwitch(targetPlayer, channel);
-						plugin.sendInfo(player, "You have forced " + targetPlayer.getDisplayName() + " to join the channel");
-						plugin.sendInfo(targetPlayer, "You have been forced to join " + channel.getName());
+						force(player, targetPlayer, channel);
 						
 					} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " is already in the channel"); }
 					
@@ -254,13 +238,21 @@ public class AdministrateCommand extends Command {
 		}
 	}
 	
+	private void force(Player player, Player targetPlayer, Channel channel) {
+		cm.chSwitch(targetPlayer, channel);
+		plugin.sendInfo(player, "You have forced " + targetPlayer.getDisplayName() + " to join the channel");
+		plugin.sendInfo(targetPlayer, "You have been forced to join " + channel.getName());
+	}
+	
 	/**
 	 * Kick Command - Kicks the player from the channel
 	 */
-	@CommandID(name = "Kick", aliases = { "kick", "k" })
-	@CommandInfo(description = "Kicks the player from the channel", usage = "kick [player] <channel>")
+	@ChCommand
+	@Aliases("k")
+	@Description("Kicks the player from the channel")
+	@Usage("kick [player] <channel>")
 	public void kick(Player player, String[] args) {
-		if (args.length < 1) { invalidArgLength(player, "Kick"); }
+		if (args.length < 1) { invalidArgLength(player, "kick"); }
 		
 		try {
 			if (cm.exists(args[1])) {
@@ -271,9 +263,7 @@ public class AdministrateCommand extends Command {
 						Player targetPlayer = plugin.getPlayer(args[0]);
 						
 						if (channel.getParticipants().contains(targetPlayer.getName())) {
-							cm.chSwitch(targetPlayer, cm.getSpawnChannel(targetPlayer));
-							plugin.sendWarning(targetPlayer, "You have been kicked from " + channel.getName());
-							plugin.sendInfo(channel.getParticipants(), targetPlayer.getDisplayName() + " has been kicked");
+							kick(player, targetPlayer, channel);
 							
 						} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " is not on the channel"); }
 						
@@ -291,9 +281,7 @@ public class AdministrateCommand extends Command {
 								Player targetPlayer = plugin.getPlayer(args[0]);
 								
 								if (channel.getParticipants().contains(targetPlayer.getName())) {
-									cm.chSwitch(targetPlayer, cm.getSpawnChannel(targetPlayer));
-									plugin.sendWarning(targetPlayer, "You have been kicked from " + channel.getName());
-									plugin.sendInfo(channel.getParticipants(), targetPlayer.getDisplayName() + " has been kicked");
+									kick(player, targetPlayer, channel);
 									
 								} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " is not on the channel"); }
 								
@@ -319,9 +307,7 @@ public class AdministrateCommand extends Command {
 					Player targetPlayer = plugin.getPlayer(args[0]);
 					
 					if (channel.getParticipants().contains(targetPlayer.getName())) {
-						cm.chSwitch(targetPlayer, cm.getSpawnChannel(targetPlayer));
-						plugin.sendWarning(targetPlayer, "You have been kicked from " + channel.getName());
-						plugin.sendInfo(channel.getParticipants(), targetPlayer.getDisplayName() + " has been kicked");
+						kick(player, targetPlayer, channel);
 						
 					} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " is not on the channel"); }
 					
@@ -331,11 +317,18 @@ public class AdministrateCommand extends Command {
 		}
 	}
 	
+	private void kick(Player player, Player targetPlayer, Channel channel) {
+		cm.chSwitch(targetPlayer, cm.getSpawnChannel(targetPlayer));
+		plugin.sendWarning(targetPlayer, "You have been kicked from " + channel.getName());
+		plugin.sendInfo(channel.getParticipants(), targetPlayer.getDisplayName() + " has been kicked");
+	}
+	
 	/**
 	 * Mute Command - Mutes the player on the channel
 	 */
-	@CommandID(name = "Mute", aliases = "mute", requireChannel = false)
-	@CommandInfo(description = "Mutes the player on the channel", usage = "mute [player] <channel>")
+	@Command
+	@Description("Mutes the player on the channel")
+	@Usage("mute [player] <channel>")
 	public void mute(Player player, String[] args) {
 		if (args.length < 1) { invalidArgLength(player, "Mute"); }
 		
@@ -361,9 +354,7 @@ public class AdministrateCommand extends Command {
 						Player targetPlayer = plugin.getPlayer(args[0]);
 						
 						if (!channel.getMuteList().contains(targetPlayer.getName())) {
-							channel.getMuteList().add(targetPlayer.getName());
-							plugin.sendWarning(targetPlayer, "You have been muted on " + channel.getName());
-							plugin.sendInfo(channel.getParticipants(), targetPlayer.getDisplayName() + " has been muted");
+							mute(player, targetPlayer, channel);
 							
 						} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " has already been muted"); }
 						
@@ -381,9 +372,7 @@ public class AdministrateCommand extends Command {
 								Player targetPlayer = plugin.getPlayer(args[0]);
 								
 								if (!channel.getMuteList().contains(targetPlayer.getName())) {
-									channel.getMuteList().add(targetPlayer.getName());
-									plugin.sendWarning(targetPlayer, "You have been muted on " + channel.getName());
-									plugin.sendInfo(channel.getParticipants(), targetPlayer.getDisplayName() + " has been muted");
+									mute(player, targetPlayer, channel);
 									
 								} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " has already been muted"); }
 								
@@ -409,9 +398,7 @@ public class AdministrateCommand extends Command {
 					Player targetPlayer = plugin.getPlayer(args[0]);
 					
 					if (!channel.getMuteList().contains(targetPlayer.getName())) {
-						channel.getMuteList().add(targetPlayer.getName());
-						plugin.sendWarning(targetPlayer, "You have been muted on " + channel.getName());
-						plugin.sendInfo(channel.getParticipants(), targetPlayer.getDisplayName() + " has been muted");
+						mute(player, targetPlayer, channel);
 						
 					} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " has already been muted"); }
 					
@@ -421,11 +408,19 @@ public class AdministrateCommand extends Command {
 		}
 	}
 	
+	private void mute(Player player, Player targetPlayer, Channel channel) {
+		channel.getMuteList().add(targetPlayer.getName());
+		plugin.sendWarning(targetPlayer, "You have been muted on " + channel.getName());
+		plugin.sendInfo(channel.getParticipants(), targetPlayer.getDisplayName() + " has been muted");
+	}
+	
 	/**
 	 * Unban Command - Unbans the player from the channel
 	 */
-	@CommandID(name = "Unban", aliases = { "unban", "ub" })
-	@CommandInfo(description = "Unbans the player from the channel", usage = "unban [player] <channel>")
+	@ChCommand
+	@Aliases("ub")
+	@Description("Unbans the player from the channel")
+	@Usage("unban [player] <channel>")
 	public void unban(Player player, String[] args) {
 		if (args.length < 1) { invalidArgLength(player, "Unban"); }
 		
@@ -471,11 +466,7 @@ public class AdministrateCommand extends Command {
 								Player targetPlayer = plugin.getPlayer(args[0]);
 								
 								if (channel.getBlackList().contains(targetPlayer.getName())) {
-									channel.getBlackList().remove(targetPlayer.getName());
-									
-									cm.whitelistMember(targetPlayer, channel);
-									plugin.sendInfo(targetPlayer, "You have been unbanned from " + channel.getName());
-									plugin.sendInfo(channel.getParticipants(), targetPlayer.getDisplayName() + "has been unbanned");
+									unban(player, targetPlayer, channel, true);
 									
 								} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " has not been banned"); }
 								
@@ -484,10 +475,7 @@ public class AdministrateCommand extends Command {
 								plugin.sendInfo(player, targetPlayer.getName() + " is offline");
 								
 								if (channel.getBlackList().contains(targetPlayer.getName())) {
-									channel.getBlackList().remove(targetPlayer.getName());
-									
-									cm.whitelistMember(targetPlayer, channel);
-									plugin.sendInfo(channel.getParticipants(), targetPlayer.getName() + "has been unbanned");
+									unban(player, targetPlayer, channel, false);
 									
 								} else { plugin.sendWarning(player, targetPlayer.getName() + " has not been banned"); }
 							}
@@ -512,11 +500,7 @@ public class AdministrateCommand extends Command {
 					Player targetPlayer = plugin.getPlayer(args[0]);
 					
 					if (channel.getBlackList().contains(targetPlayer.getName())) {
-						channel.getBlackList().remove(targetPlayer.getName());
-						
-						cm.whitelistMember(targetPlayer, channel);
-						plugin.sendInfo(targetPlayer, "You have been unbanned from " + channel.getName());
-						plugin.sendInfo(channel.getParticipants(), targetPlayer.getDisplayName() + "has been unbanned");
+						unban(player, targetPlayer, channel, true);
 						
 					} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " has not been banned"); }
 					
@@ -525,10 +509,7 @@ public class AdministrateCommand extends Command {
 					plugin.sendInfo(player, targetPlayer.getName() + " is offline");
 					
 					if (channel.getBlackList().contains(targetPlayer.getName())) {
-						channel.getBlackList().remove(targetPlayer.getName());
-						
-						cm.whitelistMember(targetPlayer, channel);
-						plugin.sendInfo(channel.getParticipants(), targetPlayer.getName() + "has been unbanned");
+						unban(player, targetPlayer, channel, false);
 						
 					} else { plugin.sendWarning(player, targetPlayer.getName() + " has not been banned"); }
 				}
@@ -537,11 +518,22 @@ public class AdministrateCommand extends Command {
 		}
 	}
 	
+	private void unban(Player player, OfflinePlayer targetPlayer, Channel channel, boolean online) {
+		channel.getBlackList().remove(targetPlayer.getName());
+		cm.whitelistMember(targetPlayer, channel);
+		
+		if (online)
+			plugin.sendInfo(targetPlayer.getPlayer(), "You have been unbanned from " + channel.getName());
+		
+		plugin.sendInfo(channel.getParticipants(), targetPlayer.getName() + "has been unbanned");
+	}
+	
 	/**
 	 * Unmute Command - Unmutes the player on the channel
 	 */
-	@CommandID(name = "Unmute", aliases = "unmute", requireChannel = false)
-	@CommandInfo(description = "Unmutes the player on the channel", usage = "unmute [player] <channel>")
+	@Command
+	@Description("Unmutes the player on the channel")
+	@Usage("unmute [player] <channel>")
 	public void unmute(Player player, String[] args) {
 		if (args.length < 1) { invalidArgLength(player, "Unmute"); }
 		
@@ -567,9 +559,7 @@ public class AdministrateCommand extends Command {
 						Player targetPlayer = plugin.getPlayer(args[0]);
 						
 						if (channel.getMuteList().contains(targetPlayer.getName())) {
-							channel.getMuteList().remove(targetPlayer.getName());
-							plugin.sendInfo(targetPlayer, "You have been unmuted on " + channel.getName());
-							plugin.sendInfo(channel.getParticipants(), targetPlayer.getDisplayName() + " has been unmuted");
+							unmute(player, targetPlayer, channel);
 							
 						} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " has not been muted"); }
 						
@@ -587,9 +577,7 @@ public class AdministrateCommand extends Command {
 								Player targetPlayer = plugin.getPlayer(args[0]);
 								
 								if (channel.getMuteList().contains(targetPlayer.getName())) {
-									channel.getMuteList().remove(targetPlayer.getName());
-									plugin.sendInfo(targetPlayer, "You have been unmuted on " + channel.getName());
-									plugin.sendInfo(channel.getParticipants(), targetPlayer.getDisplayName() + " has been unmuted");
+									unmute(player, targetPlayer, channel);
 									
 								} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " has not been muted"); }
 								
@@ -615,9 +603,7 @@ public class AdministrateCommand extends Command {
 					Player targetPlayer = plugin.getPlayer(args[0]);
 					
 					if (channel.getMuteList().contains(targetPlayer.getName())) {
-						channel.getMuteList().remove(targetPlayer.getName());
-						plugin.sendInfo(targetPlayer, "You have been unmuted on " + channel.getName());
-						plugin.sendInfo(channel.getParticipants(), targetPlayer.getDisplayName() + " has been unmuted");
+						unmute(player, targetPlayer, channel);
 						
 					} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " has not been muted"); }
 					
@@ -625,5 +611,11 @@ public class AdministrateCommand extends Command {
 				
 			} else { plugin.sendWarning(player, "You do not have permission"); }
 		}
+	}
+	
+	private void unmute(Player player, Player targetPlayer, Channel channel) {
+		channel.getMuteList().remove(targetPlayer.getName());
+		plugin.sendInfo(targetPlayer, "You have been unmuted on " + channel.getName());
+		plugin.sendInfo(channel.getParticipants(), targetPlayer.getDisplayName() + " has been unmuted");
 	}
 }

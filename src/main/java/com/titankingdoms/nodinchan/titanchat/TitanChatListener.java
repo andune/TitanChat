@@ -18,6 +18,7 @@ import org.w3c.dom.Node;
 
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.event.MessageSendEvent;
+import com.titankingdoms.nodinchan.titanchat.event.MessageSendEvent.Message;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -95,15 +96,13 @@ public class TitanChatListener implements Listener {
 				plugin.getServer().getConsoleSender().sendMessage(log);
 			
 		} else {
-			MessageSendEvent sendEvent = new MessageSendEvent(player, null, plugin.getServer().getOnlinePlayers(), message);
+			String format = plugin.getFormatHandler().format(player, null, true);
+			
+			MessageSendEvent sendEvent = new MessageSendEvent(player, null, plugin.getServer().getOnlinePlayers(), new Message(format, message));
 			plugin.getServer().getPluginManager().callEvent(sendEvent);
 			
-			if (sendEvent.isCancelled()) {
-				event.setCancelled(true);
+			if (sendEvent.isCancelled())
 				return;
-			}
-			
-			String format = plugin.getFormatHandler().format(player, null, true);
 			
 			String log = format.replace("%message", plugin.getFormatHandler().colourise(sendEvent.getMessage()));
 			

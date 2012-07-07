@@ -7,7 +7,7 @@ import org.bukkit.event.Listener;
 import com.nodinchan.ncbukkit.loader.Loadable;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
-import com.titankingdoms.nodinchan.titanchat.command.Command;
+import com.titankingdoms.nodinchan.titanchat.command.CommandBase;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -72,7 +72,7 @@ public class Addon extends Loadable implements Listener {
 	 * 
 	 * @param command The Command to register
 	 */
-	public final void register(Command command) {
+	public final void register(CommandBase command) {
 		plugin.getManager().getCommandManager().register(command);
 	}
 	

@@ -140,6 +140,11 @@ public final class FormatHandler {
 				return "%prefix";
 			}
 			
+			@Override
+			public VarType getVarType() {
+				return VarType.FORMAT;
+			}
+			
 		}, new IVariable() {
 			
 			@Override
@@ -155,6 +160,11 @@ public final class FormatHandler {
 			@Override
 			public String getVariable() {
 				return "%suffix";
+			}
+			
+			@Override
+			public VarType getVarType() {
+				return VarType.FORMAT;
 			}
 			
 		}, new IVariable() {
@@ -174,6 +184,11 @@ public final class FormatHandler {
 				return "%gprefix";
 			}
 			
+			@Override
+			public VarType getVarType() {
+				return VarType.FORMAT;
+			}
+			
 		}, new IVariable() {
 			
 			@Override
@@ -189,6 +204,11 @@ public final class FormatHandler {
 			@Override
 			public String getVariable() {
 				return "%gsuffix";
+			}
+			
+			@Override
+			public VarType getVarType() {
+				return VarType.FORMAT;
 			}
 		});
 	}

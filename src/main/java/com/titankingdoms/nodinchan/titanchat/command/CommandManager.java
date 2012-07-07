@@ -19,9 +19,9 @@ import org.bukkit.entity.Player;
 import com.nodinchan.ncbukkit.loader.Loader;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
-import com.titankingdoms.nodinchan.titanchat.command.Command.Executor;
 import com.titankingdoms.nodinchan.titanchat.command.commands.*;
-import com.titankingdoms.nodinchan.titanchat.command.info.CommandID;
+import com.titankingdoms.nodinchan.titanchat.command.info.ChCommand;
+import com.titankingdoms.nodinchan.titanchat.command.info.Command;
 import com.titankingdoms.nodinchan.titanchat.util.Debugger;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
@@ -85,40 +85,33 @@ public final class CommandManager {
 	 * @param args The arguments
 	 */
 	public void execute(Player player, String command, String[] args) {
-		if (aliases.get(command.toLowerCase()) != null) {
+		if (getCommandExecutor(command) != null) {
 			Executor executor = getCommandExecutor(command);
 			
-			if (executor.getMethod().getAnnotation(CommandID.class).requireChannel() && !plugin.enableChannels()) {
-				if (player != null)
-					plugin.sendWarning(player, "This command requires channels to be enabled");
+			if (executor.requireChannel() && !plugin.enableChannels()) {
+				plugin.sendWarning(player, "This command requires channels to be enabled");
 				return;
 			}
 			
-			for (String trigger : executor.getMethod().getAnnotation(CommandID.class).aliases()) {
-				db.i("Checking trigger \"" + trigger + "\" with command \"" + command + "\"");
-				
-				if (trigger.equalsIgnoreCase(command)) {
-					try {
-						executor.execute(player, args);
-						return;
-					} catch (IllegalAccessException e) {
-						plugin.sendWarning(player, "An error seems to have occured, please check console");
-						plugin.log(Level.SEVERE, "An IllegalAccessException has occured while using command: " + executor.getName());
-						if (db.isDebugging())
-							e.printStackTrace();
-					} catch (IllegalArgumentException e) {
-						plugin.sendWarning(player, "An error seems to have occured, please check console");
-						plugin.log(Level.SEVERE, "An IllgealArgumentException has occured while using command: " + executor.getName());
-						if (db.isDebugging())
-							e.printStackTrace();
-					} catch (InvocationTargetException e) {
-						plugin.sendWarning(player, "An error seems to have occured, please check console");
-						plugin.log(Level.SEVERE, "An InvocationTargetException has occured while using command: " + executor.getName());
-						if (db.isDebugging()) {
-							e.printStackTrace();
-							e.getTargetException().printStackTrace();
-						}
-					}
+			try {
+				executor.execute(player, args);
+				return;
+			} catch (IllegalAccessException e) {
+				plugin.sendWarning(player, "An error seems to have occured, please check console");
+				plugin.log(Level.SEVERE, "An IllegalAccessException has occured while using command: " + executor.getName());
+				if (db.isDebugging())
+					e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				plugin.sendWarning(player, "An error seems to have occured, please check console");
+				plugin.log(Level.SEVERE, "An IllgealArgumentException has occured while using command: " + executor.getName());
+				if (db.isDebugging())
+					e.printStackTrace();
+			} catch (InvocationTargetException e) {
+				plugin.sendWarning(player, "An error seems to have occured, please check console");
+				plugin.log(Level.SEVERE, "An InvocationTargetException has occured while using command: " + executor.getName());
+				if (db.isDebugging()) {
+					e.printStackTrace();
+					e.getTargetException().printStackTrace();
 				}
 			}
 		}
@@ -207,7 +200,7 @@ public final class CommandManager {
 		register(new RankingCommand());
 		register(new SettingsCommand());
 		
-		for (Command command : new Loader<Command>(plugin, getCommandDir()).load()) { register(command); }
+		for (CommandBase command : new Loader<CommandBase>(plugin, getCommandDir()).load()) { register(command); }
 		
 		sortCommands();
 	}
@@ -231,20 +224,20 @@ public final class CommandManager {
 	 * 
 	 * @param command The Command to be registered
 	 */
-	public void register(Command command) {
+	public void register(CommandBase command) {
 		db.i("Try to register command " + command.toString());
 		
-		for (Method method : command.getClass().getMethods()) {
-			if (method.getAnnotation(CommandID.class) != null) {
-				db.i("Adding new executor: " + method.getAnnotation(CommandID.class).name());
+		for (Method method : command.getClass().getDeclaredMethods()) {
+			if (method.isAnnotationPresent(Command.class) || method.isAnnotationPresent(ChCommand.class)) {
+				db.i("Adding new executor: " + method.getName());
 				
-				Executor executor = new Executor(method, command);
-				executors.put(method.getAnnotation(CommandID.class).name().toLowerCase(), executor);
+				Executor executor = new Executor(command, method);
+				executors.put(executor.getName().toLowerCase(), executor);
 				
-				aliases.put(executor.getName(), executor.getName());
+				aliases.put(executor.getName().toLowerCase(), executor.getName());
 				
-				for (String alias : method.getAnnotation(CommandID.class).aliases())
-					aliases.put(alias.toLowerCase(), executor.getName());
+				for (String alias : executor.getAliases())
+					aliases.put(alias.toLowerCase().toLowerCase(), executor.getName());
 			}
 		}
 	}

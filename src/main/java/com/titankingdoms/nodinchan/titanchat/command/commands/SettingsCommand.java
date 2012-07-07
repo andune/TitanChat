@@ -14,9 +14,8 @@ import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
 import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
 import com.titankingdoms.nodinchan.titanchat.channel.StandardChannel;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel.Type;
-import com.titankingdoms.nodinchan.titanchat.command.Command;
-import com.titankingdoms.nodinchan.titanchat.command.info.CommandID;
-import com.titankingdoms.nodinchan.titanchat.command.info.CommandInfo;
+import com.titankingdoms.nodinchan.titanchat.command.CommandBase;
+import com.titankingdoms.nodinchan.titanchat.command.info.*;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -40,7 +39,7 @@ import com.titankingdoms.nodinchan.titanchat.command.info.CommandInfo;
  * @author NodinChan
  *
  */
-public class SettingsCommand extends Command {
+public class SettingsCommand extends CommandBase {
 
 	private static ChannelManager cm;
 	
@@ -51,8 +50,9 @@ public class SettingsCommand extends Command {
 	/**
 	 * Set Command - Sets the channel settings
 	 */
-	@CommandID(name = "Set", aliases = "set")
-	@CommandInfo(description = "Sets the channel settings (\"/tc set help\" for more info)", usage = "set [setting] <value> <channel>")
+	@ChCommand
+	@Description("Sets the channel settings (\"/titanchat set help\" for more info")
+	@Usage("set [setting] <value> <channel>")
 	public void set(Player player, String[] args) {
 		if (args.length < 1) {
 			plugin.getServer().dispatchCommand(player, "titanchat set help");

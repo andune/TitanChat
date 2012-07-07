@@ -14,10 +14,11 @@ import org.bukkit.event.Listener;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.addon.Addon;
-import com.titankingdoms.nodinchan.titanchat.command.Command;
+import com.titankingdoms.nodinchan.titanchat.command.CommandBase;
 import com.titankingdoms.nodinchan.titanchat.event.MessageFormatEvent;
 import com.titankingdoms.nodinchan.titanchat.event.MessageReceiveEvent;
 import com.titankingdoms.nodinchan.titanchat.event.MessageSendEvent;
+import com.titankingdoms.nodinchan.titanchat.event.MessageSendEvent.Message;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -82,6 +83,14 @@ public class CustomChannel extends Channel implements Listener {
 		return plugin.getFormatHandler().decolourise(text);
 	}
 	
+	@Override
+	public void deny(Player player, String message) {
+		if (message != null && !message.equals(""))
+			plugin.sendWarning(player, message);
+		else
+			plugin.sendWarning(player, "You do not have permission to join " + getName());
+	}
+	
 	/**
 	 * Formats the message
 	 * 
@@ -139,7 +148,7 @@ public class CustomChannel extends Channel implements Listener {
 	 * 
 	 * @param command the command to register
 	 */
-	public final void register(Command command) {
+	public final void register(CommandBase command) {
 		plugin.getManager().getCommandManager().register(command);
 	}
 	
@@ -184,24 +193,25 @@ public class CustomChannel extends Channel implements Listener {
 	
 	@Override
 	protected final String sendMessage(Player sender, List<Player> recipants, String message) {
-		MessageSendEvent sendEvent = new MessageSendEvent(sender, this, recipants, message);
+		MessageFormatEvent formatEvent = new MessageFormatEvent(sender, format(sender, getFormat()));
+		plugin.getServer().getPluginManager().callEvent(formatEvent);
+		
+		MessageSendEvent sendEvent = new MessageSendEvent(sender, this, recipants, new Message(formatEvent.getFormat(), message));
 		plugin.getServer().getPluginManager().callEvent(sendEvent);
 		
 		if (sendEvent.isCancelled()) { return ""; }
 		
-		MessageFormatEvent formatEvent = new MessageFormatEvent(sender, format(sender, getFormat()));
-		plugin.getServer().getPluginManager().callEvent(formatEvent);
+		MessageReceiveEvent receiveEvent = new MessageReceiveEvent(sendEvent.getSender(), sendEvent.getRecipants(), new Message(sendEvent.getFormat(), sendEvent.getMessage()));
+		plugin.getServer().getPluginManager().callEvent(receiveEvent);
 		
-		for (Player recipant : sendEvent.getRecipants()) {
-			MessageReceiveEvent receiveEvent = new MessageReceiveEvent(sender, recipant, colourise(formatEvent.getFormat()), sendEvent.getMessage());
-			plugin.getServer().getPluginManager().callEvent(receiveEvent);
+		for (Player recipant : receiveEvent.getRecipants()) {
+			String[] lines = plugin.getFormatHandler().regroup(receiveEvent.getFormat(recipant), receiveEvent.getMessage(recipant));
 			
-			if (receiveEvent.isCancelled()) { continue; }
-			
-			receiveEvent.getRecipant().sendMessage(receiveEvent.getFormattedMessage());
+			recipant.sendMessage(receiveEvent.getFormat(recipant).replace("%message", lines[0]));
+			recipant.sendMessage(Arrays.copyOfRange(lines, 1, lines.length));
 		}
 		
-		return formatEvent.getFormat().replace("%message", sendEvent.getMessage());
+		return sendEvent.getFormat().replace("%message", sendEvent.getMessage());
 	}
 	
 	@Override

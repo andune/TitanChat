@@ -42,8 +42,14 @@ formatting:
     use-built-in: true
     format: "%tag %prefix%player%suffix: %message"
 permissions:
-- TitanChat.g.prefix.[&7User&f]
-- TitanChat.g.prefix.[&4Admin&f]
-- 'TitanChat.p.suffix. the &6Member&f'
-- 'TitanChat.p.suffix. the &4Owner&f'
+    groups:
+        user:
+            prefix: [&7User&f]
+            suffix: ' the &6Member&f'
+        admin:
+            prefix: [&4Admin&f]
+    users:
+        NodinChan:
+            prefix: [&4Titan&f]
+            suffix: ' the &0Dev&f'
 debug: none

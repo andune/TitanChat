@@ -40,11 +40,11 @@ public final class MessageSendEvent extends Event implements Cancellable {
 	
 	private final Channel sentFrom;
 	
-	private String message;
+	private final List<Player> recipants;
+	
+	private final Message message;
 	
 	private boolean cancelled = false;
-	
-	private final List<Player> recipants;
 	
 	/**
 	 * Called when a message is to be sent to a group of Players
@@ -55,11 +55,11 @@ public final class MessageSendEvent extends Event implements Cancellable {
 	 * 
 	 * @param message The message
 	 */
-	public MessageSendEvent(Player sender, Channel sentFrom, List<Player> recipants, String message) {
+	public MessageSendEvent(Player sender, Channel sentFrom, List<Player> recipants, Message message) {
 		this.sender = sender;
 		this.sentFrom = sentFrom;
-		this.message = message;
 		this.recipants = recipants;
+		this.message = message;
 	}
 	
 	/**
@@ -71,8 +71,17 @@ public final class MessageSendEvent extends Event implements Cancellable {
 	 * 
 	 * @param message The message
 	 */
-	public MessageSendEvent(Player sender, Channel sentFrom, Player[] recipants, String message) {
+	public MessageSendEvent(Player sender, Channel sentFrom, Player[] recipants, Message message) {
 		this(sender, sentFrom, Arrays.asList(recipants), message);
+	}
+	
+	/**
+	 * Gets the format
+	 * 
+	 * @return The format of the message
+	 */
+	public String getFormat() {
+		return message.getFormat();
 	}
 	
 	public static HandlerList getHandlerList() {
@@ -90,7 +99,7 @@ public final class MessageSendEvent extends Event implements Cancellable {
 	 * @return The message to be sent
 	 */
 	public String getMessage() {
-		return message;
+		return message.getMessage();
 	}
 	
 	/**
@@ -128,12 +137,21 @@ public final class MessageSendEvent extends Event implements Cancellable {
 	}
 	
 	/**
+	 * Sets the format
+	 * 
+	 * @param format The new format
+	 */
+	public void setFormat(String format) {
+		this.message.setFormat(format);
+	}
+	
+	/**
 	 * Sets the message
 	 * 
 	 * @param message The new message
 	 */
 	public void setMessage(String message) {
-		this.message = message;
+		this.message.setMessage(message);
 	}
 	
 	/**
@@ -141,5 +159,57 @@ public final class MessageSendEvent extends Event implements Cancellable {
 	 */
 	public void setCancelled(boolean cancelled) {
 		this.cancelled = cancelled;
+	}
+	
+	public static final class Message implements Cloneable {
+		
+		private String format;
+		private String message;
+		
+		public Message(String format, String message) {
+			this.format = format;
+			this.message = message;
+		}
+		
+		@Override
+		public Message clone() {
+			return new Message(format, message);
+		}
+		
+		/**
+		 * Gets the format
+		 * 
+		 * @return The format
+		 */
+		public String getFormat() {
+			return format;
+		}
+		
+		/**
+		 * Gets the message
+		 * 
+		 * @return The message
+		 */
+		public String getMessage() {
+			return message;
+		}
+		
+		/**
+		 * Sets the format
+		 * 
+		 * @param format The new format
+		 */
+		public void setFormat(String format) {
+			this.format = format;
+		}
+		
+		/**
+		 * Sets the message
+		 * 
+		 * @param message The new message
+		 */
+		public void setMessage(String message) {
+			this.message = message;
+		}
 	}
 }

@@ -9,9 +9,8 @@ import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
-import com.titankingdoms.nodinchan.titanchat.command.Command;
-import com.titankingdoms.nodinchan.titanchat.command.info.CommandID;
-import com.titankingdoms.nodinchan.titanchat.command.info.CommandInfo;
+import com.titankingdoms.nodinchan.titanchat.command.CommandBase;
+import com.titankingdoms.nodinchan.titanchat.command.info.*;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -35,7 +34,7 @@ import com.titankingdoms.nodinchan.titanchat.command.info.CommandInfo;
  * @author NodinChan
  *
  */
-public class ChatCommand extends Command {
+public class ChatCommand extends CommandBase {
 
 	private ChannelManager cm;
 	
@@ -46,8 +45,10 @@ public class ChatCommand extends Command {
 	/**
 	 * Broadcast Command - Broadcasts the message globally
 	 */
-	@CommandID(name = "Broadcast", aliases = { "broadcast", "bc" }, requireChannel = false)
-	@CommandInfo(description = "Broadcasts the message globally", usage = "broadcast [message]")
+	@Command
+	@Aliases("bc")
+	@Description("Broadcasts the message globally")
+	@Usage("broadcast [message]")
 	public void broadcast(Player player, String[] args) {
 		if (args.length < 1) { invalidArgLength(player, "Broadcast"); return; }
 		
@@ -71,16 +72,18 @@ public class ChatCommand extends Command {
 		
 		plugin.getServer().broadcastMessage(format.replace("%message", lines[0]));
 		
-		for (int line = 1; line < lines.length; line++)
-			plugin.getServer().broadcastMessage(lines[line]);
+		for (String line : Arrays.copyOfRange(lines, 1, lines.length))
+			plugin.getServer().broadcastMessage(line);
 	}
 	
 	/**
 	 * Emote Command - Action emote shown in channel
 	 */
-	@CommandID(name = "Emote", aliases = { "me", "em" })
-	@CommandInfo(description = "Action emote shown in channel", usage = "me [action]")
-	public void emote(Player player, String[] args) {
+	@ChCommand
+	@Aliases("me")
+	@Description("Sends an action emote to the channel")
+	@Usage("em [action]")
+	public void em(Player player, String[] args) {
 		if (args.length < 1) { invalidArgLength(player, "Emote"); return; }
 		
 		if (!plugin.getPermsBridge().has(player, "TitanChat.me")) {
@@ -123,9 +126,6 @@ public class ChatCommand extends Command {
 			recipant.sendMessage(Arrays.copyOfRange(lines, 1, lines.length));
 		}
 		
-		for (Player recipant : recipants)
-			recipant.sendMessage(format.replace("%action", str.toString()));
-		
 		if (cm.getChannel(player) == null)
 			player.sendMessage(ChatColor.GOLD + "Nobody hears you...");
 	}
@@ -133,8 +133,10 @@ public class ChatCommand extends Command {
 	/**
 	 * Send Command - Sends a message to the channel
 	 */
-	@CommandID(name = "Send", aliases = "send")
-	@CommandInfo(description = "Sends a message to the channel", usage = "send [channel] [message]")
+	@ChCommand
+	@Aliases("s")
+	@Description("Sends a message to the channel")
+	@Usage("send [channel] [message]")
 	public void send(Player player, String[] args) {
 		if (args.length < 2) { invalidArgLength(player, "Send"); return; }
 		
@@ -185,8 +187,9 @@ public class ChatCommand extends Command {
 	/**
 	 * Silence Command - Silences the channel/server
 	 */
-	@CommandID(name = "Silence", aliases = "silence", requireChannel = false)
-	@CommandInfo(description = "Silences the channel/server", usage = "silence <channel>")
+	@Command
+	@Description("Silences the channel/server")
+	@Usage("silence <channel>")
 	public void silence(Player player, String[] args) {
 		if (plugin.getPermsBridge().has(player, "TitanChat.silence")) {
 			if (!plugin.enableChannels()) {
@@ -250,8 +253,10 @@ public class ChatCommand extends Command {
 	/**
 	 * Whisper Command - Whisper messages to players
 	 */
-	@CommandID(name = "Whisper", aliases = { "whisper", "w" })
-	@CommandInfo(description = "Whisper messages to players", usage = "whisper [player] [message]")
+	@Command
+	@Aliases("w")
+	@Description("Whispers the message to the player")
+	@Usage("whisper [player] [message")
 	public void whisper(Player player, String[] args) {
 		if (args.length < 2) { invalidArgLength(player, "Whisper"); return; }
 		

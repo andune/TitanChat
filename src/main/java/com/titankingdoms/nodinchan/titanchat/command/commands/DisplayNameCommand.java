@@ -2,9 +2,8 @@ package com.titankingdoms.nodinchan.titanchat.command.commands;
 
 import org.bukkit.entity.Player;
 
-import com.titankingdoms.nodinchan.titanchat.command.Command;
-import com.titankingdoms.nodinchan.titanchat.command.info.CommandID;
-import com.titankingdoms.nodinchan.titanchat.command.info.CommandInfo;
+import com.titankingdoms.nodinchan.titanchat.command.CommandBase;
+import com.titankingdoms.nodinchan.titanchat.command.info.*;
 import com.titankingdoms.nodinchan.titanchat.util.displayname.DisplayName;
 import com.titankingdoms.nodinchan.titanchat.util.displayname.DisplayNameChanger;
 
@@ -30,7 +29,7 @@ import com.titankingdoms.nodinchan.titanchat.util.displayname.DisplayNameChanger
  * @author NodinChan
  *
  */
-public class DisplayNameCommand extends Command {
+public class DisplayNameCommand extends CommandBase {
 	
 	private final DisplayNameChanger dnc;
 	
@@ -41,8 +40,9 @@ public class DisplayNameCommand extends Command {
 	/**
 	 * Name Command - Checks the real name of you or the Player
 	 */
-	@CommandID(name = "Name", aliases = "name")
-	@CommandInfo(description = "Checks the real name of you or the Player", usage = "name <player>")
+	@Command
+	@Description("Checks the real name of you or the player")
+	@Usage("name <player>")
 	public void name(Player player, String[] args) {
 		if (plugin.getPermsBridge().has(player, "TitanChat.nick.check")) {
 			try {
@@ -65,8 +65,9 @@ public class DisplayNameCommand extends Command {
 	/**
 	 * Nick Command - Changes your or your target's display name
 	 */
-	@CommandID(name = "Nick", aliases = "nick")
-	@CommandInfo(description = "Sets your or your target's display name", usage = "nick [displayname] <player>")
+	@Command
+	@Description("Sets your or your target's display name")
+	@Usage("nick [displayname] <player>")
 	public void nick(Player player, String[] args) {
 		if (args.length < 1) { invalidArgLength(player, "Nick"); return; }
 		
@@ -115,8 +116,9 @@ public class DisplayNameCommand extends Command {
 	/**
 	 * Reset Command - Resets your or your target's display name
 	 */
-	@CommandID(name = "Reset", aliases = "reset")
-	@CommandInfo(description = "Resets your or your target's display name", usage = "reset <player>")
+	@Command
+	@Description("Resets your or your target's display name")
+	@Usage("reset <player>")
 	public void reset(Player player, String[] args) {
 		if (plugin.getPermsBridge().has(player, "TitanChat.nick.reset")) {
 			try {

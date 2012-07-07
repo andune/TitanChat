@@ -19,6 +19,7 @@ import com.nodinchan.ncbukkit.loader.Loadable;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.event.MessageReceiveEvent;
 import com.titankingdoms.nodinchan.titanchat.event.MessageSendEvent;
+import com.titankingdoms.nodinchan.titanchat.event.MessageSendEvent.Message;
 import com.titankingdoms.nodinchan.titanchat.util.Debugger;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
@@ -420,26 +421,24 @@ public class Channel extends Loadable {
 	 * @param message The message to be sent
 	 */
 	protected String sendMessage(Player sender, List<Player> recipants, String message) {
-		MessageSendEvent sendEvent = new MessageSendEvent(sender, this, recipants, message);
+		String format = plugin.getFormatHandler().format(sender, getName(), false);
+		
+		MessageSendEvent sendEvent = new MessageSendEvent(sender, this, recipants, new Message(format, message));
 		plugin.getServer().getPluginManager().callEvent(sendEvent);
 		
 		if (sendEvent.isCancelled()) { return ""; }
 		
-		String format = plugin.getFormatHandler().format(sender, getName(), false);
+		MessageReceiveEvent receiveEvent = new MessageReceiveEvent(sendEvent.getSender(), sendEvent.getRecipants(), new Message(sendEvent.getFormat(), sendEvent.getMessage()));
+		plugin.getServer().getPluginManager().callEvent(receiveEvent);
 		
-		for (Player recipant : sendEvent.getRecipants()) {
-			MessageReceiveEvent receiveEvent = new MessageReceiveEvent(sender, recipant, format, sendEvent.getMessage());
-			plugin.getServer().getPluginManager().callEvent(receiveEvent);
+		for (Player recipant : receiveEvent.getRecipants()) {
+			String[] lines = plugin.getFormatHandler().regroup(receiveEvent.getFormat(recipant), receiveEvent.getMessage(recipant));
 			
-			if (receiveEvent.isCancelled()) { continue; }
-			
-			String[] lines = plugin.getFormatHandler().regroup(format, receiveEvent.getMessage());
-			
-			receiveEvent.getRecipant().sendMessage(receiveEvent.getFormat().replace("%message", lines[0]));
-			receiveEvent.getRecipant().sendMessage(Arrays.copyOfRange(lines, 1, lines.length));
+			recipant.sendMessage(receiveEvent.getFormat(recipant).replace("%message", lines[0]));
+			recipant.sendMessage(Arrays.copyOfRange(lines, 1, lines.length));
 		}
 		
-		return format.replace("%message", sendEvent.getMessage());
+		return sendEvent.getFormat().replace("%message", sendEvent.getMessage());
 	}
 	
 	/**

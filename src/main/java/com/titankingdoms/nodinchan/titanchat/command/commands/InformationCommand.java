@@ -11,10 +11,10 @@ import com.titankingdoms.nodinchan.titanchat.addon.Addon;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
 import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
-import com.titankingdoms.nodinchan.titanchat.command.Command;
+import com.titankingdoms.nodinchan.titanchat.command.CommandBase;
 import com.titankingdoms.nodinchan.titanchat.command.CommandManager;
-import com.titankingdoms.nodinchan.titanchat.command.info.CommandID;
-import com.titankingdoms.nodinchan.titanchat.command.info.CommandInfo;
+import com.titankingdoms.nodinchan.titanchat.command.Executor;
+import com.titankingdoms.nodinchan.titanchat.command.info.*;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -38,7 +38,7 @@ import com.titankingdoms.nodinchan.titanchat.command.info.CommandInfo;
  * @author NodinChan
  *
  */
-public class InformationCommand extends Command {
+public class InformationCommand extends CommandBase {
 
 	private ChannelManager cm;
 	
@@ -49,9 +49,10 @@ public class InformationCommand extends Command {
 	/**
 	 * Addons Command - Lists out all addons
 	 */
-	@CommandID(name = "Addons", aliases = "addons", requireChannel = false)
-	@CommandInfo(description = "Lists out all addons", usage = "addons")
-	public void addons(Player player, String args) {
+	@Command
+	@Description("Lists out all addons")
+	@Usage("addons")
+	public void addons(Player player, String[] args) {
 		StringBuilder addons = new StringBuilder();
 		
 		for (Addon addon : plugin.getManager().getAddonManager().getAddons()) {
@@ -86,8 +87,10 @@ public class InformationCommand extends Command {
 	/**
 	 * ColourCodes Command - Lists out available colour codes and respective colours
 	 */
-	@CommandID(name = "ColourCodes", aliases = { "colourcodes", "colorcodes", "colours", "colors", "codes" }, requireChannel = false)
-	@CommandInfo(description = "Lists out avalable colour codes and respective colours", usage = "colourcodes")
+	@Command
+	@Aliases({ "colorcodes", "colours", "colors", "codes" })
+	@Description("Lists out available colour codes and respective colours")
+	@Usage("colourcodes")
 	public void colourcodes(Player player, String[] args) {
 		String black = plugin.getFormatHandler().colourise("&0") + "&0";
 		String darkblue = plugin.getFormatHandler().colourise("&1") + "&1";
@@ -127,8 +130,10 @@ public class InformationCommand extends Command {
 	/**
 	 * Help Command - Shows the command list
 	 */
-	@CommandID(name = "Help", aliases = { "help", "?", "commands", "cmds" }, requireChannel = false)
-	@CommandInfo(description = "Shows the command list", usage = "help <page/command>")
+	@Command
+	@Aliases({ "?", "commands", "cmds" })
+	@Description("Shows the command list")
+	@Usage("help <page/command>")
 	public void help(Player player, String[] args) {
 		CommandManager cm = plugin.getManager().getCommandManager();
 		
@@ -149,14 +154,7 @@ public class InformationCommand extends Command {
 				
 				for (int cmdNum = start; cmdNum < end; cmdNum++) {
 					Executor executor = plugin.getManager().getCommandManager().getCommandExecutor(cmdNum);
-					
-					String name = executor.getName();
-					String description = " - ";
-					
-					if (executor.getMethod().getAnnotation(CommandInfo.class) != null)
-						description += executor.getMethod().getAnnotation(CommandInfo.class).description();
-					
-					player.sendMessage(ChatColor.AQUA + name + description);
+					player.sendMessage(ChatColor.AQUA + executor.getName() + " - " + executor.getDescription());
 				}
 				
 				plugin.sendInfo(player, "Arguments: [NECESSARY] <OPTIONAL>");
@@ -179,14 +177,12 @@ public class InformationCommand extends Command {
 				return;
 			}
 			
-			player.sendMessage(ChatColor.AQUA + "=== " + executor.getMethod().getAnnotation(CommandID.class).name() + " Command ===");
-			
-			if (executor.getMethod().getAnnotation(CommandInfo.class) != null)
-				player.sendMessage(ChatColor.AQUA + "Description: " + executor.getMethod().getAnnotation(CommandInfo.class).description());
+			player.sendMessage(ChatColor.AQUA + "=== " + executor.getName().toUpperCase().toCharArray()[0] + executor.getName().toLowerCase().substring(1) + " Command ===");
+			player.sendMessage(ChatColor.AQUA + "Description: " + executor.getDescription());
 			
 			StringBuilder str = new StringBuilder();
 			
-			for (String alias : executor.getMethod().getAnnotation(CommandID.class).aliases()) {
+			for (String alias : executor.getAliases()) {
 				if (str.length() > 0)
 					str.append(", ");
 				
@@ -194,17 +190,17 @@ public class InformationCommand extends Command {
 			}
 			
 			player.sendMessage(ChatColor.AQUA + "Aliases: " + str.toString());
-			
-			if (executor.getMethod().getAnnotation(CommandInfo.class) != null)
-				player.sendMessage(ChatColor.AQUA + "Usage: /titanchat " + executor.getMethod().getAnnotation(CommandInfo.class).usage());
+			player.sendMessage(ChatColor.AQUA + "Usage: /titanchat " + executor.getUsage());
 		}
 	}
 	
 	/**
 	 * Info Command - Gets the participants and followers of the channel
 	 */
-	@CommandID(name = "Info", aliases = "info")
-	@CommandInfo(description = "Gets the participants and followers of the channel", usage = "info <channel>")
+	@ChCommand
+	@Aliases("i")
+	@Description("Gets the participants and followers of the channel")
+	@Usage("info <channel>")
 	public void info(Player player, String[] args) {
 		try {
 			if (cm.exists(args[0])) {
@@ -273,8 +269,9 @@ public class InformationCommand extends Command {
 	/**
 	 * List Command - Lists all channels you have access to
 	 */
-	@CommandID(name = "List", aliases = "list")
-	@CommandInfo(description = "Lists all channels you have access to", usage = "list")
+	@ChCommand
+	@Description("Lists all channels you have access to")
+	@Usage("list")
 	public void list(Player player, String[] args) {
 		player.sendMessage(ChatColor.AQUA + "Channels: " + plugin.createList(cm.getAccessList(player)));
 	}

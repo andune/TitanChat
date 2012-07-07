@@ -5,9 +5,8 @@ import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
-import com.titankingdoms.nodinchan.titanchat.command.Command;
-import com.titankingdoms.nodinchan.titanchat.command.info.CommandID;
-import com.titankingdoms.nodinchan.titanchat.command.info.CommandInfo;
+import com.titankingdoms.nodinchan.titanchat.command.CommandBase;
+import com.titankingdoms.nodinchan.titanchat.command.info.*;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -31,7 +30,7 @@ import com.titankingdoms.nodinchan.titanchat.command.info.CommandInfo;
  * @author NodinChan
  *
  */
-public class RankingCommand extends Command {
+public class RankingCommand extends CommandBase {
 
 	private ChannelManager cm;
 	
@@ -42,8 +41,9 @@ public class RankingCommand extends Command {
 	/**
 	 * Add Command - Whitelists the player for the channel
 	 */
-	@CommandID(name = "Add", aliases = "add")
-	@CommandInfo(description = "Whitelists the player for the channel", usage = "add [player] <channel>")
+	@ChCommand
+	@Description("Whitelists the player for the channel")
+	@Usage("add [player] <channel>")
 	public void add(Player player, String[] args) {
 		if (args.length < 1) { invalidArgLength(player, "Add"); return; }
 		
@@ -113,8 +113,9 @@ public class RankingCommand extends Command {
 	/**
 	 * Demote Command - Demotes the player of the channel
 	 */
-	@CommandID(name = "Demote", aliases = "demote")
-	@CommandInfo(description = "Demotes the player of the channel", usage = "demote [player] <channel>")
+	@ChCommand
+	@Description("Demotes the player of the channel")
+	@Usage("demote [player] <channel>")
 	public void demote(Player player, String[] args) {
 		if (args.length < 1) { invalidArgLength(player, "Demote"); }
 		
@@ -229,8 +230,9 @@ public class RankingCommand extends Command {
 	/**
 	 * Promote Command - Promotes the player of the channel
 	 */
-	@CommandID(name = "Promote", aliases = "promote")
-	@CommandInfo(description = "Promotes the player of the channel", usage = "promote [player] <channel>")
+	@ChCommand
+	@Description("Promotes the player of the channel")
+	@Usage("promote [player] <channel>")
 	public void promote(Player player, String[] args) {
 		if (args.length < 1) { invalidArgLength(player, "Promote"); }
 		

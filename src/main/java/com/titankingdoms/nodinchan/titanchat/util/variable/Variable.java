@@ -14,6 +14,7 @@ import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.event.MessageFormatEvent;
 import com.titankingdoms.nodinchan.titanchat.event.MessageReceiveEvent;
 import com.titankingdoms.nodinchan.titanchat.event.MessageSendEvent;
+import com.titankingdoms.nodinchan.titanchat.util.variable.Variable.IVariable.VarType;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -66,8 +67,14 @@ public final class Variable implements Listener {
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onMessageReceive(MessageReceiveEvent event) {
 		for (IVariable variable : variables)
-			if (event.getClass().isAssignableFrom(variable.getEvent()))
-				event.setFormat(variable.replace(event.getFormat(), event.getSender(), event.getRecipant()));
+			if (event.getClass().isAssignableFrom(variable.getEvent())) {
+				if (variable.getVarType().equals(VarType.FORMAT))
+					for (Player recipant : event.getRecipants())
+						event.setFormat(recipant, variable.replace(event.getFormat(recipant), event.getSender(), recipant));
+				else if (variable.getVarType().equals(VarType.MESSAGE))
+					for (Player recipant : event.getRecipants())
+						event.setMessage(recipant, variable.replace(event.getMessage(recipant), event.getSender(), recipant));
+			}
 	}
 	
 	/**
@@ -77,9 +84,14 @@ public final class Variable implements Listener {
 	 */
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onMessageSend(MessageSendEvent event) {
-		for (IVariable variable : variables)
-			if (event.getClass().isAssignableFrom(variable.getEvent()))
-				event.setMessage(variable.replace(event.getMessage(), event.getSender(), event.getRecipants().toArray(new Player[0])));
+		for (IVariable variable : variables) {
+			if (event.getClass().isAssignableFrom(variable.getEvent())) {
+				if (variable.getVarType().equals(VarType.FORMAT))
+					event.setFormat(variable.replace(event.getFormat(), event.getSender(), event.getRecipants().toArray(new Player[0])));
+				else if (variable.getVarType().equals(VarType.MESSAGE))
+					event.setMessage(variable.replace(event.getMessage(), event.getSender(), event.getRecipants().toArray(new Player[0])));
+			}
+		}
 	}
 	
 	/**
@@ -132,6 +144,13 @@ public final class Variable implements Listener {
 		public abstract String getVariable();
 		
 		/**
+		 * Gets the variable type of this variable
+		 * 
+		 * @return The variable Type
+		 */
+		public abstract VarType getVarType();
+		
+		/**
 		 * Replaces the variable with the replacement
 		 * 
 		 * @param line The line to be formatted
@@ -145,5 +164,7 @@ public final class Variable implements Listener {
 		public final String replace(String line, Player sender, Player... recipants) {
 			return line.replace(getVariable(), getReplacement(sender, recipants));
 		}
+		
+		public enum VarType { FORMAT, MESSAGE }
 	}
 }
