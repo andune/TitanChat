@@ -1,12 +1,13 @@
 package com.titankingdoms.nodinchan.titanchat.command;
 
-import org.bukkit.entity.Player;
+import org.bukkit.command.CommandSender;
 import org.bukkit.event.Listener;
 
 import com.nodinchan.ncbukkit.loader.Loadable;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
+import com.titankingdoms.nodinchan.titanchat.TitanChat.MessageLevel;
 import com.titankingdoms.nodinchan.titanchat.addon.Addon;
-import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
+import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -45,16 +46,13 @@ public class CommandBase extends Loadable implements Listener {
 	/**
 	 * Sends a warning for invalid argument length
 	 * 
-	 * @param player the player to send to
+	 * @param sender The command sender to send to
 	 * 
-	 * @param name the command's name
+	 * @param name The command's name
 	 */
-	public final void invalidArgLength(Player player, String name) {
-		plugin.sendWarning(player, "Invalid Argument Length");
-		Executor executor = plugin.getManager().getCommandManager().getCommandExecutor(name);
-		
-		if (!executor.getUsage().equals(""))
-			plugin.sendInfo(player, "Usage: /titanchat " + executor.getUsage());
+	public final void invalidArgLength(CommandSender sender, String name) {
+		plugin.send(MessageLevel.WARNING, sender, "Invalid Argument Length");
+		usage(sender, name);
 	}
 	
 	/**
@@ -71,7 +69,7 @@ public class CommandBase extends Loadable implements Listener {
 	 * 
 	 * @param channel the channel to register
 	 */
-	public final void register(CustomChannel channel) {
+	public final void register(Channel channel) {
 		plugin.getManager().getChannelManager().register(channel);
 	}
 	
@@ -82,5 +80,19 @@ public class CommandBase extends Loadable implements Listener {
 	 */
 	public final void register(Listener listener) {
 		plugin.register(listener);
+	}
+	
+	/**
+	 * Sends the usage message of the command
+	 * 
+	 * @param sender The command sender to send to
+	 * 
+	 * @param name The command's name
+	 */
+	public final void usage(CommandSender sender, String name) {
+		Executor executor = plugin.getManager().getCommandManager().getCommandExecutor(name);
+		
+		if (!executor.getUsage().equals(""))
+			plugin.send(MessageLevel.INFO, sender, "Usage: /titanchat " + executor.getUsage());
 	}
 }

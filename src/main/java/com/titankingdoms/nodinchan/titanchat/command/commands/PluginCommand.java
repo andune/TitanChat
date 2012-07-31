@@ -4,6 +4,7 @@ import java.util.logging.Level;
 
 import org.bukkit.entity.Player;
 
+import com.titankingdoms.nodinchan.titanchat.TitanChat.MessageLevel;
 import com.titankingdoms.nodinchan.titanchat.command.CommandBase;
 import com.titankingdoms.nodinchan.titanchat.command.info.*;
 import com.titankingdoms.nodinchan.titanchat.util.Debugger;
@@ -43,20 +44,20 @@ public class PluginCommand extends CommandBase {
 			if (plugin.isStaff(player)) {
 				if (args[0].equalsIgnoreCase("none")) {
 					Debugger.disable();
-					plugin.sendInfo(player, "Debug activated");
+					plugin.send(MessageLevel.INFO, player, "Debug activated");
 					
 				} else if (args[0].equalsIgnoreCase("all") || args[0].equalsIgnoreCase("full")) {
 					Debugger.enableAll();
-					plugin.sendInfo(player, "Debug activated");
+					plugin.send(MessageLevel.INFO, player, "Debug activated");
 					
 				} else {
 					for (String id : args[0].split(","))
 						Debugger.enable(id);
 					
-					plugin.sendInfo(player, "Debug activated");
+					plugin.send(MessageLevel.INFO, player, "Debug activated");
 				}
 				
-			} else { plugin.sendWarning(player, "You do not have permission"); }
+			} else { plugin.send(MessageLevel.WARNING, player, "You do not have permission"); }
 			
 		} catch (IndexOutOfBoundsException e) { invalidArgLength(player, "Debug"); }
 	}
@@ -70,14 +71,14 @@ public class PluginCommand extends CommandBase {
 	public void reload(Player player, String[] args) {
 		if (plugin.isStaff(player)) {
 			plugin.log(Level.INFO, "Reloading configs...");
-			plugin.sendInfo(player, "Reloading configs...");
+			plugin.send(MessageLevel.INFO, player, "Reloading configs...");
 			plugin.reloadConfig();
 			plugin.getVariableManager().unload();
 			plugin.getFormatHandler().load();
 			plugin.getManager().reload();
 			plugin.log(Level.INFO, "Configs reloaded");
-			plugin.sendInfo(player, "Configs reloaded");
+			plugin.send(MessageLevel.INFO, player, "Configs reloaded");
 			
-		} else { plugin.sendWarning(player, "You do not have permission"); }
+		} else { plugin.send(MessageLevel.WARNING, player, "You do not have permission"); }
 	}
 }

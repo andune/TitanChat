@@ -1,3 +1,6 @@
 package com.titankingdoms.nodinchan.titanchat.command.info;
 
-public @interface ChCommand {}
+public @interface Permission {
+	
+	String value();
+}

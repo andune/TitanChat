@@ -1,7 +1,6 @@
 package com.titankingdoms.nodinchan.titanchat.channel;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,424 +10,244 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
 import com.nodinchan.ncbukkit.loader.Loadable;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
-import com.titankingdoms.nodinchan.titanchat.event.MessageReceiveEvent;
-import com.titankingdoms.nodinchan.titanchat.event.MessageSendEvent;
-import com.titankingdoms.nodinchan.titanchat.event.MessageSendEvent.Message;
-import com.titankingdoms.nodinchan.titanchat.util.Debugger;
+import com.titankingdoms.nodinchan.titanchat.TitanChat.MessageLevel;
+import com.titankingdoms.nodinchan.titanchat.channel.setting.Setting;
+import com.titankingdoms.nodinchan.titanchat.channel.util.CommandHandler;
+import com.titankingdoms.nodinchan.titanchat.channel.util.Info;
+import com.titankingdoms.nodinchan.titanchat.channel.util.Participant;
+import com.titankingdoms.nodinchan.titanchat.event.channel.MessageConsoleEvent;
+import com.titankingdoms.nodinchan.titanchat.event.channel.MessageReceiveEvent;
+import com.titankingdoms.nodinchan.titanchat.event.channel.MessageSendEvent;
+import com.titankingdoms.nodinchan.titanchat.event.util.Message;
 
-/*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
- * 
- *     This program is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- * 
- *     This program is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- * 
- *     You should have received a copy of the GNU General Public License
- *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-/**
- * Channel - Channel base
- * 
- * @author NodinChan
- *
- */
-public class Channel extends Loadable {
+public abstract class Channel extends Loadable {
 	
 	protected final TitanChat plugin;
 	
-	private Type type;
-	private Type special;
+	private Option option;
 	
-	private boolean global;
-	private boolean silenced;
+	private final Info info;
 	
-	private final List<String> adminlist;
+	private final List<String> admins;
 	private final List<String> blacklist;
-	private final List<String> followerlist;
-	private final List<String> invitelist;
-	private final List<String> mutelist;
-	private final List<String> participants;
+	private final List<String> followers;
 	private final List<String> whitelist;
 	
-	private File configFile = null;
-	private FileConfiguration config = null;
+	private final Map<String, Participant> participants;
 	
-	/**
-	 * New Channel instance of Type unknown and special Type none
-	 * 
-	 * @param name Channel name
-	 */
-	public Channel(String name) {
-		this(name, Type.UNKNOWN);
+	private final Map<String, CommandHandler> commandHandlers;
+	private final Map<String, Setting> settings;
+	
+	private String password;
+	
+	private File configFile;
+	private FileConfiguration config;
+	
+	public Channel() {
+		this("", Option.TYPE);
 	}
 	
-	/**
-	 * New Channel instance of Type type and special Type none
-	 * 
-	 * @param name Channel name
-	 */
-	public Channel(String name, Type type) {
-		this(name, type, Type.NONE);
-	}
-	
-	/**
-	 * New Channel instance of Type type and special Type specialType
-	 * 
-	 * @param name Channel name
-	 * 
-	 * @param type Channel Type
-	 * 
-	 * @param specialType Channel special Type
-	 */
-	public Channel(String name, Type type, Type specialType) {
+	public Channel(String name, Option option) {
 		super(name);
 		this.plugin = TitanChat.getInstance();
-		this.type = type;
-		this.special = specialType;
-		this.global = false;
-		this.silenced = false;
-		this.adminlist = new ArrayList<String>();
+		this.option = option;
+		this.info = new Info(this);
+		this.admins = new ArrayList<String>();
 		this.blacklist = new ArrayList<String>();
-		this.followerlist = new ArrayList<String>();
-		this.invitelist = new ArrayList<String>();
-		this.mutelist = new ArrayList<String>();
-		this.participants = new ArrayList<String>();
+		this.followers = new ArrayList<String>();
 		this.whitelist = new ArrayList<String>();
+		this.participants = new HashMap<String, Participant>();
+		this.commandHandlers = new HashMap<String, CommandHandler>();
+		this.settings = new HashMap<String, Setting>();
 	}
 	
-	/**
-	 * Check if the Player has access
-	 * 
-	 * @param player The Player to check
-	 * 
-	 * @return True if the Player has access
-	 */
-	public boolean canAccess(Player player) {
-		if (plugin.getPermsBridge().has(player, "TitanChat.access.*") || plugin.getPermsBridge().has(player, "TitanChat.access." + getName()))
+	public abstract boolean access(Player player);
+	
+	public final boolean changeSetting(CommandSender sender, String setting, String[] args) {
+		if (settings.containsKey(setting.toLowerCase())) {
+			settings.get(setting.toLowerCase()).set(sender, args);
 			return true;
-		if (blacklist.contains(player.getName()) || (special.equals(Type.STAFF) && !plugin.isStaff(player)))
-			return false;
-		if (type.equals(Type.PUBLIC))
-			return true;
-		if (plugin.getManager().getChannelManager().getAdmins(this).contains(player.getName()) || whitelist.contains(player.getName()))
-			return true;
+		}
 		
 		return false;
 	}
 	
-	/**
-	 * Check if the Player can ban
-	 * 
-	 * @param player The Player to check
-	 * 
-	 * @return True if the Player can ban
-	 */
-	public boolean canBan(Player player) {
-		if (special.equals(Type.DEFAULT) || special.equals(Type.STAFF))
-			return false;
-		if (plugin.getPermsBridge().has(player, "TitanChat.ban.*") || plugin.getPermsBridge().has(player, "TitanChat.ban." + getName()))
-			return true;
-		if (plugin.getManager().getChannelManager().getAdmins(this).contains(player.getName()))
-			return true;
-		
-		return false;
-	}
+	public abstract Channel create(CommandSender sender, String name, Option option);
 	
-	/**
-	 * Check if the Player can kick
-	 * 
-	 * @param player The Player to check
-	 * 
-	 * @return True if the Player can kick
-	 */
-	public boolean canKick(Player player) {
-		if (plugin.getPermsBridge().has(player, "TitanChat.kick.*") || plugin.getPermsBridge().has(player, "TitanChat.kick." + super.getName()))
-			return true;
-		if (plugin.getManager().getChannelManager().getAdmins(this).contains(player.getName()))
-			return true;
-		
-		return false;
-	}
-	
-	/**
-	 * Check if the Player can mute
-	 * 
-	 * @param player The Player to check
-	 * 
-	 * @return True if the Player can mute
-	 */
-	public boolean canMute(Player player) {
-		if (plugin.getPermsBridge().has(player, "TitanChat.silence") || plugin.getPermsBridge().has(player, "TitanChat.mute"))
-			return true;
-		if (plugin.getManager().getChannelManager().getAdmins(this).contains(player.getName()))
-			return true;
-		
-		return false;
-	}
-	
-	/**
-	 * Check if the Player can rank
-	 * 
-	 * @param player The Player to check
-	 * 
-	 * @return True if the Player can rank
-	 */
-	public boolean canRank(Player player) {
-		if (plugin.getPermsBridge().has(player, "TitanChat.rank.*") || plugin.getPermsBridge().has(player, "TitanChat.rank." + super.getName()))
-			return true;
-		if (plugin.getManager().getChannelManager().getAdmins(this).contains(player.getName()))
-			return true;
-		
-		return false;
-	}
-	
-	/**
-	 * Sends a message to the Player if joining is denied
-	 * 
-	 * @param player The Player to send to
-	 */
 	public void deny(Player player, String message) {
 		if (message != null && !message.equals(""))
-			plugin.sendWarning(player, message);
+			plugin.send(MessageLevel.WARNING, player, message);
 		else
-			plugin.sendWarning(player, "You do not have access to the channel");
+			plugin.send(MessageLevel.WARNING, player, "You do not have access");
 	}
 	
-	/**
-	 * Check if a Channel equals another
-	 */
-	@Override
-	public final boolean equals(Object object) {
-		if (object instanceof Channel)
-			return ((Channel) object).getName().equals(getName());
-		
-		return false;
+	public final List<String> getAdmins() {
+		return admins;
 	}
 	
-	/**
-	 * Gets the admin list
-	 * 
-	 * @return The admin list
-	 */
-	public List<String> getAdminList() {
-		return adminlist;
-	}
-	
-	/**
-	 * Gets the blacklist
-	 * 
-	 * @return The blacklist
-	 */
-	public List<String> getBlackList() {
+	public final List<String> getBlacklist() {
 		return blacklist;
 	}
 	
-	/**
-	 * Gets the config
-	 * 
-	 * @return The config
-	 */
 	@Override
 	public FileConfiguration getConfig() {
-		if (config == null) { reloadConfig(); }
+		if (config == null)
+			reloadConfig();
+		
 		return config;
 	}
 	
-	/**
-	 * Gets the follower list
-	 * 
-	 * @return The follower list
-	 */
-	public List<String> getFollowerList() {
-		return followerlist;
+	public final List<String> getFollowers() {
+		return followers;
 	}
 	
-	/**
-	 * Gets the invite list
-	 * 
-	 * @return The invite list
-	 */
-	public List<String> getInviteList() {
-		return invitelist;
+	public Info getInfo() {
+		return info;
 	}
 	
-	/**
-	 * Gets the mute list
-	 * 
-	 * @return The mute list
-	 */
-	public List<String> getMuteList() {
-		return mutelist;
+	public final Option getOption() {
+		return option;
 	}
 	
-	/**
-	 * Gets the special type
-	 * 
-	 * @return Special type
-	 */
-	public final Type getSpecialType() {
-		return special;
+	public final List<Participant> getParticipants() {
+		return new ArrayList<Participant>(participants.values());
 	}
 	
-	/**
-	 * Gets the channel type
-	 * 
-	 * @return Channel type
-	 */
-	public final Type getType() {
-		return type;
+	public String getPassword() {
+		return password;
 	}
 	
-	/**
-	 * Gets the whitelist
-	 * 
-	 * @return The whitelist
-	 */
-	public List<String> getWhiteList() {
+	public abstract String getType();
+	
+	public final List<String> getWhitelist() {
 		return whitelist;
 	}
 	
-	/**
-	 * Check if global
-	 * 
-	 * @return True if the channel is global
-	 */
-	public boolean isGlobal() {
-		return global;
+	public final boolean handleCommand(CommandSender sender, String command, String[] args) {
+		if (commandHandlers.containsKey(command.toLowerCase())) {
+			commandHandlers.get(command.toLowerCase()).onCommand(sender, args);
+			return true;
+		}
+		
+		return false;
 	}
 	
-	/**
-	 * Check if silenced
-	 * 
-	 * @return True if the channel is silenced
-	 */
-	public boolean isSilenced() {
-		return silenced;
+	public boolean isParticipating(String name) {
+		return participants.containsKey(name.toLowerCase());
 	}
 	
-	/**
-	 * Called when a player joins the channel
-	 * 
-	 * @param player The player joining
-	 */
+	public void join(String name) {
+		if (!participants.containsKey(name.toLowerCase()) && plugin.getManager().getChannelManager().getParticipant(name) != null)
+			participants.put(name.toLowerCase(), plugin.getManager().getChannelManager().getParticipant(name)).join(this);
+	}
+	
 	public void join(Player player) {
-		participants.add(player.getName());
+		join(player.getName());
 	}
 	
-	/**
-	 * Gets the participant list
-	 * 
-	 * @return The participant list
-	 */
-	public List<String> getParticipants() {
-		return participants;
+	public void leave(String name) {
+		if (participants.containsKey(name.toLowerCase()))
+			participants.remove(name.toLowerCase()).leave(this);
 	}
 	
-	/**
-	 * Called when a player leaves the channel
-	 * 
-	 * @param player The player leaving
-	 */
 	public void leave(Player player) {
-		participants.remove(player.getName());
+		leave(player.getName());
 	}
 	
-	/**
-	 * Reloads the config
-	 */
+	public abstract Channel load(String name, Option option);
+	
 	@Override
 	public void reloadConfig() {
-		if (configFile == null) { configFile = new File(plugin.getChannelDir(), getName() + ".yml"); }
+		if (configFile == null)
+			configFile = new File(plugin.getChannelDir(), getName() + ".yml");
 		
 		config = YamlConfiguration.loadConfiguration(configFile);
 		
 		InputStream defConfigStream = plugin.getResource("channel.yml");
 		
-		if (defConfigStream != null) {
-			YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
-			config.setDefaults(defConfig);
-		}
+		if (defConfigStream != null)
+			config.setDefaults(YamlConfiguration.loadConfiguration(defConfigStream));
 	}
 	
-	/**
-	 * Called when TitanChat disables
-	 */
+	public final void registerCommandHandlers(CommandHandler... handlers) {
+		for (CommandHandler handler : handlers)
+			if (!commandHandlers.containsKey(handler.getCommand().toLowerCase()))
+				commandHandlers.put(handler.getCommand().toLowerCase(), handler);
+	}
+	
+	public final void registerSettings(Setting... settings) {
+		for (Setting setting : settings)
+			if (!this.settings.containsKey(setting.getSetting().toLowerCase()))
+				this.settings.put(setting.getSetting().toLowerCase(), setting);
+	}
+	
 	public void save() {
-		saveMembershipRoles();
-	}
-	
-	/**
-	 * Saves the config
-	 */
-	@Override
-	public void saveConfig() {
-		if (configFile == null || config == null) { return; }
-		try { config.save(configFile); } catch (IOException e) { plugin.log(Level.SEVERE, "Could not save config to " + configFile); }
-	}
-	
-	/**
-	 * Saves the admins, whitelist, blacklist and followers of the channel
-	 */
-	public void saveMembershipRoles() {
-		getConfig().set("admins", getAdminList());
-		getConfig().set("whitelist", getWhiteList());
-		getConfig().set("blacklist", getBlackList());
-		getConfig().set("followers", getFollowerList());
+		getConfig().set("admins", admins);
+		getConfig().set("blacklist", blacklist);
+		getConfig().set("whitelist", whitelist);
+		getConfig().set("followers", followers);
 		saveConfig();
 	}
 	
-	/**
-	 * Sends the line to all participants of the channel
-	 * 
-	 * @param line The line to be sent
-	 */
-	public void send(String line) {
-		for (String participant : participants)
-			if (plugin.getPlayer(participant) != null)
-				plugin.getPlayer(participant).sendMessage(line);
+	@Override
+	public void saveConfig() {
+		if (configFile == null || config == null)
+			return;
+		
+		try { config.save(configFile); } catch (Exception e) { plugin.log(Level.SEVERE, "Could not save config to " + configFile); }
 	}
 	
-	/**
-	 * Called when a message is to be sent
-	 * 
-	 * @param sender The message sender
-	 * 
-	 * @param message The message to be sent
-	 */
+	public final void saveParticipants() {
+		List<String> participants = new ArrayList<String>();
+		
+		for (Participant participant : getParticipants())
+			participants.add(participant.getName());
+		
+		getConfig().set("participants", participants);
+		saveConfig();
+	}
+	
+	public void send(String message) {
+		String[] lines = plugin.getFormatHandler().regroup("", message);
+		
+		for (Participant participant : getParticipants()) {
+			if (participant.getPlayer() != null) {
+				participant.getPlayer().sendMessage(lines[0]);
+				participant.getPlayer().sendMessage(Arrays.copyOfRange(lines, 1, lines.length));
+			}
+		}
+	}
+	
+	public void send(String... messages) {
+		for (String message : messages)
+			send(message);
+	}
+	
 	public String sendMessage(Player sender, String message) {
 		return sendMessage(sender, new ArrayList<Player>(), message);
 	}
 	
-	/**
-	 * Called when a message is to be sent
-	 * 
-	 * @param sender The message sender
-	 * 
-	 * @param recipants The players to send to
-	 * 
-	 * @param message The message to be sent
-	 */
-	protected String sendMessage(Player sender, List<Player> recipants, String message) {
-		String format = plugin.getFormatHandler().format(sender, getName(), false);
+	protected final String sendMessage(Player sender, List<Player> recipants, String message) {
+		return sendMessage(sender, recipants.toArray(new Player[0]), message);
+	}
+	
+	protected final String sendMessage(Player sender, Player[] recipants, String message) {
+		String format = plugin.getFormatHandler().format(sender, getName());
 		
 		MessageSendEvent sendEvent = new MessageSendEvent(sender, this, recipants, new Message(format, message));
 		plugin.getServer().getPluginManager().callEvent(sendEvent);
 		
-		if (sendEvent.isCancelled()) { return ""; }
+		if (sendEvent.isCancelled())
+			return "";
 		
-		MessageReceiveEvent receiveEvent = new MessageReceiveEvent(sendEvent.getSender(), sendEvent.getRecipants(), new Message(sendEvent.getFormat(), sendEvent.getMessage()));
+		MessageReceiveEvent receiveEvent = new MessageReceiveEvent(sender, sendEvent.getRecipants(), new Message(sendEvent.getFormat(), sendEvent.getMessage()));
 		plugin.getServer().getPluginManager().callEvent(receiveEvent);
 		
 		for (Player recipant : receiveEvent.getRecipants()) {
@@ -438,157 +257,41 @@ public class Channel extends Loadable {
 			recipant.sendMessage(Arrays.copyOfRange(lines, 1, lines.length));
 		}
 		
-		return sendEvent.getFormat().replace("%message", sendEvent.getMessage());
-	}
-	
-	/**
-	 * Called when a message is to be sent
-	 * 
-	 * @param sender The message sender
-	 * 
-	 * @param recipants The players to send to
-	 * 
-	 * @param message The message to be sent
-	 */
-	protected String sendMessage(Player sender, Player[] recipants, String message) {
-		return sendMessage(sender, Arrays.asList(recipants), message);
-	}
-	
-	/**
-	 * Sets whether the channel is global
-	 * 
-	 * @param global True if channel should be global
-	 */
-	public void setGlobal(boolean global) {
-		this.global = global;
-	}
-	
-	/**
-	 * Sets whether the channel is silenced
-	 * 
-	 * @param silenced True if channel should be silenced
-	 */
-	public void setSilenced(boolean silenced) {
-		this.silenced = silenced;
-	}
-	
-	/**
-	 * Sets the special type of the channel
-	 * 
-	 * @param type The special type
-	 */
-	public void setSpecialType(Type type) {
-		if (!type.isSpecial() || type.equals(Type.CUSTOM))
-			type = Type.NONE;
+		MessageConsoleEvent consoleEvent = new MessageConsoleEvent(sender, new Message(sendEvent.getFormat(), sendEvent.getMessage()));
+		plugin.getServer().getPluginManager().callEvent(consoleEvent);
 		
-		this.special = type;
+		return consoleEvent.getFormat().replace("%message", consoleEvent.getMessage());
 	}
 	
-	/**
-	 * Sets the special type of the channel
-	 * 
-	 * @param type The special type
-	 */
-	public void setSpecialType(String type) {
-		if (Type.fromName(type) == null)
-			type = "none";
-		
-		setSpecialType(Type.fromName(type));
+	public void setPassword(String password) {
+		this.password = password;
 	}
 	
-	/**
-	 * Sets the type of the channel
-	 * 
-	 * @param type The type
-	 */
-	public void setType(Type type) {
-		if (type.isSpecial() || type.equals(Type.CUSTOM))
-			type = Type.UNKNOWN;
-		
-		this.type = type;
-	}
-	
-	/**
-	 * Sets the type of the channel
-	 * 
-	 * @param type The type
-	 */
-	public void setType(String type) {
-		if (Type.fromName(type) == null)
-			type = "unknown";
-		
-		setType(Type.fromName(type));
-	}
-	
-	/**
-	 * Returns the Channel as a String
-	 */
-	@Override
-	public String toString() {
-		return "Channel:" + super.getName() + " : " + type.getName();
-	}
-	
-	/**
-	 * Type - Types of Channels
-	 * 
-	 * @author NodinChan
-	 *
-	 */
-	public enum Type {
-		CUSTOM("custom", false),
-		DEFAULT("default", true),
-		NONE("none", true),
-		PASSWORD("password", false),
-		PRIVATE("private", false),
-		PUBLIC("public", false),
-		STAFF("staff", true),
-		UNKNOWN("unknown", false);
+	public enum Option {
+		CUSTOM("custom"),
+		DEFAULT("default"),
+		NONE("none"),
+		STAFF("staff"),
+		TYPE("type");
 		
 		private String name;
-		private boolean special;
-
-		private final static Debugger db = new Debugger(3);
-		private static final Map<String, Type> NAME_MAP = new HashMap<String, Type>();
+		private static Map<String, Option> NAME_MAP = new HashMap<String, Option>();
 		
-		private Type(String name, boolean special) {
+		private Option(String name) {
 			this.name = name;
-			this.special = special;
 		}
 		
 		static {
-			for (Type type : EnumSet.allOf(Type.class)) {
-				db.i("Adding Type: " + type.name);
-				NAME_MAP.put(type.name.toLowerCase(), type);
-			}
+			for (Option option : EnumSet.allOf(Option.class))
+				NAME_MAP.put(option.name.toLowerCase(), option);
 		}
 		
-		/**
-		 * Gets the Type from its name
-		 * 
-		 * @param name The name of the Type
-		 * 
-		 * @return The Type if found, otherwise null
-		 */
-		public static Type fromName(String name) {
+		public static Option fromName(String name) {
 			return NAME_MAP.get(name.toLowerCase());
 		}
 		
-		/**
-		 * Gets the name of the Type
-		 * 
-		 * @return The name of the Type
-		 */
 		public String getName() {
 			return name;
-		}
-		
-		/**
-		 * Check if the Type is a special Type
-		 * 
-		 * @return True if the Type is a special Type
-		 */
-		public boolean isSpecial() {
-			return special;
 		}
 	}
 }

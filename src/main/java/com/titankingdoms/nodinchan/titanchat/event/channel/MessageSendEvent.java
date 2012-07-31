@@ -1,4 +1,4 @@
-package com.titankingdoms.nodinchan.titanchat.event;
+package com.titankingdoms.nodinchan.titanchat.event.channel;
 
 import java.util.Arrays;
 import java.util.List;
@@ -9,6 +9,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
+import com.titankingdoms.nodinchan.titanchat.event.util.Message;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -159,57 +160,5 @@ public final class MessageSendEvent extends Event implements Cancellable {
 	 */
 	public void setCancelled(boolean cancelled) {
 		this.cancelled = cancelled;
-	}
-	
-	public static final class Message implements Cloneable {
-		
-		private String format;
-		private String message;
-		
-		public Message(String format, String message) {
-			this.format = format;
-			this.message = message;
-		}
-		
-		@Override
-		public Message clone() {
-			return new Message(format, message);
-		}
-		
-		/**
-		 * Gets the format
-		 * 
-		 * @return The format
-		 */
-		public String getFormat() {
-			return format;
-		}
-		
-		/**
-		 * Gets the message
-		 * 
-		 * @return The message
-		 */
-		public String getMessage() {
-			return message;
-		}
-		
-		/**
-		 * Sets the format
-		 * 
-		 * @param format The new format
-		 */
-		public void setFormat(String format) {
-			this.format = format;
-		}
-		
-		/**
-		 * Sets the message
-		 * 
-		 * @param message The new message
-		 */
-		public void setMessage(String message) {
-			this.message = message;
-		}
 	}
 }

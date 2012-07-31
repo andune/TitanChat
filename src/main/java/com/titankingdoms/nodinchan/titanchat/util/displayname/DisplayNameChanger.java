@@ -1,5 +1,6 @@
 package com.titankingdoms.nodinchan.titanchat.util.displayname;
 
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
@@ -40,6 +41,18 @@ public final class DisplayNameChanger {
 			return;
 		
 		set(player, display.getDisplayName());
+	}
+	
+	public String getDisplayName(OfflinePlayer player) {
+		if (player.isOnline())
+			return player.getPlayer().getDisplayName();
+		
+		DisplayName display = plugin.getDatabase().find(DisplayName.class).where().ieq("name", player.getName()).findUnique();
+		
+		if (display == null)
+			return player.getName();
+		
+		return display.getDisplayName();
 	}
 	
 	/**

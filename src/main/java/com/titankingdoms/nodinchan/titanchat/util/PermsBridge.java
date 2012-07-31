@@ -1,19 +1,18 @@
 package com.titankingdoms.nodinchan.titanchat.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
 import org.anjocaido.groupmanager.GroupManager;
-import org.anjocaido.groupmanager.data.Group;
 import org.anjocaido.groupmanager.data.User;
 import org.anjocaido.groupmanager.dataholder.OverloadedWorldHolder;
 import org.anjocaido.groupmanager.permissions.AnjoPermissionsHandler;
 import org.anjocaido.groupmanager.utils.PermissionCheckResult;
-import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -24,7 +23,6 @@ import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.permissions.PermissionDefault;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
-import org.tyrannyofheaven.bukkit.zPermissions.ZPermissionsService;
 
 import com.nodinchan.ncbukkit.permission.PermissionManager;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
@@ -135,28 +133,8 @@ public final class PermsBridge {
 			if (!permInfo.getPermission().startsWith("titanchat.g.prefix.") || !permInfo.getValue())
 				continue;
 			
-			if (getPermission(permInfo.getPermission()) != null) {
-				prefix = getPermissionNode(permInfo.getPermission()).substring(19);
-				break;
-			}
-		}
-		
-		if (prefix.equals("") && using().equals(Permissions.PERMISSIONSEX)) {
-			db.i("Prefix not found with permission attachments, checking PermissionsEx");
-			
-			PermissionGroup[] groups = PermissionsEx.getPermissionManager().getUser(player).getGroups(player.getWorld().getName());
-			
-			if (groups != null && groups.length > 0) {
-				for (String perm : groups[0].getPermissions(player.getWorld().getName())) {
-					db.i("Checking if " + perm + " is a prefix permission");
-					
-					if (perm.startsWith("TitanChat.g.prefix.")) {
-						prefix = perm.substring(19);
-						db.i("PermissionsEx permissions returned prefix: " + prefix);
-						break;
-					}
-				}
-			}
+			prefix = plugin.getConfig().getString("permissions.groups." + permInfo.getPermission().substring(19) + ".prefix");
+			break;
 		}
 		
 		if (prefix.equals(""))
@@ -184,26 +162,8 @@ public final class PermsBridge {
 			if (!permInfo.getPermission().startsWith("titanchat.g.suffix.") || !permInfo.getValue())
 				continue;
 			
-			if (getPermission(permInfo.getPermission()) != null) {
-				suffix = getPermissionNode(permInfo.getPermission()).substring(19);
-				break;
-			}
-		}
-		
-		if (suffix.equals("") && using().equals(Permissions.PERMISSIONSEX)) {
-			db.i("Suffix not found with permission attachments, checking PermissionsEx");
-			
-			PermissionGroup[] groups = PermissionsEx.getPermissionManager().getUser(player).getGroups(player.getWorld().getName());
-			
-			if (groups != null && groups.length > 0) {
-				for (String perm : groups[0].getPermissions(player.getWorld().getName())) {
-					if (perm.startsWith("TitanChat.g.suffix.")) {
-						suffix = perm.substring(19);
-						db.i("PermissionsEx permissions returned suffix: " + suffix);
-						break;
-					}
-				}
-			}
+			suffix = plugin.getConfig().getString("permissions.groups." + permInfo.getPermission().substring(19) + ".suffix");
+			break;
 		}
 		
 		if (suffix.equals(""))
@@ -258,23 +218,8 @@ public final class PermsBridge {
 			if (!permInfo.getPermission().startsWith("titanchat.p.prefix.") || !permInfo.getValue())
 				continue;
 			
-			if (getPermission(permInfo.getPermission()) != null) {
-				prefix = getPermissionNode(permInfo.getPermission()).substring(19);
-				break;
-			}
-		}
-		
-		if (prefix.equals("") && using().equals(Permissions.PERMISSIONSEX)) {
-			db.i("Prefix not found with permission attachments, checking PermissionsEx");
-			
-			PermissionUser user = PermissionsEx.getPermissionManager().getUser(player);
-			for (String perm : user.getPermissions(player.getWorld().getName())) {
-				if (perm.startsWith("TitanChat.p.prefix.")) {
-					prefix = perm.substring(19);
-					db.i("PermissionsEx permissions returned prefix: " + prefix);
-					break;
-				}
-			}
+			prefix = plugin.getConfig().getString("permissions.users." + permInfo.getPermission().substring(19) + ".prefix");
+			break;
 		}
 		
 		if (prefix.equals(""))
@@ -302,10 +247,8 @@ public final class PermsBridge {
 			if (!permInfo.getPermission().startsWith("titanchat.p.suffix.") || !permInfo.getValue())
 				continue;
 			
-			if (getPermission(permInfo.getPermission()) != null) {
-				suffix = getPermissionNode(permInfo.getPermission()).substring(19);
-				break;
-			}
+			suffix = plugin.getConfig().getString("permissions.users." + permInfo.getPermission().substring(19) + ".suffix");
+			break;
 		}
 		
 		if (suffix.equals("") && using().equals(Permissions.PERMISSIONSEX)) {
@@ -356,22 +299,14 @@ public final class PermsBridge {
 		return using().has(player, permission, avoidWildcard);
 	}
 	
-	/**
-	 * Removes the permission from the player
-	 * 
-	 * @param player The player to remove from
-	 * 
-	 * @param permission The permission to remove
-	 */
-	public void removePermission(Player player, String permission) {
-		for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
-			if (!permInfo.getPermission().equals(permission))
-				continue;
-			
-			permInfo.getAttachment().unsetPermission(permission);
-		}
+	public void remove(Player player, String permission) {
+		if (perm == null)
+			return;
 		
-		using().remove(player, permission);
+		for (World world : plugin.getServer().getWorlds()) {
+			perm.playerRemove(world, player.getName(), permission);
+			perm.playerRemoveTransient(world.getName(), player, permission);
+		}
 	}
 	
 	/**
@@ -510,33 +445,16 @@ public final class PermsBridge {
 			protected boolean has(Player player, String permission, boolean avoidWildcard) {
 				if (avoidWildcard) {
 					PermissionUser user = PermissionsEx.getPermissionManager().getUser(player);
-					
-					for (String perm : user.getPermissions(player.getWorld().getName())) {
-						if (perm.equals(permission))
-							return true;
-					}
+					return Arrays.asList(user.getPermissions(player.getWorld().getName())).contains(permission);
 					
 				} else {
 					if (usingVault())
 						return perm.has(player, permission);
 					
-					return PermissionsEx.getPermissionManager().getUser(player).has(permission, player.getWorld().getName());
-				}
-				
-				return false;
-			}
-			
-			@Override
-			protected void remove(Player player, String permission) {
-				PermissionUser user = PermissionsEx.getPermissionManager().getUser(player);
-				
-				if (user != null) {
-					user.removePermission(permission);
-					
-					if (user.getGroupsNames(player.getWorld().getName()).length > 0) {
-						PermissionGroup group = PermissionsEx.getPermissionManager().getGroup(user.getGroupsNames(player.getWorld().getName())[0]);
-						group.removePermission(permission);
-					}
+					if (PermissionsEx.getPermissionManager().getUser(player).has(permission, player.getWorld().getName()))
+						return true;
+					else
+						return player.hasPermission(permission);
 				}
 			}
 		},
@@ -593,20 +511,13 @@ public final class PermsBridge {
 					if (usingVault())
 						return perm.has(player, permission);
 					
-					return ApiLayer.hasPermission(player.getWorld().getName(), CalculableType.USER, player.getName(), permission);
+					if (ApiLayer.hasPermission(player.getWorld().getName(), CalculableType.USER, player.getName(), permission))
+						return true;
+					else
+						return player.hasPermission(permission);
 				}
 				
 				return false;
-			}
-			
-			@Override
-			protected void remove(Player player, String permission) {
-				ApiLayer.removePermission(player.getWorld().getName(), CalculableType.USER, player.getName(), permission);
-				
-				String[] groups = ApiLayer.getGroups(player.getWorld().getName(), CalculableType.USER, player.getName());
-				
-				if (groups != null && groups.length > 0)
-					ApiLayer.removePermission(player.getWorld().getName(), CalculableType.GROUP, groups[0], permission);
 			}
 		},
 		/**
@@ -651,14 +562,6 @@ public final class PermsBridge {
 				
 				return false;
 			}
-			
-			@Override
-			protected void remove(Player player, String permission) {
-				for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
-					if (permInfo.getAttachment() != null && permInfo.getAttachment().getPlugin().equals(permissionsPlugin))
-						permInfo.getAttachment().unsetPermission(permission);
-				}
-			}
 		},
 		/**
 		 * Represents PermissionsBukkit
@@ -701,14 +604,6 @@ public final class PermsBridge {
 				}
 				
 				return false;
-			}
-			
-			@Override
-			protected void remove(Player player, String permission) {
-				for (PermissionAttachmentInfo permInfo : player.getEffectivePermissions()) {
-					if (permInfo.getAttachment() != null && permInfo.getAttachment().getPlugin().equals(permissionsPlugin))
-						permInfo.getAttachment().unsetPermission(permission);
-				}
 			}
 		},
 		/**
@@ -759,22 +654,13 @@ public final class PermsBridge {
 					if (usingVault())
 						return perm.has(player, permission);
 					
-					return ((GroupManager) permissionsPlugin).getWorldsHolder().getWorldPermissions(player.getWorld().getName()).permission(player, permission);
+					if (((GroupManager) permissionsPlugin).getWorldsHolder().getWorldPermissions(player.getWorld().getName()).permission(player, permission))
+						return true;
+					else
+						return player.hasPermission(permission);
 				}
 				
 				return false;
-			}
-			
-			@Override
-			protected void remove(Player player, String permission) {
-				OverloadedWorldHolder holder = ((GroupManager) TitanChat.getInstance().getServer().getPluginManager().getPlugin("GroupManager")).getWorldsHolder().getWorldDataByPlayerName(player.getName());
-				if (holder != null) {
-					User user = holder.getUser(player.getName());
-					Group group = user.getGroup();
-					
-					if (user != null) { user.removePermission(permission); }
-					if (group != null) { group.removePermission(permission); }
-				}
 			}
 		},
 		VAULT("Vault") {
@@ -824,22 +710,6 @@ public final class PermsBridge {
 				
 				return false;
 			}
-			
-			@Override
-			protected void remove(Player player, String permission) {
-				if (perm.playerRemove(player, permission)) {
-					if (perm.groupRemove(player.getWorld(), perm.getPrimaryGroup(player), permission))
-						return;
-					else
-						return;
-					
-				} else if (perm.groupRemove(player.getWorld(), perm.getPrimaryGroup(player), permission)) {
-					if (perm.playerRemove(player, permission))
-						return;
-					else
-						return;
-				}
-			}
 		},
 		/**
 		 * Represents zPermissions
@@ -882,17 +752,6 @@ public final class PermsBridge {
 				}
 				
 				return false;
-			}
-			
-			@Override
-			protected void remove(Player player, String permission) {
-				TitanChat.getInstance().getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), "permissions player " + player.getName() + " unset " + permission);
-				
-				List<String> groups = permissionsPlugin.getServer().getServicesManager().load(ZPermissionsService.class).getPlayerAssignedGroups(player.getName());
-				
-				if (groups != null) {
-					TitanChat.getInstance().getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), "permissions group " + groups.get(0) + " unset " + permission);
-				}
 			}
 		};
 		
@@ -982,14 +841,5 @@ public final class PermsBridge {
 		 * @return True if the Player has the permission
 		 */
 		protected abstract boolean has(Player player, String permission, boolean avoidWildcard);
-		
-		/**
-		 * Removes the permission from the player
-		 * 
-		 * @param player The player to remove from
-		 * 
-		 * @param permission The permission to remove
-		 */
-		protected abstract void remove(Player player, String permission);
 	}
 }

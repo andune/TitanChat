@@ -1,15 +1,20 @@
 tag: '[D]'
 chat-display-colour: '&f'
 name-display-colour: '&f'
-type: public
-special-type: default
-global: true
-colour-code: false
+type: 'Standard'
+option: 'default'
+aliases: [d]
+topic: 'Welcome to the default channel'
+setting:
+    colouring: false
+    global: true
+    whitelist: false
+    messages:
+        join: true
+        leave: true
 password: ''
 format: ''
-messages:
-    join: true
-    leave: true
-commands:
-    join: 'jd'
-    message: 'sd'
+admins: []
+blacklist: []
+followers: []
+whitelist: []

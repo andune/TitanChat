@@ -1,15 +1,21 @@
-tag: '[]'
+tag: ''
 chat-display-colour: ''
 name-display-colour: ''
-type: public
-special-type: none
-global: true
-colour-code: false
+type: 'Standard'
+option: 'none'
+aliases: []
+topic: ''
+setting:
+    colouring: false
+    global: false
+    whitelist: false
+    messages:
+        join: true
+        leave: true
 password: ''
 format: ''
-messages:
-    join: true
-    leave: true
-commands:
-    join: ''
-    message: ''
+admins: []
+blacklist: []
+followers: []
+whitelist: []
+participants: []

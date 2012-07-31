@@ -18,9 +18,10 @@ import org.bukkit.entity.Player;
 
 import com.nodinchan.ncbukkit.loader.Loader;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
+import com.titankingdoms.nodinchan.titanchat.TitanChat.MessageLevel;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
+import com.titankingdoms.nodinchan.titanchat.channel.setting.SettingsCommand;
 import com.titankingdoms.nodinchan.titanchat.command.commands.*;
-import com.titankingdoms.nodinchan.titanchat.command.info.ChCommand;
 import com.titankingdoms.nodinchan.titanchat.command.info.Command;
 import com.titankingdoms.nodinchan.titanchat.util.Debugger;
 
@@ -78,36 +79,46 @@ public final class CommandManager {
 	/**
 	 * Searches for the command and executes it if found
 	 * 
-	 * @param player The command sender
+	 * @param sender The command sender
 	 * 
 	 * @param command The command
 	 * 
 	 * @param args The arguments
 	 */
-	public void execute(Player player, String command, String[] args) {
+	public void execute(CommandSender sender, String command, String[] args) {
 		if (getCommandExecutor(command) != null) {
 			Executor executor = getCommandExecutor(command);
 			
-			if (executor.requireChannel() && !plugin.enableChannels()) {
-				plugin.sendWarning(player, "This command requires channels to be enabled");
+			if (!(sender instanceof Player) && !executor.allowServer()) {
+				plugin.send(MessageLevel.WARNING, sender, "Please use this command in game");
 				return;
+				
+			} else if (sender instanceof Player) {
+				if (!executor.getPermission().isEmpty() && !plugin.getPermsBridge().has((Player) sender, executor.getPermission())) {
+					plugin.send(MessageLevel.WARNING, sender, "You do not have permission");
+					return;
+				}
 			}
 			
 			try {
-				executor.execute(player, args);
+				if (executor.allowServer())
+					executor.execute(sender, args);
+				else
+					executor.executePlayer((Player) sender, args);
+				
 				return;
 			} catch (IllegalAccessException e) {
-				plugin.sendWarning(player, "An error seems to have occured, please check console");
+				plugin.send(MessageLevel.WARNING, sender, "An error seems to have occured, please check console");
 				plugin.log(Level.SEVERE, "An IllegalAccessException has occured while using command: " + executor.getName());
 				if (db.isDebugging())
 					e.printStackTrace();
 			} catch (IllegalArgumentException e) {
-				plugin.sendWarning(player, "An error seems to have occured, please check console");
+				plugin.send(MessageLevel.WARNING, sender, "An error seems to have occured, please check console");
 				plugin.log(Level.SEVERE, "An IllgealArgumentException has occured while using command: " + executor.getName());
 				if (db.isDebugging())
 					e.printStackTrace();
 			} catch (InvocationTargetException e) {
-				plugin.sendWarning(player, "An error seems to have occured, please check console");
+				plugin.send(MessageLevel.WARNING, sender, "An error seems to have occured, please check console");
 				plugin.log(Level.SEVERE, "An InvocationTargetException has occured while using command: " + executor.getName());
 				if (db.isDebugging()) {
 					e.printStackTrace();
@@ -116,8 +127,8 @@ public final class CommandManager {
 			}
 		}
 		
-		plugin.sendWarning(player, "Invalid Command");
-		plugin.sendInfo(player, "\"/titanchat commands [page]\" for command list");
+		plugin.send(MessageLevel.WARNING, sender, "Invalid Command");
+		plugin.send(MessageLevel.INFO, sender, "\"/titanchat commands [page]\" for command list");
 	}
 	
 	/**
@@ -228,7 +239,7 @@ public final class CommandManager {
 		db.i("Try to register command " + command.toString());
 		
 		for (Method method : command.getClass().getDeclaredMethods()) {
-			if (method.isAnnotationPresent(Command.class) || method.isAnnotationPresent(ChCommand.class)) {
+			if (method.isAnnotationPresent(Command.class)) {
 				db.i("Adding new executor: " + method.getName());
 				
 				Executor executor = new Executor(command, method);

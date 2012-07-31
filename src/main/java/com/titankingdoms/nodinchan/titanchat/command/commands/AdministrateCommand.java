@@ -1,9 +1,9 @@
 package com.titankingdoms.nodinchan.titanchat.command.commands;
 
-import org.bukkit.ChatColor;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import com.titankingdoms.nodinchan.titanchat.TitanChat.MessageLevel;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
 import com.titankingdoms.nodinchan.titanchat.command.CommandBase;
@@ -40,582 +40,240 @@ public class AdministrateCommand extends CommandBase {
 	}
 	
 	/**
-	 * Ban Command - Bans the player from the channel
+	 * Ban Command - Bans the sender from the channel
 	 */
-	@ChCommand
+	@Command(server = true)
 	@Aliases("b")
-	@Description("Bans the player from the channel")
-	@Usage("ban [player] <channel>")
-	public void ban(Player player, String[] args) {
-		if (args.length < 1) { invalidArgLength(player, "ban"); return; }
+	@Description("Bans the sender from the channel")
+	@Usage("ban [sender] <channel>")
+	public void ban(CommandSender sender, String[] args) {
+		if (args.length < 1) { invalidArgLength(sender, "ban"); return; }
+		
+		Channel channel = null;
 		
 		try {
-			if (cm.exists(args[1])) {
-				Channel channel = cm.getChannel(args[1]);
-				
-				if (channel.canBan(player)) {
-					if (plugin.getPlayer(args[0]) != null) {
-						Player targetPlayer = plugin.getPlayer(args[0]);
-						
-						if (!channel.getBlackList().contains(player.getName())) {
-							ban(player, targetPlayer, channel, true);
-							
-						} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " has already been banned"); }
-						
-					} else {
-						OfflinePlayer targetPlayer = plugin.getPlayer(args[0]);
-						plugin.sendInfo(player, targetPlayer.getName() + " is offline");
-						
-						if (!channel.getBlackList().contains(player.getName())) {
-							ban(player, targetPlayer, channel, false);
-							
-						} else { plugin.sendWarning(player, targetPlayer.getName() + " has already been banned"); }
-					}
-					
-				} else { plugin.sendWarning(player, "You do not have permission"); }
-				
-			} else {
-				if (args[1].toLowerCase().startsWith(":tag")) {
-					if (cm.existsAsTag(args[1].substring(4))) {
-						Channel channel = cm.getChannelByTag(args[1].substring(4));
-						
-						if (channel.canBan(player)) {
-							if (plugin.getPlayer(args[0]) != null) {
-								Player targetPlayer = plugin.getPlayer(args[0]);
-								
-								if (!channel.getBlackList().contains(player.getName())) {
-									ban(player, targetPlayer, channel, true);
-									
-								} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " has already been banned"); }
-								
-							} else {
-								OfflinePlayer targetPlayer = plugin.getPlayer(args[0]);
-								plugin.sendInfo(player, targetPlayer.getName() + " is offline");
-								
-								if (!channel.getBlackList().contains(player.getName())) {
-									ban(player, targetPlayer, channel, false);
-									
-								} else { plugin.sendWarning(player, targetPlayer.getName() + " has already been banned"); }
-							}
-							
-						} else { plugin.sendWarning(player, "You do not have permission"); }
-						
-					} else { plugin.sendWarning(player, "No such channel"); }
-					
-				} else { plugin.sendWarning(player, "No such channel"); }
-			}
+			if (cm.existsByAlias(args[1]))
+				channel = cm.getChannelByAlias(args[1]);
+			else
+				plugin.send(MessageLevel.WARNING, sender, "No such channel");
 			
 		} catch (IndexOutOfBoundsException e) {
-			Channel channel = cm.getChannel(player);
-			
-			if (channel == null) {
-				plugin.sendWarning(player, "Specify a channel or join a channel to use this command");
+			if (!(sender instanceof Player)) {
+				plugin.send(MessageLevel.WARNING, sender, "Please specify a channel");
+				usage(sender, "ban");
 				return;
 			}
 			
-			if (channel.canBan(player)) {
-				if (plugin.getPlayer(args[0]) != null) {
-					Player targetPlayer = plugin.getPlayer(args[0]);
-					
-					if (!channel.getBlackList().contains(targetPlayer.getName())) {
-						channel.getAdminList().remove(targetPlayer.getName());
-						channel.getWhiteList().remove(targetPlayer.getName());
-						channel.getBlackList().add(targetPlayer.getName());
-						channel.save();
-						
-						if (channel.equals(cm.getChannel(targetPlayer)))
-							cm.chSwitch(targetPlayer, cm.getSpawnChannel(targetPlayer));
-						
-						plugin.sendWarning(targetPlayer, "You have been banned from " + channel.getName());
-						plugin.sendInfo(channel.getParticipants(), targetPlayer.getDisplayName() + " has been banned");
-						
-					} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " has already been banned"); }
-					
-				} else {
-					OfflinePlayer targetPlayer = plugin.getPlayer(args[0]);
-					plugin.sendInfo(player, targetPlayer.getName() + " is offline");
-					
-					if (!channel.getBlackList().contains(player.getName())) {
-						channel.getAdminList().remove(targetPlayer.getName());
-						channel.getWhiteList().remove(targetPlayer.getName());
-						channel.getBlackList().add(targetPlayer.getName());
-						channel.save();
-						
-						plugin.sendInfo(channel.getParticipants(), targetPlayer.getName() + " has been banned");
-						
-					} else { plugin.sendWarning(player, targetPlayer.getName() + " has already been banned"); }
-				}
-				
-			} else { plugin.sendWarning(player, "You do not have permission"); }
-		}
-	}
-	
-	private void ban(Player player, OfflinePlayer targetPlayer, Channel channel, boolean online) {
-		channel.getAdminList().remove(targetPlayer.getName());
-		channel.getWhiteList().remove(targetPlayer.getName());
-		channel.getBlackList().add(targetPlayer.getName());
-		channel.save();
-		
-		if (online) {
-			if (channel.equals(cm.getChannel(targetPlayer.getPlayer())))
-				cm.chSwitch(targetPlayer.getPlayer(), cm.getSpawnChannel(targetPlayer.getPlayer()));
+			channel = cm.getChannel((Player) sender);
 			
-			plugin.sendWarning(targetPlayer.getPlayer(), "You have been banned from " + channel.getName());
+			if (channel == null) {
+				plugin.send(MessageLevel.WARNING, sender, "Specify a channel or join a channel to use this command");
+				usage(sender, "ban");
+			}
 		}
 		
-		plugin.sendInfo(channel.getParticipants(), targetPlayer.getPlayer().getDisplayName() + " has been banned");
+		if (channel == null)
+			return;
+		
+		if (channel.handleCommand(sender, "ban", args))
+			return;
 	}
 	
 	/**
-	 * Force Command - Forces the player to join the channel
+	 * Force Command - Forces the sender to join the channel
 	 */
-	@ChCommand
-	@Description("Forces the player to join the channel")
-	@Usage("force [player] <channel>")
-	public void force(Player player, String[] args) {
-		if (args.length < 1) { invalidArgLength(player, "force"); }
+	@Command(server = true)
+	@Description("Forces the sender to join the channel")
+	@Permission("TitanChat.force")
+	@Usage("force [sender] <channel>")
+	public void force(CommandSender sender, String[] args) {
+		if (args.length < 1) { invalidArgLength(sender, "force"); }
+		
+		Channel channel = null;
 		
 		try {
-			if (cm.exists(args[1])) {
-				Channel channel = cm.getChannel(args[1]);
-				
-				if (plugin.getPermsBridge().has(player, "TitanChat.force")) {
-					if (plugin.getPlayer(args[0]) != null) {
-						Player targetPlayer = plugin.getPlayer(args[0]);
-						
-						if (!channel.equals(cm.getChannel(targetPlayer))) {
-							force(player, targetPlayer, channel);
-							
-						} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " is already in the channel"); }
-						
-					} else { plugin.sendWarning(player, "Player not online"); }
-					
-				} else { plugin.sendWarning(player, "You do not have permission"); }
-				
-			} else {
-				if (args[1].toLowerCase().startsWith("tag:")) {
-					if (cm.existsAsTag(args[1].substring(4))) {
-						Channel channel = cm.getChannelByTag(args[1].substring(4));
-						
-						if (plugin.getPermsBridge().has(player, "TitanChat.force")) {
-							if (plugin.getPlayer(args[0]) != null) {
-								Player targetPlayer = plugin.getPlayer(args[0]);
-								
-								if (!channel.equals(cm.getChannel(targetPlayer))) {
-									force(player, targetPlayer, channel);
-									
-								} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " is already in the channel"); }
-								
-							} else { plugin.sendWarning(player, "Player not online"); }
-							
-						} else { plugin.sendWarning(player, "You do not have permission"); }
-						
-					} else { plugin.sendWarning(player, "No such channel"); }
-					
-				} else { plugin.sendWarning(player, "No such channel"); }
-			}
+			if (cm.existsByAlias(args[1]))
+				channel = cm.getChannelByAlias(args[1]);
+			else
+				plugin.send(MessageLevel.WARNING, sender, "No such channel");
 			
 		} catch (IndexOutOfBoundsException e) {
-			Channel channel = cm.getChannel(player);
-			
-			if (channel == null) {
-				plugin.sendWarning(player, "Specify a channel or join a channel to use this command");
+			if (!(sender instanceof Player)) {
+				plugin.send(MessageLevel.WARNING, sender, "Please specify a channel");
+				usage(sender, "force");
 				return;
 			}
 			
-			if (plugin.getPermsBridge().has(player, "TitanChat.force")) {
-				if (plugin.getPlayer(args[0]) != null) {
-					Player targetPlayer = plugin.getPlayer(args[0]);
-					
-					if (!channel.equals(cm.getChannel(targetPlayer))) {
-						force(player, targetPlayer, channel);
-						
-					} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " is already in the channel"); }
-					
-				} else { plugin.sendWarning(player, "Player not online"); }
-				
-			} else { plugin.sendWarning(player, "You do not have permission"); }
+			channel = cm.getChannel((Player) sender);
+			
+			if (channel == null) {
+				plugin.send(MessageLevel.WARNING, sender, "Specify a channel or join a channel to use this command");
+				usage(sender, "force");
+			}
 		}
-	}
-	
-	private void force(Player player, Player targetPlayer, Channel channel) {
-		cm.chSwitch(targetPlayer, channel);
-		plugin.sendInfo(player, "You have forced " + targetPlayer.getDisplayName() + " to join the channel");
-		plugin.sendInfo(targetPlayer, "You have been forced to join " + channel.getName());
+		
+		if (channel == null)
+			return;
+		
+		if (channel.handleCommand(sender, "force", args))
+			return;
 	}
 	
 	/**
-	 * Kick Command - Kicks the player from the channel
+	 * Kick Command - Kicks the sender from the channel
 	 */
-	@ChCommand
+	@Command(server = true)
 	@Aliases("k")
-	@Description("Kicks the player from the channel")
-	@Usage("kick [player] <channel>")
-	public void kick(Player player, String[] args) {
-		if (args.length < 1) { invalidArgLength(player, "kick"); }
+	@Description("Kicks the sender from the channel")
+	@Usage("kick [sender] <channel>")
+	public void kick(CommandSender sender, String[] args) {
+		if (args.length < 1) { invalidArgLength(sender, "kick"); }
+		
+		Channel channel = null;
 		
 		try {
-			if (cm.exists(args[1])) {
-				Channel channel = cm.getChannel(args[1]);
-				
-				if (channel.canKick(player)) {
-					if (plugin.getPlayer(args[0]) != null) {
-						Player targetPlayer = plugin.getPlayer(args[0]);
-						
-						if (channel.getParticipants().contains(targetPlayer.getName())) {
-							kick(player, targetPlayer, channel);
-							
-						} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " is not on the channel"); }
-						
-					} else { plugin.sendWarning(player, "Player not online"); }
-					
-				} else { plugin.sendWarning(player, "You do not have permission"); }
-				
-			} else {
-				if (args[1].toLowerCase().startsWith("tag:")) {
-					if (cm.existsAsTag(args[1].substring(4))) {
-						Channel channel = cm.getChannelByTag(args[1].substring(4));
-						
-						if (channel.canKick(player)) {
-							if (plugin.getPlayer(args[0]) != null) {
-								Player targetPlayer = plugin.getPlayer(args[0]);
-								
-								if (channel.getParticipants().contains(targetPlayer.getName())) {
-									kick(player, targetPlayer, channel);
-									
-								} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " is not on the channel"); }
-								
-							} else { plugin.sendWarning(player, "Player not online"); }
-							
-						} else { plugin.sendWarning(player, "You do not have permission"); }
-						
-					} else { plugin.sendWarning(player, "No such channel"); }
-					
-				} else { plugin.sendWarning(player, "No such channel"); }
-			}
+			if (cm.existsByAlias(args[1]))
+				cm.getChannelByAlias(args[1]);
+			else
+				plugin.send(MessageLevel.WARNING, sender, "No such channel");
 			
 		} catch (IndexOutOfBoundsException e) {
-			Channel channel = cm.getChannel(player);
-			
-			if (channel == null) {
-				plugin.sendWarning(player, "Specify a channel or join a channel to use this command");
+			if (!(sender instanceof Player)) {
+				plugin.send(MessageLevel.WARNING, sender, "Please specify a channel");
+				usage(sender, "kick");
 				return;
 			}
 			
-			if (channel.canKick(player)) {
-				if (plugin.getPlayer(args[0]) != null) {
-					Player targetPlayer = plugin.getPlayer(args[0]);
-					
-					if (channel.getParticipants().contains(targetPlayer.getName())) {
-						kick(player, targetPlayer, channel);
-						
-					} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " is not on the channel"); }
-					
-				} else { plugin.sendWarning(player, "Player not online"); }
-				
-			} else { plugin.sendWarning(player, "You do not have permission"); }
-		}
-	}
-	
-	private void kick(Player player, Player targetPlayer, Channel channel) {
-		cm.chSwitch(targetPlayer, cm.getSpawnChannel(targetPlayer));
-		plugin.sendWarning(targetPlayer, "You have been kicked from " + channel.getName());
-		plugin.sendInfo(channel.getParticipants(), targetPlayer.getDisplayName() + " has been kicked");
-	}
-	
-	/**
-	 * Mute Command - Mutes the player on the channel
-	 */
-	@Command
-	@Description("Mutes the player on the channel")
-	@Usage("mute [player] <channel>")
-	public void mute(Player player, String[] args) {
-		if (args.length < 1) { invalidArgLength(player, "Mute"); }
-		
-		if (!plugin.enableChannels()) {
-			if (plugin.getPermsBridge().has(player, "TitanChat.mute")) {
-				if (plugin.getPlayer(args[0]) != null) {
-					cm.mute(plugin.getPlayer(args[0]), true);
-					plugin.getServer().broadcastMessage("[TitanChat] " + ChatColor.GOLD + plugin.getPlayer(args[0]).getDisplayName() + " has been muted");
-					
-				} else { plugin.sendWarning(player, "Player not online"); }
-				
-			} else { plugin.sendWarning(player, "You do not have permission"); }
+			channel = cm.getChannel((Player) sender);
 			
+			if (channel == null) {
+				plugin.send(MessageLevel.WARNING, sender, "Specify a channel or join a channel to use this command");
+				usage(sender, "kick");
+			}
+		}
+		
+		if (channel == null)
 			return;
-		}
 		
-		try {
-			if (cm.exists(args[1])) {
-				Channel channel = cm.getChannel(args[1]);
-				
-				if (channel.canMute(player)) {
-					if (plugin.getPlayer(args[0]) != null) {
-						Player targetPlayer = plugin.getPlayer(args[0]);
-						
-						if (!channel.getMuteList().contains(targetPlayer.getName())) {
-							mute(player, targetPlayer, channel);
-							
-						} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " has already been muted"); }
-						
-					} else { plugin.sendWarning(player, "Player not online"); }
-					
-				} else { plugin.sendWarning(player, "You do not have permission"); }
-				
-			} else {
-				if (args[1].toLowerCase().startsWith("tag:")) {
-					if (cm.existsAsTag(args[1].substring(4))) {
-						Channel channel = cm.getChannelByTag(args[1].substring(4));
-						
-						if (channel.canMute(player)) {
-							if (plugin.getPlayer(args[0]) != null) {
-								Player targetPlayer = plugin.getPlayer(args[0]);
-								
-								if (!channel.getMuteList().contains(targetPlayer.getName())) {
-									mute(player, targetPlayer, channel);
-									
-								} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " has already been muted"); }
-								
-							} else { plugin.sendWarning(player, "Player not online"); }
-							
-						} else { plugin.sendWarning(player, "You do not have permission"); }
-						
-					} else { plugin.sendWarning(player, "No such channel"); }
-					
-				} else { plugin.sendWarning(player, "No such channel"); }
-			}
-			
-		} catch (IndexOutOfBoundsException e) {
-			Channel channel = cm.getChannel(player);
-			
-			if (channel == null) {
-				plugin.sendWarning(player, "Specify a channel or join a channel to use this command");
-				return;
-			}
-			
-			if (channel.canMute(player)) {
-				if (plugin.getPlayer(args[0]) != null) {
-					Player targetPlayer = plugin.getPlayer(args[0]);
-					
-					if (!channel.getMuteList().contains(targetPlayer.getName())) {
-						mute(player, targetPlayer, channel);
-						
-					} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " has already been muted"); }
-					
-				} else { plugin.sendWarning(player, "Player not online"); }
-				
-			} else { plugin.sendWarning(player, "You do not have permission"); }
-		}
-	}
-	
-	private void mute(Player player, Player targetPlayer, Channel channel) {
-		channel.getMuteList().add(targetPlayer.getName());
-		plugin.sendWarning(targetPlayer, "You have been muted on " + channel.getName());
-		plugin.sendInfo(channel.getParticipants(), targetPlayer.getDisplayName() + " has been muted");
+		if (channel.handleCommand(sender, "kick", args))
+			return;
 	}
 	
 	/**
-	 * Unban Command - Unbans the player from the channel
+	 * Mute Command - Mutes the sender on the channel
 	 */
-	@ChCommand
+	@Command(server = true)
+	@Description("Mutes the sender on the channel")
+	@Usage("mute [sender] <channel>")
+	public void mute(CommandSender sender, String[] args) {
+		if (args.length < 1) { invalidArgLength(sender, "mute"); }
+		
+		Channel channel = null;
+		
+		try {
+			if (cm.existsByAlias(args[1]))
+				channel = cm.getChannelByAlias(args[1]);
+			else
+				plugin.send(MessageLevel.WARNING, sender, "No such channel");
+			
+		} catch (IndexOutOfBoundsException e) {
+			if (!(sender instanceof Player)) {
+				plugin.send(MessageLevel.WARNING, sender, "Please specify a channel");
+				usage(sender, "mute");
+				return;
+			}
+			
+			channel = cm.getChannel((Player) sender);
+			
+			if (channel == null) {
+				plugin.send(MessageLevel.WARNING, sender, "Specify a channel or join a channel to use this command");
+				usage(sender, "mute");
+			}
+		}
+		
+		if (channel == null)
+			return;
+		
+		if (channel.handleCommand(sender, "mute", args))
+			return;
+	}
+	
+	/**
+	 * Unban Command - Unbans the sender from the channel
+	 */
+	@Command(server = true)
 	@Aliases("ub")
-	@Description("Unbans the player from the channel")
-	@Usage("unban [player] <channel>")
-	public void unban(Player player, String[] args) {
-		if (args.length < 1) { invalidArgLength(player, "Unban"); }
+	@Description("Unbans the sender from the channel")
+	@Usage("unban [sender] <channel>")
+	public void unban(CommandSender sender, String[] args) {
+		if (args.length < 1) { invalidArgLength(sender, "unban"); }
+		
+		Channel channel = null;
 		
 		try {
-			if (cm.exists(args[1])) {
-				Channel channel = cm.getChannel(args[1]);
-				
-				if (channel.canBan(player)) {
-					if (plugin.getPlayer(args[0]) != null) {
-						Player targetPlayer = plugin.getPlayer(args[0]);
-						
-						if (channel.getBlackList().contains(targetPlayer.getName())) {
-							channel.getBlackList().remove(targetPlayer.getName());
-							
-							cm.whitelistMember(targetPlayer, channel);
-							plugin.sendInfo(targetPlayer, "You have been unbanned from " + channel.getName());
-							plugin.sendInfo(channel.getParticipants(), targetPlayer.getDisplayName() + "has been unbanned");
-							
-						} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " has not been banned"); }
-						
-					} else {
-						OfflinePlayer targetPlayer = plugin.getOfflinePlayer(args[0]);
-						plugin.sendInfo(player, targetPlayer.getName() + " is offline");
-						
-						if (channel.getBlackList().contains(targetPlayer.getName())) {
-							channel.getBlackList().remove(targetPlayer.getName());
-							
-							cm.whitelistMember(targetPlayer, channel);
-							plugin.sendInfo(channel.getParticipants(), targetPlayer.getName() + "has been unbanned");
-							
-						} else { plugin.sendWarning(player, targetPlayer.getName() + " has not been banned"); }
-					}
-					
-				} else { plugin.sendWarning(player, "You do not have permission"); }
-				
-			} else {
-				if (args[1].toLowerCase().startsWith("tag:")) {
-					if (cm.existsAsTag(args[1].substring(4))) {
-						Channel channel = cm.getChannelByTag(args[1].substring(4));
-						
-						if (channel.canBan(player)) {
-							if (plugin.getPlayer(args[0]) != null) {
-								Player targetPlayer = plugin.getPlayer(args[0]);
-								
-								if (channel.getBlackList().contains(targetPlayer.getName())) {
-									unban(player, targetPlayer, channel, true);
-									
-								} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " has not been banned"); }
-								
-							} else {
-								OfflinePlayer targetPlayer = plugin.getOfflinePlayer(args[0]);
-								plugin.sendInfo(player, targetPlayer.getName() + " is offline");
-								
-								if (channel.getBlackList().contains(targetPlayer.getName())) {
-									unban(player, targetPlayer, channel, false);
-									
-								} else { plugin.sendWarning(player, targetPlayer.getName() + " has not been banned"); }
-							}
-							
-						} else { plugin.sendWarning(player, "You do not have permission"); }
-						
-					} else { plugin.sendWarning(player, "No such channel"); }
-					
-				} else { plugin.sendWarning(player, "No such channel"); }
-			}
+			if (cm.existsByAlias(args[1]))
+				channel = cm.getChannelByAlias(args[1]);
+			else
+				plugin.send(MessageLevel.WARNING, sender, "No such channel");
 			
 		} catch (IndexOutOfBoundsException e) {
-			Channel channel = cm.getChannel(player);
-			
-			if (channel == null) {
-				plugin.sendWarning(player, "Specify a channel or join a channel to use this command");
+			if (!(sender instanceof Player)) {
+				plugin.send(MessageLevel.WARNING, sender, "Please specify a channel");
+				usage(sender, "unban");
 				return;
 			}
 			
-			if (channel.canBan(player)) {
-				if (plugin.getPlayer(args[0]) != null) {
-					Player targetPlayer = plugin.getPlayer(args[0]);
-					
-					if (channel.getBlackList().contains(targetPlayer.getName())) {
-						unban(player, targetPlayer, channel, true);
-						
-					} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " has not been banned"); }
-					
-				} else {
-					OfflinePlayer targetPlayer = plugin.getOfflinePlayer(args[0]);
-					plugin.sendInfo(player, targetPlayer.getName() + " is offline");
-					
-					if (channel.getBlackList().contains(targetPlayer.getName())) {
-						unban(player, targetPlayer, channel, false);
-						
-					} else { plugin.sendWarning(player, targetPlayer.getName() + " has not been banned"); }
-				}
-				
-			} else { plugin.sendWarning(player, "You do not have permission"); }
+			channel = cm.getChannel((Player) sender);
+			
+			if (channel == null) {
+				plugin.send(MessageLevel.WARNING, sender, "Specify a channel or join a channel to use this command");
+				usage(sender, "unban");
+			}
 		}
-	}
-	
-	private void unban(Player player, OfflinePlayer targetPlayer, Channel channel, boolean online) {
-		channel.getBlackList().remove(targetPlayer.getName());
-		cm.whitelistMember(targetPlayer, channel);
 		
-		if (online)
-			plugin.sendInfo(targetPlayer.getPlayer(), "You have been unbanned from " + channel.getName());
+		if (channel == null)
+			return;
 		
-		plugin.sendInfo(channel.getParticipants(), targetPlayer.getName() + "has been unbanned");
+		if (channel.handleCommand(sender, "unban", args))
+			return;
 	}
 	
 	/**
-	 * Unmute Command - Unmutes the player on the channel
+	 * Unmute Command - Unmutes the sender on the channel
 	 */
-	@Command
-	@Description("Unmutes the player on the channel")
-	@Usage("unmute [player] <channel>")
-	public void unmute(Player player, String[] args) {
-		if (args.length < 1) { invalidArgLength(player, "Unmute"); }
+	@Command(server = true)
+	@Description("Unmutes the sender on the channel")
+	@Usage("unmute [sender] <channel>")
+	public void unmute(CommandSender sender, String[] args) {
+		if (args.length < 1) { invalidArgLength(sender, "unmute"); }
 		
-		if (!plugin.enableChannels()) {
-			if (plugin.getPermsBridge().has(player, "TitanChat.mute")) {
-				if (plugin.getPlayer(args[0]) != null) {
-					cm.mute(plugin.getPlayer(args[0]), false);
-					plugin.getServer().broadcastMessage("[TitanChat] " + ChatColor.GOLD + plugin.getPlayer(args[0]).getDisplayName() + " has been unmuted");
-					
-				} else { plugin.sendWarning(player, "Player not online"); }
-				
-			} else { plugin.sendWarning(player, "You do not have permission"); }
-			
-			return;
-		}
+		Channel channel = null;
 		
 		try {
-			if (cm.exists(args[1])) {
-				Channel channel = cm.getChannel(args[1]);
-				
-				if (channel.canMute(player)) {
-					if (plugin.getPlayer(args[0]) != null) {
-						Player targetPlayer = plugin.getPlayer(args[0]);
-						
-						if (channel.getMuteList().contains(targetPlayer.getName())) {
-							unmute(player, targetPlayer, channel);
-							
-						} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " has not been muted"); }
-						
-					} else { plugin.sendWarning(player, "Player not online"); }
-					
-				} else { plugin.sendWarning(player, "You do not have permission"); }
-				
-			} else {
-				if (args[1].toLowerCase().startsWith("tag:")) {
-					if (cm.existsAsTag(args[1].substring(4))) {
-						Channel channel = cm.getChannelByTag(args[1].substring(4));
-						
-						if (channel.canMute(player)) {
-							if (plugin.getPlayer(args[0]) != null) {
-								Player targetPlayer = plugin.getPlayer(args[0]);
-								
-								if (channel.getMuteList().contains(targetPlayer.getName())) {
-									unmute(player, targetPlayer, channel);
-									
-								} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " has not been muted"); }
-								
-							} else { plugin.sendWarning(player, "Player not online"); }
-							
-						} else { plugin.sendWarning(player, "You do not have permission"); }
-						
-					} else { plugin.sendWarning(player, "No such channel"); }
-					
-				} else { plugin.sendWarning(player, "No such channel"); }
-			}
+			if (cm.existsByAlias(args[1]))
+				channel = cm.getChannelByAlias(args[1]);
+			else
+				plugin.send(MessageLevel.WARNING, sender, "No such channel");
 			
 		} catch (IndexOutOfBoundsException e) {
-			Channel channel = cm.getChannel(player);
-			
-			if (channel == null) {
-				plugin.sendWarning(player, "Specify a channel or join a channel to use this command");
+			if (!(sender instanceof Player)) {
+				plugin.send(MessageLevel.WARNING, sender, "Please specify a channel");
+				usage(sender, "unmute");
 				return;
 			}
 			
-			if (channel.canMute(player)) {
-				if (plugin.getPlayer(args[0]) != null) {
-					Player targetPlayer = plugin.getPlayer(args[0]);
-					
-					if (channel.getMuteList().contains(targetPlayer.getName())) {
-						unmute(player, targetPlayer, channel);
-						
-					} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " has not been muted"); }
-					
-				} else { plugin.sendWarning(player, "Player not online"); }
-				
-			} else { plugin.sendWarning(player, "You do not have permission"); }
+			channel = cm.getChannel((Player) sender);
+			
+			if (channel == null) {
+				plugin.send(MessageLevel.WARNING, sender, "Specify a channel or join a channel to use this command");
+				usage(sender, "unmute");
+			}
 		}
-	}
-	
-	private void unmute(Player player, Player targetPlayer, Channel channel) {
-		channel.getMuteList().remove(targetPlayer.getName());
-		plugin.sendInfo(targetPlayer, "You have been unmuted on " + channel.getName());
-		plugin.sendInfo(channel.getParticipants(), targetPlayer.getDisplayName() + " has been unmuted");
+		
+		if (channel == null)
+			return;
+		
+		if (channel.handleCommand(sender, "unmute", args))
+			return;
 	}
 }

@@ -1,15 +1,21 @@
 tag: '[S]'
 chat-display-colour: '&4'
 name-display-colour: '&4'
-type: public
-special-type: staff
-global: false
-colour-code: true
+type: 'Standard'
+option: 'staff'
+aliases: [s]
+topic: 'Welcome to the staff channel || Only staff can be able to join'
+setting:
+    colouring: true
+    global: false
+    whitelist: false
+    messages:
+        join: true
+        leave: true
 password: ''
 format: ''
-messages:
-    join: true
-    leave: true
-commands:
-    join: 'js'
-    message: 'ss'
+admins: []
+blacklist: []
+followers: []
+whitelist: []
+participants: []

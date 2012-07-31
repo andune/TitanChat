@@ -53,7 +53,7 @@
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
-            <version>1.2.5-R4.0</version>
+            <version>1.2.5-R5.0</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -67,8 +67,7 @@
         <dependency>
             <groupId>de.bananaco</groupId>
             <artifactId>bPermissions</artifactId>
-            <version>2.9.4</version>
-            <type>jar</type>
+            <version>2.9.9</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/bpermissions.jar</systemPath>
         </dependency>
@@ -99,8 +98,7 @@
         <dependency>
             <groupId>com.anjocaido</groupId>
             <artifactId>GroupManager</artifactId>
-            <version>2.9.1</version>
-            <type>jar</type>
+            <version>2.9.2</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/EssentialsGroupManager.jar</systemPath>
         </dependency>

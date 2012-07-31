@@ -1,8 +1,9 @@
 package com.titankingdoms.nodinchan.titanchat.command.commands;
 
-import org.bukkit.OfflinePlayer;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import com.titankingdoms.nodinchan.titanchat.TitanChat.MessageLevel;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
 import com.titankingdoms.nodinchan.titanchat.command.CommandBase;
@@ -41,298 +42,118 @@ public class RankingCommand extends CommandBase {
 	/**
 	 * Add Command - Whitelists the player for the channel
 	 */
-	@ChCommand
+	@Command(server = true)
+	@Aliases("add")
 	@Description("Whitelists the player for the channel")
-	@Usage("add [player] <channel>")
-	public void add(Player player, String[] args) {
-		if (args.length < 1) { invalidArgLength(player, "Add"); return; }
+	@Usage("whitelist [player] <channel>")
+	public void whitelist(CommandSender sender, String[] args) {
+		if (args.length < 1) { invalidArgLength(sender, "whitelist"); return; }
+		
+		Channel channel = null;
 		
 		try {
-			if (cm.exists(args[1])) {
-				Channel channel = cm.getChannel(args[1]);
-				
-				if (channel.canRank(player)) {
-					if (plugin.getPlayer(args[0]) != null) {
-						cm.whitelistMember(plugin.getPlayer(args[0]), channel);
-						plugin.sendInfo(player, plugin.getPlayer(args[0]).getDisplayName() + " has been added to the Member List");
-						
-					} else {
-						plugin.sendInfo(player, plugin.getOfflinePlayer(args[0]).getName() + " is offline");
-						cm.whitelistMember(plugin.getOfflinePlayer(args[0]), channel);
-						plugin.sendInfo(player, plugin.getPlayer(args[0]).getDisplayName() + " has been added to the Member List");
-					}
-					
-				} else { plugin.sendWarning(player, "You do not have permission"); }
-				
-			} else {
-				if (args[1].toLowerCase().startsWith("tag:")) {
-					if (cm.existsAsTag(args[1].substring(4))) {
-						Channel channel = cm.getChannelByTag(args[1].substring(4));
-						
-						if (channel.canRank(player)) {
-							if (plugin.getPlayer(args[0]) != null) {
-								cm.whitelistMember(plugin.getPlayer(args[0]), channel);
-								plugin.sendInfo(player, plugin.getPlayer(args[0]).getDisplayName() + " has been added to the Member List");
-								
-							} else {
-								plugin.sendInfo(player, plugin.getOfflinePlayer(args[0]).getName() + " is offline");
-								cm.whitelistMember(plugin.getOfflinePlayer(args[0]), channel);
-								plugin.sendInfo(player, plugin.getPlayer(args[0]).getDisplayName() + " has been added to the Member List");
-							}
-							
-						} else { plugin.sendWarning(player, "You do not have permission"); }
-						
-					} else { plugin.sendWarning(player, "No such channel"); }
-					
-				} else { plugin.sendWarning(player, "No such channel"); }
-			}
+			if (cm.existsByAlias(args[1]))
+				channel = cm.getChannelByAlias(args[1]);
+			else
+				plugin.send(MessageLevel.WARNING, sender, "No such channel");
 			
 		} catch (IndexOutOfBoundsException e) {
-			Channel channel = cm.getChannel(player);
-			
-			if (channel == null) {
-				plugin.sendWarning(player, "Specify a channel or join a channel to use this command");
+			if (!(sender instanceof Player)) {
+				plugin.send(MessageLevel.WARNING, sender, "Please specify a channel");
+				usage(sender, "whitelist");
 				return;
 			}
 			
-			if (channel.canRank(player)) {
-				if (plugin.getPlayer(args[0]) != null) {
-					cm.whitelistMember(plugin.getPlayer(args[0]), channel);
-					plugin.sendInfo(player, plugin.getPlayer(args[0]).getDisplayName() + " has been added to the Member List");
-					
-				} else {
-					plugin.sendInfo(player, plugin.getOfflinePlayer(args[0]).getName() + " is offline");
-					cm.whitelistMember(plugin.getOfflinePlayer(args[0]), channel);
-					plugin.sendInfo(player, plugin.getOfflinePlayer(args[0]).getName() + " has been added to the Member List");
-				}
-				
-			} else { plugin.sendWarning(player, "You do not have permission"); }
+			channel = cm.getChannel((Player) sender);
+			
+			if (channel == null) {
+				plugin.send(MessageLevel.WARNING, sender, "Specify a channel or join a channel to use this command");
+				usage(sender, "whitelist");
+			}
 		}
+		
+		if (channel == null)
+			return;
+		
+		if (channel.handleCommand(sender, "whitelist", args))
+			return;
 	}
 	
 	/**
 	 * Demote Command - Demotes the player of the channel
 	 */
-	@ChCommand
+	@Command(server = true)
 	@Description("Demotes the player of the channel")
 	@Usage("demote [player] <channel>")
-	public void demote(Player player, String[] args) {
-		if (args.length < 1) { invalidArgLength(player, "Demote"); }
+	public void demote(CommandSender sender, String[] args) {
+		if (args.length < 1) { invalidArgLength(sender, "demote"); return; }
+		
+		Channel channel = null;
 		
 		try {
-			if (cm.exists(args[1])) {
-				Channel channel = cm.getChannel(args[1]);
-				
-				if (channel.canRank(player)) {
-					if (plugin.getPlayer(args[0]) != null) {
-						Player targetPlayer = plugin.getPlayer(args[0]);
-						
-						if (channel.getAdminList().contains(targetPlayer.getName())) {
-							channel.getAdminList().remove(targetPlayer.getName());
-							channel.save();
-							
-							plugin.sendInfo(targetPlayer, "You have been demoted in " + channel.getName());
-							plugin.sendInfo(channel.getParticipants(), targetPlayer.getDisplayName() + " has been demoted");
-							
-						} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " is not an Admin"); }
-						
-					} else {
-						OfflinePlayer targetPlayer = plugin.getOfflinePlayer(args[0]);
-						plugin.sendInfo(player, targetPlayer.getName() + " is offline");
-						
-						if (channel.getAdminList().contains(targetPlayer.getName())) {
-							channel.getAdminList().remove(targetPlayer.getName());
-							channel.save();
-							
-							plugin.sendInfo(channel.getParticipants(), targetPlayer.getName() + " has been demoted");
-							
-						} else { plugin.sendWarning(player, targetPlayer.getName() + " is not an Admin"); }
-					}
-					
-				} else { plugin.sendWarning(player, "You do not have permission"); }
-				
-			} else {
-				if (args[1].toLowerCase().startsWith("tag:")) {
-					if (cm.existsAsTag(args[1].substring(4))) {
-						Channel channel = cm.getChannelByTag(args[1].substring(4));
-						
-						if (channel.canRank(player)) {
-							if (plugin.getPlayer(args[0]) != null) {
-								Player targetPlayer = plugin.getPlayer(args[0]);
-								
-								if (channel.getAdminList().contains(targetPlayer.getName())) {
-									channel.getAdminList().remove(targetPlayer.getName());
-									channel.save();
-									
-									plugin.sendInfo(targetPlayer, "You have been demoted in " + channel.getName());
-									plugin.sendInfo(channel.getParticipants(), targetPlayer.getDisplayName() + " has been demoted");
-									
-								} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " is not an Admin"); }
-								
-							} else {
-								OfflinePlayer targetPlayer = plugin.getOfflinePlayer(args[0]);
-								plugin.sendInfo(player, targetPlayer.getName() + " is offline");
-								
-								if (channel.getAdminList().contains(targetPlayer.getName())) {
-									channel.getAdminList().remove(targetPlayer.getName());
-									channel.save();
-									
-									plugin.sendInfo(channel.getParticipants(), targetPlayer.getName() + " has been demoted");
-									
-								} else { plugin.sendWarning(player, targetPlayer.getName() + " is not an Admin"); }
-							}
-							
-						} else { plugin.sendWarning(player, "You do not have permission"); }
-						
-					} else { plugin.sendWarning(player, "No such channel"); }
-					
-				} else { plugin.sendWarning(player, "No such channel"); }
-			}
+			if (cm.existsByAlias(args[1]))
+				channel = cm.getChannelByAlias(args[1]);
+			else
+				plugin.send(MessageLevel.WARNING, sender, "No such channel");
 			
 		} catch (IndexOutOfBoundsException e) {
-			Channel channel = cm.getChannel(player);
-			
-			if (channel == null) {
-				plugin.sendWarning(player, "Specify a channel or join a channel to use this command");
+			if (!(sender instanceof Player)) {
+				plugin.send(MessageLevel.WARNING, sender, "Please specify a channel");
+				usage(sender, "demote");
 				return;
 			}
 			
-			if (channel.canRank(player)) {
-				if (plugin.getPlayer(args[0]) != null) {
-					Player targetPlayer = plugin.getPlayer(args[0]);
-					
-					if (channel.getAdminList().contains(targetPlayer.getName())) {
-						channel.getAdminList().remove(targetPlayer.getName());
-						channel.save();
-						
-						plugin.sendInfo(targetPlayer, "You have been demoted in " + channel.getName());
-						plugin.sendInfo(channel.getParticipants(), targetPlayer.getDisplayName() + " has been demoted");
-						
-					} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " is not an Admin"); }
-					
-				} else {
-					OfflinePlayer targetPlayer = plugin.getOfflinePlayer(args[0]);
-					plugin.sendInfo(player, targetPlayer.getName() + " not online");
-					
-					if (channel.getAdminList().contains(targetPlayer.getName())) {
-						channel.getAdminList().remove(targetPlayer.getName());
-						channel.save();
-						
-						plugin.sendInfo(channel.getParticipants(), targetPlayer.getName() + " has been demoted");
-						
-					} else { plugin.sendWarning(player, targetPlayer.getName() + " is not an Admin"); }
-				}
-				
-			} else { plugin.sendWarning(player, "You do not have permission"); }
+			channel = cm.getChannel((Player) sender);
+			
+			if (channel == null) {
+				plugin.send(MessageLevel.WARNING, sender, "Specify a channel or join a channel to use this command");
+				usage(sender, "demote");
+			}
 		}
+		
+		if (channel == null)
+			return;
+		
+		if (channel.handleCommand(sender, "demote", args))
+			return;
 	}
 	
 	/**
 	 * Promote Command - Promotes the player of the channel
 	 */
-	@ChCommand
+	@Command(server = true)
 	@Description("Promotes the player of the channel")
 	@Usage("promote [player] <channel>")
-	public void promote(Player player, String[] args) {
-		if (args.length < 1) { invalidArgLength(player, "Promote"); }
+	public void promote(CommandSender sender, String[] args) {
+		if (args.length < 1) { invalidArgLength(sender, "promote"); return; }
+		
+		Channel channel = null;
 		
 		try {
-			if (cm.exists(args[1])) {
-				Channel channel = cm.getChannel(args[1]);
-				
-				if (channel.canRank(player)) {
-					if (plugin.getPlayer(args[0]) != null) {
-						Player targetPlayer = plugin.getPlayer(args[0]);
-						
-						if (!channel.getAdminList().contains(player.getName())) {
-							cm.assignAdmin(targetPlayer, channel);
-							plugin.sendInfo(player, targetPlayer.getDisplayName() + " has been promoted");
-							plugin.sendInfo(channel.getParticipants(), targetPlayer.getDisplayName() + " has been promoted");
-							
-						} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " is already an Admin"); }
-						
-					} else {
-						OfflinePlayer targetPlayer = plugin.getOfflinePlayer(args[0]);
-						plugin.sendInfo(player, targetPlayer.getName() + " is offline");
-						
-						if (!channel.getAdminList().contains(player.getName())) {
-							cm.assignAdmin(targetPlayer, channel);
-							plugin.sendInfo(player, targetPlayer.getName() + " has been promoted");
-							plugin.sendInfo(channel.getParticipants(), targetPlayer.getName() + " has been promoted");
-							
-						} else { plugin.sendWarning(player, targetPlayer.getName() + " is already an Admin"); }
-					}
-					
-				} else { plugin.sendWarning(player, "You do not have permission"); }
-				
-			} else {
-				if (args[1].toLowerCase().startsWith("tag:")) {
-					if (cm.existsAsTag(args[1].substring(4))) {
-						Channel channel = cm.getChannelByTag(args[1].substring(4));
-						
-						if (channel.canRank(player)) {
-							if (plugin.getPlayer(args[0]) != null) {
-								Player targetPlayer = plugin.getPlayer(args[0]);
-								
-								if (!channel.getAdminList().contains(player.getName())) {
-									cm.assignAdmin(targetPlayer, channel);
-									plugin.sendInfo(player, targetPlayer.getDisplayName() + " has been promoted");
-									plugin.sendInfo(channel.getParticipants(), targetPlayer.getDisplayName() + " has been promoted");
-									
-								} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " is already an Admin"); }
-								
-							} else {
-								OfflinePlayer targetPlayer = plugin.getOfflinePlayer(args[0]);
-								plugin.sendInfo(player, targetPlayer.getName() + " is offline");
-								
-								if (!channel.getAdminList().contains(player.getName())) {
-									cm.assignAdmin(targetPlayer, channel);
-									plugin.sendInfo(player, targetPlayer.getName() + " has been promoted");
-									plugin.sendInfo(channel.getParticipants(), targetPlayer.getName() + " has been promoted");
-									
-								} else { plugin.sendWarning(player, targetPlayer.getName() + " is already an Admin"); }
-							}
-							
-						} else { plugin.sendWarning(player, "You do not have permission"); }
-						
-					} else { plugin.sendWarning(player, "No such channel"); }
-					
-				} else { plugin.sendWarning(player, "No such channel"); }
-			}
+			if (cm.existsByAlias(args[1]))
+				channel = cm.getChannelByAlias(args[1]);
+			else
+				plugin.send(MessageLevel.WARNING, sender, "No such channel");
 			
 		} catch (IndexOutOfBoundsException e) {
-			Channel channel = cm.getChannel(player);
-			
-			if (channel == null) {
-				plugin.sendWarning(player, "Specify a channel or join a channel to use this command");
+			if (!(sender instanceof Player)) {
+				plugin.send(MessageLevel.WARNING, sender, "Please specify a channel");
+				usage(sender, "promote");
 				return;
 			}
 			
-			if (channel.canRank(player)) {
-				if (plugin.getPlayer(args[0]) != null) {
-					Player targetPlayer = plugin.getPlayer(args[0]);
-					
-					if (!channel.getAdminList().contains(player.getName())) {
-						cm.assignAdmin(targetPlayer, channel);
-						plugin.sendInfo(player, targetPlayer.getDisplayName() + " has been promoted");
-						plugin.sendInfo(channel.getParticipants(), targetPlayer.getDisplayName() + " has been promoted");
-						
-					} else { plugin.sendWarning(player, targetPlayer.getDisplayName() + " is already an Admin"); }
-					
-				} else {
-					OfflinePlayer targetPlayer = plugin.getOfflinePlayer(args[0]);
-					plugin.sendInfo(player, targetPlayer.getName() + " is offline");
-					
-					if (!channel.getAdminList().contains(player.getName())) {
-						cm.assignAdmin(targetPlayer, channel);
-						plugin.sendInfo(player, targetPlayer.getName() + " has been promoted");
-						plugin.sendInfo(channel.getParticipants(), targetPlayer.getName() + " has been promoted");
-						
-					} else { plugin.sendWarning(player, targetPlayer.getName() + " is already an Admin"); }
-				}
-				
-				
-			} else { plugin.sendWarning(player, "You do not have permission"); }
+			channel = cm.getChannel((Player) sender);
+			
+			if (channel == null) {
+				plugin.send(MessageLevel.WARNING, sender, "Specify a channel or join a channel to use this command");
+				usage(sender, "promote");
+			}
 		}
+		
+		if (channel == null)
+			return;
+		
+		if (channel.handleCommand(sender, "promote", args))
+			return;
 	}
 }

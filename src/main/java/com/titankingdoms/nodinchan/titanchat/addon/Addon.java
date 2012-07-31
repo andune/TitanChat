@@ -6,7 +6,7 @@ import org.bukkit.event.Listener;
 
 import com.nodinchan.ncbukkit.loader.Loadable;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
-import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
+import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.command.CommandBase;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
@@ -81,7 +81,7 @@ public class Addon extends Loadable implements Listener {
 	 * 
 	 * @param channel The Custom Channel to register
 	 */
-	public final void register(CustomChannel channel) {
+	public final void register(Channel channel) {
 		plugin.getManager().getChannelManager().register(channel);
 	}
 	

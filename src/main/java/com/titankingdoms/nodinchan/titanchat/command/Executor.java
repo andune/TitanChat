@@ -3,12 +3,10 @@ package com.titankingdoms.nodinchan.titanchat.command;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.titankingdoms.nodinchan.titanchat.command.info.Aliases;
-import com.titankingdoms.nodinchan.titanchat.command.info.ChCommand;
-import com.titankingdoms.nodinchan.titanchat.command.info.Description;
-import com.titankingdoms.nodinchan.titanchat.command.info.Usage;
+import com.titankingdoms.nodinchan.titanchat.command.info.*;
 
 public final class Executor {
 	
@@ -19,17 +17,17 @@ public final class Executor {
 	private final String name;
 	private String[] aliases = new String[0];
 	private String description = "";
+	private String permission = "";
 	private String usage = "";
 	
-	private boolean channel = false;
+	private boolean server = false;
 	
 	public Executor(CommandBase command, Method method) {
 		this.method = method;
 		this.command = command;
 		this.name = method.getName();
 		
-		if (method.isAnnotationPresent(ChCommand.class))
-			this.channel = true;
+		this.server = method.getAnnotation(Command.class).server();
 		
 		if (method.isAnnotationPresent(Aliases.class))
 			this.aliases = method.getAnnotation(Aliases.class).value();
@@ -37,8 +35,20 @@ public final class Executor {
 		if (method.isAnnotationPresent(Description.class))
 			this.description = method.getAnnotation(Description.class).value();
 		
+		if (method.isAnnotationPresent(Permission.class))
+			this.permission = method.getAnnotation(Permission.class).value();
+		
 		if (method.isAnnotationPresent(Usage.class))
 			this.usage = method.getAnnotation(Usage.class).value();
+	}
+	
+	/**
+	 * Check if the command can be used on the console
+	 * 
+	 * @return True if the command can be used on the console
+	 */
+	public boolean allowServer() {
+		return server;
 	}
 	
 	@Override
@@ -54,7 +64,7 @@ public final class Executor {
 	/**
 	 * Executes the command
 	 * 
-	 * @param player The command sender
+	 * @param sender The command sender
 	 * 
 	 * @param args The command arguments
 	 * 
@@ -62,7 +72,22 @@ public final class Executor {
 	 * @throws IllegalArgumentException 
 	 * @throws IllegalAccessException 
 	 */
-	public void execute(Player player, String[] args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	public void execute(CommandSender sender, String[] args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		method.invoke(command, sender, args);
+	}
+	
+	/**
+	 * Executes the command
+	 * 
+	 * @param sender The command sender
+	 * 
+	 * @param args The command arguments
+	 * 
+	 * @throws InvocationTargetException 
+	 * @throws IllegalArgumentException 
+	 * @throws IllegalAccessException 
+	 */
+	public void executePlayer(Player player, String[] args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		method.invoke(command, player, args);
 	}
 	
@@ -112,21 +137,21 @@ public final class Executor {
 	}
 	
 	/**
+	 * Gets the permission of the command
+	 * 
+	 * @return The command permission
+	 */
+	public String getPermission() {
+		return permission;
+	}
+	
+	/**
 	 * Gets the usage of the command
 	 * 
 	 * @return The command usage
 	 */
 	public String getUsage() {
 		return usage;
-	}
-	
-	/**
-	 * Check if the command requires channels to be enabled
-	 * 
-	 * @return True if channels have to be enabled
-	 */
-	public boolean requireChannel() {
-		return channel;
 	}
 	
 	@Override

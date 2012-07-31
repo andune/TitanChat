@@ -1,4 +1,4 @@
-package com.titankingdoms.nodinchan.titanchat.event;
+package com.titankingdoms.nodinchan.titanchat.event.channel;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,7 +10,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
-import com.titankingdoms.nodinchan.titanchat.event.MessageSendEvent.Message;
+import com.titankingdoms.nodinchan.titanchat.event.util.Message;
+
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 

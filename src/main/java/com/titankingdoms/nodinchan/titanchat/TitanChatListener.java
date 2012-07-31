@@ -16,9 +16,10 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+import com.titankingdoms.nodinchan.titanchat.TitanChat.MessageLevel;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
-import com.titankingdoms.nodinchan.titanchat.event.MessageSendEvent;
-import com.titankingdoms.nodinchan.titanchat.event.MessageSendEvent.Message;
+import com.titankingdoms.nodinchan.titanchat.channel.util.Participant;
+import com.titankingdoms.nodinchan.titanchat.event.channel.MessageSendEvent;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -46,6 +47,10 @@ public class TitanChatListener implements Listener {
 
 	private final TitanChat plugin;
 	
+	private long chars = 0;
+	private long lines = 0;
+	private long words = 0;
+	
 	private final double currentVer;
 	private double newVer;
 	
@@ -56,6 +61,30 @@ public class TitanChatListener implements Listener {
 		this.plugin = TitanChat.getInstance();
 		this.currentVer = Double.valueOf(plugin.getDescription().getVersion().trim().split(" ")[0].trim());
 		updateCheck();
+	}
+	
+	public long getCharacters() {
+		return chars;
+	}
+	
+	public long getLines() {
+		return lines;
+	}
+	
+	public long getWords() {
+		return words;
+	}
+	
+	/**
+	 * Listens to the MessageSendEvent
+	 * 
+	 * @param event MessageSendEvent
+	 */
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void onMessageSend(MessageSendEvent event) {
+		this.chars += event.getMessage().toCharArray().length;
+		this.lines++;
+		this.words += event.getMessage().split(" ").length;
 	}
 	
 	/**
@@ -70,48 +99,31 @@ public class TitanChatListener implements Listener {
 		
 		event.setCancelled(true);
 		
-		if (plugin.enableChannels()) {
-			String quickMessage = plugin.getConfig().getString("channels.quick-message");
+		if (plugin.getConfig().getBoolean("quick-send.enable")) {
+			String quick = plugin.getConfig().getString("quick-send.key");
 			
-			if (message.startsWith(quickMessage) && !message.substring(quickMessage.length()).startsWith(" ")) {
-				String channel = message.split(" ")[0].substring(quickMessage.length());
+			if (message.startsWith(quick) && message.substring(quick.length()).startsWith(" ")) {
+				String channel = message.split(" ")[0].substring(quick.length());
 				String msg = message.substring(message.split(" ")[0].length());
-				plugin.getServer().dispatchCommand(player, "titanchat send " + channel + msg);
+				plugin.getServer().dispatchCommand(player, "titanchat send " + channel + " " + msg);
 				return;
 			}
-			
-			Channel channel = plugin.getManager().getChannelManager().getChannel(player);
-			
-			if (channel == null) {
-				plugin.sendWarning(player, "You are not in a channel, please join one to chat");
-				return;
-			}
-			
-			if (voiceless(player, channel))
-				return;
-			
-			String log = channel.sendMessage(player, message);
-			
-			if (!log.equals(""))
-				plugin.getServer().getConsoleSender().sendMessage(log);
-			
-		} else {
-			String format = plugin.getFormatHandler().format(player, null, true);
-			
-			MessageSendEvent sendEvent = new MessageSendEvent(player, null, plugin.getServer().getOnlinePlayers(), new Message(format, message));
-			plugin.getServer().getPluginManager().callEvent(sendEvent);
-			
-			if (sendEvent.isCancelled())
-				return;
-			
-			String log = format.replace("%message", plugin.getFormatHandler().colourise(sendEvent.getMessage()));
-			
-			for (Player recipant : plugin.getServer().getOnlinePlayers())
-				recipant.sendMessage(log);
-			
-			if (!log.equals(""))
-				plugin.getServer().getConsoleSender().sendMessage(log);
 		}
+		
+		Channel channel = plugin.getManager().getChannelManager().getChannel(player);
+		
+		if (channel == null) {
+			plugin.send(MessageLevel.WARNING, player, "You are not in a channel, please join one to chat");
+			return;
+		}
+		
+		if (voiceless(player, channel))
+			return;
+		
+		String log = channel.sendMessage(player, message);
+		
+		if (log != null && !log.equals(""))
+			plugin.chatLog(log);
 	}
 	
 	/**
@@ -131,23 +143,12 @@ public class TitanChatListener implements Listener {
 			}
 		}
 		
-		if (!plugin.enableChannels())
-			return;
-		
-		if (plugin.getManager().getChannelManager().getChannel(event.getPlayer()) != null)
-			return;
-		
-		Channel channel = plugin.getManager().getChannelManager().getSpawnChannel(event.getPlayer());
-		
-		if (channel != null)
-			channel.join(event.getPlayer());
-		else
-			plugin.sendWarning(event.getPlayer(), "Failed to find your spawn channel");
+		Participant participant = plugin.getManager().getChannelManager().loadParticipant(event.getPlayer());
 		
 		if (plugin.isSilenced())
-			plugin.sendWarning(event.getPlayer(), "All channels are silenced");
-		else if (channel != null && channel.isSilenced())
-			plugin.sendWarning(event.getPlayer(), channel.getName() + " is silenced");
+			plugin.send(MessageLevel.WARNING, event.getPlayer(), "All channels are silenced");
+		else if (participant.getCurrentChannel() != null && plugin.getManager().getChannelManager().isSilenced(participant.getCurrentChannel()))
+			plugin.send(MessageLevel.WARNING, event.getPlayer(), participant.getCurrentChannel().getName() + " is silenced");
 	}
 	
 	@EventHandler(priority = EventPriority.HIGHEST)
@@ -184,22 +185,17 @@ public class TitanChatListener implements Listener {
 			return false;
 		
 		if (plugin.isSilenced()) {
-			plugin.sendWarning(player, "The server is silenced");
+			plugin.send(MessageLevel.WARNING, player, "The server is silenced");
 			return true;
 		}
 		
-		if (channel.isSilenced()) {
-			plugin.sendWarning(player, "The channel is silenced");
+		if (plugin.getManager().getChannelManager().isSilenced(channel)) {
+			plugin.send(MessageLevel.WARNING, player, "The channel is silenced");
 			return true;
 		}
 		
-		if (channel.getMuteList().contains(player.getName())) {
-			plugin.sendWarning(player, "You have been muted");
-			return true;
-		}
-		
-		if (plugin.getManager().getChannelManager().isMuted(player)) {
-			plugin.sendWarning(player, "You have been muted");
+		if (plugin.getManager().getChannelManager().getParticipant(player).isMuted(channel)) {
+			plugin.send(MessageLevel.WARNING, player, "You have been muted");
 			return true;
 		}
 		

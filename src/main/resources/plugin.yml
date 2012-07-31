@@ -16,9 +16,9 @@ commands:
         aliases: bc
         permission: TitanChat.broadcast
         usage: /<command> [message]
-    me:
+    emote:
         description: Emote Command
-        aliases: em
+        aliases: [em, me]
         permission: TitanChat.emote.server
         usage: /<command> [action]
     whisper:
@@ -28,87 +28,104 @@ commands:
         usage: /<command> [player] [message]
 permissions:
     TitanChat.staff:
-        description: Access to everything
+        description: Grants all permissions
         default: op
         children:
-            TitanChat.update: true
+            TitanChat.mod: true
+            TitanChat.access.*: true
+            TitanChat.rank.*: true
             TitanChat.create: true
             TitanChat.delete: true
+            TitanChat.update: true
+            TitanChat.nick: true
             TitanChat.broadcast: true
-            TitanChat.emote.server: true
-            TitanChat.silence.server: true
-            TitanChat.force: true
-            TitanChat.access.*: true
-            TitanChat.mod: true
-            TitanChat.rank.*: true
-            TitanChat.convert: true
+            TitanChat.emote.global: true
             TitanChat.whisper: true
-    TitanChat.update:
-        description: Will be notified of updates
+            TitanChat.silence.global: true
+    TitanChat.mod:
+        description: Grants moderation permissions and voice
         default: op
+        children:
+            TitanChat.ban.*: true
+            TitanChat.kick.*: true
+            TitanChat.mute: true
+            TitanChat.voice.*: true
+    TitanChat.access.*:
+        description: Grants access to all channels
+        default: op
+    TitanChat.ban.*:
+        decription: Grants access to banning on all channels
+        default: op
+    TitanChat.kick.*:
+        decription: Grants access to kicking on all channels
+        default: op
+    TitanChat.rank.*:
+        decription: Grants access to ranking on all channels
+        default: op
+    TitanChat.mute:
+        description: Grants access to muting on all channels
+        default: op
+    TitanChat.voice.*:
+        description: Grants speaking rights on all channels
+        default: op
+    TitanChat.force:
+        description: Grants access to forcing channel joins
+        default: op
+    TitanChat.colour:
+        description: Chat will be auto-coloured
+        default: true
+    TitanChat.follow.*:
+        decription: Auto follows all channels
+        default: false
+    TitanChat.admin.*:
+        decription: Grants access to administrate all channels
+        default: false
     TitanChat.create:
-        description: Access to channel creation
+        description: Grants access to channel creation
         default: op
     TitanChat.delete:
-        description: Access to channel deletion
+        description: Grants access to channel deletion
+        default: op
+    TitanChat.update:
+        description: Automatically notified of updates on login
         default: op
     TitanChat.nick:
-        description: Access to all nick related commands
+        description: Grants access to nickname management
         default: op
         children:
             TitanChat.nick.change: true
             TitanChat.nick.reset: true
             TitanChat.nick.check: true
     TitanChat.nick.change:
-        description: Access to the nick changing command
+        description: Grants access to nickname changing
         default: op
     TitanChat.nick.reset:
-        description: Access to the nick reset command
+        description: Grants access to nickname resetting
         default: op
     TitanChat.nick.check:
-        description: Access to the nick check command
+        description: Grants access to real name checking
         default: op
     TitanChat.broadcast:
-        description: Access to broadcast command
+        description: Grants access to broadcasting
         default: op
-    TitanChat.emote.server:
-        description: Access to server-wide emote broadcast
+    TitanChat.emote.global:
+        description: Grants access to server-wide emote broadcast
         default: op
         children:
             TitanChat.emote: true
     TitanChat.emote:
-        description: Access to channel emote broadcast
+        description: Grants access to channel-wide emote broadcast
         default: true
-    TitanChat.silence.server:
-        description: Access to server silence
+    TitanChat.whisper:
+        description: Grants access to whispering
+        default: true
+    TitanChat.silence.global:
+        description: Grants access to server silence
         default: op
         children:
             TitanChat.silence: true
     TitanChat.silence:
-        description: Access to channel silence
+        description: Grants access to channel silence
         default: op
         children:
             TitanChat.mute: true
-    TitanChat.force:
-        description: Access to forcing channel joins
-        default: op
-    TitanChat.mod:
-        description: Access to moderation perms, has voice
-        default: op
-        children:
-            TitanChat.ban.*: true
-            TitanChat.kick.*: true
-            TitanChat.mute: true
-            TitanChat.voice: true
-    TitanChat.mute:
-        description: Access to mute commands
-        default: op
-    TitanChat.voice:
-        description: Access to chat at all times
-        default: op
-    TitanChat.convert:
-        description: Access to colour code conversion and its command
-        default: op
-    TitanChat.whisper:
-        description: Access to whisper command
-        default: true

@@ -2,6 +2,7 @@ package com.titankingdoms.nodinchan.titanchat.command.commands;
 
 import org.bukkit.entity.Player;
 
+import com.titankingdoms.nodinchan.titanchat.TitanChat.MessageLevel;
 import com.titankingdoms.nodinchan.titanchat.command.CommandBase;
 import com.titankingdoms.nodinchan.titanchat.command.info.*;
 import com.titankingdoms.nodinchan.titanchat.util.displayname.DisplayName;
@@ -49,17 +50,17 @@ public class DisplayNameCommand extends CommandBase {
 				DisplayName display = plugin.getDatabase().find(DisplayName.class).where().ieq("displayname", args[0]).findUnique();
 				
 				if (display == null) {
-					plugin.sendWarning(player, "No such Player with the display name of " + args[0]);
+					plugin.send(MessageLevel.WARNING, player, "No such Player with the display name of " + args[0]);
 					return;
 				}
 				
-				plugin.sendInfo(player, "The real username of " + args[0] + " is " + display.getName());
+				plugin.send(MessageLevel.INFO, player, "The real username of " + args[0] + " is " + display.getName());
 				
 			} catch (IndexOutOfBoundsException e) {
-				plugin.sendInfo(player, "Your real username is " + player.getName());
+				plugin.send(MessageLevel.INFO, player, "Your real username is " + player.getName());
 			}
 			
-		} else { plugin.sendWarning(player, "You do not have permission"); }
+		} else { plugin.send(MessageLevel.WARNING, player, "You do not have permission"); }
 	}
 	
 	/**
@@ -97,20 +98,20 @@ public class DisplayNameCommand extends CommandBase {
 				Player targetPlayer = plugin.getPlayer(targetName);
 				
 				if (targetPlayer != null) {
-					plugin.sendInfo(player, targetPlayer.getDisplayName() + " is now known as " + displayname);
+					plugin.send(MessageLevel.INFO, player, targetPlayer.getDisplayName() + " is now known as " + displayname);
 					dnc.set(targetPlayer, displayname);
-					plugin.sendInfo(targetPlayer, player.getDisplayName() + " changed your display name to " + displayname);
+					plugin.send(MessageLevel.INFO, targetPlayer, player.getDisplayName() + " changed your display name to " + displayname);
 					dnc.save(targetPlayer);
 					
-				} else { plugin.sendWarning(player, "Player not online"); }
+				} else { plugin.send(MessageLevel.WARNING, player, "Player not online"); }
 				
 			} else {
-				plugin.sendInfo(player, "You are now known as " + displayname);
+				plugin.send(MessageLevel.INFO, player, "You are now known as " + displayname);
 				dnc.set(player, displayname);
 				dnc.save(player);
 			}
 			
-		} else { plugin.sendWarning(player, "You do not have permission"); }
+		} else { plugin.send(MessageLevel.WARNING, player, "You do not have permission"); }
 	}
 	
 	/**
@@ -125,19 +126,19 @@ public class DisplayNameCommand extends CommandBase {
 				Player targetPlayer = plugin.getPlayer(args[0]);
 				
 				if (targetPlayer != null) {
-					plugin.sendInfo(player, targetPlayer.getDisplayName() + " is now known as " + targetPlayer.getName());
+					plugin.send(MessageLevel.INFO, player, targetPlayer.getDisplayName() + " is now known as " + targetPlayer.getName());
 					dnc.set(targetPlayer, targetPlayer.getName());
 					dnc.save(targetPlayer);
-					plugin.sendInfo(targetPlayer, "You are now known as " + targetPlayer.getName());
+					plugin.send(MessageLevel.INFO, targetPlayer, "You are now known as " + targetPlayer.getName());
 					
-				} else { plugin.sendWarning(player, "Player not online"); }
+				} else { plugin.send(MessageLevel.WARNING, player, "Player not online"); }
 				
 			} catch (IndexOutOfBoundsException e) {
 				dnc.set(player, player.getName());
 				dnc.save(player);
-				plugin.sendInfo(player, "You are now known as " + player.getName());
+				plugin.send(MessageLevel.INFO, player, "You are now known as " + player.getName());
 			}
 			
-		} else { plugin.sendWarning(player, "You do not have permission"); }
+		} else { plugin.send(MessageLevel.WARNING, player, "You do not have permission"); }
 	}
 }

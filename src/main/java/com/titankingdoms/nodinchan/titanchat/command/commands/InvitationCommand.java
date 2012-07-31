@@ -2,8 +2,10 @@ package com.titankingdoms.nodinchan.titanchat.command.commands;
 
 import org.bukkit.entity.Player;
 
+import com.titankingdoms.nodinchan.titanchat.TitanChat.MessageLevel;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
+import com.titankingdoms.nodinchan.titanchat.channel.util.Invitation.Response;
 import com.titankingdoms.nodinchan.titanchat.command.CommandBase;
 import com.titankingdoms.nodinchan.titanchat.command.info.*;
 
@@ -40,149 +42,86 @@ public class InvitationCommand extends CommandBase {
 	/**
 	 * Accept Command - Accepts the channel join invitation and joins the channel
 	 */
-	@ChCommand
+	@Command
 	@Description("Accepts the channel join invitation and joins the channel")
 	@Usage("accept [channel]")
 	public void accept(Player player, String[] args) {
+		Channel channel = null;
+		
 		try {
-			if (cm.exists(args[0])) {
-				Channel channel = cm.getChannel(args[0]);
-				
-				if (channel.getInviteList().contains(player.getName())) {
-					channel.getInviteList().remove(player.getName());
-					cm.onInviteRespond(channel, player, true);
-					
-					cm.chSwitch(player, channel);
-					plugin.sendInfo(player, "You have accepted the invitation");
-					
-				} else { plugin.sendWarning(player, "You did not receive any invitations from this channel"); }
-						
-			} else {
-				if (args[0].toLowerCase().startsWith("tag:")) {
-					if (cm.existsAsTag(args[0].substring(4))) {
-						Channel channel = cm.getChannelByTag(args[0].substring(4));
-						
-						if (channel.getInviteList().contains(player.getName())) {
-							channel.getInviteList().remove(player.getName());
-							cm.onInviteRespond(channel, player, true);
-							
-							cm.chSwitch(player, channel);
-							plugin.sendInfo(player, "You have accepted the invitation");
-							
-						} else { plugin.sendWarning(player, "You did not receive any invitations from this channel"); }
-						
-					} else { plugin.sendWarning(player, "No such channel"); }
-					
-				} else { plugin.sendWarning(player, "No such channel"); }
-			}
+			if (cm.existsByAlias(args[0]))
+				channel = cm.getChannelByAlias(args[0]);
+			else
+				plugin.send(MessageLevel.WARNING, player, "No such channel");
 			
-		} catch (IndexOutOfBoundsException e) { invalidArgLength(player, "Accept"); }
+		} catch (IndexOutOfBoundsException e) { invalidArgLength(player, "accept"); }
+		
+		if (channel == null)
+			return;
+		
+		cm.getParticipant(player).getInvitation().response(channel, Response.ACCEPT);
+		channel.join(player);
 	}
 	
 	/**
 	 * Decline Command - Declines the channel join invitation
 	 */
-	@ChCommand
+	@Command
 	@Description("Declines the channel join invitation")
 	@Usage("decline [channel]")
 	public void decline(Player player, String[] args) {
+		Channel channel = null;
+		
 		try {
-			if (cm.exists(args[0])) {
-				Channel channel = cm.getChannel(args[0]);
-				
-				if (channel.getInviteList().contains(player.getName())) {
-					channel.getInviteList().remove(player.getName());
-					cm.onInviteRespond(channel, player, false);
-					
-					plugin.sendInfo(player, "You have declined the invitation");
-					
-				} else { plugin.sendWarning(player, "You did not receive any invitations from this channel"); }
-				
-			} else {
-				if (args[0].toLowerCase().startsWith("tag:")) {
-					if (cm.existsAsTag(args[0].substring(4))) {
-						Channel channel = cm.getChannelByTag(args[0].substring(4));
-						
-						if (channel.getInviteList().contains(player.getName())) {
-							channel.getInviteList().remove(player.getName());
-							cm.onInviteRespond(channel, player, false);
-							
-							plugin.sendInfo(player, "You have declined the invitation");
-							
-						} else { plugin.sendWarning(player, "You did not receive any invitations from this channel"); }
-						
-					} else { plugin.sendWarning(player, "No such channel"); }
-					
-				} else { plugin.sendWarning(player, "No such channel"); }
-			}
+			if (cm.existsByAlias(args[0]))
+				channel = cm.getChannelByAlias(args[0]);
+			else
+				plugin.send(MessageLevel.WARNING, player, "No such channel");
 			
-		} catch (IndexOutOfBoundsException e) { invalidArgLength(player, "Decline"); }
+		} catch (IndexOutOfBoundsException e) { invalidArgLength(player, "decline"); }
+		
+		if (channel == null)
+			return;
+		
+		cm.getParticipant(player).getInvitation().response(channel, Response.DECLINE);
 	}
 	
 	/**
 	 * Invite Command - Invites the player to join the channel
 	 */
-	@ChCommand
+	@Command
 	@Description("Invites the player to join the channel")
 	@Usage("invite [player] <channel>")
 	public void invite(Player player, String[] args) {
-		if (args.length < 1) { invalidArgLength(player, "Invite"); }
+		if (args.length < 1) { invalidArgLength(player, "invite"); }
+		
+		Channel channel = null;
+		Player targetPlayer = plugin.getPlayer(args[0]);
+		
+		if (targetPlayer == null) {
+			plugin.send(MessageLevel.WARNING, player, "Player not online");
+			return;
+		}
 		
 		try {
-			if (cm.exists(args[1])) {
-				Channel channel = cm.getChannel(args[1]);
-				
-				if (cm.getAdmins(channel).contains(player.getName())) {
-					if (plugin.getPlayer(args[0]) != null) {
-						channel.getInviteList().add(plugin.getPlayer(args[0]).getName());
-						cm.onInvite(channel, player, plugin.getPlayer(args[0]));
-						
-						plugin.sendInfo(player, "You have invited " + plugin.getPlayer(args[0]).getName());
-						plugin.sendInfo(plugin.getPlayer(args[0]), "You have been invited to chat on " + channel.getName());
-						
-					} else { plugin.sendWarning(player, "Player not online"); }
-					
-				} else { plugin.sendWarning(player, "You do not have permission to invite players on this channel"); }
-				
-			} else {
-				if (args[1].toLowerCase().startsWith("tag:")) {
-					if (cm.existsAsTag(args[1].substring(4))) {
-						Channel channel = cm.getChannelByTag(args[1].substring(4));
-						
-						if (cm.getAdmins(channel).contains(player.getName())) {
-							if (plugin.getPlayer(args[0]) != null) {
-								channel.getInviteList().add(plugin.getPlayer(args[0]).getName());
-								cm.onInvite(channel, player, plugin.getPlayer(args[0]));
-								
-								plugin.sendInfo(player, "You have invited " + plugin.getPlayer(args[0]).getName());
-								plugin.sendInfo(plugin.getPlayer(args[0]), "You have been invited to chat on " + channel.getName());
-								
-							} else { plugin.sendWarning(player, "Player not online"); }
-							
-						} else { plugin.sendWarning(player, "You do not have permission to invite players on this channel"); }
-						
-					} else { plugin.sendWarning(player, "No such channel"); }
-					
-				} else { plugin.sendWarning(player, "No such channel"); }
-			}
+			if (cm.existsByAlias(args[0]))
+				channel = cm.getChannelByAlias(args[0]);
+			else
+				plugin.send(MessageLevel.WARNING, player, "No such channel");
 			
 		} catch (IndexOutOfBoundsException e) {
-			Channel channel = cm.getChannel(player);
+			channel = cm.getChannel(player);
 			
 			if (channel == null) {
-				plugin.sendWarning(player, "Specify a channel or join a channel to use this command");
+				plugin.send(MessageLevel.WARNING, player, "Specify a channel or join a channel to use this command");
+				usage(player, "invite");
 				return;
 			}
-			
-			if (channel.getAdminList().contains(player.getName())) {
-				if (plugin.getPlayer(args[0]) != null) {
-					channel.getInviteList().add(plugin.getPlayer(args[0]).getName());
-					plugin.sendInfo(player, "You have invited " + plugin.getPlayer(args[0]).getName());
-					plugin.sendInfo(plugin.getPlayer(args[0]), "You have been invited to chat on " + channel.getName());
-					
-				} else { plugin.sendWarning(player, "Player not online"); }
-				
-			} else { plugin.sendWarning(player, "You do not have permission to invite players on this channel"); }
 		}
+		
+		if (channel == null)
+			return;
+		
+		cm.getParticipant(targetPlayer).getInvitation().invite(channel, player);
 	}
 }

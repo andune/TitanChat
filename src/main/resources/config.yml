@@ -10,13 +10,19 @@
 
 auto-library-update: true
 channels:
-    enable-channels: true
+    enable: true
+    tag: ''
+    name-display-colour: '&f'
     chat-display-colour: '&f'
     channel-limit: -1
-    quick-message: '@'
+    quick-send:
+        enable: true
+        key: '@'
     messages:
         join: true
         leave: true
+logging:
+    colouring: true
 broadcast:
     player:
         enable: true
@@ -39,7 +45,7 @@ whisper:
         enable: true
         format: '&5Server whispers: %message'
 formatting:
-    use-built-in: true
+    use-custom-format: false
     format: "%tag %prefix%player%suffix: %message"
 permissions:
     groups:
