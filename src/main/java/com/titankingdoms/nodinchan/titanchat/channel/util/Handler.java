@@ -5,6 +5,22 @@ import java.util.Map;
 
 import org.bukkit.command.CommandSender;
 
+/*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
+ * 
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ * 
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ * 
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 public final class Handler {
 	
 	private final Map<String, CommandHandler> commandHandlers;
@@ -50,26 +66,13 @@ public final class Handler {
 		private final String description;
 		private final String usage;
 		
-		private final int minArgs;
-		private final int maxArgs;
-		
-		public HandlerInfo(String description, String usage, int minArgs, int maxArgs) {
+		public HandlerInfo(String description, String usage) {
 			this.description = description;
 			this.usage = usage;
-			this.minArgs = minArgs;
-			this.maxArgs = maxArgs;
 		}
 		
 		public String getDescription() {
 			return description;
-		}
-		
-		public int getMaxArgs() {
-			return maxArgs;
-		}
-		
-		public int getMinArgs() {
-			return minArgs;
 		}
 		
 		public String getUsage() {

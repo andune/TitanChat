@@ -1,5 +1,6 @@
 package com.titankingdoms.nodinchan.titanchat.command;
 
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
@@ -44,6 +45,21 @@ public class CommandBase extends Loadable implements Listener {
 		this.plugin = TitanChat.getInstance();
 	}
 	
+	public final String getDisplayName(OfflinePlayer player) {
+		return plugin.getDisplayNameChanger().getDisplayName(player);
+	}
+	
+	public final boolean hasPermission(CommandSender sender, String permission) {
+		return hasPermission(sender, permission, false);
+	}
+	
+	public final boolean hasPermission(CommandSender sender, String permission, boolean avoidWildcard) {
+		if (!(sender instanceof Player))
+			return true;
+		
+		return plugin.getPermsBridge().has((Player) sender, permission, avoidWildcard);
+	}
+	
 	/**
 	 * Sends a warning for invalid argument length
 	 * 
@@ -81,15 +97,6 @@ public class CommandBase extends Loadable implements Listener {
 	 */
 	public final void register(Listener listener) {
 		plugin.register(listener);
-	}
-	
-	public final void unspecifiedChannel(CommandSender sender, String name) {
-		if (sender instanceof Player)
-			plugin.send(MessageLevel.WARNING, sender, "Please specify a channel or join a channel");
-		else
-			plugin.send(MessageLevel.WARNING, sender, "Please specify a channel");
-		
-		usage(sender, name);
 	}
 	
 	/**

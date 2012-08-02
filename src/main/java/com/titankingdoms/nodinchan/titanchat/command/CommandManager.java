@@ -85,7 +85,7 @@ public final class CommandManager {
 	 * 
 	 * @param args The arguments
 	 */
-	public void execute(CommandSender sender, String command, Channel channel, String[] args) {
+	public void execute(CommandSender sender, String command, String chName, String[] args) {
 		if (getCommandExecutor(command) != null) {
 			Executor executor = getCommandExecutor(command);
 			
@@ -98,6 +98,22 @@ public final class CommandManager {
 			} else {
 				if (!executor.allowServer()) {
 					plugin.send(MessageLevel.WARNING, sender, "Please use this command in game");
+					return;
+				}
+			}
+			
+			Channel channel = null;
+			
+			if (chName == null || chName.isEmpty()) {
+				if (sender instanceof Player)
+					channel = plugin.getManager().getChannelManager().getChannel((Player) sender);
+				
+			} else {
+				if (plugin.getManager().getChannelManager().existsByAlias(chName))
+					channel = plugin.getManager().getChannelManager().getChannelByAlias(chName);
+				
+				if (executor.requireChannel() && channel == null) {
+					plugin.send(MessageLevel.WARNING, sender, "No such channel");
 					return;
 				}
 			}
@@ -219,7 +235,7 @@ public final class CommandManager {
 	 * Loads all Commands
 	 */
 	public void load() {
-		register(new AdministrateCommand());
+		register(new AdministrationCommand());
 		register(new ChannelCommand());
 		register(new ChatCommand());
 		register(new DisplayNameCommand());

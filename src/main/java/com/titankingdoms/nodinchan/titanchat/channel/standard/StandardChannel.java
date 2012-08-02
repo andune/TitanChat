@@ -10,6 +10,22 @@ import org.bukkit.entity.Player;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.util.Participant;
 
+/*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
+ * 
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ * 
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ * 
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 public final class StandardChannel extends Channel {
 	
 	public StandardChannel() {}
@@ -36,8 +52,6 @@ public final class StandardChannel extends Channel {
 	public Channel create(CommandSender sender, String name, Option option) {
 		StandardChannel channel = new StandardChannel(name, option);
 		
-		StandardCommandHandler.load(channel);
-		
 		if (sender instanceof Player)
 			channel.getAdmins().add(sender.getName());
 		
@@ -52,8 +66,6 @@ public final class StandardChannel extends Channel {
 	@Override
 	public Channel load(String name, Option option) {
 		StandardChannel channel = new StandardChannel(name, option);
-		
-		StandardCommandHandler.load(channel);
 		
 		if (channel.getConfig().get("admins") != null)
 			channel.getAdmins().addAll(channel.getConfig().getStringList("admins"));

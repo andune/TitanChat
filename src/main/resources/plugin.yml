@@ -49,7 +49,7 @@ permissions:
             TitanChat.ban.*: true
             TitanChat.kick.*: true
             TitanChat.mute: true
-            TitanChat.voice.*: true
+            TitanChat.voice: true
     TitanChat.access.*:
         description: Grants access to all channels
         default: op
@@ -65,7 +65,7 @@ permissions:
     TitanChat.mute:
         description: Grants access to muting on all channels
         default: op
-    TitanChat.voice.*:
+    TitanChat.voice:
         description: Grants speaking rights on all channels
         default: op
     TitanChat.force:

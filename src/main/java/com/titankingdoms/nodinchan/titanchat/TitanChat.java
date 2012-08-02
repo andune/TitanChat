@@ -348,18 +348,10 @@ public final class TitanChat extends JavaPlugin {
 				return true;
 			}
 			
-			Channel channel = null;
+			String chName = null;
 			
-			if (args[0].startsWith("@")) {
-				if (manager.getChannelManager().existsByAlias(args[0].substring(1)))
-					channel = manager.getChannelManager().getChannelByAlias(args[0].substring(1));
-				else
-					send(MessageLevel.WARNING, sender, "No such channel");
-				
-			} else {
-				if (sender instanceof Player)
-					channel = manager.getChannelManager().getChannel((Player) sender);
-			}
+			if (args[0].startsWith("@"))
+				chName = args[0].substring(1);
 			
 			String[] arguments = new String[0];
 			
@@ -369,7 +361,7 @@ public final class TitanChat extends JavaPlugin {
 				arguments = Arrays.copyOfRange(args, 1, args.length);
 			
 			db.i("CommandManager executing command:");
-			manager.getCommandManager().execute(sender, args[0], channel, arguments);
+			manager.getCommandManager().execute(sender, args[0], chName, arguments);
 			return true;
 		}
 		

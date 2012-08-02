@@ -28,6 +28,22 @@ import com.titankingdoms.nodinchan.titanchat.event.channel.MessageReceiveEvent;
 import com.titankingdoms.nodinchan.titanchat.event.channel.MessageSendEvent;
 import com.titankingdoms.nodinchan.titanchat.event.util.Message;
 
+/*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
+ * 
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ * 
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ * 
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 public abstract class Channel extends Loadable {
 	
 	protected final TitanChat plugin;
@@ -169,7 +185,7 @@ public abstract class Channel extends Loadable {
 		handler.registerCommandHandlers(handlers);
 	}
 	
-	public final void registerSettings(SettingHandler... handlers) {
+	public final void registerSettingHandlers(SettingHandler... handlers) {
 		handler.registerSettingHandlers(handlers);
 	}
 	

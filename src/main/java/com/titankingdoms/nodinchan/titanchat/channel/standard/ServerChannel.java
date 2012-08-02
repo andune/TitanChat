@@ -9,6 +9,22 @@ import com.titankingdoms.nodinchan.titanchat.channel.util.CommandHandler;
 import com.titankingdoms.nodinchan.titanchat.channel.util.Handler.HandlerInfo;
 import com.titankingdoms.nodinchan.titanchat.channel.util.Info;
 
+/*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
+ * 
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ * 
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ * 
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 public final class ServerChannel extends Channel {
 	
 	private final Info info;
@@ -41,22 +57,22 @@ public final class ServerChannel extends Channel {
 	
 	@Override
 	public Channel load(String name, Option option) {
-		registerCommandHandlers(new CommandHandler(this, "Ban", new HandlerInfo(null, null, 0, 0)) {
+		registerCommandHandlers(new CommandHandler(this, "Ban", new HandlerInfo(null, null)) {
 
 			@Override
 			public void onCommand(CommandSender sender, String[] args) { plugin.send(MessageLevel.WARNING, sender, "Administration command disabled"); }
 			
-		}, new CommandHandler(this, "Join", new HandlerInfo(null, null, 0, 0)) {
+		}, new CommandHandler(this, "Join", new HandlerInfo(null, null)) {
 
 			@Override
 			public void onCommand(CommandSender sender, String[] args) {}
 			
-		}, new CommandHandler(this, "Kick", new HandlerInfo(null, null, 0, 0)) {
+		}, new CommandHandler(this, "Kick", new HandlerInfo(null, null)) {
 
 			@Override
 			public void onCommand(CommandSender sender, String[] args) { plugin.send(MessageLevel.WARNING, sender, "Administration command disabled"); }
 			
-		}, new CommandHandler(this, "Leave", new HandlerInfo(null, null, 0, 0)) {
+		}, new CommandHandler(this, "Leave", new HandlerInfo(null, null)) {
 
 			@Override
 			public void onCommand(CommandSender sender, String[] args) {}

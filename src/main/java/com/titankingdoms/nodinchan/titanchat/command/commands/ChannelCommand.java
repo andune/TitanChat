@@ -108,7 +108,16 @@ public class ChannelCommand extends CommandBase {
 		if (channel.handleCommand(player, "follow", args))
 			return;
 		
-		if (args.length < 1) { invalidArgLength(player, "follow"); return; }
+		if (channel.access(player)) {
+			if (!channel.getFollowers().contains(player.getName())) {
+				channel.getFollowers().add(player.getName());
+				channel.save();
+				
+				plugin.send(MessageLevel.INFO, player, "You have followed " + channel.getName());
+				
+			} else { plugin.send(MessageLevel.WARNING, player, "You are already following " + channel.getName()); }
+			
+		} else { plugin.send(MessageLevel.WARNING, player, "You do not have access"); }
 	}
 	
 	/**
@@ -117,12 +126,48 @@ public class ChannelCommand extends CommandBase {
 	@Command(channel = true)
 	@Aliases("j")
 	@Description("Joins the channel")
-	@Usage("join")
+	@Usage("join <password>")
 	public void join(Player player, Channel channel, String[] args) {
 		if (channel.handleCommand(player, "join", args))
 			return;
 		
-		if (args.length < 1) { invalidArgLength(player, "join"); return; }
+		if (channel.getOption().equals(Option.STAFF) && !plugin.isStaff(player)) {
+			channel.deny(player, null);
+			return;
+		}
+		
+		if (!(hasPermission(player, "TitanChat.access.*") || hasPermission(player, "TitanChat.access." + channel.getName()))) {
+			if (channel.getPassword() != null && !channel.getPassword().equals("")) {
+				try {
+					String password = args[0];
+					
+					if (!channel.getPassword().equals(password)) {
+						channel.deny(player, "Incorrect password");
+						return;
+					}
+					
+				} catch (IndexOutOfBoundsException e) {
+					channel.deny(player, "Please enter a password");
+					return;
+				}
+			}
+			
+			if (channel.getBlacklist().contains(player.getName())) {
+				channel.deny(player, "You are banned");
+				return;
+			}
+			
+			if (channel.getInfo().whitelistOnly() && !channel.getWhitelist().contains(player.getName())) {
+				channel.deny(player, "You are not whitelisted");
+				return;
+			}
+		}
+		
+		if (!channel.isParticipating(player.getName())) {
+			channel.join(player);
+			plugin.send(MessageLevel.INFO, player, "You have joined " + channel.getName());
+			
+		} else { plugin.send(MessageLevel.WARNING, player, "You are already in the channel"); }
 	}
 	
 	/**
@@ -135,6 +180,12 @@ public class ChannelCommand extends CommandBase {
 	public void leave(Player player, Channel channel, String[] args) {
 		if (channel.handleCommand(player, "leave", args))
 			return;
+		
+		if (channel.isParticipating(player.getName())) {
+			channel.leave(player);
+			plugin.send(MessageLevel.INFO, player, "You have left " + channel.getName());
+			
+		} else { plugin.send(MessageLevel.WARNING, player, "You are not in the channel"); }
 	}
 	
 	/**
@@ -147,6 +198,15 @@ public class ChannelCommand extends CommandBase {
 		if (channel.handleCommand(player, "unfollow", args))
 			return;
 		
-		if (args.length < 1) { invalidArgLength(player, "unfollow"); return; }
+		if (channel.access(player)) {
+			if (channel.getFollowers().contains(player.getName())) {
+				channel.getFollowers().remove(player.getName());
+				channel.save();
+				
+				plugin.send(MessageLevel.INFO, player, "You have unfollowed " + channel.getName());
+				
+			} else { plugin.send(MessageLevel.WARNING, player, "You are not following " + channel.getName()); }
+			
+		} else { plugin.send(MessageLevel.WARNING, player, "You do not have access"); }
 	}
 }
