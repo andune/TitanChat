@@ -8,6 +8,7 @@ import com.titankingdoms.nodinchan.titanchat.TitanChat.MessageLevel;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel.Option;
 import com.titankingdoms.nodinchan.titanchat.channel.util.CommandHandler;
+import com.titankingdoms.nodinchan.titanchat.channel.util.Handler.HandlerInfo;
 
 final class StandardCommandHandler {
 	
@@ -15,7 +16,7 @@ final class StandardCommandHandler {
 		if (channel == null)
 			return;
 		
-		channel.registerCommandHandlers(new CommandHandler(channel, "Ban") {
+		channel.registerCommandHandlers(new CommandHandler(channel, "Ban", new HandlerInfo(null, null, 0, 0)) {
 			
 			@Override
 			public void onCommand(CommandSender sender, String[] args) {
@@ -61,7 +62,7 @@ final class StandardCommandHandler {
 				} else { plugin.send(MessageLevel.WARNING, sender, plugin.getDisplayNameChanger().getDisplayName(targetPlayer) + " has already been banned"); }
 			}
 			
-		}, new CommandHandler(channel, "Join") {
+		}, new CommandHandler(channel, "Join", new HandlerInfo(null, null, 0, 0)) {
 
 			@Override
 			public void onCommand(CommandSender sender, String[] args) {
@@ -104,7 +105,7 @@ final class StandardCommandHandler {
 				plugin.send(MessageLevel.INFO, sender, "You have joined " + channel.getName());
 			}
 			
-		}, new CommandHandler(channel, "Kick") {
+		}, new CommandHandler(channel, "Kick", new HandlerInfo(null, null, 0, 0)) {
 
 			@Override
 			public void onCommand(CommandSender sender, String[] args) {
@@ -133,7 +134,7 @@ final class StandardCommandHandler {
 				} else { plugin.send(MessageLevel.WARNING, sender, targetPlayer.getDisplayName() + " is not on the channel"); }
 			}
 			
-		}, new CommandHandler(channel, "Leave") {
+		}, new CommandHandler(channel, "Leave", new HandlerInfo(null, null, 0, 0)) {
 
 			@Override
 			public void onCommand(CommandSender sender, String[] args) {

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
@@ -25,11 +26,14 @@ public final class Invitation {
 		this.invitors = new HashMap<String, List<String>>();
 	}
 	
-	public void invite(Channel channel, Player invitor) {
+	public void invite(Channel channel, CommandSender invitor) {
 		if (!invitors.containsKey(channel.getName().toLowerCase()))
 			invitors.put(channel.getName().toLowerCase(), new ArrayList<String>());
 		
-		invitors.get(channel.getName().toLowerCase()).add(invitor.getName());
+		if (invitor instanceof Player)
+			invitors.get(channel.getName().toLowerCase()).add(invitor.getName());
+		else
+			invitors.get(channel.getName().toLowerCase()).add("*CONSOLE*");
 	}
 	
 	public void response(Channel channel, Response response) {
@@ -41,15 +45,22 @@ public final class Invitation {
 		switch (response) {
 		
 		case ACCEPT:
-			for (String invitor : invitors.get(channel.getName().toLowerCase()))
+			for (String invitor : invitors.get(channel.getName().toLowerCase())) {
 				if (plugin.getPlayer(invitor) != null)
 					plugin.send(MessageLevel.INFO, plugin.getPlayer(invitor), plugin.getPlayer(invitee).getDisplayName() + " has accepted your invitation");
+				else if (invitor.equals("*CONSOLE*"))
+					plugin.send(MessageLevel.INFO, plugin.getServer().getConsoleSender(), plugin.getPlayer(invitee).getDisplayName() + " has accepted your invitation");
+			}
+					
 			break;
 			
 		case DECLINE:
-			for (String invitor : invitors.get(channel.getName().toLowerCase()))
+			for (String invitor : invitors.get(channel.getName().toLowerCase())) {
 				if (plugin.getPlayer(invitor) != null)
 					plugin.send(MessageLevel.INFO, plugin.getPlayer(invitor), plugin.getPlayer(invitee).getDisplayName() + " has declined your invitation");
+				else if (invitor.equals("*CONSOLE*"))
+					plugin.send(MessageLevel.INFO, plugin.getServer().getConsoleSender(), plugin.getPlayer(invitee).getDisplayName() + " has declined your invitation");
+			}
 			break;
 		}
 		

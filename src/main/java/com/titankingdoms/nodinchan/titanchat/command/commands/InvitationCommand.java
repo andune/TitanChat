@@ -1,5 +1,6 @@
 package com.titankingdoms.nodinchan.titanchat.command.commands;
 
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat.MessageLevel;
@@ -42,23 +43,10 @@ public class InvitationCommand extends CommandBase {
 	/**
 	 * Accept Command - Accepts the channel join invitation and joins the channel
 	 */
-	@Command
+	@Command(channel = true)
 	@Description("Accepts the channel join invitation and joins the channel")
-	@Usage("accept [channel]")
-	public void accept(Player player, String[] args) {
-		Channel channel = null;
-		
-		try {
-			if (cm.existsByAlias(args[0]))
-				channel = cm.getChannelByAlias(args[0]);
-			else
-				plugin.send(MessageLevel.WARNING, player, "No such channel");
-			
-		} catch (IndexOutOfBoundsException e) { invalidArgLength(player, "accept"); }
-		
-		if (channel == null)
-			return;
-		
+	@Usage("accept")
+	public void accept(Player player, Channel channel, String[] args) {
 		cm.getParticipant(player).getInvitation().response(channel, Response.ACCEPT);
 		channel.join(player);
 	}
@@ -66,62 +54,33 @@ public class InvitationCommand extends CommandBase {
 	/**
 	 * Decline Command - Declines the channel join invitation
 	 */
-	@Command
+	@Command(channel = true)
 	@Description("Declines the channel join invitation")
 	@Usage("decline [channel]")
-	public void decline(Player player, String[] args) {
-		Channel channel = null;
-		
-		try {
-			if (cm.existsByAlias(args[0]))
-				channel = cm.getChannelByAlias(args[0]);
-			else
-				plugin.send(MessageLevel.WARNING, player, "No such channel");
-			
-		} catch (IndexOutOfBoundsException e) { invalidArgLength(player, "decline"); }
-		
-		if (channel == null)
-			return;
-		
+	public void decline(Player player, Channel channel, String[] args) {
 		cm.getParticipant(player).getInvitation().response(channel, Response.DECLINE);
 	}
 	
 	/**
 	 * Invite Command - Invites the player to join the channel
 	 */
-	@Command
+	@Command(channel = true, server = true)
 	@Description("Invites the player to join the channel")
-	@Usage("invite [player] <channel>")
-	public void invite(Player player, String[] args) {
-		if (args.length < 1) { invalidArgLength(player, "invite"); }
-		
-		Channel channel = null;
-		Player targetPlayer = plugin.getPlayer(args[0]);
-		
-		if (targetPlayer == null) {
-			plugin.send(MessageLevel.WARNING, player, "Player not online");
+	@Usage("invite [player]")
+	public void invite(CommandSender sender, Channel channel, String[] args) {
+		if (channel.handleCommand(sender, "invite", args))
 			return;
-		}
 		
 		try {
-			if (cm.existsByAlias(args[0]))
-				channel = cm.getChannelByAlias(args[0]);
-			else
-				plugin.send(MessageLevel.WARNING, player, "No such channel");
+			Player targetPlayer = plugin.getPlayer(args[0]);
 			
-		} catch (IndexOutOfBoundsException e) {
-			channel = cm.getChannel(player);
-			
-			if (channel == null) {
-				plugin.send(MessageLevel.WARNING, player, "Specify a channel or join a channel to use this command");
-				usage(player, "invite");
+			if (targetPlayer == null) {
+				plugin.send(MessageLevel.WARNING, sender, "Player not online");
 				return;
 			}
-		}
-		
-		if (channel == null)
-			return;
-		
-		cm.getParticipant(targetPlayer).getInvitation().invite(channel, player);
+			
+			cm.getParticipant(targetPlayer).getInvitation().invite(channel, sender);
+			
+		} catch (IndexOutOfBoundsException e) { invalidArgLength(sender, "invite"); }
 	}
 }

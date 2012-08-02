@@ -18,10 +18,11 @@ import org.bukkit.entity.Player;
 import com.nodinchan.ncbukkit.loader.Loadable;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.TitanChat.MessageLevel;
-import com.titankingdoms.nodinchan.titanchat.channel.setting.Setting;
 import com.titankingdoms.nodinchan.titanchat.channel.util.CommandHandler;
+import com.titankingdoms.nodinchan.titanchat.channel.util.Handler;
 import com.titankingdoms.nodinchan.titanchat.channel.util.Info;
 import com.titankingdoms.nodinchan.titanchat.channel.util.Participant;
+import com.titankingdoms.nodinchan.titanchat.channel.util.SettingHandler;
 import com.titankingdoms.nodinchan.titanchat.event.channel.MessageConsoleEvent;
 import com.titankingdoms.nodinchan.titanchat.event.channel.MessageReceiveEvent;
 import com.titankingdoms.nodinchan.titanchat.event.channel.MessageSendEvent;
@@ -42,8 +43,7 @@ public abstract class Channel extends Loadable {
 	
 	private final Map<String, Participant> participants;
 	
-	private final Map<String, CommandHandler> commandHandlers;
-	private final Map<String, Setting> settings;
+	private final Handler handler;
 	
 	private String password;
 	
@@ -64,19 +64,13 @@ public abstract class Channel extends Loadable {
 		this.followers = new ArrayList<String>();
 		this.whitelist = new ArrayList<String>();
 		this.participants = new HashMap<String, Participant>();
-		this.commandHandlers = new HashMap<String, CommandHandler>();
-		this.settings = new HashMap<String, Setting>();
+		this.handler = new Handler();
 	}
 	
 	public abstract boolean access(Player player);
 	
 	public final boolean changeSetting(CommandSender sender, String setting, String[] args) {
-		if (settings.containsKey(setting.toLowerCase())) {
-			settings.get(setting.toLowerCase()).set(sender, args);
-			return true;
-		}
-		
-		return false;
+		return handler.changeSetting(sender, setting, args);
 	}
 	
 	public abstract Channel create(CommandSender sender, String name, Option option);
@@ -131,12 +125,7 @@ public abstract class Channel extends Loadable {
 	}
 	
 	public final boolean handleCommand(CommandSender sender, String command, String[] args) {
-		if (commandHandlers.containsKey(command.toLowerCase())) {
-			commandHandlers.get(command.toLowerCase()).onCommand(sender, args);
-			return true;
-		}
-		
-		return false;
+		return handler.handleCommand(sender, command, args);
 	}
 	
 	public boolean isParticipating(String name) {
@@ -177,15 +166,11 @@ public abstract class Channel extends Loadable {
 	}
 	
 	public final void registerCommandHandlers(CommandHandler... handlers) {
-		for (CommandHandler handler : handlers)
-			if (!commandHandlers.containsKey(handler.getCommand().toLowerCase()))
-				commandHandlers.put(handler.getCommand().toLowerCase(), handler);
+		handler.registerCommandHandlers(handlers);
 	}
 	
-	public final void registerSettings(Setting... settings) {
-		for (Setting setting : settings)
-			if (!this.settings.containsKey(setting.getSetting().toLowerCase()))
-				this.settings.put(setting.getSetting().toLowerCase(), setting);
+	public final void registerSettings(SettingHandler... handlers) {
+		handler.registerSettingHandlers(handlers);
 	}
 	
 	public void save() {

@@ -1,9 +1,7 @@
 package com.titankingdoms.nodinchan.titanchat.command.commands;
 
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
-import com.titankingdoms.nodinchan.titanchat.TitanChat.MessageLevel;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
 import com.titankingdoms.nodinchan.titanchat.command.CommandBase;
@@ -40,240 +38,84 @@ public class AdministrateCommand extends CommandBase {
 	}
 	
 	/**
-	 * Ban Command - Bans the sender from the channel
+	 * Ban Command - Bans the player from the channel
 	 */
-	@Command(server = true)
+	@Command(channel = true, server = true)
 	@Aliases("b")
-	@Description("Bans the sender from the channel")
-	@Usage("ban [sender] <channel>")
-	public void ban(CommandSender sender, String[] args) {
-		if (args.length < 1) { invalidArgLength(sender, "ban"); return; }
-		
-		Channel channel = null;
-		
-		try {
-			if (cm.existsByAlias(args[1]))
-				channel = cm.getChannelByAlias(args[1]);
-			else
-				plugin.send(MessageLevel.WARNING, sender, "No such channel");
-			
-		} catch (IndexOutOfBoundsException e) {
-			if (!(sender instanceof Player)) {
-				plugin.send(MessageLevel.WARNING, sender, "Please specify a channel");
-				usage(sender, "ban");
-				return;
-			}
-			
-			channel = cm.getChannel((Player) sender);
-			
-			if (channel == null) {
-				plugin.send(MessageLevel.WARNING, sender, "Specify a channel or join a channel to use this command");
-				usage(sender, "ban");
-			}
-		}
-		
-		if (channel == null)
-			return;
-		
+	@Description("Bans the player from the channel")
+	@Usage("ban [player]")
+	public void ban(CommandSender sender, Channel channel, String[] args) {
 		if (channel.handleCommand(sender, "ban", args))
 			return;
+		
+		if (args.length < 1) { invalidArgLength(sender, "ban"); return; }
 	}
 	
 	/**
-	 * Force Command - Forces the sender to join the channel
+	 * Force Command - Forces the player to join the channel
 	 */
-	@Command(server = true)
-	@Description("Forces the sender to join the channel")
+	@Command(channel = true, server = true)
+	@Description("Forces the player to join the channel")
 	@Permission("TitanChat.force")
-	@Usage("force [sender] <channel>")
-	public void force(CommandSender sender, String[] args) {
-		if (args.length < 1) { invalidArgLength(sender, "force"); }
-		
-		Channel channel = null;
-		
-		try {
-			if (cm.existsByAlias(args[1]))
-				channel = cm.getChannelByAlias(args[1]);
-			else
-				plugin.send(MessageLevel.WARNING, sender, "No such channel");
-			
-		} catch (IndexOutOfBoundsException e) {
-			if (!(sender instanceof Player)) {
-				plugin.send(MessageLevel.WARNING, sender, "Please specify a channel");
-				usage(sender, "force");
-				return;
-			}
-			
-			channel = cm.getChannel((Player) sender);
-			
-			if (channel == null) {
-				plugin.send(MessageLevel.WARNING, sender, "Specify a channel or join a channel to use this command");
-				usage(sender, "force");
-			}
-		}
-		
-		if (channel == null)
-			return;
-		
+	@Usage("force [player]")
+	public void force(CommandSender sender, Channel channel, String[] args) {
 		if (channel.handleCommand(sender, "force", args))
 			return;
+		
+		if (args.length < 1) { invalidArgLength(sender, "force"); }
 	}
 	
 	/**
-	 * Kick Command - Kicks the sender from the channel
+	 * Kick Command - Kicks the player from the channel
 	 */
-	@Command(server = true)
+	@Command(channel = true, server = true)
 	@Aliases("k")
-	@Description("Kicks the sender from the channel")
-	@Usage("kick [sender] <channel>")
-	public void kick(CommandSender sender, String[] args) {
-		if (args.length < 1) { invalidArgLength(sender, "kick"); }
-		
-		Channel channel = null;
-		
-		try {
-			if (cm.existsByAlias(args[1]))
-				cm.getChannelByAlias(args[1]);
-			else
-				plugin.send(MessageLevel.WARNING, sender, "No such channel");
-			
-		} catch (IndexOutOfBoundsException e) {
-			if (!(sender instanceof Player)) {
-				plugin.send(MessageLevel.WARNING, sender, "Please specify a channel");
-				usage(sender, "kick");
-				return;
-			}
-			
-			channel = cm.getChannel((Player) sender);
-			
-			if (channel == null) {
-				plugin.send(MessageLevel.WARNING, sender, "Specify a channel or join a channel to use this command");
-				usage(sender, "kick");
-			}
-		}
-		
-		if (channel == null)
-			return;
-		
+	@Description("Kicks the player from the channel")
+	@Usage("kick [player]")
+	public void kick(CommandSender sender, Channel channel, String[] args) {
 		if (channel.handleCommand(sender, "kick", args))
 			return;
+		
+		if (args.length < 1) { invalidArgLength(sender, "kick"); }
 	}
 	
 	/**
-	 * Mute Command - Mutes the sender on the channel
+	 * Mute Command - Mutes the player on the channel
 	 */
-	@Command(server = true)
-	@Description("Mutes the sender on the channel")
-	@Usage("mute [sender] <channel>")
-	public void mute(CommandSender sender, String[] args) {
-		if (args.length < 1) { invalidArgLength(sender, "mute"); }
-		
-		Channel channel = null;
-		
-		try {
-			if (cm.existsByAlias(args[1]))
-				channel = cm.getChannelByAlias(args[1]);
-			else
-				plugin.send(MessageLevel.WARNING, sender, "No such channel");
-			
-		} catch (IndexOutOfBoundsException e) {
-			if (!(sender instanceof Player)) {
-				plugin.send(MessageLevel.WARNING, sender, "Please specify a channel");
-				usage(sender, "mute");
-				return;
-			}
-			
-			channel = cm.getChannel((Player) sender);
-			
-			if (channel == null) {
-				plugin.send(MessageLevel.WARNING, sender, "Specify a channel or join a channel to use this command");
-				usage(sender, "mute");
-			}
-		}
-		
-		if (channel == null)
-			return;
-		
+	@Command(channel = true, server = true)
+	@Description("Mutes the player on the channel")
+	@Usage("mute [player]")
+	public void mute(CommandSender sender, Channel channel, String[] args) {
 		if (channel.handleCommand(sender, "mute", args))
 			return;
+		
+		if (args.length < 1) { invalidArgLength(sender, "mute"); }
 	}
 	
 	/**
-	 * Unban Command - Unbans the sender from the channel
+	 * Unban Command - Unbans the player from the channel
 	 */
-	@Command(server = true)
+	@Command(channel = true, server = true)
 	@Aliases("ub")
-	@Description("Unbans the sender from the channel")
-	@Usage("unban [sender] <channel>")
-	public void unban(CommandSender sender, String[] args) {
-		if (args.length < 1) { invalidArgLength(sender, "unban"); }
-		
-		Channel channel = null;
-		
-		try {
-			if (cm.existsByAlias(args[1]))
-				channel = cm.getChannelByAlias(args[1]);
-			else
-				plugin.send(MessageLevel.WARNING, sender, "No such channel");
-			
-		} catch (IndexOutOfBoundsException e) {
-			if (!(sender instanceof Player)) {
-				plugin.send(MessageLevel.WARNING, sender, "Please specify a channel");
-				usage(sender, "unban");
-				return;
-			}
-			
-			channel = cm.getChannel((Player) sender);
-			
-			if (channel == null) {
-				plugin.send(MessageLevel.WARNING, sender, "Specify a channel or join a channel to use this command");
-				usage(sender, "unban");
-			}
-		}
-		
-		if (channel == null)
-			return;
-		
+	@Description("Unbans the player from the channel")
+	@Usage("unban [player]")
+	public void unban(CommandSender sender, Channel channel, String[] args) {
 		if (channel.handleCommand(sender, "unban", args))
 			return;
+		
+		if (args.length < 1) { invalidArgLength(sender, "unban"); }
 	}
 	
 	/**
-	 * Unmute Command - Unmutes the sender on the channel
+	 * Unmute Command - Unmutes the player on the channel
 	 */
-	@Command(server = true)
-	@Description("Unmutes the sender on the channel")
-	@Usage("unmute [sender] <channel>")
-	public void unmute(CommandSender sender, String[] args) {
-		if (args.length < 1) { invalidArgLength(sender, "unmute"); }
-		
-		Channel channel = null;
-		
-		try {
-			if (cm.existsByAlias(args[1]))
-				channel = cm.getChannelByAlias(args[1]);
-			else
-				plugin.send(MessageLevel.WARNING, sender, "No such channel");
-			
-		} catch (IndexOutOfBoundsException e) {
-			if (!(sender instanceof Player)) {
-				plugin.send(MessageLevel.WARNING, sender, "Please specify a channel");
-				usage(sender, "unmute");
-				return;
-			}
-			
-			channel = cm.getChannel((Player) sender);
-			
-			if (channel == null) {
-				plugin.send(MessageLevel.WARNING, sender, "Specify a channel or join a channel to use this command");
-				usage(sender, "unmute");
-			}
-		}
-		
-		if (channel == null)
-			return;
-		
+	@Command(channel = true, server = true)
+	@Description("Unmutes the player on the channel")
+	@Usage("unmute [player]")
+	public void unmute(CommandSender sender, Channel channel, String[] args) {
 		if (channel.handleCommand(sender, "unmute", args))
 			return;
+		
+		if (args.length < 1) { invalidArgLength(sender, "unmute"); }
 	}
 }

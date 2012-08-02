@@ -27,6 +27,8 @@ import org.json.simple.parser.JSONParser;
 
 import com.nodinchan.ncbukkit.NCBL;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
+import com.titankingdoms.nodinchan.titanchat.event.EmoteEvent;
+import com.titankingdoms.nodinchan.titanchat.event.util.Message;
 import com.titankingdoms.nodinchan.titanchat.metrics.Metrics;
 import com.titankingdoms.nodinchan.titanchat.metrics.Metrics.Graph;
 import com.titankingdoms.nodinchan.titanchat.metrics.Metrics.Plotter;
@@ -328,7 +330,7 @@ public final class TitanChat extends JavaPlugin {
 		db.i("onCommand: " + cmd.getName());
 		
 		if (cmd.getName().equals("titanchat")) {
-			if (args.length < 1) {
+			if (args.length < 1 || (args[0].startsWith("@") && args.length < 2)) {
 				db.i("onCommand: No arguments!");
 				
 				sender.sendMessage(ChatColor.AQUA + "You are running " + this);
@@ -346,8 +348,28 @@ public final class TitanChat extends JavaPlugin {
 				return true;
 			}
 			
+			Channel channel = null;
+			
+			if (args[0].startsWith("@")) {
+				if (manager.getChannelManager().existsByAlias(args[0].substring(1)))
+					channel = manager.getChannelManager().getChannelByAlias(args[0].substring(1));
+				else
+					send(MessageLevel.WARNING, sender, "No such channel");
+				
+			} else {
+				if (sender instanceof Player)
+					channel = manager.getChannelManager().getChannel((Player) sender);
+			}
+			
+			String[] arguments = new String[0];
+			
+			if (args[0].startsWith("@"))
+				arguments = Arrays.copyOfRange(args, 2, args.length);
+			else
+				arguments = Arrays.copyOfRange(args, 1, args.length);
+			
 			db.i("CommandManager executing command:");
-			manager.getCommandManager().execute(sender, args[0], Arrays.copyOfRange(args, 1, args.length));
+			manager.getCommandManager().execute(sender, args[0], channel, arguments);
 			return true;
 		}
 		
@@ -362,101 +384,55 @@ public final class TitanChat extends JavaPlugin {
 			}
 			
 			getServer().dispatchCommand(sender, "titanchat broadcast " + str.toString());
+			return true;
 		}
 		
-		if (cmd.getName().equalsIgnoreCase("me")) {
-			if (!(sender instanceof Player)) {
-				if (!getConfig().getBoolean("emote.server.enable")) {
-					log(Level.WARNING, "Command disabled");
-					return true;
-				}
-				
-				String message = getConfig().getString("emote.server.format");
-				
-				StringBuilder str = new StringBuilder();
-				
-				for (String word : args) {
-					if (str.length() > 0)
-						str.append(" ");
-					
-					str.append(word);
-				}
-				
-				String[] lines = getFormatHandler().regroup(message, str.toString());
-				
-				getServer().broadcastMessage(getFormatHandler().colourise(message.replace("%action", lines[0])));
-				
-				for (int line = 1; line < lines.length; line++)
-					getServer().broadcastMessage(getFormatHandler().colourise(lines[line]));
-				
-				String console = "* " + ChatColor.RED + "Server " + ChatColor.RESET;
-				
-				getServer().getConsoleSender().sendMessage(console + str.toString());
+		if (cmd.getName().equalsIgnoreCase("emote")) {
+			if (sender instanceof Player && !getPermsBridge().has((Player) sender, "TitanChat.emote.global")) {
+				send(MessageLevel.WARNING, sender, "You do not have permission");
 				return true;
 			}
 			
-			if (!getConfig().getBoolean("emote.player.enable")) {
-				send(MessageLevel.WARNING, (Player) sender, "Command disabled");
+			if (!getConfig().getBoolean("chat." + ((sender instanceof Player) ? "player" : "server") + ".enable")) {
+				send(MessageLevel.WARNING, sender, "Emote Command Disabled");
 				return true;
 			}
 			
-			if (permBridge.has((Player) sender, "TitanChat.emote.server"))
-				try { manager.getCommandManager().execute((Player) sender, "me", args); } catch (Exception e) {}
-			else
-				send(MessageLevel.WARNING, (Player) sender, "You do not have permission");
+			StringBuilder str = new StringBuilder();
+			
+			for (String word : args) {
+				if (str.length() > 0)
+					str.append(" ");
+				
+				str.append(word);
+			}
+			
+			String format = getFormatHandler().emoteFormat(sender);
+			
+			EmoteEvent event = new EmoteEvent(sender, new Message(format, str.toString()));
+			getServer().getPluginManager().callEvent(event);
+			
+			String[] lines = getFormatHandler().regroup(event.getFormat(), event.getMessage());
+			
+			getServer().broadcastMessage(event.getFormat().replace("%action", lines[0]));
+			
+			for (String line : Arrays.copyOfRange(lines, 1, lines.length))
+				getServer().broadcastMessage(line);
 			
 			return true;
 		}
 		
 		if (cmd.getName().equalsIgnoreCase("whisper")) {
-			if (!(sender instanceof Player)) {
-				if (!getConfig().getBoolean("whisper.server.enable")) {
-					log(Level.WARNING, "Command disabled");
-					return true;
-				}
+			StringBuilder str = new StringBuilder();
+			
+			for (String arg : args) {
+				if (str.length() > 0)
+					str.append(" ");
 				
-				if (getPlayer(args[0]) == null) {
-					log(Level.WARNING, "Player not online");
-					return true;
-				}
-				
-				String message = getConfig().getString("whisper.server.format");
-				
-				StringBuilder str = new StringBuilder();
-				
-				for (String word : args) {
-					if (str.length() > 0)
-						str.append(" ");
-					
-					str.append(word);
-				}
-				
-				if (args[0].equalsIgnoreCase("console")) {
-					log(Level.INFO, "You whispered to yourself: " + str.toString());
-					log(Level.INFO, message.replace("%message", str.toString()));
-					return true;
-				}
-				
-				if (getPlayer(args[0]) != null) {
-					String[] lines = getFormatHandler().regroup(message, str.toString());
-					getPlayer(args[0]).sendMessage(message.replace("%message", lines[0]));
-					getPlayer(args[0]).sendMessage(Arrays.copyOfRange(lines, 1, lines.length));
-					getPlayer(args[0]).sendMessage(message.replace("%message", getFormatHandler().colourise(str.toString())));
-					log(Level.INFO, "[Server -> " + getPlayer(args[0]).getName() + "] " + str.toString());
-					
-				} else { log(Level.WARNING, "Player not online"); }
+				str.append(arg);
 			}
 			
-			if (!getConfig().getBoolean("whisper.player.enable")) {
-				send(MessageLevel.WARNING, (Player) sender, "Command disabled");
-				return true;
-			}
-			
-			if (permBridge.has((Player) sender, "TitanChat.whisper"))
-				try { manager.getCommandManager().execute((Player) sender, "whisper", args); } catch (Exception e) {}
-			else
-				send(MessageLevel.WARNING, (Player) sender, "You do not have permission");
-			
+			getServer().dispatchCommand(sender, "titanchat whisper " + str.toString());
 			return true;
 		}
 		
@@ -469,7 +445,6 @@ public final class TitanChat extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		log(Level.INFO, "is now disabling...");
-		
 		log(Level.INFO, "Unloading managers...");
 		
 		manager.getAddonManager().unload();
@@ -690,6 +665,34 @@ public final class TitanChat extends JavaPlugin {
 			libPlugin.hook(this);
 			
 		} catch (Exception e) { getLogger().log(Level.WARNING, "Failed to check for library update"); }
+	}
+	
+	public boolean voiceless(Player player, Channel channel, boolean message) {
+		if (getPermsBridge().has(player, "TitanChat.voice"))
+			return false;
+		
+		if (isSilenced()) {
+			if (message)
+				send(MessageLevel.WARNING, player, "The server is silenced");
+			
+			return true;
+		}
+		
+		if (manager.getChannelManager().isSilenced(channel)) {
+			if (message)
+				send(MessageLevel.WARNING, player, "The channel is silenced");
+			
+			return true;
+		}
+		
+		if (manager.getChannelManager().getParticipant(player).isMuted(channel)) {
+			if (message)
+				send(MessageLevel.WARNING, player, "You have been muted");
+			
+			return true;
+		}
+		
+		return false;
 	}
 	
 	public enum MessageLevel {

@@ -1,9 +1,7 @@
 package com.titankingdoms.nodinchan.titanchat.command.commands;
 
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
-import com.titankingdoms.nodinchan.titanchat.TitanChat.MessageLevel;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
 import com.titankingdoms.nodinchan.titanchat.command.CommandBase;
@@ -40,82 +38,16 @@ public class RankingCommand extends CommandBase {
 	}
 	
 	/**
-	 * Add Command - Whitelists the player for the channel
-	 */
-	@Command(server = true)
-	@Aliases("add")
-	@Description("Whitelists the player for the channel")
-	@Usage("whitelist [player] <channel>")
-	public void whitelist(CommandSender sender, String[] args) {
-		if (args.length < 1) { invalidArgLength(sender, "whitelist"); return; }
-		
-		Channel channel = null;
-		
-		try {
-			if (cm.existsByAlias(args[1]))
-				channel = cm.getChannelByAlias(args[1]);
-			else
-				plugin.send(MessageLevel.WARNING, sender, "No such channel");
-			
-		} catch (IndexOutOfBoundsException e) {
-			if (!(sender instanceof Player)) {
-				plugin.send(MessageLevel.WARNING, sender, "Please specify a channel");
-				usage(sender, "whitelist");
-				return;
-			}
-			
-			channel = cm.getChannel((Player) sender);
-			
-			if (channel == null) {
-				plugin.send(MessageLevel.WARNING, sender, "Specify a channel or join a channel to use this command");
-				usage(sender, "whitelist");
-			}
-		}
-		
-		if (channel == null)
-			return;
-		
-		if (channel.handleCommand(sender, "whitelist", args))
-			return;
-	}
-	
-	/**
 	 * Demote Command - Demotes the player of the channel
 	 */
 	@Command(server = true)
 	@Description("Demotes the player of the channel")
-	@Usage("demote [player] <channel>")
-	public void demote(CommandSender sender, String[] args) {
-		if (args.length < 1) { invalidArgLength(sender, "demote"); return; }
-		
-		Channel channel = null;
-		
-		try {
-			if (cm.existsByAlias(args[1]))
-				channel = cm.getChannelByAlias(args[1]);
-			else
-				plugin.send(MessageLevel.WARNING, sender, "No such channel");
-			
-		} catch (IndexOutOfBoundsException e) {
-			if (!(sender instanceof Player)) {
-				plugin.send(MessageLevel.WARNING, sender, "Please specify a channel");
-				usage(sender, "demote");
-				return;
-			}
-			
-			channel = cm.getChannel((Player) sender);
-			
-			if (channel == null) {
-				plugin.send(MessageLevel.WARNING, sender, "Specify a channel or join a channel to use this command");
-				usage(sender, "demote");
-			}
-		}
-		
-		if (channel == null)
-			return;
-		
+	@Usage("demote [player]")
+	public void demote(CommandSender sender, Channel channel, String[] args) {
 		if (channel.handleCommand(sender, "demote", args))
 			return;
+		
+		if (args.length < 1) { invalidArgLength(sender, "demote"); return; }
 	}
 	
 	/**
@@ -123,37 +55,25 @@ public class RankingCommand extends CommandBase {
 	 */
 	@Command(server = true)
 	@Description("Promotes the player of the channel")
-	@Usage("promote [player] <channel>")
-	public void promote(CommandSender sender, String[] args) {
-		if (args.length < 1) { invalidArgLength(sender, "promote"); return; }
-		
-		Channel channel = null;
-		
-		try {
-			if (cm.existsByAlias(args[1]))
-				channel = cm.getChannelByAlias(args[1]);
-			else
-				plugin.send(MessageLevel.WARNING, sender, "No such channel");
-			
-		} catch (IndexOutOfBoundsException e) {
-			if (!(sender instanceof Player)) {
-				plugin.send(MessageLevel.WARNING, sender, "Please specify a channel");
-				usage(sender, "promote");
-				return;
-			}
-			
-			channel = cm.getChannel((Player) sender);
-			
-			if (channel == null) {
-				plugin.send(MessageLevel.WARNING, sender, "Specify a channel or join a channel to use this command");
-				usage(sender, "promote");
-			}
-		}
-		
-		if (channel == null)
-			return;
-		
+	@Usage("promote [player]")
+	public void promote(CommandSender sender, Channel channel, String[] args) {
 		if (channel.handleCommand(sender, "promote", args))
 			return;
+		
+		if (args.length < 1) { invalidArgLength(sender, "promote"); return; }
+	}
+	
+	/**
+	 * Whitelist Command - Whitelists the player for the channel
+	 */
+	@Command(channel = true, server = true)
+	@Aliases("add")
+	@Description("Whitelists the player for the channel")
+	@Usage("whitelist [player]")
+	public void whitelist(CommandSender sender, Channel channel, String[] args) {
+		if (channel.handleCommand(sender, "whitelist", args))
+			return;
+		
+		if (args.length < 1) { invalidArgLength(sender, "whitelist"); return; }
 	}
 }

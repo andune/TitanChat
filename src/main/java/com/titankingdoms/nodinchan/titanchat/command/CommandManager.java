@@ -85,41 +85,59 @@ public final class CommandManager {
 	 * 
 	 * @param args The arguments
 	 */
-	public void execute(CommandSender sender, String command, String[] args) {
+	public void execute(CommandSender sender, String command, Channel channel, String[] args) {
 		if (getCommandExecutor(command) != null) {
 			Executor executor = getCommandExecutor(command);
 			
-			if (!(sender instanceof Player) && !executor.allowServer()) {
-				plugin.send(MessageLevel.WARNING, sender, "Please use this command in game");
-				return;
-				
-			} else if (sender instanceof Player) {
+			if (sender instanceof Player) {
 				if (!executor.getPermission().isEmpty() && !plugin.getPermsBridge().has((Player) sender, executor.getPermission())) {
 					plugin.send(MessageLevel.WARNING, sender, "You do not have permission");
 					return;
 				}
+				
+			} else {
+				if (!executor.allowServer()) {
+					plugin.send(MessageLevel.WARNING, sender, "Please use this command in game");
+					return;
+				}
+			}
+			
+			if (executor.requireChannel() && channel == null) {
+				if (sender instanceof Player)
+					plugin.send(MessageLevel.WARNING, sender, "Please specify a channel or join a channel");
+				else
+					plugin.send(MessageLevel.WARNING, sender, "Please specify a channel");
+				
+				executor.getCommand().usage(sender, command);
+				return;
 			}
 			
 			try {
 				if (executor.allowServer())
-					executor.execute(sender, args);
+					executor.execute(sender, channel, args);
 				else
-					executor.executePlayer((Player) sender, args);
+					executor.execute((Player) sender, channel, args);
 				
 				return;
+				
 			} catch (IllegalAccessException e) {
 				plugin.send(MessageLevel.WARNING, sender, "An error seems to have occured, please check console");
 				plugin.log(Level.SEVERE, "An IllegalAccessException has occured while using command: " + executor.getName());
+				
 				if (db.isDebugging())
 					e.printStackTrace();
+				
 			} catch (IllegalArgumentException e) {
 				plugin.send(MessageLevel.WARNING, sender, "An error seems to have occured, please check console");
 				plugin.log(Level.SEVERE, "An IllgealArgumentException has occured while using command: " + executor.getName());
+				
 				if (db.isDebugging())
 					e.printStackTrace();
+				
 			} catch (InvocationTargetException e) {
 				plugin.send(MessageLevel.WARNING, sender, "An error seems to have occured, please check console");
 				plugin.log(Level.SEVERE, "An InvocationTargetException has occured while using command: " + executor.getName());
+				
 				if (db.isDebugging()) {
 					e.printStackTrace();
 					e.getTargetException().printStackTrace();

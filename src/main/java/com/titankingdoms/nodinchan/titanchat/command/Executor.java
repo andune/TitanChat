@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.command.info.*;
 
 public final class Executor {
@@ -20,13 +21,15 @@ public final class Executor {
 	private String permission = "";
 	private String usage = "";
 	
-	private boolean server = false;
+	private final boolean channel;
+	private final boolean server;
 	
 	public Executor(CommandBase command, Method method) {
 		this.method = method;
 		this.command = command;
 		this.name = method.getName();
 		
+		this.channel = method.getAnnotation(Command.class).channel();
 		this.server = method.getAnnotation(Command.class).server();
 		
 		if (method.isAnnotationPresent(Aliases.class))
@@ -66,14 +69,16 @@ public final class Executor {
 	 * 
 	 * @param sender The command sender
 	 * 
+	 * @param channel The targetted channel
+	 * 
 	 * @param args The command arguments
 	 * 
 	 * @throws InvocationTargetException 
 	 * @throws IllegalArgumentException 
 	 * @throws IllegalAccessException 
 	 */
-	public void execute(CommandSender sender, String[] args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		method.invoke(command, sender, args);
+	public void execute(CommandSender sender, Channel channel, String[] args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		method.invoke(command, sender, channel, args);
 	}
 	
 	/**
@@ -81,14 +86,16 @@ public final class Executor {
 	 * 
 	 * @param sender The command sender
 	 * 
+	 * @param channel The targetted channel
+	 * 
 	 * @param args The command arguments
 	 * 
 	 * @throws InvocationTargetException 
 	 * @throws IllegalArgumentException 
 	 * @throws IllegalAccessException 
 	 */
-	public void executePlayer(Player player, String[] args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		method.invoke(command, player, args);
+	public void execute(Player player, Channel channel, String[] args) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		method.invoke(command, player, channel, args);
 	}
 	
 	/**
@@ -152,6 +159,15 @@ public final class Executor {
 	 */
 	public String getUsage() {
 		return usage;
+	}
+	
+	/**
+	 * Check if the command requires a channel to be defined
+	 * 
+	 * @return True if a channel is required to be defined
+	 */
+	public boolean requireChannel() {
+		return channel;
 	}
 	
 	@Override

@@ -37,7 +37,6 @@ public final class StandardChannel extends Channel {
 		StandardChannel channel = new StandardChannel(name, option);
 		
 		StandardCommandHandler.load(channel);
-		StandardSetting.load(channel);
 		
 		if (sender instanceof Player)
 			channel.getAdmins().add(sender.getName());
@@ -55,7 +54,6 @@ public final class StandardChannel extends Channel {
 		StandardChannel channel = new StandardChannel(name, option);
 		
 		StandardCommandHandler.load(channel);
-		StandardSetting.load(channel);
 		
 		if (channel.getConfig().get("admins") != null)
 			channel.getAdmins().addAll(channel.getConfig().getStringList("admins"));

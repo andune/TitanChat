@@ -1,6 +1,7 @@
 package com.titankingdoms.nodinchan.titanchat.command;
 
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 
 import com.nodinchan.ncbukkit.loader.Loadable;
@@ -82,6 +83,15 @@ public class CommandBase extends Loadable implements Listener {
 		plugin.register(listener);
 	}
 	
+	public final void unspecifiedChannel(CommandSender sender, String name) {
+		if (sender instanceof Player)
+			plugin.send(MessageLevel.WARNING, sender, "Please specify a channel or join a channel");
+		else
+			plugin.send(MessageLevel.WARNING, sender, "Please specify a channel");
+		
+		usage(sender, name);
+	}
+	
 	/**
 	 * Sends the usage message of the command
 	 * 
@@ -93,6 +103,6 @@ public class CommandBase extends Loadable implements Listener {
 		Executor executor = plugin.getManager().getCommandManager().getCommandExecutor(name);
 		
 		if (!executor.getUsage().equals(""))
-			plugin.send(MessageLevel.INFO, sender, "Usage: /titanchat " + executor.getUsage());
+			plugin.send(MessageLevel.INFO, sender, "Usage: /titanchat <@><channel> " + executor.getUsage());
 	}
 }

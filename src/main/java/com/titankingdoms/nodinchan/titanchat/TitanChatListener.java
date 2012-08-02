@@ -117,7 +117,7 @@ public class TitanChatListener implements Listener {
 			return;
 		}
 		
-		if (voiceless(player, channel))
+		if (plugin.voiceless(player, channel, true))
 			return;
 		
 		String log = channel.sendMessage(player, message);
@@ -178,27 +178,5 @@ public class TitanChatListener implements Listener {
 		} catch (Exception e) {}
 		
 		this.newVer = Double.valueOf(plugin.getDescription().getVersion().trim().split(" ")[0].trim());
-	}
-	
-	private boolean voiceless(Player player, Channel channel) {
-		if (plugin.getPermsBridge().has(player, "TitanChat.voice"))
-			return false;
-		
-		if (plugin.isSilenced()) {
-			plugin.send(MessageLevel.WARNING, player, "The server is silenced");
-			return true;
-		}
-		
-		if (plugin.getManager().getChannelManager().isSilenced(channel)) {
-			plugin.send(MessageLevel.WARNING, player, "The channel is silenced");
-			return true;
-		}
-		
-		if (plugin.getManager().getChannelManager().getParticipant(player).isMuted(channel)) {
-			plugin.send(MessageLevel.WARNING, player, "You have been muted");
-			return true;
-		}
-		
-		return false;
 	}
 }

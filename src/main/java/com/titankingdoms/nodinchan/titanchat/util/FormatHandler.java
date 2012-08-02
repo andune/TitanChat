@@ -1,8 +1,9 @@
 package com.titankingdoms.nodinchan.titanchat.util;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -214,7 +215,7 @@ public final class FormatHandler {
 	 * @return The splitted line
 	 */
 	public String[] regroup(String format, String line) {
-		List<String> lines = new ArrayList<String>();
+		List<String> lines = new LinkedList<String>();
 		
 		while (line.length() > 119) {
 			if (lines.size() < 1) {
@@ -229,12 +230,12 @@ public final class FormatHandler {
 						
 						if (end != -1) {
 							lines.add(line.substring(0, end).trim());
-							line = line.substring(end).trim();
+							line = ChatColor.getLastColors(lines.get(lines.size() - 1)) + line.substring(end).trim();
 						}
 						
 					} else {
 						lines.add(line.substring(0, 119 - index).trim());
-						line = line.substring(119 - index).trim();
+						line = ChatColor.getLastColors(lines.get(lines.size() - 1)) + line.substring(119 - index).trim();
 					}
 					
 					continue;
@@ -246,19 +247,19 @@ public final class FormatHandler {
 				
 				if (end != -1) {
 					lines.add(line.substring(0, end).trim());
-					line = line.substring(end).trim();
+					line = ChatColor.getLastColors(lines.get(lines.size() - 1)) + line.substring(end).trim();
 				}
 				
 			} else {
 				lines.add(line.substring(0, 119).trim());
-				line = line.substring(119).trim();
+				line = ChatColor.getLastColors(lines.get(lines.size() - 1)) + line.substring(119).trim();
 			}
 		}
 		
 		if (line.length() > 0)
-			lines.add(line.trim());
+			lines.add(ChatColor.getLastColors(lines.get(lines.size() - 1)) + line.trim());
 		
-		return lines.toArray(new String[lines.size()]);
+		return lines.toArray(new String[0]);
 	}
 	
 	/**

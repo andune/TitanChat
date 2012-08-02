@@ -19,7 +19,7 @@ commands:
     emote:
         description: Emote Command
         aliases: [em, me]
-        permission: TitanChat.emote.server
+        permission: TitanChat.emote.global
         usage: /<command> [action]
     whisper:
         description: Whisper Command

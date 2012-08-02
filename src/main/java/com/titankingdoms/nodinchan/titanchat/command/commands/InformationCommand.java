@@ -55,7 +55,7 @@ public class InformationCommand extends CommandBase {
 	@Command(server = true)
 	@Description("Lists out all addons")
 	@Usage("addons")
-	public void addons(CommandSender sender, String[] args) {
+	public void addons(CommandSender sender, Channel channel, String[] args) {
 		StringBuilder addons = new StringBuilder();
 		
 		for (Addon addon : plugin.getManager().getAddonManager().getAddons()) {
@@ -83,14 +83,14 @@ public class InformationCommand extends CommandBase {
 		
 		StringBuilder channels = new StringBuilder();
 		
-		for (Channel channel : cm.getChannels()) {
-			if (!(channel instanceof CustomChannel))
+		for (Channel customChannel : cm.getChannels()) {
+			if (!(customChannel instanceof CustomChannel))
 				continue;
 			
 			if (channels.length() > 0)
 				channels.append(", ");
 			
-			channels.append(channel.getName());
+			channels.append(customChannel.getName());
 		}
 		
 		String[] channelLines = plugin.getFormatHandler().regroup("Custom Channels: %message", channels.toString());
@@ -110,7 +110,7 @@ public class InformationCommand extends CommandBase {
 	@Aliases({ "colorcodes", "colours", "colors", "codes" })
 	@Description("Lists out available colour codes and respective colours")
 	@Usage("colourcodes <format>")
-	public void colourcodes(CommandSender sender, String[] args) {
+	public void colourcodes(CommandSender sender, Channel channel, String[] args) {
 		try {
 			if (args[0].equals("format")) {
 				sender.sendMessage(ChatColor.AQUA + "=== Special Codes ===");
@@ -151,7 +151,7 @@ public class InformationCommand extends CommandBase {
 	@Aliases({ "?", "commands", "cmds" })
 	@Description("Shows the command list")
 	@Usage("help <page/command>")
-	public void help(CommandSender sender, String[] args) {
+	public void help(CommandSender sender, Channel channel, String[] args) {
 		CommandManager cm = plugin.getManager().getCommandManager();
 		
 		try {
@@ -214,39 +214,16 @@ public class InformationCommand extends CommandBase {
 	/**
 	 * Info Command - Gets the participants and followers of the channel
 	 */
-	@Command(server = true)
+	@Command(channel = true, server = true)
 	@Aliases("i")
 	@Description("Gets the participants and followers of the channel")
-	@Usage("info <channel>")
-	public void info(CommandSender sender, String[] args) {
-		Channel channel = null;
-		
-		try {
-			if (cm.existsByAlias(args[0]))
-				channel = cm.getChannelByAlias(args[0]);
-			else
-				plugin.send(MessageLevel.WARNING, sender, "No such channel");
-			
-		} catch (IndexOutOfBoundsException e) {
-			if (!(sender instanceof Player)) {
-				plugin.send(MessageLevel.WARNING, sender, "Please specify a channel");
-				usage(sender, "info");
-				return;
-			}
-			
-			channel = cm.getChannel((Player) sender);
-			
-			if (channel == null) {
-				plugin.send(MessageLevel.WARNING, sender, "Specify a channel or join a channel to use this command");
-				usage(sender, "info");
-			}
-		}
-		
-		if (channel == null)
+	@Usage("info")
+	public void info(CommandSender sender, Channel channel, String[] args) {
+		if (channel.handleCommand(sender, "info", args))
 			return;
 		
 		if (sender instanceof Player && !channel.access((Player) sender)) {
-			channel.deny((Player) sender, null);
+			channel.deny((Player) sender, "You do not have access");
 			return;
 		}
 		
@@ -273,12 +250,12 @@ public class InformationCommand extends CommandBase {
 	@Command
 	@Description("Lists all channels you have access to")
 	@Usage("list")
-	public void list(Player player, String[] args) {
+	public void list(Player player, Channel channel, String[] args) {
 		List<String> accessList = new ArrayList<String>();
 		
-		for (Channel channel : cm.getChannels()) {
-			if (channel.access(player))
-				accessList.add(channel.getName());
+		for (Channel ch : cm.getChannels()) {
+			if (ch.access(player))
+				accessList.add(ch.getName());
 		}
 		
 		player.sendMessage(ChatColor.AQUA + "Channels: " + plugin.createList(accessList));

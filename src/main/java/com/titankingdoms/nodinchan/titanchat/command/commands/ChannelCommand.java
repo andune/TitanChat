@@ -48,7 +48,7 @@ public class ChannelCommand extends CommandBase {
 	@Description("Creates a new channel")
 	@Permission("TitanChat.create")
 	@Usage("create [channel]")
-	public void create(CommandSender sender, String[] args) {
+	public void create(CommandSender sender, Channel channel, String[] args) {
 		if (args.length < 1) { invalidArgLength(sender, "create"); return; }
 		
 		String name = args[0];
@@ -61,124 +61,78 @@ public class ChannelCommand extends CommandBase {
 			return;
 		}
 		
-		if (plugin.getConfig().getInt("channels.channel-limit", -1) < 0) {
-			if (cm.nameCheck(name)) {
-				if (!cm.exists(name))
-					cm.createChannel(sender, name, type);
-				else
-					plugin.send(MessageLevel.WARNING, sender, "Channel already exists");
-				
-			} else { plugin.send(MessageLevel.WARNING, sender, "Channel names cannot contain \\, /, :. *, ?, \", <, > or |"); }
-			
-		} else if (cm.getChannels().size() < plugin.getConfig().getInt("channel.channel-limit", -1)) {
-			if (cm.nameCheck(name)) {
-				if (!cm.exists(name))
-					cm.createChannel(sender, name, type);
-				else
-					plugin.send(MessageLevel.WARNING, sender, "Channel already exists");
-				
-			} else { plugin.send(MessageLevel.WARNING, sender, "Channel names cannot contain \\, /, :. *, ?, \", <, > or |"); }
-			
-		} else { plugin.send(MessageLevel.WARNING, sender, "Cannot create channel - Limit passed"); }
+		if (!cm.nameCheck(name)) {
+			plugin.send(MessageLevel.WARNING, sender, "Channel names cannot contain \\, /, :. *, ?, \", <, > or |");
+			return;
+		}
+		
+		if (cm.exists(name)) {
+			plugin.send(MessageLevel.WARNING, sender, "Channel already exists");
+			return;
+		}
+		
+		if (plugin.getConfig().getInt("channels.channel-limit", -1) >= 0) {
+			if (cm.getChannels().size() >= plugin.getConfig().getInt("channel.channel-limit", -1)) {
+				plugin.send(MessageLevel.WARNING, sender, "Cannot create channel - Limit passed");
+				return;
+			}
+		}
+		
+		cm.createChannel(sender, name, type);
 	}
 	
 	/**
 	 * Delete Command - Deletes the channel
 	 */
-	@Command(server = true)
+	@Command(channel = true, server = true)
 	@Aliases("d")
 	@Description("Deletes the channel")
 	@Permission("TitanChat.delete")
-	@Usage("delete [channel]")
-	public void delete(CommandSender sender, String[] args) {
+	@Usage("delete")
+	public void delete(CommandSender sender, Channel channel, String[] args) {
 		if (args.length < 1) { invalidArgLength(sender, "delete"); return; }
 		
-		if (cm.exists(args[0])) {
-			Channel channel = cm.getChannelByAlias(args[0]);
-			
-			if (channel.getOption().equals(Option.NONE))
-				cm.deleteChannel(sender, channel.getName());
-			else
-				plugin.send(MessageLevel.WARNING, sender, "You cannot delete this channel");
-			
-		} else { plugin.send(MessageLevel.WARNING, sender, "No such channel"); }
+		if (channel.getOption().equals(Option.NONE))
+			cm.deleteChannel(sender, channel.getName());
+		else
+			plugin.send(MessageLevel.WARNING, sender, "You cannot delete this channel");
 	}
 	
 	/**
 	 * Follow Command - Follows the channel
 	 */
-	@Command
+	@Command(channel = true)
 	@Description("Follows the channel")
-	@Usage("follow [channel]")
-	public void follow(Player player, String[] args) {
-		if (args.length < 1) { invalidArgLength(player, "follow"); return; }
-		
-		Channel channel = null;
-		
-		if (cm.existsByAlias(args[0]))
-			channel = cm.getChannelByAlias(args[0]);
-		else
-			plugin.send(MessageLevel.WARNING, player, "No such channel");
-		
-		if (channel == null)
-			return;
-		
+	@Usage("follow")
+	public void follow(Player player, Channel channel, String[] args) {
 		if (channel.handleCommand(player, "follow", args))
 			return;
+		
+		if (args.length < 1) { invalidArgLength(player, "follow"); return; }
 	}
 	
 	/**
 	 * Join Command - Joins the channel
 	 */
-	@Command
+	@Command(channel = true)
 	@Aliases("j")
 	@Description("Joins the channel")
-	@Usage("join [channel]")
-	public void join(Player player, String[] args) {
-		if (args.length < 1) { invalidArgLength(player, "join"); return; }
-		
-		Channel channel = null;
-		
-		if (cm.existsByAlias(args[0]))
-			channel = cm.getChannelByAlias(args[0]);
-		else
-			plugin.send(MessageLevel.WARNING, player, "No such channel");
-		
-		if (channel == null)
-			return;
-		
+	@Usage("join")
+	public void join(Player player, Channel channel, String[] args) {
 		if (channel.handleCommand(player, "join", args))
 			return;
+		
+		if (args.length < 1) { invalidArgLength(player, "join"); return; }
 	}
 	
 	/**
 	 * Leave Command - Leaves the channel you are in
 	 */
-	@Command
+	@Command(channel = true)
 	@Aliases("part")
 	@Description("Leaves the channel")
-	@Usage("leave <channel>")
-	public void leave(Player player, String[] args) {
-		Channel channel = null;
-		
-		try {
-			if (cm.existsByAlias(args[0]))
-				channel = cm.getChannelByAlias(args[0]);
-			else
-				plugin.send(MessageLevel.WARNING, player, "No such channel");
-			
-		} catch (IndexOutOfBoundsException e) {
-			channel = cm.getChannel(player);
-			
-			if (channel == null) {
-				plugin.send(MessageLevel.WARNING, player, "Specify a channel or join a channel to use this command");
-				usage(player, "leave");
-			}
-		}
-		
-		if (channel == null)
-			return;
-		
+	@Usage("leave")
+	public void leave(Player player, Channel channel, String[] args) {
 		if (channel.handleCommand(player, "leave", args))
 			return;
 	}
@@ -186,23 +140,13 @@ public class ChannelCommand extends CommandBase {
 	/**
 	 * Unfollow Command - Unfollows the channel
 	 */
-	@Command
+	@Command(channel = true)
 	@Description("Unfollows the channel")
-	@Usage("unfollow [channel]")
-	public void unfollow(Player player, String[] args) {
-		if (args.length < 1) { invalidArgLength(player, "unfollow"); return; }
-		
-		Channel channel = null;
-		
-		if (cm.existsByAlias(args[0]))
-			channel = cm.getChannelByAlias(args[0]);
-		else
-			plugin.send(MessageLevel.WARNING, player, "No such channel");
-		
-		if (channel == null)
-			return;
-		
+	@Usage("unfollow")
+	public void unfollow(Player player, Channel channel, String[] args) {
 		if (channel.handleCommand(player, "unfollow", args))
 			return;
+		
+		if (args.length < 1) { invalidArgLength(player, "unfollow"); return; }
 	}
 }

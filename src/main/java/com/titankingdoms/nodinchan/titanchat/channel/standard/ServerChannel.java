@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 import com.titankingdoms.nodinchan.titanchat.TitanChat.MessageLevel;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.util.CommandHandler;
+import com.titankingdoms.nodinchan.titanchat.channel.util.Handler.HandlerInfo;
 import com.titankingdoms.nodinchan.titanchat.channel.util.Info;
 
 public final class ServerChannel extends Channel {
@@ -40,22 +41,22 @@ public final class ServerChannel extends Channel {
 	
 	@Override
 	public Channel load(String name, Option option) {
-		registerCommandHandlers(new CommandHandler(this, "Ban") {
+		registerCommandHandlers(new CommandHandler(this, "Ban", new HandlerInfo(null, null, 0, 0)) {
 
 			@Override
 			public void onCommand(CommandSender sender, String[] args) { plugin.send(MessageLevel.WARNING, sender, "Administration command disabled"); }
 			
-		}, new CommandHandler(this, "Join") {
+		}, new CommandHandler(this, "Join", new HandlerInfo(null, null, 0, 0)) {
 
 			@Override
 			public void onCommand(CommandSender sender, String[] args) {}
 			
-		}, new CommandHandler(this, "Kick") {
+		}, new CommandHandler(this, "Kick", new HandlerInfo(null, null, 0, 0)) {
 
 			@Override
 			public void onCommand(CommandSender sender, String[] args) { plugin.send(MessageLevel.WARNING, sender, "Administration command disabled"); }
 			
-		}, new CommandHandler(this, "Leave") {
+		}, new CommandHandler(this, "Leave", new HandlerInfo(null, null, 0, 0)) {
 
 			@Override
 			public void onCommand(CommandSender sender, String[] args) {}

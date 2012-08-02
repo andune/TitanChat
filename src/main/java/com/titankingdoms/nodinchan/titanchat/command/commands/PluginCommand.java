@@ -1,7 +1,9 @@
 package com.titankingdoms.nodinchan.titanchat.command.commands;
 
+import java.nio.channels.Channel;
 import java.util.logging.Level;
 
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat.MessageLevel;
@@ -36,49 +38,52 @@ public class PluginCommand extends CommandBase {
 	/**
 	 * Debug Command - Toggles the debug
 	 */
-	@Command
+	@Command(server = true)
 	@Description("Toggles the debug")
 	@Usage("debug [type]")
-	public void debug(Player player, String[] args) {
+	public void debug(CommandSender sender, Channel channel, String[] args) {
+		if (sender instanceof Player && plugin.isStaff((Player) sender)) {
+			plugin.send(MessageLevel.WARNING, sender, "You do not have permission");
+			return;
+		}
+		
 		try {
-			if (plugin.isStaff(player)) {
-				if (args[0].equalsIgnoreCase("none")) {
-					Debugger.disable();
-					plugin.send(MessageLevel.INFO, player, "Debug activated");
-					
-				} else if (args[0].equalsIgnoreCase("all") || args[0].equalsIgnoreCase("full")) {
-					Debugger.enableAll();
-					plugin.send(MessageLevel.INFO, player, "Debug activated");
-					
-				} else {
-					for (String id : args[0].split(","))
-						Debugger.enable(id);
-					
-					plugin.send(MessageLevel.INFO, player, "Debug activated");
-				}
-				
-			} else { plugin.send(MessageLevel.WARNING, player, "You do not have permission"); }
+			if (args[0].equalsIgnoreCase("none"))
+				Debugger.disable();
+			else if (args[0].equalsIgnoreCase("all") || args[0].equalsIgnoreCase("full"))
+				Debugger.enableAll();
+			else
+				for (String id : args[0].split(","))
+					Debugger.enable(id);
 			
-		} catch (IndexOutOfBoundsException e) { invalidArgLength(player, "Debug"); }
+			plugin.send(MessageLevel.INFO, sender, "Debug activated");
+			
+		} catch (IndexOutOfBoundsException e) { invalidArgLength(sender, "debug"); }
 	}
 	
 	/**
 	 * Reload Command - Reloads the config
 	 */
-	@Command
+	@Command(server = true)
 	@Description("Reloads the config")
 	@Usage("reload")
-	public void reload(Player player, String[] args) {
-		if (plugin.isStaff(player)) {
-			plugin.log(Level.INFO, "Reloading configs...");
-			plugin.send(MessageLevel.INFO, player, "Reloading configs...");
-			plugin.reloadConfig();
-			plugin.getVariableManager().unload();
-			plugin.getFormatHandler().load();
-			plugin.getManager().reload();
-			plugin.log(Level.INFO, "Configs reloaded");
-			plugin.send(MessageLevel.INFO, player, "Configs reloaded");
-			
-		} else { plugin.send(MessageLevel.WARNING, player, "You do not have permission"); }
+	public void reload(CommandSender sender, Channel channel, String[] args) {
+		if (sender instanceof Player && plugin.isStaff((Player) sender)) {
+			plugin.send(MessageLevel.WARNING, sender, "You do not have permission");
+			return;
+		}
+		
+		if (sender instanceof Player)
+			plugin.log(Level.INFO, "Reloading TitanChat...");
+		
+		plugin.send(MessageLevel.INFO, sender, "Reloading TitanChat...");
+		plugin.reloadConfig();
+		plugin.getVariableManager().unload();
+		plugin.getFormatHandler().load();
+		plugin.getManager().reload();
+		plugin.send(MessageLevel.INFO, sender, "TitanChat reloaded");
+		
+		if (sender instanceof Player)
+			plugin.log(Level.INFO, "TitanChat reloaded");
 	}
 }

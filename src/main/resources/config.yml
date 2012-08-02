@@ -23,27 +23,17 @@ channels:
         leave: true
 logging:
     colouring: true
-broadcast:
+chat:
     player:
         enable: true
-        format: '[&cBroadcast&f] %player: %message'
+        broadcast: '[&cBroadcast&f] %player: %message'
+        emote: '* %player %action'
+        whisper: '&5%player whispers: %message'
     server:
         enable: true
-        format: '<&4Server&f> %message'
-emote:
-    player:
-        enable: true
-        format: '* %player %action'
-    server:
-        enable: true
-        format: '* &4Server &f%action'
-whisper:
-    player:
-        enable: true
-        format: '&5%player whispers: %message'
-    server:
-        enable: true
-        format: '&5Server whispers: %message'
+        broadcast: '<&4Server&f> %message'
+        emote: '* &4Server &f%action'
+        whisper: '&4Server &5whispers: %message'
 formatting:
     use-custom-format: false
     format: "%tag %prefix%player%suffix: %message"
