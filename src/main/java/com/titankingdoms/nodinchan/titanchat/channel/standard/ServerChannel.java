@@ -1,5 +1,6 @@
 package com.titankingdoms.nodinchan.titanchat.channel.standard;
 
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -7,6 +8,7 @@ import com.titankingdoms.nodinchan.titanchat.TitanChat.MessageLevel;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.util.handler.CommandHandler;
 import com.titankingdoms.nodinchan.titanchat.channel.util.handler.Handler.HandlerInfo;
+import com.titankingdoms.nodinchan.titanchat.channel.util.handler.SettingHandler;
 import com.titankingdoms.nodinchan.titanchat.channel.util.Info;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
@@ -61,31 +63,165 @@ public final class ServerChannel extends Channel {
 	@Override
 	public Channel load(String name, Option option) {
 		registerCommandHandlers(
-				new ServerCommandHandler("ban"),
-				new ServerCommandHandler("dewhitelist"),
-				new ServerCommandHandler("follow"),
-				new ServerCommandHandler("force"),
-				new ServerCommandHandler("invite"),
-				new ServerCommandHandler("join"),
-				new ServerCommandHandler("kick"),
-				new ServerCommandHandler("leave"),
-				new ServerCommandHandler("unban"),
-				new ServerCommandHandler("unfollow"),
-				new ServerCommandHandler("whitelist")
+				new UnsupportedCommand("ban"),
+				new UnsupportedCommand("dewhitelist"),
+				new UnsupportedCommand("follow"),
+				new UnsupportedCommand("force"),
+				new UnsupportedCommand("invite"),
+				new UnsupportedCommand("join"),
+				new UnsupportedCommand("kick"),
+				new UnsupportedCommand("leave"),
+				new UnsupportedCommand("unban"),
+				new UnsupportedCommand("unfollow"),
+				new UnsupportedCommand("whitelist")
+		);
+		
+		registerSettingHandlers(
+				new ServerSettingHandlers.ChatColourSetting(),
+				new ServerSettingHandlers.UnsupportedSetting("colouring"),
+				new ServerSettingHandlers.UnsupportedSetting("format"),
+				new ServerSettingHandlers.Help(),
+				new ServerSettingHandlers.NameColourSetting(),
+				new ServerSettingHandlers.UnsupportedSetting("radius"),
+				new ServerSettingHandlers.UnsupportedSetting("range"),
+				new ServerSettingHandlers.TagSetting(),
+				new ServerSettingHandlers.TopicSetting(),
+				new ServerSettingHandlers.UnsupportedSetting("whitelist")
 		);
 		
 		return this;
 	}
 	
-	public static final class ServerCommandHandler extends CommandHandler {
+	public static final class UnsupportedCommand extends CommandHandler {
 		
-		public ServerCommandHandler(String command) {
+		public UnsupportedCommand(String command) {
 			super(ServerChannel.instance, command, new HandlerInfo("Command Disabled", command.toLowerCase()));
 		}
 		
 		@Override
 		public void onCommand(CommandSender sender, String[] args) {
 			plugin.send(MessageLevel.WARNING, sender, "Channels Disabled");
+		}
+	}
+	
+	public static final class ServerSettingHandlers {
+		
+		public static final class ChatColourSetting extends SettingHandler {
+			
+			public ChatColourSetting() {
+				super(ServerChannel.instance, "chat-colour", new HandlerInfo("Sets the chat display colour", "chat-colour [colour]"));
+			}
+			
+			@Override
+			public void set(CommandSender sender, String[] args) {
+				try {
+					if (!(sender instanceof Player) || plugin.isStaff((Player) sender)) {
+						channel.getInfo().setChatColour(args[0]);
+						plugin.send(MessageLevel.INFO, sender, "You have set the chat colour to " + channel.getInfo().getChatColour());
+						
+					} else { plugin.send(MessageLevel.WARNING, sender, "You do not have permission"); }
+					
+				} catch (IndexOutOfBoundsException e) { invalidArgLength(sender); }
+			}
+		}
+		
+		public static final class Help extends SettingHandler {
+			
+			public Help() {
+				super(ServerChannel.instance, "help", new HandlerInfo("Shows the help menu", "help"));
+			}
+			
+			@Override
+			public void set(CommandSender sender, String[] args) {
+				sender.sendMessage(ChatColor.AQUA + "=== " + channel.getName() + " ===");
+				sender.sendMessage(ChatColor.AQUA + "CHAT-COLOUR [COLOUR] - Sets the chat display colour of the channel");
+				sender.sendMessage(ChatColor.AQUA + "HELP - Shows the help menu");
+				sender.sendMessage(ChatColor.AQUA + "NAME_COLOUR [COLOUR] - Sets the name display colour of the channel");
+				sender.sendMessage(ChatColor.AQUA + "TAG [TAG] - Sets the tag of the channel");
+				sender.sendMessage(ChatColor.AQUA + "TOPIC [TOPIC] - Sets the topic of the channel");
+			}
+		}
+		
+		public static final class NameColourSetting extends SettingHandler {
+			
+			public NameColourSetting() {
+				super(ServerChannel.instance, "name-colour", new HandlerInfo("Sets the name display colour", "name-colour [colour]"));
+			}
+			
+			@Override
+			public void set(CommandSender sender, String[] args) {
+				try {
+					if (!(sender instanceof Player) || plugin.isStaff((Player) sender)) {
+						channel.getInfo().setChatColour(args[0]);
+						plugin.send(MessageLevel.INFO, sender, "You have set the name colour to " + channel.getInfo().getNameColour());
+						
+					} else { plugin.send(MessageLevel.WARNING, sender, "You do not have permission"); }
+					
+				} catch (IndexOutOfBoundsException e) { invalidArgLength(sender); }
+			}
+		}
+		
+		public static final class TagSetting extends SettingHandler {
+			
+			public TagSetting() {
+				super(ServerChannel.instance, "tag", new HandlerInfo("Sets the tag", "tag [tag]"));
+			}
+			
+			@Override
+			public void set(CommandSender sender, String[] args) {
+				try {
+					if (!(sender instanceof Player) || plugin.isStaff((Player) sender)) {
+						channel.getInfo().setTag(args[0]);
+						plugin.send(MessageLevel.INFO, sender, "You have set the tag to " + channel.getInfo().getTag());
+						
+					} else { plugin.send(MessageLevel.WARNING, sender, "You do not have permission"); }
+					
+				} catch (IndexOutOfBoundsException e) { invalidArgLength(sender); }
+			}
+		}
+		
+		public static final class TopicSetting extends SettingHandler {
+			
+			public TopicSetting() {
+				super(ServerChannel.instance, "topic", new HandlerInfo("Sets the topic", "topic [topic]"));
+			}
+			
+			@Override
+			public void set(CommandSender sender, String[] args) {
+				if (args.length > 0) {
+					if (!(sender instanceof Player) || plugin.isStaff((Player) sender)) {
+						StringBuilder str = new StringBuilder();
+						
+						for (String arg : args) {
+							if (str.length() > 0)
+								str.append(" ");
+							
+							str.append(arg);
+						}
+						
+						channel.getInfo().setTopic(str.toString());
+						
+						if (!channel.isParticipating(sender.getName()))
+							plugin.send(MessageLevel.INFO, sender, "You have changed the topic: " + channel.getInfo().getTopic());
+						
+						plugin.send(MessageLevel.INFO, channel, ((sender instanceof Player) ? ((Player) sender).getDisplayName() : sender.getName()) + " changed the topic: " + channel.getInfo().getTopic());
+						
+					} else { plugin.send(MessageLevel.WARNING, sender, "You do not have permission"); }
+					
+				} else { invalidArgLength(sender); }
+			}
+		}
+		
+		public static final class UnsupportedSetting extends SettingHandler {
+			
+			public UnsupportedSetting(String setting) {
+				super(ServerChannel.instance, setting, new HandlerInfo("Unsupported Setting", setting.toLowerCase()));
+			}
+			
+			@Override
+			public void set(CommandSender sender, String[] args) {
+				plugin.send(MessageLevel.WARNING, sender, "Setting Unsupported");
+			}
 		}
 	}
 	
@@ -134,33 +270,32 @@ public final class ServerChannel extends Channel {
 		}
 		
 		@Override
-		public int radius()  {
-			return 0;
-		}
-		
-		@Override
 		public Range range() {
 			return Range.GLOBAL;
 		}
 		
 		@Override
-		public void setChatColour(String colour) {}
+		public void setChatColour(String colour) {
+			plugin.getConfig().set("channels.chat-display-colour", colour);
+			plugin.saveConfig();
+		}
 		
 		@Override
-		public void setColouring(boolean colouring) {}
+		public void setNameColour(String colour) {
+			plugin.getConfig().set("channels.name-display-colour", colour);
+			plugin.saveConfig();
+		}
 		
 		@Override
-		public void setFormat(String format) {}
+		public void setTag(String tag) {
+			plugin.getConfig().set("channels.tag", tag);
+			plugin.saveConfig();
+		}
 		
 		@Override
-		public void setNameColour(String colour) {}
-		
-		@Override
-		public void setRadius(int radius) {}
-		
-		@Override
-		public void setRange(Range range) {}
-		
-		public void setTag(String tag) {}
+		public void setTopic(String topic) {
+			plugin.getConfig().set("topic", topic);
+			plugin.saveConfig();
+		}
 	}
 }

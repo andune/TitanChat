@@ -68,15 +68,6 @@ public abstract class CommandHandler {
 	
 	public abstract void onCommand(CommandSender sender, String[] args);
 	
-	public final void unspecifiedChannel(CommandSender sender) {
-		if (sender instanceof Player)
-			plugin.send(MessageLevel.WARNING, sender, "Please specify a channel or join a channel");
-		else
-			plugin.send(MessageLevel.WARNING, sender, "Please specify a channel");
-		
-		usage(sender);
-	}
-	
 	public final void usage(CommandSender sender) {
 		if (info.getUsage().isEmpty()) {
 			Executor executor = plugin.getManager().getCommandManager().getCommandExecutor(command);

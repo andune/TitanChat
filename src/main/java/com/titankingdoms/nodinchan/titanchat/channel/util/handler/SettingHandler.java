@@ -4,7 +4,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
+import com.titankingdoms.nodinchan.titanchat.TitanChat.MessageLevel;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
+import com.titankingdoms.nodinchan.titanchat.channel.util.handler.Handler.HandlerInfo;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -30,10 +32,17 @@ public abstract class SettingHandler {
 	
 	private final String setting;
 	
-	public SettingHandler(Channel channel, String setting) {
+	private final HandlerInfo info;
+	
+	public SettingHandler(Channel channel, String setting, HandlerInfo info) {
 		this.plugin = TitanChat.getInstance();
 		this.channel = channel;
 		this.setting = setting;
+		this.info = info;
+	}
+	
+	public final HandlerInfo getInfo() {
+		return info;
 	}
 	
 	public final String getSetting() {
@@ -51,5 +60,17 @@ public abstract class SettingHandler {
 		return plugin.getPermsBridge().has((Player) sender, permission, avoidWildcard);
 	}
 	
+	public final void invalidArgLength(CommandSender sender) {
+		plugin.send(MessageLevel.WARNING, sender, "Invalid Argument Length");
+		usage(sender);
+	}
+	
 	public abstract void set(CommandSender sender, String[] args);
+	
+	public final void usage(CommandSender sender) {
+		if (info.getUsage().isEmpty())
+			plugin.send(MessageLevel.WARNING, sender, "Usage: /titanchat <@><channel> set [setting] <arguments>");
+		else
+			plugin.send(MessageLevel.WARNING, sender, "Usage: /titanchat <@><channel> set " + info.getUsage());
+	}
 }

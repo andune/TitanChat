@@ -11,9 +11,11 @@
 auto-library-update: true
 channels:
     enable: true
-    tag: ''
-    name-display-colour: '&f'
-    chat-display-colour: '&f'
+    server:
+        tag: ''
+        name-display-colour: '&f'
+        chat-display-colour: '&f'
+        topic: ''
     channel-limit: -1
     quick-send:
         enable: true
