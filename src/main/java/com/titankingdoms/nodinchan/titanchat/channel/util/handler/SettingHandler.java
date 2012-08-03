@@ -1,4 +1,4 @@
-package com.titankingdoms.nodinchan.titanchat.channel.util;
+package com.titankingdoms.nodinchan.titanchat.channel.util.handler;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;

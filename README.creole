@@ -54,6 +54,7 @@ TitanChat, a chat management and formatting plugin for Bukkit.
 * 07.07.12 - Started rewrite for v4.0, accepting ideas for improvement
 * 31.07.12 - Rewrote channel management and added basics for future improvements in flexibility
 * 02.08.12 - Changed how commands work, improved the line-regrouper and added in standard commands
+* 03.08.12 - Added CommandHandlers in ServerChannel to override standard commands when channels are disabled
 
 -----------------------------------------------------------------------------------------------------------------------
 

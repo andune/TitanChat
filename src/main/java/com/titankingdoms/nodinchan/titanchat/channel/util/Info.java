@@ -2,6 +2,7 @@ package com.titankingdoms.nodinchan.titanchat.channel.util;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
+import com.titankingdoms.nodinchan.titanchat.channel.Channel.Range;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -48,7 +49,7 @@ public class Info {
 	
 	public String getFormat() {
 		String format = channel.getConfig().getString("format", "");
-		return (format.equals("")) ? plugin.getConfig().getString("formatting.format") : format;
+		return (format.isEmpty()) ? plugin.getConfig().getString("formatting.format") : format;
 	}
 	
 	public String getNameColour() {
@@ -63,8 +64,12 @@ public class Info {
 		return channel.getConfig().getString("topic", "");
 	}
 	
-	public boolean global() {
-		return channel.getConfig().getBoolean("setting.global");
+	public int radius() {
+		return channel.getConfig().getInt("setting.radius", 0);
+	}
+	
+	public Range range() {
+		return Range.fromName(channel.getConfig().getString("setting.range", "channel"));
 	}
 	
 	public void setChatColour(String colour) {
@@ -82,13 +87,18 @@ public class Info {
 		channel.saveConfig();
 	}
 	
-	public void setGlobal(boolean global) {
-		channel.getConfig().set("setting.global", global);
+	public void setNameColour(String colour) {
+		channel.getConfig().set("name-display-colour", colour);
 		channel.saveConfig();
 	}
 	
-	public void setNameColour(String colour) {
-		channel.getConfig().set("name-display-colour", colour);
+	public void setRadius(int radius) {
+		channel.getConfig().set("setting.radius", radius);
+		channel.saveConfig();
+	}
+	
+	public void setRange(Range range) {
+		channel.getConfig().set("setting.range", range.getName());
 		channel.saveConfig();
 	}
 	

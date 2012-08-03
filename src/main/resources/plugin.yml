@@ -11,6 +11,10 @@ commands:
         description: TitanChat Commands
         aliases: tc
         usage: /<command> [action] [argument]
+    channel:
+        description: Channel Command
+        aliases: ch
+        usage: /<command> [channel] <message>
     broadcast:
         description: Broadcast Command
         aliases: bc

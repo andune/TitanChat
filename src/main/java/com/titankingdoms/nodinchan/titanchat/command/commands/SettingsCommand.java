@@ -1,4 +1,4 @@
-package com.titankingdoms.nodinchan.titanchat.channel.setting;
+package com.titankingdoms.nodinchan.titanchat.command.commands;
 
 import java.util.Arrays;
 

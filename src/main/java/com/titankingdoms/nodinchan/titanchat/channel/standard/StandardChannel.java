@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
@@ -85,12 +86,29 @@ public final class StandardChannel extends Channel {
 	public String sendMessage(Player sender, String message) {
 		List<Player> recipants = new ArrayList<Player>();
 		
-		if (!getInfo().global()) {
+		switch (getInfo().range()) {
+		
+		case CHANNEL:
 			for (Participant participant : getParticipants())
 				if (participant.getPlayer() != null)
 					recipants.add(participant.getPlayer());
+			break;
 			
-		} else { recipants.addAll(Arrays.asList(plugin.getServer().getOnlinePlayers())); }
+		case GLOBAL:
+			recipants.addAll(Arrays.asList(plugin.getServer().getOnlinePlayers()));
+			break;
+			
+		case LOCAL:
+			for (Entity entity : sender.getNearbyEntities(getInfo().radius(), getInfo().radius(), getInfo().radius()))
+				if (entity instanceof Player)
+					recipants.add((Player) entity);
+			break;
+			
+		case WORLD:
+			for (Player recipant : sender.getWorld().getPlayers())
+				recipants.add(recipant);
+			break;
+		}
 		
 		return sendMessage(sender, recipants, message);
 	}

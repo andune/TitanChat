@@ -18,11 +18,11 @@ import org.bukkit.entity.Player;
 import com.nodinchan.ncbukkit.loader.Loadable;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.TitanChat.MessageLevel;
-import com.titankingdoms.nodinchan.titanchat.channel.util.CommandHandler;
-import com.titankingdoms.nodinchan.titanchat.channel.util.Handler;
+import com.titankingdoms.nodinchan.titanchat.channel.util.handler.CommandHandler;
+import com.titankingdoms.nodinchan.titanchat.channel.util.handler.Handler;
+import com.titankingdoms.nodinchan.titanchat.channel.util.handler.SettingHandler;
 import com.titankingdoms.nodinchan.titanchat.channel.util.Info;
 import com.titankingdoms.nodinchan.titanchat.channel.util.Participant;
-import com.titankingdoms.nodinchan.titanchat.channel.util.SettingHandler;
 import com.titankingdoms.nodinchan.titanchat.event.channel.MessageConsoleEvent;
 import com.titankingdoms.nodinchan.titanchat.event.channel.MessageReceiveEvent;
 import com.titankingdoms.nodinchan.titanchat.event.channel.MessageSendEvent;
@@ -268,6 +268,12 @@ public abstract class Channel extends Loadable {
 		this.password = password;
 	}
 	
+	/**
+	 * Option - Option of the channel
+	 * 
+	 * @author NodinChan
+	 *
+	 */
 	public enum Option {
 		CUSTOM("custom"),
 		DEFAULT("default"),
@@ -288,6 +294,39 @@ public abstract class Channel extends Loadable {
 		}
 		
 		public static Option fromName(String name) {
+			return NAME_MAP.get(name.toLowerCase());
+		}
+		
+		public String getName() {
+			return name;
+		}
+	}
+	
+	/**
+	 * Range - Range to send the message
+	 * 
+	 * @author NodinChan
+	 *
+	 */
+	public enum Range {
+		CHANNEL("channel"),
+		GLOBAL("global"),
+		LOCAL("local"),
+		WORLD("world");
+		
+		private String name;
+		private static Map<String, Range> NAME_MAP = new HashMap<String, Range>();
+		
+		private Range(String name) {
+			this.name = name;
+		}
+		
+		static {
+			for (Range range : EnumSet.allOf(Range.class))
+				NAME_MAP.put(range.name.toLowerCase(), range);
+		}
+		
+		public static Range fromName(String name) {
 			return NAME_MAP.get(name.toLowerCase());
 		}
 		

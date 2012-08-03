@@ -90,8 +90,6 @@ public class ChannelCommand extends CommandBase {
 	@Permission("TitanChat.delete")
 	@Usage("delete")
 	public void delete(CommandSender sender, Channel channel, String[] args) {
-		if (args.length < 1) { invalidArgLength(sender, "delete"); return; }
-		
 		if (channel.getOption().equals(Option.NONE))
 			cm.deleteChannel(sender, channel.getName());
 		else

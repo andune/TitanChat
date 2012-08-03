@@ -5,8 +5,8 @@ import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat.MessageLevel;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
-import com.titankingdoms.nodinchan.titanchat.channel.util.CommandHandler;
-import com.titankingdoms.nodinchan.titanchat.channel.util.Handler.HandlerInfo;
+import com.titankingdoms.nodinchan.titanchat.channel.util.handler.CommandHandler;
+import com.titankingdoms.nodinchan.titanchat.channel.util.handler.Handler.HandlerInfo;
 import com.titankingdoms.nodinchan.titanchat.channel.util.Info;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
@@ -27,11 +27,14 @@ import com.titankingdoms.nodinchan.titanchat.channel.util.Info;
 
 public final class ServerChannel extends Channel {
 	
+	private static ServerChannel instance;
+	
 	private final Info info;
 	
 	public ServerChannel() {
 		super("Server", Option.DEFAULT);
-		load(getName(), getOption());
+		ServerChannel.instance = this;
+		load(null, null);
 		this.info = new ServerInfo();
 	}
 	
@@ -57,28 +60,33 @@ public final class ServerChannel extends Channel {
 	
 	@Override
 	public Channel load(String name, Option option) {
-		registerCommandHandlers(new CommandHandler(this, "Ban", new HandlerInfo(null, null)) {
-
-			@Override
-			public void onCommand(CommandSender sender, String[] args) { plugin.send(MessageLevel.WARNING, sender, "Administration command disabled"); }
-			
-		}, new CommandHandler(this, "Join", new HandlerInfo(null, null)) {
-
-			@Override
-			public void onCommand(CommandSender sender, String[] args) {}
-			
-		}, new CommandHandler(this, "Kick", new HandlerInfo(null, null)) {
-
-			@Override
-			public void onCommand(CommandSender sender, String[] args) { plugin.send(MessageLevel.WARNING, sender, "Administration command disabled"); }
-			
-		}, new CommandHandler(this, "Leave", new HandlerInfo(null, null)) {
-
-			@Override
-			public void onCommand(CommandSender sender, String[] args) {}
-		});
+		registerCommandHandlers(
+				new ServerCommandHandler("ban"),
+				new ServerCommandHandler("dewhitelist"),
+				new ServerCommandHandler("follow"),
+				new ServerCommandHandler("force"),
+				new ServerCommandHandler("invite"),
+				new ServerCommandHandler("join"),
+				new ServerCommandHandler("kick"),
+				new ServerCommandHandler("leave"),
+				new ServerCommandHandler("unban"),
+				new ServerCommandHandler("unfollow"),
+				new ServerCommandHandler("whitelist")
+		);
 		
 		return this;
+	}
+	
+	public static final class ServerCommandHandler extends CommandHandler {
+		
+		public ServerCommandHandler(String command) {
+			super(ServerChannel.instance, command, new HandlerInfo("Command Disabled", command.toLowerCase()));
+		}
+		
+		@Override
+		public void onCommand(CommandSender sender, String[] args) {
+			plugin.send(MessageLevel.WARNING, sender, "Channels Disabled");
+		}
 	}
 	
 	public static final class ServerInfo extends Info {
@@ -104,7 +112,7 @@ public final class ServerChannel extends Channel {
 		
 		@Override
 		public String getChatColour() {
-			return plugin.getConfig().getString("channels.chat-display-colour");
+			return plugin.getConfig().getString("channels.chat-display-colour", "");
 		}
 		
 		@Override
@@ -117,12 +125,22 @@ public final class ServerChannel extends Channel {
 		
 		@Override
 		public String getNameColour() {
-			return plugin.getConfig().getString("channels.name-display-colour");
+			return plugin.getConfig().getString("channels.name-display-colour", "");
 		}
 		
 		@Override
 		public String getTag() {
-			return plugin.getConfig().getString("channels.tag");
+			return plugin.getConfig().getString("channels.tag", "");
+		}
+		
+		@Override
+		public int radius()  {
+			return 0;
+		}
+		
+		@Override
+		public Range range() {
+			return Range.GLOBAL;
 		}
 		
 		@Override
@@ -136,6 +154,12 @@ public final class ServerChannel extends Channel {
 		
 		@Override
 		public void setNameColour(String colour) {}
+		
+		@Override
+		public void setRadius(int radius) {}
+		
+		@Override
+		public void setRange(Range range) {}
 		
 		public void setTag(String tag) {}
 	}

@@ -379,6 +379,35 @@ public final class TitanChat extends JavaPlugin {
 			return true;
 		}
 		
+		if (cmd.getName().equalsIgnoreCase("channel")) {
+			switch (args.length) {
+			
+			case 1:
+				getServer().dispatchCommand(sender, "titanchat @" + args[0] + " join");
+				break;
+				
+			case 2:
+				StringBuilder str = new StringBuilder();
+				
+				for (String arg : Arrays.copyOfRange(args, 1, args.length)) {
+					if (str.length() > 0)
+						str.append(" ");
+					
+					str.append(arg);
+				}
+				
+				getServer().dispatchCommand(sender, "titanchat @" + args[0] + " send " + str.toString());
+				break;
+				
+			default:
+				send(MessageLevel.WARNING, sender, "Invalid Argument Length");
+				send(MessageLevel.INFO, sender, "Usage: /channel [channel] <message>");
+				break;
+			}
+			
+			return true;
+		}
+		
 		if (cmd.getName().equalsIgnoreCase("emote")) {
 			if (sender instanceof Player && !getPermsBridge().has((Player) sender, "TitanChat.emote.global")) {
 				send(MessageLevel.WARNING, sender, "You do not have permission");

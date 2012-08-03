@@ -238,9 +238,9 @@ public class InformationCommand extends CommandBase {
 				participants.add(ChatColor.RED + participant.getName());
 		}
 		
-		String[] participantLines = plugin.getFormatHandler().regroup("Participants: %message", plugin.createList(participants));
+		String[] participantLines = plugin.getFormatHandler().regroup(ChatColor.AQUA + "Participants: %message", plugin.createList(participants));
 		
-		sender.sendMessage("Participants: " + participantLines[0]);
+		sender.sendMessage(ChatColor.AQUA + "Participants: " + participantLines[0]);
 		sender.sendMessage(Arrays.copyOfRange(participantLines, 1, participantLines.length));
 	}
 	

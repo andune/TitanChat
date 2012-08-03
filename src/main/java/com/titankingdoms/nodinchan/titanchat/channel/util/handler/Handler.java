@@ -1,4 +1,4 @@
-package com.titankingdoms.nodinchan.titanchat.channel.util;
+package com.titankingdoms.nodinchan.titanchat.channel.util.handler;
 
 import java.util.HashMap;
 import java.util.Map;

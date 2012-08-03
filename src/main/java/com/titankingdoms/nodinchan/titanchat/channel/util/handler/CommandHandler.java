@@ -1,4 +1,4 @@
-package com.titankingdoms.nodinchan.titanchat.channel.util;
+package com.titankingdoms.nodinchan.titanchat.channel.util.handler;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -6,8 +6,8 @@ import org.bukkit.entity.Player;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.TitanChat.MessageLevel;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
-import com.titankingdoms.nodinchan.titanchat.channel.util.Handler.HandlerInfo;
 import com.titankingdoms.nodinchan.titanchat.command.Executor;
+import com.titankingdoms.nodinchan.titanchat.channel.util.handler.Handler.HandlerInfo;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
