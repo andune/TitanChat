@@ -40,25 +40,39 @@ public class PluginCommand extends CommandBase {
 	 */
 	@Command(server = true)
 	@Description("Toggles the debug")
-	@Usage("debug [type]")
+	@Usage("debug [enable/disable] <type>")
 	public void debug(CommandSender sender, Channel channel, String[] args) {
 		if (sender instanceof Player && plugin.isStaff((Player) sender)) {
 			plugin.send(MessageLevel.WARNING, sender, "You do not have permission");
 			return;
 		}
 		
+		if (args.length < 1) { invalidArgLength(sender, "debug"); return; }
+		
 		try {
-			if (args[0].equalsIgnoreCase("none"))
-				Debugger.disable();
-			else if (args[0].equalsIgnoreCase("all") || args[0].equalsIgnoreCase("full"))
-				Debugger.enableAll();
+			if (args[0].equalsIgnoreCase("enable")) {
+				if (args[1].startsWith("none"))
+					return;
+				
+				if (args[1].contains(","))
+					for (String debugId : args[1].split(","))
+						Debugger.enable(debugId);
+				
+			} else {
+				if (args[1].startsWith("none"))
+					return;
+				
+				if (args[1].contains(","))
+					for (String debugId : args[1].split(","))
+						Debugger.disable(debugId);
+			}
+			
+		} catch (IndexOutOfBoundsException e) {
+			if (args[0].equalsIgnoreCase("enable"))
+				Debugger.enable("all");
 			else
-				for (String id : args[0].split(","))
-					Debugger.enable(id);
-			
-			plugin.send(MessageLevel.INFO, sender, "Debug activated");
-			
-		} catch (IndexOutOfBoundsException e) { invalidArgLength(sender, "debug"); }
+				Debugger.disable("all");
+		}
 	}
 	
 	/**

@@ -33,11 +33,12 @@ import com.titankingdoms.nodinchan.titanchat.metrics.Metrics;
 import com.titankingdoms.nodinchan.titanchat.metrics.Metrics.Graph;
 import com.titankingdoms.nodinchan.titanchat.metrics.Metrics.Plotter;
 import com.titankingdoms.nodinchan.titanchat.util.Debugger;
+import com.titankingdoms.nodinchan.titanchat.util.DefaultPermissions;
 import com.titankingdoms.nodinchan.titanchat.util.FormatHandler;
-import com.titankingdoms.nodinchan.titanchat.util.PermsBridge;
+import com.titankingdoms.nodinchan.titanchat.util.PermissionsHandler;
 import com.titankingdoms.nodinchan.titanchat.util.displayname.DisplayName;
 import com.titankingdoms.nodinchan.titanchat.util.displayname.DisplayNameChanger;
-import com.titankingdoms.nodinchan.titanchat.util.variable.Variable;
+import com.titankingdoms.nodinchan.titanchat.util.variable.VariableHandler;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -68,14 +69,15 @@ public final class TitanChat extends JavaPlugin {
 	private String NAME;
 	
 	private static final Logger log = Logger.getLogger("TitanLog");
-	private static final Debugger db = new Debugger(1);
+	private static final Debugger db = new Debugger(0);
 	
 	private TitanChatListener listener;
 	private TitanChatManager manager;
+	private DefaultPermissions defPerms;
 	private DisplayNameChanger displayname;
 	private FormatHandler format;
-	private PermsBridge permBridge;
-	private Variable variable;
+	private PermissionsHandler permHandler;
+	private VariableHandler variable;
 	
 	private boolean silenced = false;
 	
@@ -94,8 +96,6 @@ public final class TitanChat extends JavaPlugin {
 	 * @return The created list of items
 	 */
 	public String createList(List<String> list) {
-		db.i("Creating string out of stringlist: " + list.toString());
-		
 		StringBuilder str = new StringBuilder();
 		
 		for (String item : list) {
@@ -105,6 +105,7 @@ public final class TitanChat extends JavaPlugin {
 			str.append(item);
 		}
 		
+		db.i("TitanChat: Creating string out of string list: " + str.toString());
 		return str.toString();
 	}
 	
@@ -147,6 +148,10 @@ public final class TitanChat extends JavaPlugin {
 	@Override
 	public List<Class<?>> getDatabaseClasses() {
 		return Arrays.asList(new Class<?>[] { DisplayName.class });
+	}
+	
+	public DefaultPermissions getDefPerms() {
+		return defPerms;
 	}
 	
 	/**
@@ -206,12 +211,12 @@ public final class TitanChat extends JavaPlugin {
 	}
 	
 	/**
-	 * Gets the PermsBridge
+	 * Gets the PermissionsHandler
 	 * 
-	 * @return The built-in PermsBridge
+	 * @return The built-in PermissionsHandler
 	 */
-	public PermsBridge getPermsBridge() {
-		return permBridge;
+	public PermissionsHandler getPermissionsHandler() {
+		return permHandler;
 	}
 	
 	/**
@@ -230,7 +235,7 @@ public final class TitanChat extends JavaPlugin {
 	 * 
 	 * @return The Variable manager
 	 */
-	public Variable getVariableManager() {
+	public VariableHandler getVariableManager() {
 		return variable;
 	}
 	
@@ -298,7 +303,7 @@ public final class TitanChat extends JavaPlugin {
 	 * @return True if the Player has TitanChat.admin
 	 */
 	public boolean isStaff(Player player) {
-		return permBridge.has(player, "TitanChat.staff");
+		return permHandler.has(player, "TitanChat.staff");
 	}
 	
 	/**
@@ -327,19 +332,14 @@ public final class TitanChat extends JavaPlugin {
 	 */
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		db.i("onCommand: " + cmd.getName());
+		db.i("TitanChat: On command " + cmd.getName());
 		
 		if (cmd.getName().equals("titanchat")) {
 			if (args.length < 1 || (args[0].startsWith("@") && args.length < 2)) {
-				db.i("onCommand: No arguments!");
+				db.i("TitanChat: On command: No arguments");
 				
 				sender.sendMessage(ChatColor.AQUA + "You are running " + this);
-				
-				if (sender instanceof Player)
-					send(MessageLevel.INFO, (Player) sender, "\"/titanchat commands [page]\" for command list");
-				else
-					log(Level.INFO, "\"/titanchat commands [page]\" for command list");
-				
+				send(MessageLevel.INFO, sender, "\"/titanchat commands [page]\" for command list");
 				return true;
 			}
 			
@@ -360,7 +360,7 @@ public final class TitanChat extends JavaPlugin {
 			else
 				arguments = Arrays.copyOfRange(args, 1, args.length);
 			
-			db.i("CommandManager executing command:");
+			db.i("TitanChat: CommandManager executing command:");
 			manager.getCommandManager().execute(sender, args[0], chName, arguments);
 			return true;
 		}
@@ -379,37 +379,8 @@ public final class TitanChat extends JavaPlugin {
 			return true;
 		}
 		
-		if (cmd.getName().equalsIgnoreCase("channel")) {
-			switch (args.length) {
-			
-			case 1:
-				getServer().dispatchCommand(sender, "titanchat @" + args[0] + " join");
-				break;
-				
-			case 2:
-				StringBuilder str = new StringBuilder();
-				
-				for (String arg : Arrays.copyOfRange(args, 1, args.length)) {
-					if (str.length() > 0)
-						str.append(" ");
-					
-					str.append(arg);
-				}
-				
-				getServer().dispatchCommand(sender, "titanchat @" + args[0] + " send " + str.toString());
-				break;
-				
-			default:
-				send(MessageLevel.WARNING, sender, "Invalid Argument Length");
-				send(MessageLevel.INFO, sender, "Usage: /channel [channel] <message>");
-				break;
-			}
-			
-			return true;
-		}
-		
 		if (cmd.getName().equalsIgnoreCase("emote")) {
-			if (sender instanceof Player && !getPermsBridge().has((Player) sender, "TitanChat.emote.global")) {
+			if (sender instanceof Player && !permHandler.has((Player) sender, "TitanChat.emote.global")) {
 				send(MessageLevel.WARNING, sender, "You do not have permission");
 				return true;
 			}
@@ -508,17 +479,19 @@ public final class TitanChat extends JavaPlugin {
 		}
 		
 		manager = new TitanChatManager();
+		this.defPerms = new DefaultPermissions();
 		displayname = new DisplayNameChanger();
 		format = new FormatHandler();
-		permBridge = new PermsBridge();
-		variable = new Variable();
+		permHandler = new PermissionsHandler();
+		variable = new VariableHandler();
 		
-		Debugger.load(this);
+		Debugger.load(getConfig().getString("logging.debug"));
 		
 		for (Player player : getServer().getOnlinePlayers())
 			displayname.apply(player);
 		
 		manager.load();
+		defPerms.load();
 		format.load();
 		
 		if (manager.getChannelManager().getDefaultChannels().isEmpty()) {
@@ -689,7 +662,7 @@ public final class TitanChat extends JavaPlugin {
 	}
 	
 	public boolean voiceless(Player player, Channel channel, boolean message) {
-		if (getPermsBridge().has(player, "TitanChat.voice"))
+		if (permHandler.has(player, "TitanChat.voice"))
 			return false;
 		
 		if (isSilenced()) {

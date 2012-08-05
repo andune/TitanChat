@@ -1,4 +1,4 @@
-package com.titankingdoms.nodinchan.titanchat.event.channel;
+package com.titankingdoms.nodinchan.titanchat.event.chat;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -8,11 +8,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 
-import com.titankingdoms.nodinchan.titanchat.TitanChat.MessageLevel;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.util.Participant;
-import com.titankingdoms.nodinchan.titanchat.channel.util.handler.Handler.HandlerInfo;
-import com.titankingdoms.nodinchan.titanchat.channel.util.handler.SettingHandler;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -30,10 +27,26 @@ import com.titankingdoms.nodinchan.titanchat.channel.util.handler.SettingHandler
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * StandardChannel - Represents a standard channel
+ * 
+ * @author NodinChan
+ *
+ */
 public final class StandardChannel extends Channel {
 	
+	/**
+	 * Standard Type
+	 */
 	public StandardChannel() {}
 	
+	/**
+	 * Standard Channel
+	 * 
+	 * @param name The channel name
+	 * 
+	 * @param option The channel option
+	 */
 	public StandardChannel(String name, Option option) {
 		super(name, option);
 	}
@@ -71,30 +84,6 @@ public final class StandardChannel extends Channel {
 	public Channel load(String name, Option option) {
 		StandardChannel channel = new StandardChannel(name, option);
 		
-		registerSettingHandlers(
-				new SettingHandler(this, "chat-colour", new HandlerInfo("Sets the chat colour of the channel", "chat-colour [colour]")) {
-					
-					@Override
-					public void set(CommandSender sender, String[] args) {
-						if (channel.getAdmins().contains(sender.getName()) || (sender instanceof Player && plugin.isStaff((Player) sender))) {
-							channel.getInfo().setChatColour(args[0]);
-							plugin.send(MessageLevel.INFO, sender, "You have changed the colour to " + args[0]);
-							
-						} else { plugin.send(MessageLevel.WARNING, sender, "You do not have permission"); }
-					}
-				},
-				new SettingHandler(this, "name-colour", new HandlerInfo("Sets the name colour of the channel", "name-colour [colour]")) {
-					
-					@Override
-					public void set(CommandSender sender, String[] args) {
-						if (channel.getAdmins().contains(sender.getName()) || (sender instanceof Player && plugin.isStaff((Player) sender))) {
-							channel.getInfo().setNameColour(args[0]);
-							plugin.send(MessageLevel.INFO, sender, "You have changed the colour to " + args[0]);
-							
-						} else { plugin.send(MessageLevel.WARNING, sender, "You do not have permission"); }
-					}
-				});
-		
 		if (channel.getConfig().get("admins") != null)
 			channel.getAdmins().addAll(channel.getConfig().getStringList("admins"));
 		
@@ -110,6 +99,7 @@ public final class StandardChannel extends Channel {
 		return channel;
 	}
 	
+	@Override
 	public String sendMessage(Player sender, String message) {
 		List<Player> recipants = new ArrayList<Player>();
 		

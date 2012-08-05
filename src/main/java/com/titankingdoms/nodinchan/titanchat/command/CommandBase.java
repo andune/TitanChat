@@ -10,6 +10,7 @@ import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.TitanChat.MessageLevel;
 import com.titankingdoms.nodinchan.titanchat.addon.Addon;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
+import com.titankingdoms.nodinchan.titanchat.util.Debugger;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -37,6 +38,8 @@ public class CommandBase extends Loadable implements Listener {
 
 	protected final TitanChat plugin;
 	
+	protected static final Debugger db = new Debugger(3);
+	
 	/**
 	 * Initialises variables
 	 */
@@ -50,14 +53,10 @@ public class CommandBase extends Loadable implements Listener {
 	}
 	
 	public final boolean hasPermission(CommandSender sender, String permission) {
-		return hasPermission(sender, permission, false);
-	}
-	
-	public final boolean hasPermission(CommandSender sender, String permission, boolean avoidWildcard) {
 		if (!(sender instanceof Player))
 			return true;
 		
-		return plugin.getPermsBridge().has((Player) sender, permission, avoidWildcard);
+		return plugin.getPermissionsHandler().has((Player) sender, permission);
 	}
 	
 	/**

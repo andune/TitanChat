@@ -11,10 +11,10 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
-import com.titankingdoms.nodinchan.titanchat.event.channel.MessageFormatEvent;
-import com.titankingdoms.nodinchan.titanchat.event.channel.MessageReceiveEvent;
-import com.titankingdoms.nodinchan.titanchat.event.channel.MessageSendEvent;
-import com.titankingdoms.nodinchan.titanchat.util.variable.Variable.IVariable.VarType;
+import com.titankingdoms.nodinchan.titanchat.event.chat.MessageFormatEvent;
+import com.titankingdoms.nodinchan.titanchat.event.chat.MessageReceiveEvent;
+import com.titankingdoms.nodinchan.titanchat.event.chat.MessageSendEvent;
+import com.titankingdoms.nodinchan.titanchat.util.variable.VariableHandler.Variable.VarType;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -38,12 +38,12 @@ import com.titankingdoms.nodinchan.titanchat.util.variable.Variable.IVariable.Va
  * @author NodinChan
  *
  */
-public final class Variable implements Listener {
+public final class VariableHandler implements Listener {
 	
-	private final List<IVariable> variables;
+	private final List<Variable> variables;
 	
-	public Variable() {
-		this.variables = new ArrayList<IVariable>();
+	public VariableHandler() {
+		this.variables = new ArrayList<Variable>();
 		TitanChat.getInstance().getServer().getPluginManager().registerEvents(this, TitanChat.getInstance());
 	}
 	
@@ -54,7 +54,7 @@ public final class Variable implements Listener {
 	 */
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onMessageFormat(MessageFormatEvent event) {
-		for (IVariable variable : variables)
+		for (Variable variable : variables)
 			if (event.getClass().isAssignableFrom(variable.getEvent()))
 				event.setFormat(variable.replace(event.getFormat(), event.getSender()));
 	}
@@ -66,7 +66,7 @@ public final class Variable implements Listener {
 	 */
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onMessageReceive(MessageReceiveEvent event) {
-		for (IVariable variable : variables)
+		for (Variable variable : variables)
 			if (event.getClass().isAssignableFrom(variable.getEvent())) {
 				if (variable.getVarType().equals(VarType.FORMAT))
 					for (Player recipant : event.getRecipants())
@@ -84,7 +84,7 @@ public final class Variable implements Listener {
 	 */
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onMessageSend(MessageSendEvent event) {
-		for (IVariable variable : variables) {
+		for (Variable variable : variables) {
 			if (event.getClass().isAssignableFrom(variable.getEvent())) {
 				if (variable.getVarType().equals(VarType.FORMAT))
 					event.setFormat(variable.replace(event.getFormat(), event.getSender(), event.getRecipants().toArray(new Player[0])));
@@ -99,7 +99,7 @@ public final class Variable implements Listener {
 	 * 
 	 * @param variables The variables to register
 	 */
-	public void register(IVariable... variables) {
+	public void register(Variable... variables) {
 		this.variables.addAll(Arrays.asList(variables));
 	}
 	
@@ -116,7 +116,7 @@ public final class Variable implements Listener {
 	 * @author NodinChan
 	 *
 	 */
-	public static abstract class IVariable {
+	public static abstract class Variable {
 		
 		/**
 		 * Gets the Class of the Event to format for

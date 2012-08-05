@@ -1,13 +1,12 @@
 package com.titankingdoms.nodinchan.titanchat.addon;
 
-import java.util.logging.Logger;
-
 import org.bukkit.event.Listener;
 
 import com.nodinchan.ncbukkit.loader.Loadable;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.command.CommandBase;
+import com.titankingdoms.nodinchan.titanchat.util.Debugger;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -35,7 +34,7 @@ public class Addon extends Loadable implements Listener {
 	
 	protected final TitanChat plugin;
 	
-	private Logger log = Logger.getLogger("TitanLog");
+	protected static final Debugger db = new Debugger(1);
 	
 	/**
 	 * Addons for supporting other plugins
@@ -56,15 +55,6 @@ public class Addon extends Loadable implements Listener {
 			return ((Addon) object).getName().equals(getName());
 		
 		return false;
-	}
-	
-	/**
-	 * Gets the Logger
-	 * 
-	 * @return The Logger
-	 */
-	public Logger getLogger() {
-		return log;
 	}
 	
 	/**

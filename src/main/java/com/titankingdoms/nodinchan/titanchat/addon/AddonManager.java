@@ -36,9 +36,7 @@ public final class AddonManager {
 	
 	private final TitanChat plugin;
 	
-	private static AddonManager instance;
-	
-	private static final Debugger db = new Debugger(2);
+	private static final Debugger db = new Debugger(1);
 	
 	private List<Addon> addons;
 	
@@ -47,7 +45,6 @@ public final class AddonManager {
 	 */
 	public AddonManager() {
 		this.plugin = TitanChat.getInstance();
-		AddonManager.instance = this;
 		
 		if (getAddonDir().mkdir())
 			plugin.log(Level.INFO, "Creating addon directory...");
@@ -87,15 +84,6 @@ public final class AddonManager {
 	 */
 	public List<Addon> getAddons() {
 		return Collections.unmodifiableList(addons);
-	}
-	
-	/**
-	 * Gets the instance of this
-	 * 
-	 * @return AddonManager instance
-	 */
-	public static AddonManager getInstance() {
-		return instance;
 	}
 	
 	/**

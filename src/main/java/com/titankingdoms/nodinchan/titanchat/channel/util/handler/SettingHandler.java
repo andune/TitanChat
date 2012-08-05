@@ -50,14 +50,10 @@ public abstract class SettingHandler {
 	}
 	
 	public final boolean hasPermission(CommandSender sender, String permission) {
-		return hasPermission(sender, permission, false);
-	}
-	
-	public final boolean hasPermission(CommandSender sender, String permission, boolean avoidWildcard) {
 		if (!(sender instanceof Player))
 			return true;
 		
-		return plugin.getPermsBridge().has((Player) sender, permission, avoidWildcard);
+		return plugin.getPermissionsHandler().has((Player) sender, permission);
 	}
 	
 	public final void invalidArgLength(CommandSender sender) {

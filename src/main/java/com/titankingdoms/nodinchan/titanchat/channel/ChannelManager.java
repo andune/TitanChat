@@ -43,7 +43,7 @@ public final class ChannelManager {
 	
 	private final TitanChat plugin;
 	
-	private static final Debugger db = new Debugger(3);
+	private static final Debugger db = new Debugger(2);
 	
 	private final Map<String, String> aliases;
 	private final Map<String, Channel> channels;
@@ -61,23 +61,26 @@ public final class ChannelManager {
 	}
 	
 	public void createChannel(CommandSender sender, String name, String type) {
-		db.i("CommandSender " + sender.getName() + " is creating channel " + name);
+		db.i("ChannelManager: " + sender.getName() + " is creating " + name);
 		Channel channel = getType(type).create(sender, name, Option.NONE);
 		register(channel);
 		
 		if (sender instanceof Player) {
 			channel.join((Player) sender);
+			channel.getAdmins().add(sender.getName());
 		}
 		
 		channel.getConfig().options().copyDefaults(true);
 		channel.saveConfig();
 		
 		sortChannels();
+		
+		plugin.getDefPerms().load(channel);
 		plugin.send(MessageLevel.INFO, sender, "You have created channel " + name + " of type " + channel.getType());
 	}
 	
 	public void deleteChannel(CommandSender sender, String name) {
-		db.i("CommandSender " + sender.getName() + " is deleting channel " + name);
+		db.i("ChannelManager: " + sender.getName() + " is deleting " + name);
 		Channel channel = getChannel(name);
 		
 		List<Participant> participants = channel.getParticipants();
@@ -211,6 +214,8 @@ public final class ChannelManager {
 		}
 		
 		sortChannels();
+		
+		plugin.getDefPerms().load(getChannels());
 	}
 	
 	private Channel loadChannel(File file) {

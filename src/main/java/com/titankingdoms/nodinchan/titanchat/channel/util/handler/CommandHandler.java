@@ -6,8 +6,8 @@ import org.bukkit.entity.Player;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.TitanChat.MessageLevel;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
-import com.titankingdoms.nodinchan.titanchat.command.Executor;
 import com.titankingdoms.nodinchan.titanchat.channel.util.handler.Handler.HandlerInfo;
+import com.titankingdoms.nodinchan.titanchat.command.Executor;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -51,14 +51,10 @@ public abstract class CommandHandler {
 	}
 	
 	public final boolean hasPermission(CommandSender sender, String permission) {
-		return hasPermission(sender, permission, false);
-	}
-	
-	public final boolean hasPermission(CommandSender sender, String permission, boolean avoidWildcard) {
 		if (!(sender instanceof Player))
 			return true;
 		
-		return plugin.getPermsBridge().has((Player) sender, permission, avoidWildcard);
+		return plugin.getPermissionsHandler().has((Player) sender, permission);
 	}
 	
 	public final void invalidArgLength(CommandSender sender) {

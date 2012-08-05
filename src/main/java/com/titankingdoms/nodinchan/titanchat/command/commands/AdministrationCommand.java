@@ -61,16 +61,15 @@ public class AdministrationCommand extends CommandBase {
 				plugin.send(MessageLevel.WARNING, sender, getDisplayName(targetPlayer) + " is offline");
 			}
 			
-			if (!channel.getOption().equals(Option.NONE)) {
-				plugin.send(MessageLevel.WARNING, sender, "You do not have permission");
+			if (channel.getOption().equals(Option.DEFAULT)) {
+				plugin.send(MessageLevel.WARNING, sender, "Command disabled for default and staff channels");
 				return;
-				
-			} else {
-				if (!channel.getAdmins().contains(sender.getName())) {
-					if (!(hasPermission(sender, "TitanChat.ban.*") || hasPermission(sender, "TitanChat.ban." + channel.getName()))) {
-						plugin.send(MessageLevel.WARNING, sender, "You do not have permission");
-						return;
-					}
+			}
+			
+			if (!channel.getAdmins().contains(sender.getName())) {
+				if (!hasPermission(sender, "TitanChat.ban." + channel.getName())) {
+					plugin.send(MessageLevel.WARNING, sender, "You do not have permission");
+					return;
 				}
 			}
 			
@@ -85,7 +84,7 @@ public class AdministrationCommand extends CommandBase {
 				if (targetPlayer.isOnline())
 					plugin.send(MessageLevel.WARNING, targetPlayer.getPlayer(), "You have been banned from " + channel.getName());
 				
-				if (sender instanceof Player && !channel.isParticipating(sender.getName()))
+				if (!channel.isParticipating(sender.getName()))
 					plugin.send(MessageLevel.INFO, sender, getDisplayName(targetPlayer) + " has been banned");
 				
 				plugin.send(MessageLevel.INFO, channel, getDisplayName(targetPlayer) + " has been banned");

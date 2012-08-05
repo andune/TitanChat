@@ -2,6 +2,8 @@ package com.titankingdoms.nodinchan.titanchat.util;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -10,8 +12,8 @@ import org.bukkit.event.Event;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.channel.util.Info;
-import com.titankingdoms.nodinchan.titanchat.event.channel.MessageFormatEvent;
-import com.titankingdoms.nodinchan.titanchat.util.variable.Variable.IVariable;
+import com.titankingdoms.nodinchan.titanchat.event.chat.MessageFormatEvent;
+import com.titankingdoms.nodinchan.titanchat.util.variable.VariableHandler.Variable;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -39,6 +41,10 @@ public final class FormatHandler {
 	
 	private static TitanChat plugin;
 	
+	protected static final Debugger db = new Debugger(5);
+	
+	private final Pattern pattern = Pattern.compile("(?i)(&)([0-9a-fk-or])");
+	
 	public FormatHandler() {
 		FormatHandler.plugin = TitanChat.getInstance();
 	}
@@ -55,6 +61,31 @@ public final class FormatHandler {
 	}
 	
 	/**
+	 * Colourises the message according to the permissions of the sender
+	 * 
+	 * @param sender The message sender
+	 * 
+	 * @param msg The message
+	 * 
+	 * @return The processed text
+	 */
+	public String colour(Player sender, String msg) {
+		StringBuffer str = new StringBuffer();
+		Matcher match = pattern.matcher(msg);
+		
+		while (match.find()) {
+			ChatColor colour = ChatColor.getByChar(match.group(2).toLowerCase());
+			
+			if (plugin.getPermissionsHandler().has(sender, "TitanChat.colourstyle.&" + colour.getChar()))
+				match.appendReplacement(str, colour.toString());
+			else
+				match.appendReplacement(str, "");
+		}
+		
+		return match.appendTail(str).toString();
+	}
+	
+	/**
 	 * Colourises the message
 	 * 
 	 * @param text The message
@@ -62,7 +93,7 @@ public final class FormatHandler {
 	 * @return The colourised text
 	 */
 	public String colourise(String text) {
-		return text.replaceAll("(&([a-f0-9A-Fk-oK-OrR]))", "\u00A7$2");
+		return text.replaceAll(pattern.toString(), "\u00A7$2");
 	}
 	
 	/**
@@ -73,7 +104,7 @@ public final class FormatHandler {
 	 * @return The decolourised text
 	 */
 	public String decolourise(String message) {
-		return message.replaceAll("(&([a-f0-9A-Fk-oK-OrR]))", "");
+		return message.replaceAll(pattern.toString(), "");
 	}
 	
 	/**
@@ -99,25 +130,17 @@ public final class FormatHandler {
 	 * @return The formatted message
 	 */
 	public String format(Player player, String channel) {
-		if (!plugin.enableChannels()) {
-			MessageFormatEvent event = new MessageFormatEvent(player, Format.DEFAULT.format(player));
-			plugin.getServer().getPluginManager().callEvent(event);
-			
-			return event.getFormat();
-			
-		} else {
-			MessageFormatEvent event = new MessageFormatEvent(player, Format.CHANNEL.format(player, channel));
-			plugin.getServer().getPluginManager().callEvent(event);
-			
-			return event.getFormat();
-		}
+		MessageFormatEvent event = new MessageFormatEvent(player, Format.CHANNEL.format(player, channel));
+		plugin.getServer().getPluginManager().callEvent(event);
+		
+		return event.getFormat();
 	}
 	
 	/**
 	 * Loads the basic Chat variables
 	 */
 	public void load() {
-		plugin.getVariableManager().register(new IVariable() {
+		plugin.getVariableManager().register(new Variable() {
 			
 			@Override
 			public Class<? extends Event> getEvent() {
@@ -126,7 +149,7 @@ public final class FormatHandler {
 			
 			@Override
 			public String getReplacement(Player sender, Player... recipants) {
-				return colourise(plugin.getPermsBridge().getPlayerPrefix(sender));
+				return colourise(plugin.getPermissionsHandler().getPlayerPrefix(sender));
 			}
 			
 			@Override
@@ -139,7 +162,7 @@ public final class FormatHandler {
 				return VarType.FORMAT;
 			}
 			
-		}, new IVariable() {
+		}, new Variable() {
 			
 			@Override
 			public Class<? extends Event> getEvent() {
@@ -148,7 +171,7 @@ public final class FormatHandler {
 			
 			@Override
 			public String getReplacement(Player sender, Player... recipants) {
-				return colourise(plugin.getPermsBridge().getPlayerSuffix(sender));
+				return colourise(plugin.getPermissionsHandler().getPlayerSuffix(sender));
 			}
 			
 			@Override
@@ -161,7 +184,7 @@ public final class FormatHandler {
 				return VarType.FORMAT;
 			}
 			
-		}, new IVariable() {
+		}, new Variable() {
 			
 			@Override
 			public Class<? extends Event> getEvent() {
@@ -170,7 +193,7 @@ public final class FormatHandler {
 			
 			@Override
 			public String getReplacement(Player sender, Player... recipants) {
-				return colourise(plugin.getPermsBridge().getGroupPrefix(sender));
+				return colourise(plugin.getPermissionsHandler().getGroupPrefix(sender));
 			}
 			
 			@Override
@@ -183,7 +206,7 @@ public final class FormatHandler {
 				return VarType.FORMAT;
 			}
 			
-		}, new IVariable() {
+		}, new Variable() {
 			
 			@Override
 			public Class<? extends Event> getEvent() {
@@ -192,7 +215,7 @@ public final class FormatHandler {
 			
 			@Override
 			public String getReplacement(Player sender, Player... recipants) {
-				return colourise(plugin.getPermsBridge().getGroupSuffix(sender));
+				return colourise(plugin.getPermissionsHandler().getGroupSuffix(sender));
 			}
 			
 			@Override
@@ -308,31 +331,6 @@ public final class FormatHandler {
 					format = format.replace("%player", info.getNameColour() + ((Player) params[0]).getDisplayName() + "&f");
 					format = format.replace("%name", info.getNameColour() + ((Player) params[0]).getName() + "&f");
 					format = format.replace("%tag", info.getTag());
-					format = format.replace("%message", info.getChatColour() + "%message");
-					
-				} else {
-					format = info.getFormat();
-					format = format.replace("%player", info.getNameColour() + ((Player) params[0]).getDisplayName() + "&f");
-					format = format.replace("%name", info.getNameColour() + ((Player) params[0]).getName() + "&f");
-					format = format.replace("%tag", info.getTag());
-					format = format.replace("%message", info.getChatColour() + "%message");
-				}
-				
-				return plugin.getFormatHandler().colourise(format);
-			}
-		},
-		DEFAULT {
-			
-			@Override
-			protected String format(Object... params) {
-				String format = "";
-				
-				Info info = plugin.getManager().getChannelManager().getChannel("Server").getInfo();
-				
-				if (!plugin.getConfig().getBoolean("formatting.use-custom-format")) {
-					format = "<%prefix%player%suffix&f> %message";
-					format = format.replace("%player", info.getNameColour() + ((Player) params[0]).getDisplayName() + "&f");
-					format = format.replace("%name", info.getNameColour() + ((Player) params[0]).getName() + "&f");
 					format = format.replace("%message", info.getChatColour() + "%message");
 					
 				} else {

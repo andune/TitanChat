@@ -13,18 +13,15 @@ channels:
     enable: true
     server:
         tag: ''
-        name-display-colour: '&f'
-        chat-display-colour: '&f'
+        display-colour: '&f'
         topic: ''
     channel-limit: -1
-    quick-send:
-        enable: true
-        key: '@'
     messages:
         join: true
         leave: true
 logging:
     colouring: true
+    debug: none
 chat:
     player:
         enable: true
@@ -40,14 +37,25 @@ formatting:
     use-custom-format: false
     format: "%tag %prefix%player%suffix: %message"
 permissions:
-    groups:
-        user:
-            prefix: [&7User&f]
-            suffix: ' the &6Member&f'
-        admin:
-            prefix: [&4Admin&f]
-    users:
-        NodinChan:
-            prefix: [&4Titan&f]
-            suffix: ' the &0Dev&f'
-debug: none
+    affixes:
+        group:
+            guest:
+                prefix: '[&8Guest&f]'
+             member:
+                prefix: '[&7Member&f]'
+                suffix: '&2'
+            vip:
+                prefix: '[&6VIP&f]'
+                suffix: '&5'
+            mod:
+                prefix: '[&1Mod&f]'
+            admin:
+                prefix: '[&4Admin&f]'
+        player:
+            titan:
+                prefix: '[&4Titan&f]'
+            dev:
+                prefix: '[&6Dev&f]'
+            bukkitdev:
+                prefix: '[&1Bukkit]'
+                suffix: '&b'

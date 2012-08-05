@@ -21,8 +21,19 @@ import com.titankingdoms.nodinchan.titanchat.channel.Channel;
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * CustomChannel - Represents a custom channel
+ * 
+ * @author NodinChan
+ *
+ */
 public class CustomChannel extends Channel {
 	
+	/**
+	 * Custom Channel
+	 * 
+	 * @param name The channel name
+	 */
 	public CustomChannel(String name) {
 		super(name, Option.CUSTOM);
 	}

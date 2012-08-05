@@ -4,6 +4,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
+import com.titankingdoms.nodinchan.titanchat.util.Debugger;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -25,6 +26,8 @@ public final class DisplayNameChanger {
 	
 	private final TitanChat plugin;
 	
+	private static final Debugger db = new Debugger(5);
+	
 	public DisplayNameChanger() {
 		this.plugin = TitanChat.getInstance();
 	}
@@ -41,6 +44,7 @@ public final class DisplayNameChanger {
 			return;
 		
 		set(player, display.getDisplayName());
+		db.i("DisplayNameChanger: Display name " + display.getDisplayName() + " found and applied to " + player.getName());
 	}
 	
 	public String getDisplayName(OfflinePlayer player) {
@@ -77,6 +81,7 @@ public final class DisplayNameChanger {
 		
 		display.setDisplayName(player.getDisplayName());
 		plugin.getDatabase().save(display);
+		db.i("DisplayNameChanger: Display name " + display.getDisplayName() + " saved for " + player.getName());
 	}
 	
 	/**

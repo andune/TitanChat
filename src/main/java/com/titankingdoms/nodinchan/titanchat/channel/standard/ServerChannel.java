@@ -6,9 +6,8 @@ import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat.MessageLevel;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
-import com.titankingdoms.nodinchan.titanchat.channel.util.handler.CommandHandler;
+import com.titankingdoms.nodinchan.titanchat.channel.util.handler.*;
 import com.titankingdoms.nodinchan.titanchat.channel.util.handler.Handler.HandlerInfo;
-import com.titankingdoms.nodinchan.titanchat.channel.util.handler.SettingHandler;
 import com.titankingdoms.nodinchan.titanchat.channel.util.Info;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
@@ -27,12 +26,21 @@ import com.titankingdoms.nodinchan.titanchat.channel.util.Info;
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+/**
+ * ServerChannel - Represents a standard channel for when channels are disabled
+ * 
+ * @author NodinChan
+ *
+ */
 public final class ServerChannel extends Channel {
 	
 	private static ServerChannel instance;
 	
 	private final Info info;
 	
+	/**
+	 * Server Channel
+	 */
 	public ServerChannel() {
 		super("Server", Option.DEFAULT);
 		ServerChannel.instance = this;
@@ -92,6 +100,12 @@ public final class ServerChannel extends Channel {
 		return this;
 	}
 	
+	/**
+	 * UnsupportedCommand - Block certain command usage when channels are disabled
+	 * 
+	 * @author NodinChan
+	 *
+	 */
 	public static final class UnsupportedCommand extends CommandHandler {
 		
 		public UnsupportedCommand(String command) {
@@ -104,8 +118,20 @@ public final class ServerChannel extends Channel {
 		}
 	}
 	
+	/**
+	 * ServerSettingHandlers - SettingHandlers for when channels are disabled
+	 * 
+	 * @author NodinChan
+	 *
+	 */
 	public static final class ServerSettingHandlers {
 		
+		/**
+		 * ChatColourSetting - For setting the chat display colour
+		 * 
+		 * @author NodinChan
+		 *
+		 */
 		public static final class ChatColourSetting extends SettingHandler {
 			
 			public ChatColourSetting() {
@@ -125,6 +151,12 @@ public final class ServerChannel extends Channel {
 			}
 		}
 		
+		/**
+		 * Help - Help menu
+		 * 
+		 * @author NodinChan
+		 *
+		 */
 		public static final class Help extends SettingHandler {
 			
 			public Help() {
@@ -142,6 +174,12 @@ public final class ServerChannel extends Channel {
 			}
 		}
 		
+		/**
+		 * NameColourSetting - For setting the name display colour
+		 * 
+		 * @author NodinChan
+		 *
+		 */
 		public static final class NameColourSetting extends SettingHandler {
 			
 			public NameColourSetting() {
@@ -161,6 +199,12 @@ public final class ServerChannel extends Channel {
 			}
 		}
 		
+		/**
+		 * TagSetting - For setting the tag
+		 * 
+		 * @author NodinChan
+		 *
+		 */
 		public static final class TagSetting extends SettingHandler {
 			
 			public TagSetting() {
@@ -180,6 +224,12 @@ public final class ServerChannel extends Channel {
 			}
 		}
 		
+		/**
+		 * TopicSetting - For setting the topic
+		 * 
+		 * @author NodinChan
+		 *
+		 */
 		public static final class TopicSetting extends SettingHandler {
 			
 			public TopicSetting() {
@@ -212,6 +262,12 @@ public final class ServerChannel extends Channel {
 			}
 		}
 		
+		/**
+		 * UnsupportedSetting - Block certain settings when channels are disabled
+		 * 
+		 * @author NodinChan
+		 *
+		 */
 		public static final class UnsupportedSetting extends SettingHandler {
 			
 			public UnsupportedSetting(String setting) {
@@ -225,6 +281,12 @@ public final class ServerChannel extends Channel {
 		}
 	}
 	
+	/**
+	 * ServerInfo - Info regarding the channel when channels are disabled
+	 * 
+	 * @author NodinChan
+	 *
+	 */
 	public static final class ServerInfo extends Info {
 		
 		public ServerInfo() {

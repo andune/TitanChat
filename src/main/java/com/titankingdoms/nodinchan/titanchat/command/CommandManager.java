@@ -52,7 +52,7 @@ public final class CommandManager {
 	
 	private static CommandManager instance;
 	
-	private static final Debugger db = new Debugger(4);
+	private static final Debugger db = new Debugger(3);
 	
 	private final Map<String, String> aliases;
 	private final Map<String, Executor> executors;
@@ -89,7 +89,7 @@ public final class CommandManager {
 			Executor executor = getCommandExecutor(command);
 			
 			if (sender instanceof Player) {
-				if (!executor.getPermission().isEmpty() && !plugin.getPermsBridge().has((Player) sender, executor.getPermission())) {
+				if (!executor.getPermission().isEmpty() && !plugin.getPermissionsHandler().has((Player) sender, executor.getPermission())) {
 					plugin.send(MessageLevel.WARNING, sender, "You do not have permission");
 					return;
 				}
