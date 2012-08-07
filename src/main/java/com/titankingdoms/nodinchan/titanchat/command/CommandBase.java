@@ -40,6 +40,11 @@ public class CommandBase extends Loadable implements Listener {
 	
 	protected static final Debugger db = new Debugger(3);
 	
+	protected static final MessageLevel INFO = MessageLevel.INFO;
+	protected static final MessageLevel NONE = MessageLevel.NONE;
+	protected static final MessageLevel PLUGIN = MessageLevel.PLUGIN;
+	protected static final MessageLevel WARNING = MessageLevel.WARNING;
+	
 	/**
 	 * Initialises variables
 	 */
@@ -69,6 +74,13 @@ public class CommandBase extends Loadable implements Listener {
 	public final void invalidArgLength(CommandSender sender, String name) {
 		plugin.send(MessageLevel.WARNING, sender, "Invalid Argument Length");
 		usage(sender, name);
+	}
+	
+	public final boolean isOffline(CommandSender sender, OfflinePlayer player) {
+		if (player == null || !player.isOnline())
+			plugin.send(MessageLevel.WARNING, sender, getDisplayName(player) + " is offline");
+		
+		return !player.isOnline();
 	}
 	
 	/**

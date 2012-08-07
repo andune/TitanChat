@@ -5,14 +5,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -50,29 +48,25 @@ public final class CommandManager {
 	
 	private final TitanChat plugin;
 	
-	private static CommandManager instance;
-	
 	private static final Debugger db = new Debugger(3);
+	
+	private ShortcutManager shortcuts;
 	
 	private final Map<String, String> aliases;
 	private final Map<String, Executor> executors;
-	
-	private Dynamic dynamic;
 	
 	/**
 	 * Initialises variables
 	 */
 	public CommandManager() {
 		this.plugin = TitanChat.getInstance();
-		CommandManager.instance = this;
 		
 		if (getCommandDir().mkdir())
-			plugin.log(Level.INFO, "Creating commands directory");
+			plugin.log(Level.INFO, "Creating commands directory...");
 		
+		this.shortcuts = new ShortcutManager();
 		this.executors = new LinkedHashMap<String, Executor>();
 		this.aliases = new LinkedHashMap<String, String>();
-		
-		try { this.dynamic = new Dynamic(plugin); } catch (Exception e) { e.printStackTrace(); }
 	}
 	
 	/**
@@ -85,20 +79,12 @@ public final class CommandManager {
 	 * @param args The arguments
 	 */
 	public void execute(CommandSender sender, String command, String chName, String[] args) {
-		if (getCommandExecutor(command) != null) {
+		if (hasCommand(command)) {
 			Executor executor = getCommandExecutor(command);
 			
-			if (sender instanceof Player) {
-				if (!executor.getPermission().isEmpty() && !plugin.getPermissionsHandler().has((Player) sender, executor.getPermission())) {
-					plugin.send(MessageLevel.WARNING, sender, "You do not have permission");
-					return;
-				}
-				
-			} else {
-				if (!executor.allowServer()) {
-					plugin.send(MessageLevel.WARNING, sender, "Please use this command in game");
-					return;
-				}
+			if (!(sender instanceof Player) && !executor.allowServer()) {
+				plugin.send(MessageLevel.WARNING, sender, "Please use this command in game");
+				return;
 			}
 			
 			Channel channel = null;
@@ -213,21 +199,21 @@ public final class CommandManager {
 	}
 	
 	/**
-	 * Gets the dynamic command registrator
+	 * Check if the command exists
 	 * 
-	 * @return The dynamic command registrator
+	 * @param alias The alias
+	 * 
+	 * @return True if the command exists
 	 */
-	public Dynamic getDynamic() {
-		return dynamic;
+	public boolean hasCommand(String alias) {
+		if (alias == null || !aliases.containsKey(alias.toLowerCase()))
+			return false;
+		
+		return aliases.get(alias) != null && aliases.containsKey(aliases.get(alias.toLowerCase()));
 	}
 	
-	/**
-	 * Gets an instance of this
-	 * 
-	 * @return CommandManager instance
-	 */
-	public CommandManager getInstance() {
-		return instance;
+	public ShortcutManager getShortcutManager() {
+		return shortcuts;
 	}
 	
 	/**
@@ -307,90 +293,5 @@ public final class CommandManager {
 	 */
 	public void unload() {
 		executors.clear();
-	}
-	
-	/**
-	 * Dynamic - For dynamic command registration of channels
-	 * 
-	 * @author NodinChan
-	 *
-	 */
-	public final class Dynamic implements CommandExecutor {
-		
-		private final TitanChat plugin;
-		
-		private final com.nodinchan.ncbukkit.command.CommandManager dynamic;
-		
-		private final Map<String, Channel> joinCommand;
-		private final Map<String, Channel> sendCommand;
-		
-		public Dynamic(TitanChat plugin) throws Exception {
-			this.plugin = plugin;
-			this.dynamic = new com.nodinchan.ncbukkit.command.CommandManager(plugin);
-			this.joinCommand = new HashMap<String, Channel>();
-			this.sendCommand = new HashMap<String, Channel>();
-		}
-		
-		/**
-		 * Loads the commands for the Channel
-		 * 
-		 * @param channel The Channel to be loaded
-		 */
-		public void load(Channel channel) {
-			if (!channel.getConfig().getString("commands.join").equals("")) {
-				String cmd = channel.getConfig().getString("commands.join");
-				registerJoin(cmd, channel);
-			}
-			
-			if (!channel.getConfig().getString("commands.message").equals("")) {
-				String cmd = channel.getConfig().getString("commands.message");
-				registerSend(cmd, channel);
-			}
-		}
-		
-		public boolean onCommand(CommandSender sender, org.bukkit.command.Command cmd, String label, String[] args) {
-			if (joinCommand.get(cmd.getName().toLowerCase()) != null) {
-				plugin.getServer().dispatchCommand(sender, "titanchat join " + joinCommand.get(cmd.getName().toLowerCase()).getName());
-				return true;
-			}
-			
-			if (sendCommand.get(cmd.getName().toLowerCase()) != null) {
-				StringBuilder str = new StringBuilder();
-				
-				for (String arg : args) {
-					if (str.length() > 0)
-						str.append(" ");
-					
-					str.append(arg);
-				}
-				
-				plugin.getServer().dispatchCommand(sender, "titanchat send " + sendCommand.get(cmd.getName().toLowerCase()).getName() + " " + str.toString());
-				return true;
-			}
-			
-			return false;
-		}
-		
-		public void registerJoin(String cmd, Channel channel) {
-			com.nodinchan.ncbukkit.command.PluginCommand command = dynamic.registerCommand(cmd);
-			
-			if (command != null) {
-				command.setExecutor(this);
-				command.setDescription("Joins the channel");
-				command.setUsage("/<command>");
-				joinCommand.put(cmd.toLowerCase(), channel);
-			}
-		}
-		
-		public void registerSend(String cmd, Channel channel) {
-			com.nodinchan.ncbukkit.command.PluginCommand command = dynamic.registerCommand(cmd);
-			
-			if (command != null) {
-				command.setExecutor(this);
-				command.setDescription("Sends a message to the channel");
-				command.setUsage("/<command>");
-				sendCommand.put(cmd.toLowerCase(), channel);
-			}
-		}
 	}
 }

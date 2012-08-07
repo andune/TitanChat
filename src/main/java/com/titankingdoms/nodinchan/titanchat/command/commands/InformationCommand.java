@@ -1,7 +1,6 @@
 package com.titankingdoms.nodinchan.titanchat.command.commands;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.bukkit.ChatColor;
@@ -65,7 +64,7 @@ public class InformationCommand extends CommandBase {
 			addons.append(addon.getName());
 		}
 		
-		String[] addonLines = plugin.getFormatHandler().regroup("Addons: %message", addons.toString());
+		String[] addonLines = plugin.getFormatHandler().splitAndFormat("Addons: %", "%", addons.toString());
 		
 		StringBuilder types = new StringBuilder();
 		
@@ -79,7 +78,7 @@ public class InformationCommand extends CommandBase {
 			types.append(type.getType());
 		}
 		
-		String[] typeLines = plugin.getFormatHandler().regroup("Custom Types: %message", types.toString());
+		String[] typeLines = plugin.getFormatHandler().splitAndFormat("Custom Types: %", "%", types.toString());
 		
 		StringBuilder channels = new StringBuilder();
 		
@@ -93,14 +92,11 @@ public class InformationCommand extends CommandBase {
 			channels.append(customChannel.getName());
 		}
 		
-		String[] channelLines = plugin.getFormatHandler().regroup("Custom Channels: %message", channels.toString());
+		String[] channelLines = plugin.getFormatHandler().splitAndFormat("Custom Channels: %", "%", channels.toString());
 		
-		sender.sendMessage("Addons: " + addonLines[0]);
-		sender.sendMessage(Arrays.copyOfRange(addonLines, 1, addonLines.length));
-		sender.sendMessage("Custom Types: " + typeLines[0]);
-		sender.sendMessage(Arrays.copyOfRange(typeLines, 1, typeLines.length));
-		sender.sendMessage("Custom Channels: " + channelLines[0]);
-		sender.sendMessage(Arrays.copyOfRange(channelLines, 1, channelLines.length));
+		sender.sendMessage(addonLines);
+		sender.sendMessage(typeLines);
+		sender.sendMessage(channelLines);
 	}
 	
 	/**
@@ -238,10 +234,9 @@ public class InformationCommand extends CommandBase {
 				participants.add(ChatColor.RED + participant.getName());
 		}
 		
-		String[] participantLines = plugin.getFormatHandler().regroup(ChatColor.AQUA + "Participants: %message", plugin.createList(participants));
+		String[] participantLines = plugin.getFormatHandler().splitAndFormat(ChatColor.AQUA + "Participants: %", "%", plugin.createList(participants));
 		
-		sender.sendMessage(ChatColor.AQUA + "Participants: " + participantLines[0]);
-		sender.sendMessage(Arrays.copyOfRange(participantLines, 1, participantLines.length));
+		sender.sendMessage(participantLines);
 	}
 	
 	/**

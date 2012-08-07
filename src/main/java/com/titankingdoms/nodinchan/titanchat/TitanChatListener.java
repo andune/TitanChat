@@ -9,14 +9,12 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.SignChangeEvent;
-import org.bukkit.event.player.PlayerChatEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
-import com.titankingdoms.nodinchan.titanchat.TitanChat.MessageLevel;
-import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.util.Participant;
 import com.titankingdoms.nodinchan.titanchat.event.chat.MessageSendEvent;
 
@@ -87,16 +85,20 @@ public class TitanChatListener implements Listener {
 	}
 	
 	/**
-	 * Listens to the PlayerChatEvent
+	 * Listens to the PlayerCommandPreprocessEvent
 	 * 
-	 * @param event PlayerChatEvent
+	 * @param event PlayerCommandPreprocessEvent
 	 */
-	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-	public void onPlayerChat(PlayerChatEvent event) {
-		event.setCancelled(true);
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
+		if (plugin.getServer().getPluginCommand(event.getMessage().split(" ")[0]) != null)
+			return;
 		
-		ChatPacket packet = new ChatPacket(event.getPlayer(), event.getMessage());
-		plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, packet);
+		Player player = event.getPlayer();
+		String command = event.getMessage().split(" ")[0];
+		String[] args = event.getMessage().substring(command.length()).trim().split(" ");
+		
+		plugin.getManager().getCommandManager().getShortcutManager().handled(player, command, args);
 	}
 	
 	/**
@@ -151,43 +153,5 @@ public class TitanChatListener implements Listener {
 		
 		player.sendMessage(plugin.getFormatHandler().colourise("&6" + newVer + " &5is out! You are running &6" + currentVer));
 		player.sendMessage(plugin.getFormatHandler().colourise("&5Update at &9http://dev.bukkit.org/server-mods/titanchat"));
-	}
-	
-	/**
-	 * ChatPacket - Created when chat has to be processed
-	 * 
-	 * @author NodinChan
-	 *
-	 */
-	public final class ChatPacket implements Runnable {
-		
-		private final TitanChat plugin;
-		
-		private final Player sender;
-		
-		private final String message;
-		
-		public ChatPacket(Player sender, String message) {
-			this.plugin = TitanChat.getInstance();
-			this.sender = sender;
-			this.message = message;
-		}
-		
-		public void run() {
-			Channel channel = plugin.getManager().getChannelManager().getChannel(sender);
-			
-			if (channel == null) {
-				plugin.send(MessageLevel.WARNING, sender, "You are not in a channel, please join one to chat");
-				return;
-			}
-			
-			if (plugin.voiceless(sender, channel, true))
-				return;
-			
-			String log = channel.sendMessage(sender, message);
-			
-			if (log != null && !log.equals(""))
-				plugin.chatLog(log);
-		}
 	}
 }

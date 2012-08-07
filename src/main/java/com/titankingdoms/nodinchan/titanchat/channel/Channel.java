@@ -3,7 +3,6 @@ package com.titankingdoms.nodinchan.titanchat.channel;
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +26,7 @@ import com.titankingdoms.nodinchan.titanchat.event.chat.MessageConsoleEvent;
 import com.titankingdoms.nodinchan.titanchat.event.chat.MessageReceiveEvent;
 import com.titankingdoms.nodinchan.titanchat.event.chat.MessageSendEvent;
 import com.titankingdoms.nodinchan.titanchat.event.util.Message;
+import com.titankingdoms.nodinchan.titanchat.processing.ChatPacket;
 import com.titankingdoms.nodinchan.titanchat.util.Debugger;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
@@ -248,6 +248,18 @@ public abstract class Channel extends Loadable {
 		return handler.handleCommand(sender, command, args);
 	}
 	
+	public boolean isAdmin(String name) {
+		return admins.contains(name);
+	}
+	
+	public boolean isBlacklisted(String name) {
+		return blacklist.contains(name);
+	}
+	
+	public boolean isFollower(String name) {
+		return followers.contains(name);
+	}
+	
 	/**
 	 * Check if a participant by the specified name is participating in the channel
 	 * 
@@ -257,6 +269,10 @@ public abstract class Channel extends Loadable {
 	 */
 	public boolean isParticipating(String name) {
 		return participants.containsKey(name.toLowerCase());
+	}
+	
+	public boolean isWhitelisted(String name) {
+		return whitelist.contains(name);
 	}
 	
 	/**
@@ -384,14 +400,11 @@ public abstract class Channel extends Loadable {
 	}
 	
 	public void send(String message) {
-		String[] lines = plugin.getFormatHandler().regroup("", message);
+		String[] lines = plugin.getFormatHandler().split(message);
 		
-		for (Participant participant : getParticipants()) {
-			if (participant.getPlayer() != null) {
-				participant.getPlayer().sendMessage(lines[0]);
-				participant.getPlayer().sendMessage(Arrays.copyOfRange(lines, 1, lines.length));
-			}
-		}
+		for (Participant participant : getParticipants())
+			if (participant.getPlayer() != null)
+				participant.getPlayer().sendMessage(lines);
 	}
 	
 	public void send(String... messages) {
@@ -419,12 +432,13 @@ public abstract class Channel extends Loadable {
 		MessageReceiveEvent receiveEvent = new MessageReceiveEvent(sender, sendEvent.getRecipants(), new Message(sendEvent.getFormat(), sendEvent.getMessage()));
 		plugin.getServer().getPluginManager().callEvent(receiveEvent);
 		
-		for (Player recipant : receiveEvent.getRecipants()) {
-			String[] lines = plugin.getFormatHandler().regroup(receiveEvent.getFormat(recipant), receiveEvent.getMessage(recipant));
-			
-			recipant.sendMessage(receiveEvent.getFormat(recipant).replace("%message", lines[0]));
-			recipant.sendMessage(Arrays.copyOfRange(lines, 1, lines.length));
-		}
+		Map<String, Message> chat = new HashMap<String, Message>();
+		
+		for (Player recipant : receiveEvent.getRecipants())
+			chat.put(recipant.getName(), new Message(receiveEvent.getFormat(recipant), receiveEvent.getMessage(recipant)));
+		
+		ChatPacket packet = new ChatPacket(chat);
+		plugin.getChatProcessor().addPacket(packet);
 		
 		MessageConsoleEvent consoleEvent = new MessageConsoleEvent(sender, new Message(sendEvent.getFormat(), sendEvent.getMessage()));
 		plugin.getServer().getPluginManager().callEvent(consoleEvent);

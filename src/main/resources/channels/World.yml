@@ -1,12 +1,12 @@
-tag: '[Pub]'
-chat-display-colour: '&a'
+tag: '[W]'
+chat-display-colour: '&9'
 type: 'Standard'
 option: 'none'
-aliases: [pub]
-topic: 'Welcome to Public Channel || No passwords or whitelists'
+aliases: [w]
+topic: 'Welcome to the world channel || Chat is sent to players in the same world'
 setting:
     colouring: false
-    range: 'channel'
+    range: 'world'
     radius: 15
     whitelist: false
     messages:
@@ -15,8 +15,8 @@ setting:
 password: ''
 format: ''
 command:
-    join: 'pu'
-    send: 'pus'
+    join: 'w'
+    send: 'ws'
 admins: []
 blacklist: []
 followers: []

@@ -1,12 +1,12 @@
-tag: '[Pub]'
-chat-display-colour: '&a'
+tag: '[L]'
+chat-display-colour: '&2'
 type: 'Standard'
 option: 'none'
-aliases: [pub]
-topic: 'Welcome to Public Channel || No passwords or whitelists'
+aliases: [l]
+topic: 'Welcome to the local channel || Chat is sent to players within a radius of 15 blocks'
 setting:
-    colouring: false
-    range: 'channel'
+    colouring: true
+    range: 'local'
     radius: 15
     whitelist: false
     messages:
@@ -15,8 +15,8 @@ setting:
 password: ''
 format: ''
 command:
-    join: 'pu'
-    send: 'pus'
+    join: 'l'
+    send: 'ls'
 admins: []
 blacklist: []
 followers: []

@@ -2,6 +2,7 @@ package com.titankingdoms.nodinchan.titanchat.command.commands;
 
 import java.nio.channels.Channel;
 
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -46,25 +47,27 @@ public class DisplayNameCommand extends CommandBase {
 	 */
 	@Command(server = true)
 	@Description("Checks the real username of you or of the player")
-	@Permission("TitanChat.nick.check")
 	@Usage("name <player>")
 	public void name(CommandSender sender, Channel channel, String[] args) {
-		try {
-			if (!(sender instanceof Player)) {
-				DisplayName display = plugin.getDatabase().find(DisplayName.class).where().ieq("displayname", args[0]).findUnique();
+		if (hasPermission(sender, "TitanChat.nick.check")) {
+			try {
+				if (!(sender instanceof Player)) {
+					DisplayName display = plugin.getDatabase().find(DisplayName.class).where().ieq("displayname", args[0]).findUnique();
+					
+					if (display != null)
+						plugin.send(MessageLevel.INFO, sender, "The real username of " + args[0] + " is " + display.getName());
+					else
+						plugin.send(MessageLevel.WARNING, sender, "No such player with the display name of " + args[0]);
+				}
 				
-				if (display != null)
-					plugin.send(MessageLevel.INFO, sender, "The real username of " + args[0] + " is " + display.getName());
+			} catch (IndexOutOfBoundsException e) {
+				if (sender instanceof Player)
+					plugin.send(MessageLevel.INFO, sender, "Your real username is " + sender.getName());
 				else
-					plugin.send(MessageLevel.WARNING, sender, "No such player with the display name of " + args[0]);
+					plugin.send(MessageLevel.INFO, sender, "You do not have a username");
 			}
 			
-		} catch (IndexOutOfBoundsException e) {
-			if (sender instanceof Player)
-				plugin.send(MessageLevel.INFO, sender, "Your real username is " + sender.getName());
-			else
-				plugin.send(MessageLevel.INFO, sender, "You do not have a username");
-		}
+		} else { plugin.send(WARNING, sender, "You do not have permission"); }
 	}
 	
 	/**
@@ -72,7 +75,6 @@ public class DisplayNameCommand extends CommandBase {
 	 */
 	@Command(server = true)
 	@Description("Sets your or your target's display name")
-	@Permission("TitanChat.nick.change")
 	@Usage("nick [displayname] <player>")
 	public void nick(CommandSender sender, Channel channel, String[] args) {
 		if (args.length < 1) { invalidArgLength(sender, "nick"); return; }
@@ -99,28 +101,34 @@ public class DisplayNameCommand extends CommandBase {
 		String targetName = displaynameStr.toString().substring(closeQ + 1).trim().split(" ")[0];
 		
 		if (!targetName.isEmpty()) {
-			Player targetPlayer = plugin.getPlayer(targetName);
-			
-			if (targetPlayer != null) {
-				plugin.send(MessageLevel.INFO, sender, targetPlayer.getDisplayName() + " is now known as " + displayname);
-				dnc.set(targetPlayer, displayname);
+			if (hasPermission(sender, "TitanChat.nick.change.other")) {
+				OfflinePlayer targetPlayer = plugin.getOfflinePlayer(targetName);
 				
-				if (sender instanceof Player)
-					plugin.send(MessageLevel.INFO, targetPlayer, ((Player) sender).getDisplayName() + " changed your display name to " + displayname);
-				else
-					plugin.send(MessageLevel.INFO, targetPlayer, sender.getName() + " changed your display name to " + displayname);
+				if (targetPlayer.isOnline()) {
+					plugin.send(MessageLevel.INFO, sender, targetPlayer.getPlayer().getDisplayName() + " is now known as " + displayname);
+					dnc.set(targetPlayer.getPlayer(), displayname);
+					
+					if (sender instanceof Player)
+						plugin.send(MessageLevel.INFO, targetPlayer.getPlayer(), ((Player) sender).getDisplayName() + " changed your display name to " + displayname);
+					else
+						plugin.send(MessageLevel.INFO, targetPlayer.getPlayer(), sender.getName() + " changed your display name to " + displayname);
+					
+					dnc.save(targetPlayer.getPlayer());
+					
+				} else { plugin.send(MessageLevel.WARNING, sender, getDisplayName(targetPlayer) + " is offline"); }
 				
-				dnc.save(targetPlayer);
-				
-			} else { plugin.send(MessageLevel.WARNING, sender, "Player not online"); }
+			} else { plugin.send(WARNING, sender, "You do not have permission"); }
 			
 		} else {
-			if (sender instanceof Player) {
-				plugin.send(MessageLevel.INFO, sender, "You are now known as " + displayname);
-				dnc.set((Player) sender, displayname);
-				dnc.save((Player) sender);
+			if (hasPermission(sender, "TitanChat.nick.change")) {
+				if (sender instanceof Player) {
+					plugin.send(MessageLevel.INFO, sender, "You are now known as " + displayname);
+					dnc.set((Player) sender, displayname);
+					dnc.save((Player) sender);
+					
+				} else { plugin.send(MessageLevel.WARNING, sender, "You cannot change your display name"); }
 				
-			} else { plugin.send(MessageLevel.WARNING, sender, "You cannot change your display name"); }
+			} else { plugin.send(WARNING, sender, "You do not have permission"); }
 		}
 	}
 	
@@ -129,25 +137,30 @@ public class DisplayNameCommand extends CommandBase {
 	 */
 	@Command(server = true)
 	@Description("Resets your or your target's display name")
-	@Permission("TitanChat.nick.reset")
 	@Usage("reset <player>")
 	public void reset(CommandSender sender, Channel channel, String[] args) {
 		try {
-			Player targetPlayer = plugin.getPlayer(args[0]);
-			
-			if (targetPlayer != null) {
-				plugin.send(MessageLevel.INFO, sender, targetPlayer.getDisplayName() + " is now known as " + targetPlayer.getName());
-				dnc.set(targetPlayer, targetPlayer.getName());
-				dnc.save(targetPlayer);
-				plugin.send(MessageLevel.INFO, targetPlayer, "You are now known as " + targetPlayer.getName());
+			if (hasPermission(sender, "TitanChat.nick.reset.other")) {
+				OfflinePlayer targetPlayer = plugin.getOfflinePlayer(args[0]);
 				
-			} else { plugin.send(MessageLevel.WARNING, sender, "Player not online"); }
+				if (targetPlayer.isOnline()) {
+					plugin.send(MessageLevel.INFO, sender, targetPlayer.getPlayer().getDisplayName() + " is now known as " + targetPlayer.getName());
+					dnc.set(targetPlayer.getPlayer(), targetPlayer.getName());
+					dnc.save(targetPlayer.getPlayer());
+					plugin.send(MessageLevel.INFO, targetPlayer.getPlayer(), "You are now known as " + targetPlayer.getName());
+					
+				} else { plugin.send(MessageLevel.WARNING, sender, getDisplayName(targetPlayer) + " is offline"); }
+				
+			} else { plugin.send(WARNING, sender, "You do not have permission"); }
 			
 		} catch (IndexOutOfBoundsException e) {
 			if (sender instanceof Player) {
-				plugin.send(MessageLevel.INFO, sender, "You are now known as " + sender.getName());
-				dnc.set((Player) sender, sender.getName());
-				dnc.save((Player) sender);
+				if (hasPermission(sender, "TitanChat.nick.reset")) {
+					plugin.send(MessageLevel.INFO, sender, "You are now known as " + sender.getName());
+					dnc.set((Player) sender, sender.getName());
+					dnc.save((Player) sender);
+					
+				} else { plugin.send(WARNING, sender, "You do not have permission"); }
 				
 			} else { plugin.send(MessageLevel.WARNING, sender, "You cannot reset your display name"); }
 		}

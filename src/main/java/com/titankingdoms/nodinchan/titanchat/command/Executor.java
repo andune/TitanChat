@@ -18,7 +18,6 @@ public final class Executor {
 	private final String name;
 	private String[] aliases = new String[0];
 	private String description = "";
-	private String permission = "";
 	private String usage = "";
 	
 	private final boolean channel;
@@ -37,9 +36,6 @@ public final class Executor {
 		
 		if (method.isAnnotationPresent(Description.class))
 			this.description = method.getAnnotation(Description.class).value();
-		
-		if (method.isAnnotationPresent(Permission.class))
-			this.permission = method.getAnnotation(Permission.class).value();
 		
 		if (method.isAnnotationPresent(Usage.class))
 			this.usage = method.getAnnotation(Usage.class).value();
@@ -141,15 +137,6 @@ public final class Executor {
 	 */
 	public String getName() {
 		return name;
-	}
-	
-	/**
-	 * Gets the permission of the command
-	 * 
-	 * @return The command permission
-	 */
-	public String getPermission() {
-		return permission;
 	}
 	
 	/**

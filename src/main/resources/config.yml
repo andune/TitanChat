@@ -23,6 +23,10 @@ logging:
     colouring: true
     debug: none
 chat:
+    serverToChannel: '%tag &4Server: %message'
+    channel-emote:
+        enable: true
+        format: '* %player %action'
     player:
         enable: true
         broadcast: '[&cBroadcast&f] %player: %message'

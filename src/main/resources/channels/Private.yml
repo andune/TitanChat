@@ -1,19 +1,22 @@
 tag: '[Priv]'
 chat-display-colour: '&b'
-name-display-colour: '&b'
 type: 'Standard'
 option: 'none'
 aliases: [priv]
 topic: 'Welcome to Private Channel || This channel is whitelist only'
 setting:
     colouring: false
-    global: false
+    range: 'channel'
+    radius: 15
     whitelist: true
     messages:
         join: true
         leave: true
 password: ''
 format: ''
+command:
+    join: 'pr'
+    send: 'prs'
 admins: []
 blacklist: []
 followers: []

@@ -1,13 +1,12 @@
 tag: ''
 chat-display-colour: ''
-name-display-colour: ''
 type: 'Standard'
 option: 'none'
 aliases: []
 topic: ''
 setting:
     colouring: false
-    range: channel
+    range: 'channel'
     radius: 15
     whitelist: false
     messages:
@@ -15,6 +14,9 @@ setting:
         leave: true
 password: ''
 format: ''
+command:
+    join: ''
+    send: ''
 admins: []
 blacklist: []
 followers: []

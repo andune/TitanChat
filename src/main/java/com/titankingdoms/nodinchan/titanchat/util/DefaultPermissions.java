@@ -65,7 +65,7 @@ public final class DefaultPermissions {
 		pm.getPermission("TitanChat.nick.reset").addParent("TitanChat.nick.reset.other", true);
 		pm.getPermission("TitanChat.nick.reset.other").addParent("TitanChat.nick", true);
 		
-		Permission join = new Permission("TitanChat.join.*", "Grants permission to join all channels");
+		Permission join = new Permission("TitanChat.join.*", "Grants permission to join all channels", ALL);
 		pm.addPermission(join);
 		join.addParent(staff, true);
 		
@@ -93,21 +93,17 @@ public final class DefaultPermissions {
 		pm.addPermission(rank);
 		rank.addParent(staff, true);
 		
-		Permission colour = new Permission("TitanChat.colour.*", "Grants permission to colour usage in all channels");
-		pm.addPermission(colour);
-		colour.addParent(staff, true);
+		Permission format = new Permission("TitanChat.format", "Grants permission to format code usage");
+		pm.addPermission(format);
+		format.addParent(staff, true);
 		
-		Permission style = new Permission("TitanChat.style.*", "Grants permission to style usage in all channels");
-		pm.addPermission(style);
-		style.addParent(staff, true);
-		
-		Permission codes = new Permission("TitanChat.colourstyles.*", "Grants permission to all colours and styles");
+		Permission codes = new Permission("TitanChat.format.*", "Grants permission to all format codes");
 		pm.addPermission(codes);
 		codes.addParent(staff, true);
 		
 		for (ChatColor colourStyle : EnumSet.allOf(ChatColor.class)) {
 			char colourC = colourStyle.getChar();
-			Permission code = new Permission("TitanChat.colourstyle.&" + colourC, "Grants permission to &" + colourC);
+			Permission code = new Permission("TitanChat.format.&" + colourC, "Grants permission to the format code");
 			pm.addPermission(code);
 			code.addParent(codes, true);
 		}

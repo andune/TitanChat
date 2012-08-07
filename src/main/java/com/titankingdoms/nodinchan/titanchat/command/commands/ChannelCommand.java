@@ -3,7 +3,6 @@ package com.titankingdoms.nodinchan.titanchat.command.commands;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.titankingdoms.nodinchan.titanchat.TitanChat.MessageLevel;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel.Option;
@@ -46,7 +45,6 @@ public class ChannelCommand extends CommandBase {
 	@Command(server = true)
 	@Aliases("c")
 	@Description("Creates a new channel")
-	@Permission("TitanChat.create")
 	@Usage("create [channel]")
 	public void create(CommandSender sender, Channel channel, String[] args) {
 		if (args.length < 1) { invalidArgLength(sender, "create"); return; }
@@ -56,29 +54,27 @@ public class ChannelCommand extends CommandBase {
 		
 		try { if (!args[1].isEmpty()) type = args[1]; } catch (IndexOutOfBoundsException e) {}
 		
-		if (name.isEmpty()) {
-			plugin.send(MessageLevel.WARNING, sender, "Invalid channel name - Empty");
-			return;
-		}
-		
-		if (!cm.nameCheck(name)) {
-			plugin.send(MessageLevel.WARNING, sender, "Channel names cannot contain \\, /, :. *, ?, \", <, > or |");
-			return;
-		}
-		
-		if (cm.exists(name)) {
-			plugin.send(MessageLevel.WARNING, sender, "Channel already exists");
-			return;
-		}
-		
-		if (plugin.getConfig().getInt("channels.channel-limit", -1) >= 0) {
-			if (cm.getChannels().size() >= plugin.getConfig().getInt("channel.channel-limit", -1)) {
-				plugin.send(MessageLevel.WARNING, sender, "Cannot create channel - Limit passed");
-				return;
-			}
-		}
-		
-		cm.createChannel(sender, name, type);
+		if (hasPermission(sender, "TitanChat.create")) {
+			if (!name.isEmpty()) {
+				if (cm.nameCheck(name)) {
+					if (!cm.exists(name)) {
+						if (cm.getType(type) != null) {
+							int limit = plugin.getConfig().getInt("channel.channel-limit", -1);
+							
+							if (limit < 0 || cm.getChannels().size() < limit) {
+								cm.createChannel(sender, name, type);
+								
+							} else { plugin.send(WARNING, sender, "Cannot create channel - Limit passed"); }
+							
+						} else { plugin.send(WARNING, sender, "Invalid channel type"); }
+						
+					} else { plugin.send(WARNING, sender, "Channel already exists"); }
+					
+				} else { plugin.send(WARNING, sender, "Channel names cannot contain \\, /, :. *, ?, \", <, > or |"); }
+				
+			} else { plugin.send(WARNING, sender, "Invalid channel name - Empty"); }
+			
+		} else { plugin.send(WARNING, sender, "You do not have permission"); }
 	}
 	
 	/**
@@ -87,13 +83,15 @@ public class ChannelCommand extends CommandBase {
 	@Command(channel = true, server = true)
 	@Aliases("d")
 	@Description("Deletes the channel")
-	@Permission("TitanChat.delete")
 	@Usage("delete")
 	public void delete(CommandSender sender, Channel channel, String[] args) {
-		if (channel.getOption().equals(Option.NONE))
-			cm.deleteChannel(sender, channel.getName());
-		else
-			plugin.send(MessageLevel.WARNING, sender, "You cannot delete this channel");
+		if (hasPermission(sender, "TitanChat.delete")) {
+			if (channel.getOption().equals(Option.NONE))
+				cm.deleteChannel(sender, channel.getName());
+			else
+				plugin.send(WARNING, sender, "You cannot delete this channel");
+			
+		} else { plugin.send(WARNING, sender, "You do not have permission"); }
 	}
 	
 	/**
@@ -107,15 +105,15 @@ public class ChannelCommand extends CommandBase {
 			return;
 		
 		if (channel.access(player)) {
-			if (!channel.getFollowers().contains(player.getName())) {
+			if (!channel.isFollower(player.getName())) {
 				channel.getFollowers().add(player.getName());
 				channel.save();
 				
-				plugin.send(MessageLevel.INFO, player, "You have followed " + channel.getName());
+				plugin.send(INFO, player, "You have followed " + channel.getName());
 				
-			} else { plugin.send(MessageLevel.WARNING, player, "You are already following " + channel.getName()); }
+			} else { plugin.send(WARNING, player, "You are already following " + channel.getName()); }
 			
-		} else { plugin.send(MessageLevel.WARNING, player, "You do not have access"); }
+		} else { plugin.send(WARNING, player, "You do not have access"); }
 	}
 	
 	/**
@@ -134,8 +132,8 @@ public class ChannelCommand extends CommandBase {
 			return;
 		}
 		
-		if (!(hasPermission(player, "TitanChat.access.*") || hasPermission(player, "TitanChat.access." + channel.getName()))) {
-			if (channel.getPassword() != null && !channel.getPassword().equals("")) {
+		if (hasPermission(player, "TitanChat.join." + channel.getName())) {
+			if (channel.getPassword() != null && !channel.getPassword().isEmpty()) {
 				try {
 					String password = args[0];
 					
@@ -159,13 +157,14 @@ public class ChannelCommand extends CommandBase {
 				channel.deny(player, "You are not whitelisted");
 				return;
 			}
-		}
-		
-		if (!channel.isParticipating(player.getName())) {
-			channel.join(player);
-			plugin.send(MessageLevel.INFO, player, "You have joined " + channel.getName());
 			
-		} else { plugin.send(MessageLevel.WARNING, player, "You are already in the channel"); }
+			if (!channel.isParticipating(player.getName())) {
+				channel.join(player);
+				plugin.send(INFO, player, "You have joined " + channel.getName());
+				
+			} else { plugin.send(WARNING, player, "You are already in the channel"); }
+			
+		} else { plugin.send(WARNING, player, "You do not have permission"); }
 	}
 	
 	/**
@@ -181,9 +180,9 @@ public class ChannelCommand extends CommandBase {
 		
 		if (channel.isParticipating(player.getName())) {
 			channel.leave(player);
-			plugin.send(MessageLevel.INFO, player, "You have left " + channel.getName());
+			plugin.send(INFO, player, "You have left " + channel.getName());
 			
-		} else { plugin.send(MessageLevel.WARNING, player, "You are not in the channel"); }
+		} else { plugin.send(WARNING, player, "You are not in the channel"); }
 	}
 	
 	/**
@@ -197,14 +196,14 @@ public class ChannelCommand extends CommandBase {
 			return;
 		
 		if (channel.access(player)) {
-			if (channel.getFollowers().contains(player.getName())) {
+			if (channel.isFollower(player.getName())) {
 				channel.getFollowers().remove(player.getName());
 				channel.save();
 				
-				plugin.send(MessageLevel.INFO, player, "You have unfollowed " + channel.getName());
+				plugin.send(INFO, player, "You have unfollowed " + channel.getName());
 				
-			} else { plugin.send(MessageLevel.WARNING, player, "You are not following " + channel.getName()); }
+			} else { plugin.send(WARNING, player, "You are not following " + channel.getName()); }
 			
-		} else { plugin.send(MessageLevel.WARNING, player, "You do not have access"); }
+		} else { plugin.send(WARNING, player, "You do not have access"); }
 	}
 }

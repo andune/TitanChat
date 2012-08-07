@@ -8,42 +8,55 @@
 # &o (italic), &r (reset)                                      #
 #==============================================================#
 #                            TYPES                             #
-# password - PASSWORD PROTECTED CHANNEL, REQUIRES A PASSWORD TO#
-#            JOIN                                              #
-# private  - PRIVATE CHANNEL, ONLY ALLOWS WHITELISTED MEMBERS  #
-# public   - PUBLIC CHANNEL, ALLOWS ALL BUT BANNED             #
+# standard - STANDARD CHANNELS BUILT IN TITANCHAT              #
 #==============================================================#
-#                         SPECIAL TYPES                        #
-# default - DEFAULT CHANNEL, PLAYERS SPAWN IN HERE IF NONE IS  #
+#                           OPTIONS                            #
+# default - DEFAULT OPTION, PLAYERS SPAWN IN HERE IF NONE IS   #
 #           SET WITH PERMISSIONS                               #
-# none    - NO SPECIAL TYPE                                    #
-# staff   - STAFF CHANNEL, MOSTLY PRIVATE AND ADMINS SPAWN IN  #
-#           HERE IF DEFAULT CHANNEL FOR THE PLAYER HAS NOT BEEN#
-#           SET                                                #
+# none    - NO OPTION                                          #
+# staff   - STAFF OPTION, ONLY STAFF CAN JOIN AND STAFF        #
+#           AUTO-JOIN THIS CHANNEL IF A SPAWN CHANNEL FOR THE  #
+#           STAFF HAS NOT BEEN SET                             #
 #==============================================================#
-#                            CONFIG                            #
-# TAG                : Where you define the Channel Tag        #
-# CHAT-DISPLAY-COLOUR: Where you define the colour of the      #
-#                      message                                 #
-# NAME-DISPLAY-COLOUR: Where you define the colour of the      #
-#                      player name                             #
-# TYPE               : Where you define the type of the channel#
-# SPECIAL-TYPE       : Where you define the special type of the#
-#                      channel                                 #
-# GLOBAL             : Where you define whether the channel    #
-#                      sends the message server-wide           #
-# COLOUR-CODE        : Where you define whether the channel    #
-#                      converts colour codes                   #
-# PASSWORD           : Where you define the password of the    #
-#                      channel if its type is 'password'       #
-# FORMAT             : Where you define the format of the      #
-#                      channel if you want a different format  #
-# MESSAGES.JOIN      : Where you define if the channel sends   #
-#                      channel join messages                   #
-# MESSAGES.LEAVE     : Where you define if the channel sends   #
-#                      channel leave messages                  #
-# COMMANDS.JOIN      : Where you define the shortcut command of#
-#                      joining the channel                     #
-# COMMANDS.MESSAGE   : Where you define the shortcut command of#
-#                      sending messages to the channel         #
+#                           RANGES                             #
+# channel - CHANNEL RANGE, SEND CHAT TO PLAYERS IN THE CHANNEL #
+#           AND TO THOSE WHO ARE FOLLOWING THE CHANNEL         #
+# global  - GLOBAL RANGE, SEND CHAT TO ALL PLAYERS ON THE      #
+#           SERVER                                             #
+# local   - LOCAL RANGE, SEND CHAT TO ALL PLAYERS WITHIN A     #
+#           BLOCK RADIUS OF THE PLAYER                         #
+# world   - WORLD RANGE, SEND CHAT TO ALL PLAYERS IN THE SAME  #
+#           WORLD                                              #
+#==============================================================#
+#                           CONFIG                             #
+# TAG                   : Where you define the Channel Tag     #
+# CHAT-DISPLAY-COLOUR   : Where you define the colour of the   #
+#                         message                              #
+# TYPE                  : Where you define the type of the     #
+#                         channel                              #
+# OPTION                : Where you define the option for the  #
+#                         channel                              #
+# ALIASES               : Where you define the aliases for the #
+#                         channel where it can be used in place#
+#                         of its name                          #
+# SETTING.COLOURING     : Where you define whether the channel #
+#                         formats colour codes                 #
+# SETTING.RANGE         : Where you define the range of the    #
+#                         channel                              #
+# SETTING.RADIUS        : Where you define the radius of the   #
+#                         channel and used only if the range is#
+#                         local                                #
+# SETTING.WHITELIST     : Where you define whether the channel #
+#                         is whitelist only                    #
+# SETTING.MESSAGES.JOIN : Where you define if the channel sends#
+#                         channel join messages                #
+# SETTING.MESSAGES.LEAVE: Where you define if the channel sends#
+#                         channel leave messages               #
+# PASSWORD              : Where you define the password of the #
+#                         channel                              #
+# FORMAT                : Where you define the format of the   #
+#                         channel if you want a different      #
+#                         format                               #
+# COMMAND.*             : Where you define custom commands for #
+#                         any TitanChat commands by listing it #
 #==============================================================#

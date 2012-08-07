@@ -32,6 +32,7 @@ import com.titankingdoms.nodinchan.titanchat.event.util.Message;
 import com.titankingdoms.nodinchan.titanchat.metrics.Metrics;
 import com.titankingdoms.nodinchan.titanchat.metrics.Metrics.Graph;
 import com.titankingdoms.nodinchan.titanchat.metrics.Metrics.Plotter;
+import com.titankingdoms.nodinchan.titanchat.processing.ChatProcessor;
 import com.titankingdoms.nodinchan.titanchat.util.Debugger;
 import com.titankingdoms.nodinchan.titanchat.util.DefaultPermissions;
 import com.titankingdoms.nodinchan.titanchat.util.FormatHandler;
@@ -70,6 +71,8 @@ public final class TitanChat extends JavaPlugin {
 	
 	private static final Logger log = Logger.getLogger("TitanLog");
 	private static final Debugger db = new Debugger(0);
+	
+	private ChatProcessor processor;
 	
 	private TitanChatListener listener;
 	private TitanChatManager manager;
@@ -143,6 +146,10 @@ public final class TitanChat extends JavaPlugin {
 	 */
 	public File getChannelDir() {
 		return new File(getDataFolder(), "channels");
+	}
+	
+	public ChatProcessor getChatProcessor() {
+		return processor;
 	}
 	
 	@Override
@@ -348,10 +355,13 @@ public final class TitanChat extends JavaPlugin {
 				return true;
 			}
 			
+			String command = args[0];
 			String chName = null;
 			
-			if (args[0].startsWith("@"))
+			if (args[0].startsWith("@")) {
+				command = args[1];
 				chName = args[0].substring(1);
+			}
 			
 			String[] arguments = new String[0];
 			
@@ -361,7 +371,7 @@ public final class TitanChat extends JavaPlugin {
 				arguments = Arrays.copyOfRange(args, 1, args.length);
 			
 			db.i("TitanChat: CommandManager executing command:");
-			manager.getCommandManager().execute(sender, args[0], chName, arguments);
+			manager.getCommandManager().execute(sender, command, chName, arguments);
 			return true;
 		}
 		
@@ -380,7 +390,7 @@ public final class TitanChat extends JavaPlugin {
 		}
 		
 		if (cmd.getName().equalsIgnoreCase("emote")) {
-			if (sender instanceof Player && !permHandler.has((Player) sender, "TitanChat.emote.global")) {
+			if (sender instanceof Player && !permHandler.has((Player) sender, "TitanChat.emote")) {
 				send(MessageLevel.WARNING, sender, "You do not have permission");
 				return true;
 			}
@@ -399,16 +409,14 @@ public final class TitanChat extends JavaPlugin {
 				str.append(word);
 			}
 			
-			String format = getFormatHandler().emoteFormat(sender);
+			String format = getFormatHandler().emoteFormat(sender, "");
 			
 			EmoteEvent event = new EmoteEvent(sender, new Message(format, str.toString()));
 			getServer().getPluginManager().callEvent(event);
 			
-			String[] lines = getFormatHandler().regroup(event.getFormat(), event.getMessage());
+			String[] lines = this.format.splitAndFormat(event.getFormat(), "%action", event.getMessage());
 			
-			getServer().broadcastMessage(event.getFormat().replace("%action", lines[0]));
-			
-			for (String line : Arrays.copyOfRange(lines, 1, lines.length))
+			for (String line : lines)
 				getServer().broadcastMessage(line);
 			
 			return true;
@@ -479,7 +487,7 @@ public final class TitanChat extends JavaPlugin {
 		}
 		
 		manager = new TitanChatManager();
-		this.defPerms = new DefaultPermissions();
+		defPerms = new DefaultPermissions();
 		displayname = new DisplayNameChanger();
 		format = new FormatHandler();
 		permHandler = new PermissionsHandler();
@@ -500,6 +508,8 @@ public final class TitanChat extends JavaPlugin {
 			return;
 		}
 		
+		processor = new ChatProcessor();
+		getServer().getPluginManager().registerEvents(processor, this);
 		log(Level.INFO, "is now enabled");
 	}
 	
