@@ -24,7 +24,7 @@ import com.avaje.ebean.validation.NotEmpty;
  */
 
 @Entity
-@Table(name = "display_Names")
+@Table(name = "display_names")
 public class DisplayName {
 	
 	@Id

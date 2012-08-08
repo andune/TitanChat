@@ -1,9 +1,15 @@
-package com.titankingdoms.nodinchan.titanchat.event;
+package com.titankingdoms.nodinchan.titanchat.event.chat;
+
+import java.util.Arrays;
+import java.util.List;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+
+import com.titankingdoms.nodinchan.titanchat.channel.Channel;
+import com.titankingdoms.nodinchan.titanchat.event.util.Message;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -22,39 +28,52 @@ import org.bukkit.event.HandlerList;
  */
 
 /**
- * MessageReceiveEvent - Called when a Player is to recieve a message
+ * MessageSendEvent - Called when a message is to be sent to a group of Players
  * 
  * @author NodinChan
  *
  */
-public final class MessageReceiveEvent extends Event implements Cancellable {
+public final class MessageSendEvent extends Event implements Cancellable {
 	
 	private static final HandlerList handlers = new HandlerList();
 	
 	private final Player sender;
-	private final Player recipant;
 	
-	private String format;
-	private String message;
+	private final Channel sentFrom;
+	
+	private final List<Player> recipants;
+	
+	private final Message message;
 	
 	private boolean cancelled = false;
 	
 	/**
-	 * Called when a Player is to recieve a message
+	 * Called when a message is to be sent to a group of Players
 	 * 
 	 * @param sender The message sender
 	 * 
-	 * @param recipant The message recipant
-	 * 
-	 * @param format The format
+	 * @param recipants The message recipants
 	 * 
 	 * @param message The message
 	 */
-	public MessageReceiveEvent(Player sender, Player recipant, String format, String message) {
+	public MessageSendEvent(Player sender, Channel sentFrom, List<Player> recipants, Message message) {
 		this.sender = sender;
-		this.recipant = recipant;
-		this.format = format;
+		this.sentFrom = sentFrom;
+		this.recipants = recipants;
 		this.message = message;
+	}
+	
+	/**
+	 * Called when a message is going to be sent to a group of Players
+	 * 
+	 * @param sender The message sender
+	 * 
+	 * @param recipants The message recipants
+	 * 
+	 * @param message The message
+	 */
+	public MessageSendEvent(Player sender, Channel sentFrom, Player[] recipants, Message message) {
+		this(sender, sentFrom, Arrays.asList(recipants), message);
 	}
 	
 	/**
@@ -63,16 +82,7 @@ public final class MessageReceiveEvent extends Event implements Cancellable {
 	 * @return The format of the message
 	 */
 	public String getFormat() {
-		return format;
-	}
-	
-	/**
-	 * Gets the entire formatted message
-	 * 
-	 * @return The formatted message
-	 */
-	public String getFormattedMessage() {
-		return format.replace("%message", message);
+		return message.getFormat();
 	}
 	
 	public static HandlerList getHandlerList() {
@@ -90,16 +100,16 @@ public final class MessageReceiveEvent extends Event implements Cancellable {
 	 * @return The message to be sent
 	 */
 	public String getMessage() {
-		return message;
+		return message.getMessage();
 	}
 	
 	/**
-	 * Gets the message recipant
+	 * Gets the message recipants
 	 * 
-	 * @return The recipant of the message
+	 * @return The recipants of the message
 	 */
-	public Player getRecipant() {
-		return recipant;
+	public List<Player> getRecipants() {
+		return recipants;
 	}
 	
 	/**
@@ -109,6 +119,15 @@ public final class MessageReceiveEvent extends Event implements Cancellable {
 	 */
 	public Player getSender() {
 		return sender;
+	}
+	
+	/**
+	 * Gets the Channel which the message was sent from
+	 * 
+	 * @return The Channel which sent the message
+	 */
+	public Channel getSentFrom() {
+		return sentFrom;
 	}
 	
 	/**
@@ -124,7 +143,7 @@ public final class MessageReceiveEvent extends Event implements Cancellable {
 	 * @param format The new format
 	 */
 	public void setFormat(String format) {
-		this.format = format;
+		this.message.setFormat(format);
 	}
 	
 	/**
@@ -133,7 +152,7 @@ public final class MessageReceiveEvent extends Event implements Cancellable {
 	 * @param message The new message
 	 */
 	public void setMessage(String message) {
-		this.message = message;
+		this.message.setMessage(message);
 	}
 	
 	/**

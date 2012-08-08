@@ -1,10 +1,14 @@
 package com.titankingdoms.nodinchan.titanchat.command.commands;
 
+import java.nio.channels.Channel;
+
+import org.bukkit.OfflinePlayer;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.titankingdoms.nodinchan.titanchat.command.Command;
-import com.titankingdoms.nodinchan.titanchat.command.CommandID;
-import com.titankingdoms.nodinchan.titanchat.command.CommandInfo;
+import com.titankingdoms.nodinchan.titanchat.TitanChat.MessageLevel;
+import com.titankingdoms.nodinchan.titanchat.command.CommandBase;
+import com.titankingdoms.nodinchan.titanchat.command.info.*;
 import com.titankingdoms.nodinchan.titanchat.util.displayname.DisplayName;
 import com.titankingdoms.nodinchan.titanchat.util.displayname.DisplayNameChanger;
 
@@ -30,7 +34,7 @@ import com.titankingdoms.nodinchan.titanchat.util.displayname.DisplayNameChanger
  * @author NodinChan
  *
  */
-public class DisplayNameCommand extends Command {
+public class DisplayNameCommand extends CommandBase {
 	
 	private final DisplayNameChanger dnc;
 	
@@ -39,133 +43,126 @@ public class DisplayNameCommand extends Command {
 	}
 	
 	/**
-	 * Name Command - Checks the real name of you or the Player
+	 * Name Command - Checks the real username of you or of the Player
 	 */
-	@CommandID(name = "Name", triggers = "name")
-	@CommandInfo(description = "Checks the real name of you or the Player", usage = "name <player>")
-	public void name(Player player, String[] args) {
-		try {
-			DisplayName display = plugin.getDatabase().find(DisplayName.class).where().ieq("displayname", args[0]).findUnique();
-			
-			if (display == null) {
-				plugin.sendWarning(player, "No such Player with the display name of " + args[0]);
-				return;
+	@Command(server = true)
+	@Description("Checks the real username of you or of the player")
+	@Usage("name <player>")
+	public void name(CommandSender sender, Channel channel, String[] args) {
+		if (hasPermission(sender, "TitanChat.nick.check")) {
+			try {
+				if (!(sender instanceof Player)) {
+					DisplayName display = plugin.getDatabase().find(DisplayName.class).where().ieq("displayname", args[0]).findUnique();
+					
+					if (display != null)
+						plugin.send(MessageLevel.INFO, sender, "The real username of " + args[0] + " is " + display.getName());
+					else
+						plugin.send(MessageLevel.WARNING, sender, "No such player with the display name of " + args[0]);
+				}
+				
+			} catch (IndexOutOfBoundsException e) {
+				if (sender instanceof Player)
+					plugin.send(MessageLevel.INFO, sender, "Your real username is " + sender.getName());
+				else
+					plugin.send(MessageLevel.INFO, sender, "You do not have a username");
 			}
 			
-			plugin.sendInfo(player, "The real username of " + args[0] + " is " + display.getName());
-			
-		} catch (IndexOutOfBoundsException e) {
-			plugin.sendInfo(player, "Your real username is " + player.getName());
-		}
+		} else { plugin.send(WARNING, sender, "You do not have permission"); }
 	}
 	
 	/**
 	 * Nick Command - Changes your or your target's display name
 	 */
-	@CommandID(name = "Nick", triggers = "nick")
-	@CommandInfo(description = "Sets your or your target's display name", usage = "nick [displayname] <player>")
-	public void nick(Player player, String[] args) {
-		if (args.length < 1) { invalidArgLength(player, "Nick"); return; }
+	@Command(server = true)
+	@Description("Sets your or your target's display name")
+	@Usage("nick [displayname] <player>")
+	public void nick(CommandSender sender, Channel channel, String[] args) {
+		if (args.length < 1) { invalidArgLength(sender, "nick"); return; }
+		
+		StringBuilder displaynameStr = new StringBuilder();
+		
+		for (String arg : args) {
+			if (displaynameStr.length() > 0)
+				displaynameStr.append(" ");
+			
+			displaynameStr.append(arg);
+		}
+		
+		int openQ = displaynameStr.toString().indexOf("\"");
+		int closeQ = displaynameStr.toString().lastIndexOf("\"");
 		
 		String displayname = "";
 		
-		for (String arg : args) {
-			if (arg.startsWith("\"") && arg.endsWith("\"")) {
-				displayname += arg.substring(1, arg.length() - 1);
-				continue;
-			}
-			
-			if (arg.startsWith("\"")) {
-				displayname += arg + " ";
-				continue;
-			}
-			
-			if (displayname.length() < 1)
-				continue;
-			
-			if (arg.endsWith("\"")) {
-				displayname += arg;
-				break;
-			}
-			
-			displayname += arg + " ";
-		}
+		if (openQ == closeQ || openQ < 0 || closeQ < 0)
+			displayname = args[0];
+		else
+			displayname = displaynameStr.toString().substring(openQ + 1, closeQ);
 		
-		try {
-			if (displayname.equals("")) {
-				Player targetPlayer = plugin.getPlayer(args[1]);
+		String targetName = displaynameStr.toString().substring(closeQ + 1).trim().split(" ")[0];
+		
+		if (!targetName.isEmpty()) {
+			if (hasPermission(sender, "TitanChat.nick.change.other")) {
+				OfflinePlayer targetPlayer = plugin.getOfflinePlayer(targetName);
 				
-				if (targetPlayer != null) {
-					plugin.sendInfo(player, targetPlayer.getDisplayName() + " is now known as " + args[0]);
-					dnc.set(targetPlayer, args[0]);
-					plugin.sendInfo(targetPlayer, player.getDisplayName() + " changed your display name to " + args[0]);
-					dnc.save(targetPlayer);
+				if (targetPlayer.isOnline()) {
+					plugin.send(MessageLevel.INFO, sender, targetPlayer.getPlayer().getDisplayName() + " is now known as " + displayname);
+					dnc.set(targetPlayer.getPlayer(), displayname);
 					
-				} else { plugin.sendWarning(player, "Player not online"); }
-				
-			} else if (!displayname.endsWith("\"")) {
-				plugin.sendWarning(player, "");
-				
-			} else {
-				if (args[args.length - 1].endsWith("\""))
-					throw new IndexOutOfBoundsException();
-				
-				Player targetPlayer = plugin.getPlayer(args[args.length - 1]);
-				
-				if (!displayname.endsWith("\"")) {
-					plugin.sendInfo(player, targetPlayer.getDisplayName() + " is now known as " + targetPlayer.getDisplayName());
-					return;
-				}
-				
-				if (targetPlayer != null) {
-					plugin.sendInfo(player, targetPlayer.getDisplayName() + " is now known as " + displayname.substring(1, displayname.length() - 1));
-					dnc.set(targetPlayer, displayname.substring(1, displayname.length() - 1));
-					plugin.sendInfo(targetPlayer, player.getDisplayName() + " changed your display name to " + displayname.substring(1, displayname.length() - 1));
-					dnc.save(targetPlayer);
+					if (sender instanceof Player)
+						plugin.send(MessageLevel.INFO, targetPlayer.getPlayer(), ((Player) sender).getDisplayName() + " changed your display name to " + displayname);
+					else
+						plugin.send(MessageLevel.INFO, targetPlayer.getPlayer(), sender.getName() + " changed your display name to " + displayname);
 					
-				} else { plugin.sendWarning(player, "Player not online"); }
-			}
+					dnc.save(targetPlayer.getPlayer());
+					
+				} else { plugin.send(MessageLevel.WARNING, sender, getDisplayName(targetPlayer) + " is offline"); }
+				
+			} else { plugin.send(WARNING, sender, "You do not have permission"); }
 			
-		} catch (IndexOutOfBoundsException e) {
-			if (displayname.equals("")) {
-				dnc.set(player, args[0]);
-				dnc.save(player);
-				plugin.sendInfo(player, "You are now known as " + args[0]);
+		} else {
+			if (hasPermission(sender, "TitanChat.nick.change")) {
+				if (sender instanceof Player) {
+					plugin.send(MessageLevel.INFO, sender, "You are now known as " + displayname);
+					dnc.set((Player) sender, displayname);
+					dnc.save((Player) sender);
+					
+				} else { plugin.send(MessageLevel.WARNING, sender, "You cannot change your display name"); }
 				
-			} else {
-				if (!displayname.endsWith("\"")) {
-					plugin.sendInfo(player, "You are now known as " + player.getDisplayName());
-					return;
-				}
-				
-				dnc.set(player, displayname.substring(1, displayname.length() - 1));
-				dnc.save(player);
-				plugin.sendInfo(player, "You are now known as " + displayname.substring(1, displayname.length() - 1));
-			}
+			} else { plugin.send(WARNING, sender, "You do not have permission"); }
 		}
 	}
 	
 	/**
 	 * Reset Command - Resets your or your target's display name
 	 */
-	@CommandID(name = "Reset", triggers = "reset")
-	@CommandInfo(description = "Resets your or your target's display name", usage = "reset <player>")
-	public void reset(Player player, String[] args) {
+	@Command(server = true)
+	@Description("Resets your or your target's display name")
+	@Usage("reset <player>")
+	public void reset(CommandSender sender, Channel channel, String[] args) {
 		try {
-			Player targetPlayer = plugin.getPlayer(args[1]);
-			
-			if (targetPlayer != null) {
-				plugin.sendInfo(player, targetPlayer.getDisplayName() + " is now known as " + targetPlayer.getName());
-				dnc.set(targetPlayer, targetPlayer.getName());
-				dnc.save(targetPlayer);
-				plugin.sendInfo(targetPlayer, "You are now known as " + targetPlayer.getName());
+			if (hasPermission(sender, "TitanChat.nick.reset.other")) {
+				OfflinePlayer targetPlayer = plugin.getOfflinePlayer(args[0]);
 				
-			} else { plugin.sendWarning(player, "Player not online"); }
+				if (targetPlayer.isOnline()) {
+					plugin.send(MessageLevel.INFO, sender, targetPlayer.getPlayer().getDisplayName() + " is now known as " + targetPlayer.getName());
+					dnc.set(targetPlayer.getPlayer(), targetPlayer.getName());
+					dnc.save(targetPlayer.getPlayer());
+					plugin.send(MessageLevel.INFO, targetPlayer.getPlayer(), "You are now known as " + targetPlayer.getName());
+					
+				} else { plugin.send(MessageLevel.WARNING, sender, getDisplayName(targetPlayer) + " is offline"); }
+				
+			} else { plugin.send(WARNING, sender, "You do not have permission"); }
 			
 		} catch (IndexOutOfBoundsException e) {
-			dnc.set(player, player.getName());
-			dnc.save(player);
-			plugin.sendInfo(player, "You are now known as " + player.getName());
+			if (sender instanceof Player) {
+				if (hasPermission(sender, "TitanChat.nick.reset")) {
+					plugin.send(MessageLevel.INFO, sender, "You are now known as " + sender.getName());
+					dnc.set((Player) sender, sender.getName());
+					dnc.save((Player) sender);
+					
+				} else { plugin.send(WARNING, sender, "You do not have permission"); }
+				
+			} else { plugin.send(MessageLevel.WARNING, sender, "You cannot reset your display name"); }
 		}
 	}
 }

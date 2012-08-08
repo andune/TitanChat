@@ -1,12 +1,24 @@
 tag: '[Pub]'
 chat-display-colour: '&a'
-name-display-colour: '&a'
-type: public
-special-type: none
-global: false
-colour-code: false
+type: 'Standard'
+option: 'none'
+aliases: [pub]
+topic: 'Welcome to Public Channel || No passwords or whitelists'
+setting:
+    colouring: false
+    range: 'channel'
+    radius: 15
+    whitelist: false
+    messages:
+        join: true
+        leave: true
 password: ''
 format: ''
-messages:
-    join: true
-    leave: true
+command:
+    join: 'pu'
+    send: 'pus'
+admins: []
+blacklist: []
+followers: []
+whitelist: []
+participants: []

@@ -1,26 +1,26 @@
 package com.titankingdoms.nodinchan.titanchat.channel;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 import java.util.logging.Level;
 
-import org.bukkit.OfflinePlayer;
+import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
-import com.nodinchan.ncloader.Loader;
+import com.nodinchan.ncbukkit.loader.Loader;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
-import com.titankingdoms.nodinchan.titanchat.channel.Channel.Type;
+import com.titankingdoms.nodinchan.titanchat.TitanChat.MessageLevel;
+import com.titankingdoms.nodinchan.titanchat.channel.Channel.Option;
+import com.titankingdoms.nodinchan.titanchat.channel.standard.ServerChannel;
+import com.titankingdoms.nodinchan.titanchat.channel.standard.StandardChannel;
+import com.titankingdoms.nodinchan.titanchat.channel.util.Participant;
 import com.titankingdoms.nodinchan.titanchat.util.Debugger;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
@@ -39,386 +39,175 @@ import com.titankingdoms.nodinchan.titanchat.util.Debugger;
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/**
- * ChannelManager - Channel Management and Storage
- * 
- * @author NodinChan
- *
- */
 public final class ChannelManager {
 	
 	private final TitanChat plugin;
 	
-	private static ChannelManager instance;
+	private static final Debugger db = new Debugger(2);
 	
-	private static final Debugger db = new Debugger(3);
+	private final Map<String, String> aliases;
+	private final Map<String, Channel> channels;
+	private final Map<String, Participant> participants;
+	private final Map<String, Boolean> silenced;
+	private final Map<String, Channel> types;
 	
-	private int channelAmount = 0;
-	private int customChAmount = 0;
-	
-	private final List<Channel> linked;
-	private final List<String> muted;
-	
-	private final Map<Channel, Map<String, List<String>>> channelInvitors;
-	private Map<String, Channel> channels;
-	private final Map<CustomChannel, JarFile> jarFiles;
-	
-	/**
-	 * Initialises variables
-	 */
 	public ChannelManager() {
 		this.plugin = TitanChat.getInstance();
-		ChannelManager.instance = this;
-		
-		if (getCustomChannelDir().mkdir())
-			plugin.log(Level.INFO, "Creating custom channel directory...");
-		
-		this.muted = new ArrayList<String>();
-		this.linked = new LinkedList<Channel>();
-		this.channelInvitors = new HashMap<Channel, Map<String, List<String>>>();
+		this.aliases = new HashMap<String, String>();
 		this.channels = new LinkedHashMap<String, Channel>();
-		this.jarFiles = new HashMap<CustomChannel, JarFile>();
+		this.participants = new HashMap<String, Participant>();
+		this.silenced = new HashMap<String, Boolean>();
+		this.types = new LinkedHashMap<String, Channel>();
 	}
 	
-	/**
-	 * Assigns the Player as an admin of the Channel
-	 * 
-	 * @param player The Player to be assigned admin
-	 * 
-	 * @param channel The Channel to assign the Player to
-	 */
-	public void assignAdmin(Player player, Channel channel) {
-		db.i("Assigning player " + player.getName() + " as admin of channel " + channel.getName());
-		channel.getAdminList().add(player.getName());
-		channel.save();
-		plugin.sendInfo(player, "You are now an Admin of " + channel.getName());
-	}
-	
-	/**
-	 * Assigns the OfflinePlayer as an admin of the Channel
-	 * 
-	 * @param player The OfflinePlayer to be assigned admin
-	 * 
-	 * @param channel The Channel to assign the OfflinePlayer to
-	 */
-	public void assignAdmin(OfflinePlayer player, Channel channel) {
-		db.i("Assigning player " + player.getName() + " as admin of channel " + channel.getName());
-		channel.getAdminList().add(player.getName());
-		channel.save();
-	}
-	
-	/**
-	 * Switching the Player from a Channel to another
-	 * 
-	 * @param player The Player to switch
-	 * 
-	 * @param channel The Channel to join
-	 */
-	public void chSwitch(Player player, Channel channel) {
-		db.i("Switching player " + player.getName() +
-				" from channel " + ((getChannel(player) != null) ? getChannel(player).getName() : "none") +
-				" to channel " + channel.getName());
+	public void createChannel(CommandSender sender, String name, String type) {
+		db.i("ChannelManager: " + sender.getName() + " is creating " + name);
+		Channel channel = getType(type).create(sender, name, Option.NONE);
+		register(channel);
 		
-		if (getChannel(player) != null)
-			getChannel(player).leave(player);
-		
-		if (channel != null)
-			channel.join(player);
-	}
-
-	/**
-	 * Creates a new Channel with the given name
-	 * 
-	 * @param player The Channel creator
-	 * 
-	 * @param name The Channel name
-	 */
-	public void createChannel(Player player, String name) {
-		db.i("Player " + player.getName() + " is creating channel " + name);
-		StandardChannel channel = new StandardChannel(name, Type.PUBLIC, Type.NONE);
-		channels.put(name, channel);
-		
-		assignAdmin(player, channel);
-		chSwitch(player, channel);
+		if (sender instanceof Player) {
+			channel.join((Player) sender);
+			channel.getAdmins().add(sender.getName());
+		}
 		
 		channel.getConfig().options().copyDefaults(true);
-		channel.save();
+		channel.saveConfig();
 		
-		plugin.sendInfo(player, "You have created " + channel.getName());
+		sortChannels();
+		
+		plugin.getDefPerms().load(channel);
+		plugin.send(MessageLevel.INFO, sender, "You have created channel " + name + " of type " + channel.getType());
 	}
 	
-	/**
-	 * Deletes the Channel with the given name
-	 * 
-	 * @param player The Channel deleter
-	 * 
-	 * @param name The Channel name
-	 */
-	public void deleteChannel(Player player, String name) {
-		db.i("Player " + player.getName() + " is deleting channel " + name);
+	public void deleteChannel(CommandSender sender, String name) {
+		db.i("ChannelManager: " + sender.getName() + " is deleting " + name);
 		Channel channel = getChannel(name);
 		
-		for (String participant : channel.getParticipants()) {
-			if (plugin.getPlayer(participant) != null)
-				chSwitch(plugin.getPlayer(participant), getSpawnChannel(player));
+		List<Participant> participants = channel.getParticipants();
+		
+		for (Participant participant : participants) {
+			if (participant.getPlayer() != null) {
+				participant.leave(channel);
+				plugin.send(MessageLevel.WARNING, participant.getPlayer(), channel.getName() + " has been deleted");
+			}
 		}
 		
-		channels.remove(channel);
+		channels.remove(name.toLowerCase());
 		
-		plugin.sendWarning(channel.getParticipants(), channel.getName() + " has been deleted");
-		
-		File file = new File(plugin.getChannelDir(), name + ".yml");
-		file.delete();
-		
-		plugin.sendInfo(player, "You have deleted " + channel.getName());
+		sortChannels();
+		new File(plugin.getChannelDir(), channel.getName() + ".yml").delete();
+		plugin.send(MessageLevel.INFO, sender, "You have deleted " + channel.getName());
 	}
 	
-	/**
-	 * Check if a Channel by that name exists
-	 * 
-	 * @param name The Channel name
-	 * 
-	 * @return True if the Channel exists
-	 */
 	public boolean exists(String name) {
-		return getChannel(name) != null;
+		return channels.containsKey(name.toLowerCase());
 	}
 	
-	/**
-	 * Creates a list of Channels that can be accessed by the Player
-	 * 
-	 * @param player The Player to check
-	 * 
-	 * @return The list of accessible Channels of the Player
-	 */
-	public List<String> getAccessList(Player player) {
-		List<String> channels = new LinkedList<String>();
+	public boolean existsByAlias(String name) {
+		if (exists(name))
+			return true;
 		
-		for (Channel channel : linked) {
-			if (channel.canAccess(player))
-				channels.add(channel.getName());
-		}
+		if (!aliases.containsKey(name.toLowerCase()))
+			return false;
 		
-		return channels;
+		return exists(aliases.get(name.toLowerCase()));
 	}
 	
-	/**
-	 * Gets all admins of the Channel
-	 * 
-	 * @param channel The Channel
-	 * 
-	 * @return All admins of the Channel
-	 */
-	public List<String> getAdmins(Channel channel) {
-		List<String> admins = new ArrayList<String>();
-		admins.addAll(channel.getAdminList());
-		
-		for (Player player : plugin.getServer().getOnlinePlayers()) {
-			if (plugin.getPermsBridge().has(player, "TitanChat.admin." + channel.getName(), true) && !admins.contains(player.getName()))
-				admins.add(player.getName());
-		}
-		
-		return admins;
-	}
-	
-	/**
-	 * Gets the Channel of the given name
-	 * 
-	 * @param name The Channel name
-	 * 
-	 * @return The Channel if it exists, otherwise null
-	 */
 	public Channel getChannel(String name) {
 		return channels.get(name.toLowerCase());
 	}
-
-	/**
-	 * Gets the Channel of the Player
-	 * 
-	 * @param player The Player to check
-	 * 
-	 * @return The Channel if it exists, otherwise null
-	 */
+	
 	public Channel getChannel(Player player) {
-		for (Channel channel : channels.values()) {
-			if (channel.getParticipants().contains(player.getName()))
-				return channel;
-		}
-		
-		return null;
-	}
-
-	/**
-	 * Gets the number of loaded Channels
-	 * 
-	 * @return The number of loaded Channels
-	 */
-	public int getChannelAmount() {
-		return channelAmount;
+		return getParticipant(player).getCurrentChannel();
 	}
 	
-	/**
-	 * Gets the Custom Channel directory
-	 * 
-	 * @return The Custom Channel directory
-	 */
+	public Channel getChannelByAlias(String name) {
+		Channel channel = getChannel(name);
+		
+		if (channel != null)
+			return channel;
+		
+		if (!aliases.containsKey(name.toLowerCase()))
+			return null;
+		
+		return getChannel(aliases.get(name.toLowerCase()));
+	}
+	
+	public List<Channel> getChannels() {
+		return new ArrayList<Channel>(channels.values());
+	}
+	
 	public File getCustomChannelDir() {
-		return new File(plugin.getAddonManager().getAddonDir(), "channels");
-	}
-
-	/**
-	 * Gets the Default Channels of the Server
-	 * 
-	 * @return The Default Channels
-	 */
-	public Channel getDefaultChannel() {
-		for (Channel channel : this.channels.values()) {
-			if (channel.getSpecialType().equals(Type.DEFAULT))
-				return channel;
-		}
-		
-		return null;
+		return new File(plugin.getManager().getAddonManager().getAddonDir(), "channels");
 	}
 	
-	/**
-	 * Gets the exact name of the Channel of the given name
-	 * 
-	 * @param name The Channel name
-	 * 
-	 * @return The exact name of the Channel
-	 */
-	public String getExact(String name) {
-		return getChannel(name).getName();
+	public List<Channel> getDefaultChannels() {
+		List<Channel> defaults = new ArrayList<Channel>();
+		
+		for (Channel channel : channels.values())
+			if (channel.getOption().equals(Option.DEFAULT))
+				defaults.add(channel);
+		
+		return defaults;
 	}
 	
-	/**
-	 * Gets all followers of the Channel
-	 * 
-	 * @param channel The Channel
-	 * 
-	 * @return All followers of the Channel
-	 */
-	public List<String> getFollowers(Channel channel) {
-		List<String> followers = new ArrayList<String>();
-		followers.addAll(channel.getFollowerList());
-		
-		for (Player player : plugin.getServer().getOnlinePlayers()) {
-			if (plugin.getPermsBridge().has(player, "TitanChat.follow." + channel.getName(), true) && !followers.contains(player.getName()))
-				followers.add(player.getName());
-		}
-		
-		return followers;
-	}
-
-	/**
-	 * Gets an instance of this
-	 * 
-	 * @return ChannelManager instance
-	 */
-	public static ChannelManager getInstance() {
-		return instance;
+	public Participant getParticipant(String name) {
+		return participants.get(name.toLowerCase());
 	}
 	
-	/**
-	 * Gets resource out of the JAR file of an Channel
-	 * 
-	 * @param channel The Channel
-	 * 
-	 * @param fileName The file to look for
-	 * 
-	 * @return The file if found, otherwise null
-	 */
-	public InputStream getResource(CustomChannel channel, String fileName) {
-		try {
-			JarFile jarFile = jarFiles.get(channel);
-			Enumeration<JarEntry> entries = jarFile.entries();
-			
-			while (entries.hasMoreElements()) {
-				JarEntry element = entries.nextElement();
-				
-				if (element.getName().equalsIgnoreCase(fileName))
-					return jarFile.getInputStream(element);
-			}
-			
-		} catch (IOException e) {}
-		
-		return null;
+	public Participant getParticipant(Player player) {
+		return getParticipant(player.getName());
 	}
 	
-	/**
-	 * Gets the Spawn Channel of the Player
-	 * 
-	 * @param player The Player to check
-	 * 
-	 * @return The Spawn Channel
-	 */
-	public Channel getSpawnChannel(Player player) {
-		for (Channel channel : channels.values()) {
-			if (plugin.getPermsBridge().has(player, "TitanChat.spawn." + channel.getName(), true) && channel.canAccess(player))
-				return channel;
-		}
-		
-		if (getStaffChannels().size() > 0) {
-			if (plugin.isStaff(player)) {
-				for (Channel channel : getStaffChannels()) {
-					if (channel.getType().equals(Type.PUBLIC))
-						return channel;
-				}
-			}
-		}
-		
-		if (getDefaultChannel().getType().equals(Type.PUBLIC))
-			return getDefaultChannel();
-		
-		return null;
-	}
-	
-	/**
-	 * Gets the Staff Channels of the Server
-	 * 
-	 * @return The Staff Channels
-	 */
 	public List<Channel> getStaffChannels() {
-		List<Channel> channels = new LinkedList<Channel>();
+		List<Channel> staffs = new ArrayList<Channel>();
 		
-		for (Channel channel : this.channels.values()) {
-			if (channel.getSpecialType().equals(Type.STAFF))
-				channels.add(channel);
-		}
+		for (Channel channel : channels.values())
+			if (channel.getOption().equals(Option.STAFF))
+				staffs.add(channel);
 		
-		return channels;
+		return staffs;
 	}
 	
-	/**
-	 * Check if player is muted
-	 * 
-	 * @param player The Player to check
-	 * 
-	 * @return True if the Player is muted
-	 */
-	public boolean isMuted(Player player) {
-		return muted.contains(player.getName());
+	public Channel getType(String name) {
+		return types.get(name.toLowerCase());
 	}
-
-	/**
-	 * Loads all channels
-	 * 
-	 * @throws Exception
-	 */
+	
+	public List<Channel> getTypes() {
+		return new ArrayList<Channel>(types.values());
+	}
+	
+	public boolean isSilenced(Channel channel) {
+		if (!silenced.containsKey(channel.getName().toLowerCase()))
+			return false;
+		
+		return silenced.get(channel.getName().toLowerCase());
+	}
+	
 	public void load() {
-		if (!plugin.enableChannels()) { plugin.log(Level.INFO, "Channels disabled"); return; }
+		if (!plugin.enableChannels()) {
+			plugin.log(Level.INFO, "Channels disabled");
+			register(new ServerChannel());
+			return;
+		}
 		
-		Loader<CustomChannel> loader = new Loader<CustomChannel>(plugin, getCustomChannelDir(), new Object[0]);
+		Loader<Channel> loader = new Loader<Channel>(plugin, getCustomChannelDir());
 		
-		for (CustomChannel channel : loader.load()) { if (exists(channel.getName())) { continue; } register(channel); }
+		register(new StandardChannel());
 		
-		for (String fileName : plugin.getChannelDir().list()) {
-			if (!fileName.endsWith(".yml") || exists(fileName.replace(".yml", "")))
+		for (Channel channel : loader.load())
+			if (!exists(channel.getName()))
+				register(channel);
+		
+		sortTypes();
+		
+		for (File file : plugin.getChannelDir().listFiles()) {
+			if (!file.getName().endsWith(".yml"))
 				continue;
 			
-			StandardChannel channel = loadChannel(fileName.replace(".yml", ""));
+			Channel channel = loadChannel(file);
 			
-			if (channel == null)
+			if (channel == null || exists(channel.getName()))
 				continue;
 			
 			register(channel);
@@ -426,205 +215,139 @@ public final class ChannelManager {
 		
 		sortChannels();
 		
-		for (Player player : plugin.getServer().getOnlinePlayers()) {
-			if (getChannel(player) == null)
-				getSpawnChannel(player).join(player);
+		plugin.getDefPerms().load(getChannels());
+	}
+	
+	private Channel loadChannel(File file) {
+		String name = file.getName().replace(".yml", "");
+		
+		if (name == null || name.equals(""))
+			return null;
+		
+		FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+		
+		Channel type = getType(config.getString("type", ""));
+		
+		if (type == null)
+			return null;
+		
+		Option option = Option.fromName(config.getString("option", ""));
+		
+		if (option == null)
+			return null;
+		
+		return type.load(name, option);
+	}
+	
+	public Participant loadParticipant(Player player) {
+		Participant participant = getParticipant(player);
+		
+		if (participant == null)
+			participant = new Participant(player);
+		
+		for (Channel channel : getChannels()) {
+			if (channel.getConfig().getStringList("participants") == null)
+				continue;
+			
+			if (channel.getConfig().getStringList("participants").contains(player.getName()))
+				channel.join(player);
 		}
 		
-		plugin.log(Level.INFO, "No. of channels: " + (channelAmount = channels.size() - customChAmount));
-		plugin.log(Level.INFO, "No. of custom channels: " + customChAmount);
-		plugin.log(Level.INFO, "Channels loaded");
+		return participants.put(participant.getName().toLowerCase(), participant);
 	}
 	
-	/**
-	 * Loads the Channel of the given name
-	 * 
-	 * @param name The Channel name
-	 * 
-	 * @return The loaded Channel
-	 */
-	public StandardChannel loadChannel(String name) {
-		StandardChannel channel = new StandardChannel(name);
+	public boolean nameCheck(String name) {
+		if (name.contains("\\") || name.contains("|") || name.contains("/"))
+			return false;
 		
-		channel.setType(channel.getConfig().getString("type"));
+		if (name.contains(":") || name.contains("?"))
+			return false;
 		
-		channel.setSpecialType(channel.getConfig().getString("special-type"));
+		if (name.contains("*") || name.contains("\""))
+			return false;
 		
-		channel.setGlobal(channel.getConfig().getBoolean("global"));
+		if (name.contains("<") || name.contains(">"))
+			return false;
 		
-		channel.setPassword(channel.getConfig().getString("password"));
-		
-		if (channel.getConfig().getStringList("admins") != null)
-			channel.getAdminList().addAll(channel.getConfig().getStringList("admins"));
-		
-		if (channel.getConfig().getStringList("blacklist") != null)
-			channel.getBlackList().addAll(channel.getConfig().getStringList("blacklist"));
-		
-		if (channel.getConfig().getStringList("followers") != null)
-			channel.getFollowerList().addAll(channel.getConfig().getStringList("followers"));
-		
-		if (channel.getConfig().getStringList("whitelist") != null)
-			channel.getWhiteList().addAll(channel.getConfig().getStringList("whitelist"));
-		
-		loadChannelVariables(channel);
-		
-		return channel;
-	}
-
-	/**
-	 * Loads the ChannelVariables of the Channel
-	 * 
-	 * @param channel The Channel to load
-	 */
-	public void loadChannelVariables(StandardChannel channel) {
-		Variables variables = channel.getVariables();
-		variables.setChatColour(channel.getConfig().getString("chat-display-colour"));
-		variables.setConvert(channel.getConfig().getBoolean("colour-code"));
-		
-		if (channel.getConfig().getString("format") != null)
-			variables.setFormat(channel.getConfig().getString("format"));
-		
-		variables.setNameColour(channel.getConfig().getString("name-display-colour"));
-		variables.setTag(channel.getConfig().getString("tag"));
+		return true;
 	}
 	
-	/**
-	 * Mute/Unmute the Player
-	 * 
-	 * @param player The Player to mute/unmute
-	 * 
-	 * @param mute Whether to mute or unmute
-	 */
-	public void mute(Player player, boolean mute) {
-		db.i((mute ? "" : "un") + "muting player");
+	public void postReload() {
+		load();
 		
-		if (mute)
-			muted.add(player.getName());
-		else
-			muted.remove(player.getName());
+		for (Player player : plugin.getServer().getOnlinePlayers())
+			loadParticipant(player);
 	}
 	
-	/**
-	 * Called when a Player is invited to join a Channel
-	 * 
-	 * @param channel The Channel invited into
-	 * 
-	 * @param invitor The one who invited
-	 * 
-	 * @param invitee The one who was invited
-	 */
-	public void onInvite(Channel channel, Player invitor, Player invitee) {
-		Map<String, List<String>> invitors = channelInvitors.get(channel);
-		List<String> invitorlist = (invitors.get(invitee.getName()) != null) ? invitors.get(invitee.getName()) : new ArrayList<String>();
-		invitorlist.add(invitor.getName());
-		invitors.put(invitee.getName(), invitorlist);
-		channelInvitors.put(channel, invitors);
+	public void preReload() {
+		for (Channel channel : getChannels()) {
+			channel.reloadConfig();
+			channel.save();
+			channel.saveParticipants();
+		}
+		
+		this.aliases.clear();
+		this.channels.clear();
+		this.participants.clear();
+		this.silenced.clear();
+		this.types.clear();
 	}
 	
-	/**
-	 * Called when a Player responds to an invitation
-	 * 
-	 * @param channel The Channel invited into
-	 * 
-	 * @param invitee The one who was invited
-	 * 
-	 * @param accept True if the Player accepts the invitation
-	 */
-	public void onInviteRespond(Channel channel, Player invitee, boolean accept) {
-		Map<String, List<String>> invitors = channelInvitors.get(channel);
-		
-		for (String invitor : invitors.get(invitee.getName())) {
-			if (plugin.getPlayer(invitor) != null) {
-				if (accept)
-					plugin.sendInfo(plugin.getPlayer(invitor), invitee.getDisplayName() + " has accepted your invitation");
-				else
-					plugin.sendInfo(plugin.getPlayer(invitor), invitee.getDisplayName() + " has declined your invitation");
+	public void register(Channel channel) {
+		if (channel.getOption().equals(Option.TYPE)) {
+			if (getType(channel.getType()) == null)
+				types.put(channel.getType().toLowerCase(), channel);
+			
+		} else {
+			if (getChannel(channel.getName()) == null) {
+				channels.put(channel.getName().toLowerCase(), channel);
+				
+				for (String alias : channel.getConfig().getStringList("aliases"))
+					if (!aliases.containsKey(alias.toLowerCase()))
+						aliases.put(alias.toLowerCase(), channel.getName());
 			}
 		}
-		
-		invitors.remove(invitee.getName());
-		channelInvitors.put(channel, invitors);
 	}
 	
-	/**
-	 * Registers the Custom Channel
-	 * 
-	 * @param channel The Custom Channel to be registered
-	 */
-	public void register(Channel channel) {
-		if (channel instanceof CustomChannel)
-			customChAmount++;
-		
-		channels.put(channel.getName().toLowerCase(), channel);
+	public void setSilence(Channel channel, boolean silenced) {
+		this.silenced.put(channel.getName().toLowerCase(), silenced);
 	}
 	
-	/**
-	 * Saves the JAR files of the Channels for future use
-	 * 
-	 * @param channel The Channel
-	 * 
-	 * @param jarFile The JAR file of the Channel
-	 */
-	public void setJarFile(CustomChannel channel, JarFile jarFile) {
-		jarFiles.put(channel, jarFile);
-	}
-	
-	/**
-	 * Sorts the Channels
-	 */
 	public void sortChannels() {
 		Map<String, Channel> channels = new LinkedHashMap<String, Channel>();
 		List<String> names = new ArrayList<String>(this.channels.keySet());
 		
 		Collections.sort(names);
 		
-		linked.clear();
-		
-		for (String name : names) {
-			linked.add(getChannel(name));
+		for (String name : names)
 			channels.put(name, getChannel(name));
+		
+		this.channels.clear();
+		this.channels.putAll(channels);
+	}
+	
+	public void sortTypes() {
+		Map<String, Channel> types = new LinkedHashMap<String, Channel>();
+		List<String> names = new ArrayList<String>(this.types.keySet());
+		
+		Collections.sort(names);
+		
+		for (String name : names)
+			types.put(name, getChannel(name));
+		
+		this.types.clear();
+		this.types.putAll(types);
+	}
+	
+	public void unload() {
+		for (Channel channel : getChannels()) {
+			channel.save();
+			channel.saveParticipants();
 		}
 		
-		this.channels = channels;
-	}
-	
-	/**
-	 * Unloads the Channels
-	 */
-	public void unload() {
-		for (Channel channel : channels.values())
-			channel.save();
-		
-		channels.clear();
-		jarFiles.clear();
-		channelAmount = 0;
-		customChAmount = 0;
-	}
-	
-	/**
-	 * Whitelists the Player to the Channel
-	 * 
-	 * @param player The Player to whitelist
-	 * 
-	 * @param channel The Channel to whitelist the Player to
-	 */
-	public void whitelistMember(Player player, Channel channel) {
-		db.i("Adding player " + player.getName() + " to whitelist of channel " + channel.getName());
-		channel.getWhiteList().add(player.getName());
-		channel.save();
-		plugin.sendInfo(player, "You are now a Member of " + channel.getName());
-	}
-	
-	/**
-	 * Whitelists the OfflinePlayer to the Channel
-	 * 
-	 * @param player The OfflinePlayer to whitelist
-	 * 
-	 * @param channel The Channel to whitelist the OfflinePlayer to
-	 */
-	public void whitelistMember(OfflinePlayer player, Channel channel) {
-		db.i("Adding player " + player.getName() + " to whitelist of channel " + channel.getName());
-		channel.getWhiteList().add(player.getName());
-		channel.save();
+		this.aliases.clear();
+		this.channels.clear();
+		this.silenced.clear();
+		this.types.clear();
 	}
 }

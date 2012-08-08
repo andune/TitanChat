@@ -1,18 +1,12 @@
 package com.titankingdoms.nodinchan.titanchat.addon;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 import java.util.logging.Level;
 
-import com.nodinchan.ncloader.Loader;
+import com.nodinchan.ncbukkit.loader.Loader;
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
 import com.titankingdoms.nodinchan.titanchat.util.Debugger;
 
@@ -42,26 +36,20 @@ public final class AddonManager {
 	
 	private final TitanChat plugin;
 	
-	private static AddonManager instance;
-	
-	private static final Debugger db = new Debugger(2);
+	private static final Debugger db = new Debugger(1);
 	
 	private List<Addon> addons;
-	
-	private final Map<Addon, JarFile> jarFiles;
 	
 	/**
 	 * Initialises variables
 	 */
 	public AddonManager() {
 		this.plugin = TitanChat.getInstance();
-		AddonManager.instance = this;
 		
 		if (getAddonDir().mkdir())
 			plugin.log(Level.INFO, "Creating addon directory...");
 		
 		this.addons = new ArrayList<Addon>();
-		this.jarFiles = new HashMap<Addon, JarFile>();
 	}
 	
 	/**
@@ -90,38 +78,12 @@ public final class AddonManager {
 	}
 	
 	/**
-	 * Gets the instance of this
+	 * Gets an unmodifiable list of addons
 	 * 
-	 * @return AddonManager instance
+	 * @return An unmodifiable view of addons
 	 */
-	public static AddonManager getInstance() {
-		return instance;
-	}
-	
-	/**
-	 * Gets resource out of the JAR file of an Addon
-	 * 
-	 * @param addon The Addon 
-	 * 
-	 * @param fileName The file to look for
-	 * 
-	 * @return The file if found, otherwise null
-	 */
-	public InputStream getResource(Addon addon, String fileName) {
-		try {
-			JarFile jarFile = jarFiles.get(addon);
-			Enumeration<JarEntry> entries = jarFile.entries();
-			
-			while (entries.hasMoreElements()) {
-				JarEntry element = entries.nextElement();
-				
-				if (element.getName().equalsIgnoreCase(fileName))
-					return jarFile.getInputStream(element);
-			}
-			
-		} catch (IOException e) {}
-		
-		return null;
+	public List<Addon> getAddons() {
+		return Collections.unmodifiableList(addons);
 	}
 	
 	/**
@@ -131,6 +93,9 @@ public final class AddonManager {
 		Loader<Addon> loader = new Loader<Addon>(plugin, getAddonDir(), new Object[0]);
 		for (Addon addon : loader.load()) { register(addon); }
 		addons = loader.sort(addons);
+		
+		if (addons.size() < 1)
+			return;
 		
 		StringBuilder str = new StringBuilder();
 		
@@ -145,6 +110,20 @@ public final class AddonManager {
 	}
 	
 	/**
+	 * Reloads the AddonManager and all Addons
+	 */
+	public void postReload() {
+		load();
+	}
+	
+	/**
+	 * Reloads the AddonManager and all Addons
+	 */
+	public void preReload() {
+		unload();
+	}
+	
+	/**
 	 * Registers the Addon
 	 * 
 	 * @param addon The Addon to register
@@ -155,17 +134,6 @@ public final class AddonManager {
 	}
 	
 	/**
-	 * Saves the JAR files of the Addons for future use
-	 * 
-	 * @param addon The Addon
-	 * 
-	 * @param jarFile The JAR file of the Addon
-	 */
-	public void setJarFile(Addon addon, JarFile jarFile) {
-		jarFiles.put(addon, jarFile);
-	}
-	
-	/**
 	 * Unloads the AddonManager and all Addons
 	 */
 	public void unload() {
@@ -173,6 +141,5 @@ public final class AddonManager {
 			addon.unload();
 		
 		addons.clear();
-		jarFiles.clear();
 	}
 }

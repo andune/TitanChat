@@ -1,10 +1,9 @@
 package com.titankingdoms.nodinchan.titanchat.util;
 
 import java.util.HashSet;
-
-import org.bukkit.Bukkit;
-
-import com.titankingdoms.nodinchan.titanchat.TitanChat;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -25,171 +24,165 @@ import com.titankingdoms.nodinchan.titanchat.TitanChat;
 /**
  * Debugger - Provides methods for logging when in debug mode
  * 
- * @author slipcor
- * 
+ * @author NodinChan, SLiPCoR
+ *
  */
-public class Debugger {
+public final class Debugger {
 	
-	private int id = 0;
+	private static final Logger log = Logger.getLogger("TitanDebug");
 	
-	private static byte level = 3;
+	private final int id;
 	
-	private static String prefix = "[TC-Debug] ";
+	private static final Set<Integer> debug = new HashSet<Integer>();
 	
-	public static boolean override = false;
-	
-	private static HashSet<Integer> check = new HashSet<Integer>();
-	
-	/**
-	 * Debug constructor
-	 * 
-	 * @param i The debug id to check
-	 */
 	public Debugger(int id) {
 		this.id = id;
 	}
 	
 	/**
-	 * Check if debugging enabled
-	 * 
-	 * @return True if debug is enabled
+	 * Disables the debugger
 	 */
-	private boolean debugs() {
-		return override || check.contains(id) || check.contains(666);
+	public void disable() {
+		debug.remove(id);
 	}
 	
 	/**
-	 * Disables all debuggers
-	 */
-	public static void disable() {
-		Debugger.override = false;
-		check.clear();
-	}
-	/**
-	 * Enables a particular debugger
+	 * Disables the debugger
 	 * 
-	 * @param debug Debugger id
+	 * @param id The debugger ID
 	 */
-	public static void enable(String debug) {
-		try {
-			check.add(Integer.valueOf(debug));
-			System.out.println("Debugging: " + debug);
-		} catch (NumberFormatException e) {
-			System.out.println("Debug load error: " + debug);
-		}
-		
-		if (debug.equals("i"))
-			level = (byte) 1;
-		else if (debug.equals("w"))
-			level = (byte) 2;
-		else if (debug.equals("s"))
-			level = (byte) 3;
+	public static void disable(int id) {
+		debug.remove(id);
 	}
 	
 	/**
-	 * Enables all debuggers
-	 */
-	public static void enableAll() {
-		Debugger.check.add(666);
-	}
-
-	/**
-	 * Reads a string array and return a readable string
+	 * Disables the debugger
 	 * 
-	 * @param s The string array
-	 *            
-	 * @return A string, the array elements joined with comma
+	 * @param debugId The type to disable
 	 */
-	public String formatStringArray(String[] s) {
-		if (s == null)
-			return "NULL";
-		String result = "";
-		for (int i = 0; i < s.length; i++) {
-			result = result + (result.equals("") ? "" : ",") + s[i];
-		}
-		return result;
-	}
-
-	/**
-	 * Logs a message prefixed with INFO
-	 * 
-	 * @param s The message
-	 */
-	public void i(String s) {
-		if (!debugs() || level < 1)
+	public static void disable(String debugId) {
+		if (debugId.equalsIgnoreCase("none"))
 			return;
-		Bukkit.getLogger().info(prefix + s);
+		
+		try {
+			int id = Integer.parseInt(debugId);
+			debug.remove(id);
+			
+		} catch (NumberFormatException e) {
+			if (debugId.equalsIgnoreCase("all"))
+				debug.remove(1024);
+		}
 	}
 	
 	/**
-	 * Check if Debugger is debugging
+	 * Enables the debugger
+	 */
+	public void enable() {
+		debug.add(id);
+	}
+	
+	/**
+	 * Enables the debugger
 	 * 
-	 * @return True if debugging
+	 * @param id The debugger id
+	 */
+	public static void enable(int id) {
+		debug.add(id);
+	}
+	
+	/**
+	 * Enables the debugger
+	 * 
+	 * @param debugId The debugger type
+	 */
+	public static void enable(String debugId) {
+		if (debugId.equalsIgnoreCase("none"))
+			return;
+		
+		try {
+			int id = Integer.parseInt(debugId);
+			debug.add(id);
+			
+		} catch (NumberFormatException e) {
+			if (debugId.equalsIgnoreCase("all"))
+				debug.add(1024);
+		}
+	}
+	
+	/**
+	 * Info debugger
+	 * 
+	 * @param message The debug message
+	 */
+	public void i(String message) {
+		if (isDebugging())
+			log(Level.INFO, message);
+	}
+	
+	/**
+	 * Check if the debugger is debugging
+	 * 
+	 * @return True if the debugger is debugging
 	 */
 	public boolean isDebugging() {
-		return debugs();
+		return debug.contains(id) || debug.contains(1024);
 	}
 	
 	/**
-	 * Loads the Debugger
+	 * Check if the debugger is debugging
 	 * 
-	 * @param instance TitanChat
+	 * @param id The debugger id
+	 * 
+	 * @return True if the debugger is debugging
 	 */
-	public static void load(TitanChat instance) {
-		String debugs = instance.getConfig().getString("debug", "none");
+	public static boolean isDebugging(int id) {
+		return debug.contains(id) || debug.contains(1024);
+	}
+	
+	/**
+	 * Loads the debugger
+	 * 
+	 * @param configOption The config option
+	 */
+	public static void load(String configOption) {
+		if (configOption.equalsIgnoreCase("none"))
+			return;
 		
-		if (!debugs.equals("none")) {
-			if (debugs.equals("all") || debugs.equals("full")) {
-				Debugger.check.add(666);
-				System.out.print("Debugging EVERYTHING");
-			} else {
-				String[] sIds = debugs.split(",");
-				for (String s : sIds) {
-					try {
-						Debugger.check.add(Integer.valueOf(s));
-						System.out.print("Debugging: " + s);
-					} catch (Exception e) {
-						System.out.print("Debug load error: " + s);
-					}
-					if (s.equals("i")) {
-						level = (byte) 1;
-					} else if (s.equals("w")) {
-						level = (byte) 2;
-					} else if (s.equals("s")) {
-						level = (byte) 3;
-					}
-				}
-			}
-		}
+		if (configOption.contains(","))
+			for (String id : configOption.split(","))
+				enable(id.trim());
+		else
+			enable(configOption);
 	}
-
+	
 	/**
-	 * Logs a message prefixed with SEVERE
+	 * Sends the message to the log
 	 * 
-	 * @param s The message
+	 * @param level Level of the announcement
+	 * 
+	 * @param msg The message to send
 	 */
-	public void s(String s) {
-		if (!debugs() || level < 3)
-			return;
-		Bukkit.getLogger().severe(prefix + s);
+	public void log(Level level, String msg) {
+		log.log(level, "[TitanDebug] " + msg);
 	}
-
+	
 	/**
-	 * Logs a message prefixed with WARNING
+	 * Severe debugger
 	 * 
-	 * @param s The message
+	 * @param message The debug message
 	 */
-	public void w(String s) {
-		if (!debugs() || level < 2)
-			return;
-		Bukkit.getLogger().warning(prefix + s);
+	public void s(String message) {
+		if (isDebugging())
+			log(Level.SEVERE, message);
+	}
+	
+	/**
+	 * Warning debugger
+	 * 
+	 * @param message The debug message
+	 */
+	public void w(String message) {
+		if (isDebugging())
+			log(Level.WARNING, message);
 	}
 }
-
-// debug ids:
-// 1 - titanchat
-// 2 - .addon
-// 3 - .channel
-// 4 - .command
-// 5 - .permissions
-

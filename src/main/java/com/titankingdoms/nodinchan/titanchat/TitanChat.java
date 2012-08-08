@@ -1,19 +1,13 @@
 package com.titankingdoms.nodinchan.titanchat;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Method;
-import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.Arrays;
 import java.util.List;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -25,18 +19,27 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
-import com.titankingdoms.nodinchan.titanchat.addon.AddonManager;
-import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
-import com.titankingdoms.nodinchan.titanchat.command.CommandManager;
+import com.nodinchan.ncbukkit.NCBL;
+import com.titankingdoms.nodinchan.titanchat.channel.Channel;
+import com.titankingdoms.nodinchan.titanchat.event.EmoteEvent;
+import com.titankingdoms.nodinchan.titanchat.event.util.Message;
 import com.titankingdoms.nodinchan.titanchat.metrics.Metrics;
+import com.titankingdoms.nodinchan.titanchat.metrics.Metrics.Graph;
+import com.titankingdoms.nodinchan.titanchat.metrics.Metrics.Plotter;
+import com.titankingdoms.nodinchan.titanchat.processing.ChatProcessor;
 import com.titankingdoms.nodinchan.titanchat.util.Debugger;
+import com.titankingdoms.nodinchan.titanchat.util.DefaultPermissions;
 import com.titankingdoms.nodinchan.titanchat.util.FormatHandler;
-import com.titankingdoms.nodinchan.titanchat.util.PermsBridge;
+import com.titankingdoms.nodinchan.titanchat.util.PermissionsHandler;
 import com.titankingdoms.nodinchan.titanchat.util.displayname.DisplayName;
 import com.titankingdoms.nodinchan.titanchat.util.displayname.DisplayNameChanger;
-import com.titankingdoms.nodinchan.titanchat.util.variable.Variable;
+import com.titankingdoms.nodinchan.titanchat.util.variable.VariableHandler;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -67,17 +70,26 @@ public final class TitanChat extends JavaPlugin {
 	private String NAME;
 	
 	private static final Logger log = Logger.getLogger("TitanLog");
-	private static final Debugger db = new Debugger(1);
+	private static final Debugger db = new Debugger(0);
 	
-	private AddonManager addonManager;
-	private ChannelManager chManager;
-	private CommandManager cmdManager;
+	private ChatProcessor processor;
+	
+	private TitanChatListener listener;
+	private TitanChatManager manager;
+	private DefaultPermissions defPerms;
 	private DisplayNameChanger displayname;
 	private FormatHandler format;
-	private PermsBridge permBridge;
-	private Variable variable;
+	private PermissionsHandler permHandler;
+	private VariableHandler variable;
 	
 	private boolean silenced = false;
+	
+	public void chatLog(String line) {
+		if (getConfig().getBoolean("logging.colouring"))
+			getServer().getConsoleSender().sendMessage(line);
+		else
+			getServer().getConsoleSender().sendMessage(line.replaceAll("(?i)(\u00A7)([a-f0-9k-or])", ""));
+	}
 	
 	/**
 	 * Creates a new list with items seperated with commas
@@ -87,8 +99,6 @@ public final class TitanChat extends JavaPlugin {
 	 * @return The created list of items
 	 */
 	public String createList(List<String> list) {
-		db.i("Creating string out of stringlist: " + list.toString());
-		
 		StringBuilder str = new StringBuilder();
 		
 		for (String item : list) {
@@ -98,18 +108,8 @@ public final class TitanChat extends JavaPlugin {
 			str.append(item);
 		}
 		
+		db.i("TitanChat: Creating string out of string list: " + str.toString());
 		return str.toString();
-	}
-	
-	/**
-	 * Creates a new list with items seperated with commas
-	 * 
-	 * @param array The string array to create a list from
-	 * 
-	 * @return The created list of items
-	 */
-	public String createList(String[] array) {
-		return createList(Arrays.asList(array));
 	}
 	
 	/**
@@ -118,7 +118,7 @@ public final class TitanChat extends JavaPlugin {
 	 * @return True if Channels are enabled
 	 */
 	public boolean enableChannels() {
-		return getConfig().getBoolean("channels.enable-channels");
+		return getConfig().getBoolean("channels.enable");
 	}
 	
 	/**
@@ -140,15 +140,6 @@ public final class TitanChat extends JavaPlugin {
 	}
 	
 	/**
-	 * Gets the AddonManager
-	 * 
-	 * @return The AddonManager
-	 */
-	public AddonManager getAddonManager() {
-		return addonManager;
-	}
-	
-	/**
 	 * Gets the Channel directory
 	 * 
 	 * @return The Channel directory
@@ -157,27 +148,17 @@ public final class TitanChat extends JavaPlugin {
 		return new File(getDataFolder(), "channels");
 	}
 	
-	/**
-	 * Gets the ChannelManager
-	 * 
-	 * @return The ChannelManager
-	 */
-	public ChannelManager getChannelManager() {
-		return chManager;
-	}
-	
-	/**
-	 * Gets the CommandManager
-	 * 
-	 * @return The CommandManager
-	 */
-	public CommandManager getCommandManager() {
-		return cmdManager;
+	public ChatProcessor getChatProcessor() {
+		return processor;
 	}
 	
 	@Override
 	public List<Class<?>> getDatabaseClasses() {
 		return Arrays.asList(new Class<?>[] { DisplayName.class });
+	}
+	
+	public DefaultPermissions getDefPerms() {
+		return defPerms;
 	}
 	
 	/**
@@ -216,6 +197,15 @@ public final class TitanChat extends JavaPlugin {
 	}
 	
 	/**
+	 * Gets the manager that manages other managers
+	 * 
+	 * @return The TitanChatManager
+	 */
+	public TitanChatManager getManager() {
+		return manager;
+	}
+	
+	/**
 	 * Gets OfflinePlayer by name
 	 * 
 	 * @param name The name of the OfflinePlayer
@@ -228,12 +218,12 @@ public final class TitanChat extends JavaPlugin {
 	}
 	
 	/**
-	 * Gets the PermsBridge
+	 * Gets the PermissionsHandler
 	 * 
-	 * @return The built-in PermsBridge
+	 * @return The built-in PermissionsHandler
 	 */
-	public PermsBridge getPermsBridge() {
-		return permBridge;
+	public PermissionsHandler getPermissionsHandler() {
+		return permHandler;
 	}
 	
 	/**
@@ -244,8 +234,7 @@ public final class TitanChat extends JavaPlugin {
 	 * @return The Player with the name
 	 */
 	public Player getPlayer(String name) {
-		OfflinePlayer player = getOfflinePlayer(name);
-		return (player.isOnline()) ? player.getPlayer() : null;
+		return getServer().getPlayer(name);
 	}
 	
 	/**
@@ -253,88 +242,8 @@ public final class TitanChat extends JavaPlugin {
 	 * 
 	 * @return The Variable manager
 	 */
-	public Variable getVariableManager() {
+	public VariableHandler getVariableManager() {
 		return variable;
-	}
-
-	/**
-	 * Initialises the NC-LoaderLib
-	 * 
-	 * @return True if the Lib is initialised
-	 */
-	private boolean initLoaderLib() {
-		try {
-			File destination = new File(getDataFolder().getParentFile().getParentFile(), "lib");
-			destination.mkdirs();
-			
-			File lib = new File(destination, "NC-LoaderLib.jar");
-			
-			boolean download = false;
-			
-			if (!lib.exists()) {
-				System.out.println("Missing NC-Loader lib");
-				download = true;
-				
-			} else {
-				JarFile jarFile = new JarFile(lib);
-				
-				double version = 0;
-				
-				if (jarFile.getEntry("version.yml") != null) {
-					JarEntry element = jarFile.getJarEntry("version.yml");
-					BufferedReader reader = new BufferedReader(new InputStreamReader(jarFile.getInputStream(element)));
-					version = Double.parseDouble(reader.readLine().substring(9).trim());
-					
-				} else {
-					System.out.println("Missing version.yml");
-					download = true;
-				}
-				
-				if (!download) {
-					if (version == 0) {
-						System.out.println("NC-Loader lib outdated");
-						download = true;
-						
-					} else {
-						HttpURLConnection urlConnection = (HttpURLConnection) new URL("http://www.nodinchan.com/NC-LoaderLib/version.yml").openConnection();
-						BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-						
-						if (Double.parseDouble(reader.readLine().replace("NC-LoaderLib Version ", "").trim()) > version) {
-							System.out.println("NC-Loader lib outdated");
-							download = true;
-						}
-					}
-				}
-			}
-			
-			if (download) {
-				System.out.println("Downloading NC-Loader lib...");
-				URL url = new URL("http://www.nodinchan.com/NC-LoaderLib/NC-LoaderLib.jar");
-				ReadableByteChannel rbc = Channels.newChannel(url.openStream());
-				FileOutputStream output = new FileOutputStream(lib);
-				output.getChannel().transferFrom(rbc, 0, 1 << 24);
-				System.out.println("Downloaded NC-Loader lib");
-			}
-			
-			URLClassLoader sysLoader = (URLClassLoader) ClassLoader.getSystemClassLoader();
-			
-			for (URL url : sysLoader.getURLs()) {
-				if (url.sameFile(lib.toURI().toURL()))
-					return true;
-			}
-			
-			try {
-				Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
-				method.setAccessible(true);
-				method.invoke(sysLoader, lib.toURI().toURL());
-				
-			} catch (Exception e) { return false; }
-			
-			return true;
-			
-		} catch (Exception e) { e.printStackTrace(); }
-		
-		return false;
 	}
 	
 	/**
@@ -350,6 +259,34 @@ public final class TitanChat extends JavaPlugin {
 			
 			if (metrics.isOptOut())
 				return true;
+			
+			Graph metricsStats = metrics.createGraph("Stats");
+			
+			metricsStats.addPlotter(new Plotter("Characters") {
+				
+				@Override
+				public int getValue() {
+					return (int) listener.getCharacters();
+				}
+			});
+			
+			metricsStats.addPlotter(new Plotter("Lines") {
+				
+				@Override
+				public int getValue() {
+					return (int) listener.getLines();
+				}
+			});
+			
+			metricsStats.addPlotter(new Plotter("Words") {
+				
+				@Override
+				public int getValue() {
+					return (int) listener.getWords();
+				}
+			});
+			
+			metrics.addGraph(metricsStats);
 			
 			return metrics.start();
 			
@@ -373,7 +310,7 @@ public final class TitanChat extends JavaPlugin {
 	 * @return True if the Player has TitanChat.admin
 	 */
 	public boolean isStaff(Player player) {
-		return permBridge.has(player, "TitanChat.staff");
+		return permHandler.has(player, "TitanChat.staff");
 	}
 	
 	/**
@@ -402,220 +339,100 @@ public final class TitanChat extends JavaPlugin {
 	 */
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		db.i("onCommand: " + cmd.getName());
+		db.i("TitanChat: On command " + cmd.getName());
 		
 		if (cmd.getName().equals("titanchat")) {
-			if (args.length < 1) {
-				db.i("onCommand: No arguments!");
+			if (args.length < 1 || (args[0].startsWith("@") && args.length < 2)) {
+				db.i("TitanChat: On command: No arguments");
 				
 				sender.sendMessage(ChatColor.AQUA + "You are running " + this);
-				
-				if (sender instanceof Player)
-					sendInfo((Player) sender, "\"/titanchat commands [page]\" for command list");
-				else
-					log(Level.INFO, "\"/titanchat commands [page]\" for command list");
-				
+				send(MessageLevel.INFO, sender, "\"/titanchat commands [page]\" for command list");
 				return true;
 			}
 			
-			if (!(sender instanceof Player)) {
-				if (args[0].equalsIgnoreCase("reload")) {
-					log(Level.INFO, "Reloading configs...");
-					reloadConfig();
-					addonManager.unload();
-					chManager.unload();
-					cmdManager.unload();
-					variable.unload();
-					addonManager.load();
-					chManager.load();
-					cmdManager.load();
-					format.load();
-					log(Level.INFO, "Configs reloaded");
-					return true;
-				}
-				
-				if (args[0].equalsIgnoreCase("broadcast")) {
-					if (!getConfig().getBoolean("broadcast.server.enable")) {
-						log(Level.WARNING, "Command disabled");
-						return true;
-					}
-					
-					String message = getConfig().getString("broadcast.server.format");
-					
-					StringBuilder str = new StringBuilder();
-					
-					for (String word : args) {
-						if (str.length() > 0)
-							str.append(" ");
-						
-						str.append(word);
-					}
-					
-					String[] lines = getFormatHandler().regroup(message, str.toString());
-					
-					for (int line = 0; line < lines.length; line++) {
-						if (line < 1)
-							getServer().broadcastMessage(getFormatHandler().colourise(message.replace("%message", lines[0])));
-						else
-							getServer().broadcastMessage(lines[line]);
-					}
-					
-					String console = "<" + ChatColor.RED + "Server" + ChatColor.RESET + "> ";
-					
-					getServer().getConsoleSender().sendMessage(console + message.replace("%message", message.replace("%message", str.toString())));
-					return true;
-				}
-				
-				log(Level.INFO, "Please use commands in-game");
+			if (args[0].equalsIgnoreCase("updatelib")) {
+				updateLib();
 				return true;
 			}
-
-			db.i("CommandManager executing command:");
-			cmdManager.execute((Player) sender, args[0], Arrays.copyOfRange(args, 1, args.length));
+			
+			String command = args[0];
+			String chName = null;
+			
+			if (args[0].startsWith("@")) {
+				command = args[1];
+				chName = args[0].substring(1);
+			}
+			
+			String[] arguments = new String[0];
+			
+			if (args[0].startsWith("@"))
+				arguments = Arrays.copyOfRange(args, 2, args.length);
+			else
+				arguments = Arrays.copyOfRange(args, 1, args.length);
+			
+			db.i("TitanChat: CommandManager executing command:");
+			manager.getCommandManager().execute(sender, command, chName, arguments);
 			return true;
 		}
 		
 		if (cmd.getName().equalsIgnoreCase("broadcast")) {
-			if (!(sender instanceof Player)) {
-				if (!getConfig().getBoolean("broadcast.server.enable")) {
-					log(Level.WARNING, "Command disabled");
-					return true;
-				}
+			StringBuilder str = new StringBuilder();
+			
+			for (String arg : args) {
+				if (str.length() > 0)
+					str.append(" ");
 				
-				String message = getConfig().getString("broadcast.server.format");
-				
-				StringBuilder str = new StringBuilder();
-				
-				for (String word : args) {
-					if (str.length() > 0)
-						str.append(" ");
-					
-					str.append(word);
-				}
-				
-				String[] lines = getFormatHandler().regroup(message, str.toString());
-				
-				for (int line = 0; line < lines.length; line++) {
-					if (line < 1)
-						getServer().broadcastMessage(getFormatHandler().colourise(message.replace("%message", lines[0])));
-					else
-						getServer().broadcastMessage(lines[line]);
-				}
-				
-				String console = "<" + ChatColor.RED + "Server" + ChatColor.RESET + "> ";
-				
-				getServer().getConsoleSender().sendMessage(console + message.replace("%message", message.replace("%message", str.toString())));
-				return true;
+				str.append(arg);
 			}
 			
-			if (!getConfig().getBoolean("broadcast.player.enable")) {
-				sendWarning((Player) sender, "Command disabled");
-				return true;
-			}
-			
-			if (permBridge.has((Player) sender, "TitanChat.broadcast"))
-				try { cmdManager.execute((Player) sender, "broadcast", args); } catch (Exception e) {}
-			else
-				sendWarning((Player) sender, "You do not have permission");
-			
+			getServer().dispatchCommand(sender, "titanchat broadcast " + str.toString());
 			return true;
 		}
 		
-		if (cmd.getName().equalsIgnoreCase("me")) {
-			if (!(sender instanceof Player)) {
-				if (!getConfig().getBoolean("emote.server.enable")) {
-					log(Level.WARNING, "Command disabled");
-					return true;
-				}
-				
-				String message = getConfig().getString("emote.server.format");
-				
-				StringBuilder str = new StringBuilder();
-				
-				for (String word : args) {
-					if (str.length() > 0)
-						str.append(" ");
-					
-					str.append(word);
-				}
-				
-				String[] lines = getFormatHandler().regroup(message, str.toString());
-				
-				for (int line = 0; line < lines.length; line++) {
-					if (line < 1)
-						getServer().broadcastMessage(getFormatHandler().colourise(message.replace("%action", lines[0])));
-					else
-						getServer().broadcastMessage(getFormatHandler().colourise(lines[line]));
-				}
-				
-				String console = "* " + ChatColor.RED + "Server " + ChatColor.RESET;
-				
-				getServer().getConsoleSender().sendMessage(console + str.toString());
+		if (cmd.getName().equalsIgnoreCase("emote")) {
+			if (sender instanceof Player && !permHandler.has((Player) sender, "TitanChat.emote")) {
+				send(MessageLevel.WARNING, sender, "You do not have permission");
 				return true;
 			}
 			
-			if (!getConfig().getBoolean("emote.player.enable")) {
-				sendWarning((Player) sender, "Command disabled");
+			if (!getConfig().getBoolean("chat." + ((sender instanceof Player) ? "player" : "server") + ".enable")) {
+				send(MessageLevel.WARNING, sender, "Emote Command Disabled");
 				return true;
 			}
 			
-			if (permBridge.has((Player) sender, "TitanChat.emote.server"))
-				try { cmdManager.execute((Player) sender, "me", args); } catch (Exception e) {}
-			else
-				sendWarning((Player) sender, "You do not have permission");
+			StringBuilder str = new StringBuilder();
+			
+			for (String word : args) {
+				if (str.length() > 0)
+					str.append(" ");
+				
+				str.append(word);
+			}
+			
+			String format = getFormatHandler().emoteFormat(sender, "");
+			
+			EmoteEvent event = new EmoteEvent(sender, new Message(format, str.toString()));
+			getServer().getPluginManager().callEvent(event);
+			
+			String[] lines = this.format.splitAndFormat(event.getFormat(), "%action", event.getMessage());
+			
+			for (String line : lines)
+				getServer().broadcastMessage(line);
 			
 			return true;
 		}
 		
 		if (cmd.getName().equalsIgnoreCase("whisper")) {
-			if (!(sender instanceof Player)) {
-				if (!getConfig().getBoolean("whisper.server.enable")) {
-					log(Level.WARNING, "Command disabled");
-					return true;
-				}
+			StringBuilder str = new StringBuilder();
+			
+			for (String arg : args) {
+				if (str.length() > 0)
+					str.append(" ");
 				
-				if (getPlayer(args[0]) == null) {
-					log(Level.WARNING, "Player not online");
-					return true;
-				}
-				
-				String message = getConfig().getString("whisper.server.format");
-				
-				StringBuilder str = new StringBuilder();
-				
-				for (String word : args) {
-					if (str.length() > 0)
-						str.append(" ");
-					
-					str.append(word);
-				}
-				
-				if (args[0].equalsIgnoreCase("console")) {
-					log(Level.INFO, "You whispered to yourself: " + str.toString());
-					log(Level.INFO, message.replace("%message", str.toString()));
-					return true;
-				}
-				
-				if (getPlayer(args[0]) != null) {
-					String[] lines = getFormatHandler().regroup(message, str.toString());
-					getPlayer(args[0]).sendMessage(message.replace("%message", lines[0]));
-					getPlayer(args[0]).sendMessage(Arrays.copyOfRange(lines, 1, lines.length));
-					getPlayer(args[0]).sendMessage(message.replace("%message", getFormatHandler().colourise(str.toString())));
-					log(Level.INFO, "[Server -> " + getPlayer(args[0]).getName() + "] " + str.toString());
-					
-				} else { log(Level.WARNING, "Player not online"); }
+				str.append(arg);
 			}
 			
-			if (!getConfig().getBoolean("whisper.player.enable")) {
-				sendWarning((Player) sender, "Command disabled");
-				return true;
-			}
-			
-			if (permBridge.has((Player) sender, "TitanChat.whisper"))
-				try { cmdManager.execute((Player) sender, "whisper", args); } catch (Exception e) {}
-			else
-				sendWarning((Player) sender, "You do not have permission");
-			
+			getServer().dispatchCommand(sender, "titanchat whisper " + str.toString());
 			return true;
 		}
 		
@@ -628,12 +445,11 @@ public final class TitanChat extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		log(Level.INFO, "is now disabling...");
-		
 		log(Level.INFO, "Unloading managers...");
-
-		addonManager.unload();
-		chManager.unload();
-		cmdManager.unload();
+		
+		manager.getAddonManager().unload();
+		manager.getChannelManager().unload();
+		manager.getCommandManager().unload();
 		displayname.unload();
 		variable.unload();
 		
@@ -647,15 +463,18 @@ public final class TitanChat extends JavaPlugin {
 	public void onEnable() {
 		log(Level.INFO, "is now enabling...");
 		
+		try {
+			getDatabase().find(DisplayName.class).findRowCount();
+			
+		} catch (PersistenceException e) {
+			log(Level.INFO, "Setting up display name database...");
+			installDDL();
+		}
+		
+		register(listener = new TitanChatListener());
+		
 		if (!initMetrics())
 			log(Level.WARNING, "Failed to hook into Metrics");
-		
-		File config = new File(getDataFolder(), "config.yml");
-		
-		if (!config.exists()) {
-			log(Level.INFO, "Loading default config");
-			saveResource("config.yml", false);
-		}
 		
 		if (getChannelDir().mkdir()) {
 			log(Level.INFO, "Creating channel directory...");
@@ -667,40 +486,30 @@ public final class TitanChat extends JavaPlugin {
 			saveResource("channels/Staff.yml", false);
 		}
 		
-		try {
-			getDatabase().find(DisplayName.class).findRowCount();
-			
-		} catch (PersistenceException e) {
-			log(Level.INFO, "Setting up display name database...");
-			installDDL();
-		}
-		
-		addonManager = new AddonManager();
-		chManager = new ChannelManager();
-		cmdManager = new CommandManager();
+		manager = new TitanChatManager();
+		defPerms = new DefaultPermissions();
 		displayname = new DisplayNameChanger();
 		format = new FormatHandler();
-		permBridge = new PermsBridge();
-		variable = new Variable();
+		permHandler = new PermissionsHandler();
+		variable = new VariableHandler();
 		
-		Debugger.load(this);
-		
-		register(new TitanChatListener(this));
+		Debugger.load(getConfig().getString("logging.debug"));
 		
 		for (Player player : getServer().getOnlinePlayers())
 			displayname.apply(player);
 		
-		addonManager.load();
-		try { chManager.load(); } catch (Exception e) {}
-		cmdManager.load();
+		manager.load();
+		defPerms.load();
 		format.load();
 		
-		if (chManager.getDefaultChannel() == null && enableChannels()) {
+		if (manager.getChannelManager().getDefaultChannels().isEmpty()) {
 			log(Level.SEVERE, "A default channel is not defined");
 			getServer().getPluginManager().disablePlugin(this);
 			return;
 		}
 		
+		processor = new ChatProcessor();
+		getServer().getPluginManager().registerEvents(processor, this);
 		log(Level.INFO, "is now enabled");
 	}
 	
@@ -712,8 +521,15 @@ public final class TitanChat extends JavaPlugin {
 		instance = this;
 		NAME = "TitanChat " + instance.toString().split(" ")[1];
 		
-		if (!initLoaderLib())
-			log(Level.WARNING, "Failed to initialise Loader lib");
+		File config = new File(getDataFolder(), "config.yml");
+		
+		if (!config.exists()) {
+			log(Level.INFO, "Loading default config...");
+			saveResource("config.yml", false);
+		}
+		
+		if (getConfig().getBoolean("auto-library-update"))
+			updateLib();
 	}
 	
 	/**
@@ -726,57 +542,37 @@ public final class TitanChat extends JavaPlugin {
 	}
 	
 	/**
-	 * Sends an info to the Player
+	 * Sends a message to the player
 	 * 
-	 * @param player The Player to send to
+	 * @param level The level of the mssage
 	 * 
-	 * @param info The message
+	 * @param player The player to send to
+	 * 
+	 * @param msg The message
 	 */
-	public void sendInfo(Player player, String info) {
-		db.i("@" + player.getName() + ": " + info);
-		
-		player.sendMessage("[TitanChat] " + ChatColor.GOLD + info);
+	public void send(MessageLevel level, CommandSender sender, String msg) {
+		db.i("@" + sender.getName() + ": " + msg);
+		String format = "[" + level.getColour() + "TitanChat" + ChatColor.WHITE + "] " + level.getColour() + "%msg";
+		sender.sendMessage(this.format.splitAndFormat(format, "%msg", msg));
+	}
+	
+	public void send(MessageLevel level, Channel channel, String msg) {
+		db.i("@Channel " + channel.getName() + ": " + msg);
+		channel.send("[" + level.getColour() + "TitanChat" + ChatColor.WHITE + "] " + level.getColour() + msg);
 	}
 	
 	/**
-	 * Sends an info to all the Players within the list
+	 * Sends a message to all players within the list
 	 * 
-	 * @param players String list of Players to send to
+	 * @param level The level of the message
 	 * 
-	 * @param info The message
+	 * @param players The players to send to
+	 * 
+	 * @param msg The message
 	 */
-	public void sendInfo(List<String> players, String info) {
-		for (String player : players) {
-			if (getPlayer(player) != null)
-				sendInfo(getPlayer(player), info);
-		}
-	}
-	
-	/**
-	 * Sends a warning to the Player
-	 * 
-	 * @param player The Player to send to
-	 * 
-	 * @param warning The message
-	 */
-	public void sendWarning(Player player, String warning) {
-		db.i("Warning @" + player.getName() + ": " + warning);
-		
-		player.sendMessage("[TitanChat] " + ChatColor.RED + warning);
-	}
-	
-	/**
-	 * Sends a warning to all the Players within the list
-	 * 
-	 * @param players String list of Players to send to
-	 * 
-	 * @param warning The message
-	 */
-	public void sendWarning(List<String> players, String warning) {
-		for (String player : players) {
-			if (getPlayer(player) != null)
-				sendWarning(getPlayer(player), warning);
-		}
+	public void send(MessageLevel level, List<Player> players, String msg) {
+		for (Player player : players)
+			send(level, player, msg);
 	}
 	
 	/**
@@ -790,11 +586,134 @@ public final class TitanChat extends JavaPlugin {
 	}
 	
 	/**
-	 * Check if default formatting should be used
-	 * 
-	 * @return True if default formatting should be used
+	 * Checks for update of the library
 	 */
-	public boolean useDefaultFormat() {
-		return getConfig().getBoolean("formatting.use-built-in");
+	private void updateLib() {
+		PluginManager pm = getServer().getPluginManager();
+		
+		NCBL libPlugin = (NCBL) pm.getPlugin("NC-BukkitLib");
+		
+		File destination = new File(getDataFolder().getParentFile().getParentFile(), "lib");
+		destination.mkdirs();
+		
+		File lib = new File(destination, "NC-BukkitLib.jar");
+		File pluginLib = new File(getDataFolder().getParentFile(), "NC-BukkitLib.jar");
+		
+		boolean inPlugins = false;
+		boolean download = false;
+		
+		try {
+			URL url = new URL("http://bukget.org/api/plugin/nc-bukkitlib");
+			
+			JSONObject jsonPlugin = (JSONObject) new JSONParser().parse(new InputStreamReader(url.openStream()));
+			JSONArray versions = (JSONArray) jsonPlugin.get("versions");
+			
+			if (libPlugin == null) {
+				getLogger().log(Level.WARNING, "Missing NC-Bukkit lib");
+				inPlugins = true;
+				download = true;
+				
+			} else {
+				double currentVer = libPlugin.getVersion();
+				double newVer = currentVer;
+				
+				for (int ver = 0; ver < versions.size(); ver++) {
+					JSONObject version = (JSONObject) versions.get(ver);
+					
+					if (version.get("type").equals("Release")) {
+						newVer = Double.parseDouble(((String) version.get("name")).split(" ")[1].trim().substring(1));
+						break;
+					}
+				}
+				
+				if (newVer > currentVer) {
+					getLogger().log(Level.WARNING, "NC-Bukkit lib outdated");
+					download = true;
+				}
+			}
+			
+			if (download) {
+				getLogger().log(Level.INFO, "Downloading NC-Bukkit lib");
+				
+				String dl_link = "";
+				
+				for (int ver = 0; ver < versions.size(); ver++) {
+					JSONObject version = (JSONObject) versions.get(ver);
+					
+					if (version.get("type").equals("Release")) {
+						dl_link = (String) version.get("dl_link");
+						break;
+					}
+				}
+				
+				if (dl_link == null)
+					throw new Exception();
+				
+				URL link = new URL(dl_link);
+				ReadableByteChannel rbc = Channels.newChannel(link.openStream());
+				FileOutputStream output = null;
+				
+				if (inPlugins) {
+					output = new FileOutputStream(pluginLib);
+					output.getChannel().transferFrom(rbc, 0, 1 << 24);
+					libPlugin = (NCBL) pm.loadPlugin(pluginLib);
+					
+				} else {
+					output = new FileOutputStream(lib);
+					output.getChannel().transferFrom(rbc, 0, 1 << 24);
+				}
+				
+				output.close();
+				getLogger().log(Level.INFO, "Downloaded NC-Bukkit lib");
+			}
+			
+			libPlugin.hook(this);
+			
+		} catch (Exception e) { getLogger().log(Level.WARNING, "Failed to check for library update"); }
+	}
+	
+	public boolean voiceless(Player player, Channel channel, boolean message) {
+		if (permHandler.has(player, "TitanChat.voice"))
+			return false;
+		
+		if (isSilenced()) {
+			if (message)
+				send(MessageLevel.WARNING, player, "The server is silenced");
+			
+			return true;
+		}
+		
+		if (manager.getChannelManager().isSilenced(channel)) {
+			if (message)
+				send(MessageLevel.WARNING, player, "The channel is silenced");
+			
+			return true;
+		}
+		
+		if (manager.getChannelManager().getParticipant(player).isMuted(channel)) {
+			if (message)
+				send(MessageLevel.WARNING, player, "You have been muted");
+			
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public enum MessageLevel {
+		INFO(ChatColor.GOLD),
+		NONE(ChatColor.WHITE),
+		PLUGIN(ChatColor.AQUA),
+		WARNING(ChatColor.RED);
+		
+		private ChatColor colour;
+		
+		private MessageLevel(ChatColor colour) {
+			this.colour = colour;
+		}
+		
+		public ChatColor getColour() {
+			return colour;
+		}
 	}
 }

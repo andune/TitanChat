@@ -1,4 +1,4 @@
-package com.titankingdoms.nodinchan.titanchat.event;
+package com.titankingdoms.nodinchan.titanchat.event.chat;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;

@@ -8,41 +8,58 @@
 # &l (bold), &m (underlined), &n (striked), &o (italic)        #
 #==============================================================#
 
+auto-library-update: true
 channels:
-    enable-channels: true
-    chat-display-colour: '&f'
+    enable: true
+    server:
+        tag: ''
+        display-colour: '&f'
+        topic: ''
     channel-limit: -1
-    quick-message: '@'
     messages:
         join: true
         leave: true
-broadcast:
-    player:
-        enable: true
-        format: '[&cBroadcast&f] %player: %message'
-    server:
-        enable: true
-        format: '<&4Server&f> %message'
-emote:
-    player:
+logging:
+    colouring: true
+    debug: none
+chat:
+    serverToChannel: '%tag &4Server: %message'
+    channel-emote:
         enable: true
         format: '* %player %action'
-    server:
-        enable: true
-        format: '* &4Server &f%action'
-whisper:
     player:
         enable: true
-        format: '&5%player whispers: %message'
+        broadcast: '[&cBroadcast&f] %player: %message'
+        emote: '* %player %action'
+        whisper: '&5%player whispers: %message'
     server:
         enable: true
-        format: '&5Server whispers: %message'
+        broadcast: '<&4Server&f> %message'
+        emote: '* &4Server &f%action'
+        whisper: '&4Server &5whispers: %message'
 formatting:
-    use-built-in: true
+    use-custom-format: false
     format: "%tag %prefix%player%suffix: %message"
 permissions:
-- TitanChat.g.prefix.[&7User&f]
-- TitanChat.g.prefix.[&4Admin&f]
-- 'TitanChat.p.suffix. the &6Member&f'
-- 'TitanChat.p.suffix. the &4Owner&f'
-debug: none
+    affixes:
+        group:
+            guest:
+                prefix: '[&8Guest&f]'
+             member:
+                prefix: '[&7Member&f]'
+                suffix: '&2'
+            vip:
+                prefix: '[&6VIP&f]'
+                suffix: '&5'
+            mod:
+                prefix: '[&1Mod&f]'
+            admin:
+                prefix: '[&4Admin&f]'
+        player:
+            titan:
+                prefix: '[&4Titan&f]'
+            dev:
+                prefix: '[&6Dev&f]'
+            bukkitdev:
+                prefix: '[&1Bukkit]'
+                suffix: '&b'

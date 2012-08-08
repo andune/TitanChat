@@ -1,15 +1,13 @@
 package com.titankingdoms.nodinchan.titanchat.command.commands;
 
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
-import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
-import com.titankingdoms.nodinchan.titanchat.channel.StandardChannel;
-import com.titankingdoms.nodinchan.titanchat.channel.Channel.Type;
-import com.titankingdoms.nodinchan.titanchat.command.Command;
-import com.titankingdoms.nodinchan.titanchat.command.CommandID;
-import com.titankingdoms.nodinchan.titanchat.command.CommandInfo;
+import com.titankingdoms.nodinchan.titanchat.channel.Channel.Option;
+import com.titankingdoms.nodinchan.titanchat.command.CommandBase;
+import com.titankingdoms.nodinchan.titanchat.command.info.*;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -33,267 +31,179 @@ import com.titankingdoms.nodinchan.titanchat.command.CommandInfo;
  * @author NodinChan
  *
  */
-public class ChannelCommand extends Command {
+public class ChannelCommand extends CommandBase {
 
 	private ChannelManager cm;
 	
 	public ChannelCommand() {
-		this.cm = plugin.getChannelManager();
+		this.cm = plugin.getManager().getChannelManager();
 	}
 	
 	/**
 	 * Create Command - Creates a new channel
 	 */
-	@CommandID(name = "Create", triggers = { "create", "c" })
-	@CommandInfo(description = "Creates a new channel", usage = "create [channel]")
-	public void create(Player player, String[] args) {
-		try {
-			if (plugin.getConfig().getInt("channels.channel-limit") < 0) {
-				if (plugin.getPermsBridge().has(player, "TitanChat.create")) {
-					if (!cm.exists(args[0])) {
-						plugin.getChannelManager().createChannel(player, args[0]);
+	@Command(server = true)
+	@Aliases("c")
+	@Description("Creates a new channel")
+	@Usage("create [channel]")
+	public void create(CommandSender sender, Channel channel, String[] args) {
+		if (args.length < 1) { invalidArgLength(sender, "create"); return; }
+		
+		String name = args[0];
+		String type = "Standard";
+		
+		try { if (!args[1].isEmpty()) type = args[1]; } catch (IndexOutOfBoundsException e) {}
+		
+		if (hasPermission(sender, "TitanChat.create")) {
+			if (!name.isEmpty()) {
+				if (cm.nameCheck(name)) {
+					if (!cm.exists(name)) {
+						if (cm.getType(type) != null) {
+							int limit = plugin.getConfig().getInt("channel.channel-limit", -1);
+							
+							if (limit < 0 || cm.getChannels().size() < limit) {
+								cm.createChannel(sender, name, type);
+								
+							} else { plugin.send(WARNING, sender, "Cannot create channel - Limit passed"); }
+							
+						} else { plugin.send(WARNING, sender, "Invalid channel type"); }
 						
-					} else { plugin.sendWarning(player, "Channel already exists"); }
+					} else { plugin.send(WARNING, sender, "Channel already exists"); }
 					
-				} else { plugin.sendWarning(player, "You do not have permission"); }
+				} else { plugin.send(WARNING, sender, "Channel names cannot contain \\, /, :. *, ?, \", <, > or |"); }
 				
-			} else if (plugin.getChannelManager().getChannelAmount() < plugin.getConfig().getInt("channel-limit")) {
-				if (plugin.getPermsBridge().has(player, "TitanChat.create")) {
-					if (!cm.exists(args[0])) {
-						plugin.getChannelManager().createChannel(player, args[0]);
-						
-					} else { plugin.sendWarning(player, "Channel already exists"); }
-					
-				} else { plugin.sendWarning(player, "You do not have permission"); }
-				
-			} else { plugin.sendWarning(player, "Cannot create channel - Limit Passed"); }
+			} else { plugin.send(WARNING, sender, "Invalid channel name - Empty"); }
 			
-		} catch (IndexOutOfBoundsException e) { invalidArgLength(player, "Create"); }
+		} else { plugin.send(WARNING, sender, "You do not have permission"); }
 	}
 	
 	/**
 	 * Delete Command - Deletes the channel
 	 */
-	@CommandID(name = "Delete", triggers = { "delete", "d" })
-	@CommandInfo(description = "Deletes the channel", usage = "delete [channel]")
-	public void delete(Player player, String[] args) {
-		try {
-			if (plugin.getPermsBridge().has(player, "TitanChat.delete")) {
-				if (cm.exists(args[0])) {
-					if (!cm.getChannel(args[0]).getSpecialType().equals(Type.DEFAULT) || !cm.getChannel(args[0]).getSpecialType().equals(Type.STAFF))
-						plugin.getChannelManager().deleteChannel(player, args[0]);
-					else { plugin.sendWarning(player, "You cannot delete this channel"); }
-					
-				} else { plugin.sendWarning(player, "Channel does not exists"); }
-				
-			} else { plugin.sendWarning(player, "You do not have permission to delete channels"); }
+	@Command(channel = true, server = true)
+	@Aliases("d")
+	@Description("Deletes the channel")
+	@Usage("delete")
+	public void delete(CommandSender sender, Channel channel, String[] args) {
+		if (hasPermission(sender, "TitanChat.delete")) {
+			if (channel.getOption().equals(Option.NONE))
+				cm.deleteChannel(sender, channel.getName());
+			else
+				plugin.send(WARNING, sender, "You cannot delete this channel");
 			
-		} catch (IndexOutOfBoundsException e) { invalidArgLength(player, "Delete"); }
+		} else { plugin.send(WARNING, sender, "You do not have permission"); }
 	}
 	
 	/**
 	 * Follow Command - Follows the channel
 	 */
-	@CommandID(name = "Follow", triggers = "follow")
-	@CommandInfo(description = "Follows the channel", usage = "follow [channel]")
-	public void follow(Player player, String[] args) {
-		try {
-			if (cm.exists(args[0])) {
-				Channel channel = cm.getChannel(args[0]);
+	@Command(channel = true)
+	@Description("Follows the channel")
+	@Usage("follow")
+	public void follow(Player player, Channel channel, String[] args) {
+		if (channel.handleCommand(player, "follow", args))
+			return;
+		
+		if (channel.access(player)) {
+			if (!channel.isFollower(player.getName())) {
+				channel.getFollowers().add(player.getName());
+				channel.save();
 				
-				if (channel.canAccess(player)) {
-					if (!channel.getFollowerList().contains(player.getName())) {
-						channel.getFollowerList().add(player.getName());
-						channel.save();
-						
-						plugin.sendInfo(player, "You have followed " + channel.getName());
-						
-					} else { plugin.sendWarning(player, "You are already following " + channel.getName()); }
-					
-				} else { plugin.sendWarning(player, "You do not have permission"); }
+				plugin.send(INFO, player, "You have followed " + channel.getName());
 				
-			} else { plugin.sendWarning(player, "No such channel"); }
+			} else { plugin.send(WARNING, player, "You are already following " + channel.getName()); }
 			
-		} catch (IndexOutOfBoundsException e) { invalidArgLength(player, "Follow"); }
+		} else { plugin.send(WARNING, player, "You do not have access"); }
 	}
 	
 	/**
 	 * Join Command - Joins the channel
 	 */
-	@CommandID(name = "Join", triggers = { "join", "j" })
-	@CommandInfo(description = "Joins the channel", usage = "join [channel] <password>")
-	public void join(Player player, String[] args) {
-		if (args.length < 1) { invalidArgLength(player, "Join"); return; }
+	@Command(channel = true)
+	@Aliases("j")
+	@Description("Joins the channel")
+	@Usage("join <password>")
+	public void join(Player player, Channel channel, String[] args) {
+		if (channel.handleCommand(player, "join", args))
+			return;
 		
-		if (cm.exists(args[0])) {
-			Channel ch = cm.getChannel(args[0]);
-			String password = "";
-			
-			if (ch.equals(cm.getChannel(player))) { plugin.sendWarning(player, "You are already on the channel"); return; }
-			
-			try { password = args[1]; } catch (IndexOutOfBoundsException e) {}
-			
-			if (ch instanceof CustomChannel) {
-				if (ch.canAccess(player)) {
-					cm.chSwitch(player, ch);
-					plugin.sendInfo(player, "You have switched channels");
+		if (channel.getOption().equals(Option.STAFF) && !plugin.isStaff(player)) {
+			channel.deny(player, null);
+			return;
+		}
+		
+		if (hasPermission(player, "TitanChat.join." + channel.getName())) {
+			if (channel.getPassword() != null && !channel.getPassword().isEmpty()) {
+				try {
+					String password = args[0];
 					
-				} else { plugin.sendWarning(player, "You do not have permission to join " + ch.getName()); }
-				
+					if (!channel.getPassword().equals(password)) {
+						channel.deny(player, "Incorrect password");
+						return;
+					}
+					
+				} catch (IndexOutOfBoundsException e) {
+					channel.deny(player, "Please enter a password");
+					return;
+				}
+			}
+			
+			if (channel.getBlacklist().contains(player.getName())) {
+				channel.deny(player, "You are banned");
 				return;
 			}
 			
-			StandardChannel channel = (StandardChannel) ch;
-			
-			switch (channel.getType()) {
-			
-			case PASSWORD:
-				switch (channel.getSpecialType()) {
-				
-				case DEFAULT:
-					if (!password.equals("")) {
-						if (channel.correctPassword(password)) {
-							cm.chSwitch(player, channel);
-							plugin.sendInfo(player, "You have switched channels");
-							
-						} else { plugin.sendWarning(player, "Incorrect password"); }
-						
-					} else { plugin.sendWarning(player, "You need to enter a password"); }
-					break;
-					
-				case NONE:
-					if (!password.equals("")) {
-						if (channel.correctPassword(password)) {
-							if (channel.canAccess(player)) {
-								cm.chSwitch(player, channel);
-								plugin.sendInfo(player, "You have switched channels");
-								
-							} else { plugin.sendWarning(player, "You are banned on this channel"); }
-							
-						} else { plugin.sendWarning(player, "Incorrect password"); }
-						
-					} else { plugin.sendWarning(player, "You need to enter a password"); }
-					break;
-					
-				case STAFF:
-					if (plugin.isStaff(player)) {
-						if (!password.equals("")) {
-							if (channel.correctPassword(password)) {
-								cm.chSwitch(player, channel);
-								plugin.sendInfo(player, "You have switched channels");
-									
-							} else { plugin.sendWarning(player, "Incorrect password"); }
-								
-						} else { plugin.sendWarning(player, "You need to enter a password"); }
-						
-					} else { plugin.sendWarning(player, "You do not have permission to join " + channel.getName()); }
-					break;
-					
-				default:
-					plugin.sendWarning(player, "Invalid special type set for Channel " + channel.getName());
-					break;
-				}
-				break;
-				
-			case PRIVATE:
-				switch (channel.getSpecialType()) {
-				
-				case DEFAULT:
-				case NONE:
-					if (channel.canAccess(player)) {
-						cm.chSwitch(player, channel);
-						plugin.sendInfo(player, "You have switched channels");
-						
-					} else { plugin.sendWarning(player, "You are not on the whitelist"); }
-					break;
-					
-				case STAFF:
-					if (plugin.isStaff(player)) {
-						if (channel.canAccess(player)) {
-							cm.chSwitch(player, channel);
-							plugin.sendInfo(player, "You have switched channels");
-							
-						} else { plugin.sendWarning(player, "You are not on the whitelist"); }
-						
-					} else { plugin.sendWarning(player, "You do not have permission to join " + channel.getName()); }
-					break;
-					
-				default:
-					plugin.sendWarning(player, "Invalid special type set for Channel " + channel.getName());
-					break;
-				}
-				break;
-				
-			case PUBLIC:
-				switch (channel.getSpecialType()) {
-				
-				case DEFAULT:
-					cm.chSwitch(player, channel);
-					plugin.sendInfo(player, "You have switched channels");
-					break;
-					
-				case NONE:
-					if (channel.canAccess(player)) {
-						cm.chSwitch(player, channel);
-						plugin.sendInfo(player, "You have switched channels");
-						
-					} else { plugin.sendWarning(player, "You are banned on this channel"); }
-					break;
-					
-				case STAFF:
-					if (plugin.isStaff(player)) {
-						cm.chSwitch(player, channel);
-						plugin.sendInfo(player, "You have switched channels");
-						
-					} else { plugin.sendWarning(player, "You do not have permission to join " + channel.getName()); }
-					break;
-					
-				default:
-					plugin.sendWarning(player, "Invalid special type set for Channel " + channel.getName());
-					break;
-				}
-				break;
+			if (channel.getInfo().whitelistOnly() && !channel.getWhitelist().contains(player.getName())) {
+				channel.deny(player, "You are not whitelisted");
+				return;
 			}
 			
-		} else { plugin.sendWarning(player, "No such channel"); }
+			if (!channel.isParticipating(player.getName())) {
+				channel.join(player);
+				plugin.send(INFO, player, "You have joined " + channel.getName());
+				
+			} else { plugin.send(WARNING, player, "You are already in the channel"); }
+			
+		} else { plugin.send(WARNING, player, "You do not have permission"); }
 	}
 	
-	@CommandID(name = "Leave", triggers = { "leave", "part"})
-	@CommandInfo(description = "Leaves the channel you are in", usage = "leave")
-	public void leave(Player player, String[] args) {
-		Channel channel = cm.getChannel(player);
+	/**
+	 * Leave Command - Leaves the channel you are in
+	 */
+	@Command(channel = true)
+	@Aliases("part")
+	@Description("Leaves the channel")
+	@Usage("leave")
+	public void leave(Player player, Channel channel, String[] args) {
+		if (channel.handleCommand(player, "leave", args))
+			return;
 		
-		if (channel != null) {
+		if (channel.isParticipating(player.getName())) {
 			channel.leave(player);
-			plugin.sendInfo(player, "You have left the channel");
+			plugin.send(INFO, player, "You have left " + channel.getName());
 			
-		} else { plugin.sendWarning(player, "You are not in any channels"); }
+		} else { plugin.send(WARNING, player, "You are not in the channel"); }
 	}
 	
 	/**
 	 * Unfollow Command - Unfollows the channel
 	 */
-	@CommandID(name = "Unfollow", triggers = "unfollow")
-	@CommandInfo(description = "Unfollows the channel", usage = "unfollow [channel]")
-	public void unfollow(Player player, String[] args) {
-		try {
-			if (cm.exists(args[0])) {
-				Channel channel = cm.getChannel(args[0]);
+	@Command(channel = true)
+	@Description("Unfollows the channel")
+	@Usage("unfollow")
+	public void unfollow(Player player, Channel channel, String[] args) {
+		if (channel.handleCommand(player, "unfollow", args))
+			return;
+		
+		if (channel.access(player)) {
+			if (channel.isFollower(player.getName())) {
+				channel.getFollowers().remove(player.getName());
+				channel.save();
 				
-				if (cm.getFollowers(channel).contains(player.getName())) {
-					if (channel.getFollowerList().contains(player.getName()))
-						channel.getFollowerList().remove(player.getName());
-					else
-						plugin.getPermsBridge().removePermission(player, "TitanChat.follow." + channel.getName());
-					
-					channel.save();
-					
-					plugin.sendInfo(player, "You have unfollowed " + channel.getName());
-					
-				} else { plugin.sendWarning(player, "You are not following " + channel.getName()); }
+				plugin.send(INFO, player, "You have unfollowed " + channel.getName());
 				
-			} else { plugin.sendWarning(player, "No such channel"); }
+			} else { plugin.send(WARNING, player, "You are not following " + channel.getName()); }
 			
-		} catch (IndexOutOfBoundsException e) { invalidArgLength(player, "Unfollow"); }
+		} else { plugin.send(WARNING, player, "You do not have access"); }
 	}
 }

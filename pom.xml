@@ -7,7 +7,7 @@
     <groupId>com.titankingdoms.dev</groupId>
     <artifactId>TitanChat</artifactId>
     <name>TitanChat</name>
-    <version>v3.6</version>
+    <version>v4.0</version>
 
     <description>TitanChat, a chat management and formatting plugin.</description>
     <build>
@@ -65,7 +65,7 @@
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
-            <version>1.2.5-R4.0</version>
+            <version>1.3.1-R1.0</version>
             <type>jar</type>
             <scope>compile</scope>
         </dependency>
@@ -79,15 +79,14 @@
         <dependency>
             <groupId>de.bananaco</groupId>
             <artifactId>bPermissions</artifactId>
-            <version>2.9.4</version>
-            <type>jar</type>
+            <version>2.9.12</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/bpermissions.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>ru.tehkode</groupId>
             <artifactId>PermissionsEx</artifactId>
-            <version>1.19.2</version>
+            <version>1.19.3</version>
             <type>jar</type>
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/PermissionsEx.jar</systemPath>
@@ -111,18 +110,17 @@
         <dependency>
             <groupId>com.anjocaido</groupId>
             <artifactId>GroupManager</artifactId>
-            <version>2.9.1</version>
-            <type>jar</type>
+            <version>2.9.2</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/lib/EssentialsGroupManager.jar</systemPath>
         </dependency>
         <dependency>
         	<groupId>com.nodinchan</groupId>
-        	<artifactId>NC-LoaderLib</artifactId>
-        	<version>1.6</version>
+        	<artifactId>NC-BukkitLib</artifactId>
+        	<version>2.1</version>
         	<type>jar</type>
         	<scope>system</scope>
-        	<systemPath>${project.basedir}/lib/NC-LoaderLib.jar</systemPath>
+        	<systemPath>${project.basedir}/lib/NC-BukkitLib.jar</systemPath>
         </dependency>
     </dependencies>
 </project>

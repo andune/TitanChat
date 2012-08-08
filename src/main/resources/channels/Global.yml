@@ -1,0 +1,24 @@
+tag: '[G]'
+chat-display-colour: '&1'
+type: 'Standard'
+option: 'none'
+aliases: [g]
+topic: 'Welcome to the global channel || Chat is sent to all players on the server'
+setting:
+    colouring: true
+    range: 'global'
+    radius: 15
+    whitelist: false
+    messages:
+        join: true
+        leave: true
+password: ''
+format: ''
+command:
+    join: 'g'
+    send: 'gs'
+admins: []
+blacklist: []
+followers: []
+whitelist: []
+participants: []

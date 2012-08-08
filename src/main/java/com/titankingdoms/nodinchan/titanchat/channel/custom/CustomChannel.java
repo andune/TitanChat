@@ -1,7 +1,9 @@
-package com.titankingdoms.nodinchan.titanchat.command;
+package com.titankingdoms.nodinchan.titanchat.channel.custom;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
+
+import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -20,32 +22,39 @@ import java.lang.annotation.RetentionPolicy;
  */
 
 /**
- * CommandID - Essential command details
+ * CustomChannel - Represents a custom channel
  * 
  * @author NodinChan
  *
  */
-@Retention(RetentionPolicy.RUNTIME)
-public @interface CommandID {
+public class CustomChannel extends Channel {
 	
 	/**
-	 * Gets the name of the Command
+	 * Custom Channel
 	 * 
-	 * @return The Command name
+	 * @param name The channel name
 	 */
-	String name();
+	public CustomChannel(String name) {
+		super(name, Option.CUSTOM);
+	}
 	
-	/**
-	 * Gets the triggers of the Command
-	 * 
-	 * @return The Command triggers
-	 */
-	String[] triggers();
+	@Override
+	public boolean access(Player player) {
+		return true;
+	}
 	
-	/**
-	 * Check if the Command requires Channels to be enabled
-	 * 
-	 * @return True if Channels are required
-	 */
-	boolean requireChannel() default true;
+	@Override
+	public final Channel create(CommandSender sender, String name, Option option) {
+		return this;
+	}
+
+	@Override
+	public final String getType() {
+		return "Custom";
+	}
+
+	@Override
+	public final Channel load(String name, Option option) {
+		return this;
+	}
 }

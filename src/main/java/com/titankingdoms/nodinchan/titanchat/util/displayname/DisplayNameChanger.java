@@ -1,8 +1,10 @@
 package com.titankingdoms.nodinchan.titanchat.util.displayname;
 
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
+import com.titankingdoms.nodinchan.titanchat.util.Debugger;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -24,6 +26,8 @@ public final class DisplayNameChanger {
 	
 	private final TitanChat plugin;
 	
+	private static final Debugger db = new Debugger(5);
+	
 	public DisplayNameChanger() {
 		this.plugin = TitanChat.getInstance();
 	}
@@ -39,12 +43,20 @@ public final class DisplayNameChanger {
 		if (display == null)
 			return;
 		
-		if (display.getDisplayName().length() > 16)
-			player.setPlayerListName(display.getDisplayName().substring(0, 16));
-		else
-			player.setPlayerListName(display.getDisplayName());
+		set(player, display.getDisplayName());
+		db.i("DisplayNameChanger: Display name " + display.getDisplayName() + " found and applied to " + player.getName());
+	}
+	
+	public String getDisplayName(OfflinePlayer player) {
+		if (player.isOnline())
+			return player.getPlayer().getDisplayName();
 		
-		player.setDisplayName(display.getDisplayName());
+		DisplayName display = plugin.getDatabase().find(DisplayName.class).where().ieq("name", player.getName()).findUnique();
+		
+		if (display == null)
+			return player.getName();
+		
+		return display.getDisplayName();
 	}
 	
 	/**
@@ -59,21 +71,17 @@ public final class DisplayNameChanger {
 			if (player.getDisplayName().equals(player.getName())) {
 				plugin.getDatabase().delete(display);
 				return;
-				
-			} else
-				display.setDisplayName(player.getDisplayName());
+			}
 			
-		} else {
-			if (!player.getDisplayName().equals(player.getName())) {
-				display = new DisplayName();
-				display.setName(player.getName());
-				display.setDisplayName(player.getDisplayName());
-				
-			} else
-				return;
-		}
+		} else if (!player.getDisplayName().equals(player.getName())) {
+			display = new DisplayName();
+			display.setName(player.getName());
+			
+		} else { return; }
 		
+		display.setDisplayName(player.getDisplayName());
 		plugin.getDatabase().save(display);
+		db.i("DisplayNameChanger: Display name " + display.getDisplayName() + " saved for " + player.getName());
 	}
 	
 	/**
@@ -85,10 +93,9 @@ public final class DisplayNameChanger {
 	 */
 	public void set(Player player, String displayname) {
 		if (displayname.length() > 16)
-			player.setPlayerListName(displayname.substring(0, 16));
-		else
-			player.setPlayerListName(displayname);
+			displayname = displayname.substring(0, 16);
 		
+		player.setPlayerListName(displayname);
 		player.setDisplayName(displayname);
 	}
 	

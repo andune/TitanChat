@@ -1,22 +1,16 @@
 package com.titankingdoms.nodinchan.titanchat.command.commands;
 
 import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.titankingdoms.nodinchan.titanchat.TitanChat;
+import com.titankingdoms.nodinchan.titanchat.TitanChat.MessageLevel;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
-import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
-import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
-import com.titankingdoms.nodinchan.titanchat.channel.StandardChannel;
-import com.titankingdoms.nodinchan.titanchat.channel.Channel.Type;
-import com.titankingdoms.nodinchan.titanchat.command.Command;
-import com.titankingdoms.nodinchan.titanchat.command.CommandID;
-import com.titankingdoms.nodinchan.titanchat.command.CommandInfo;
+import com.titankingdoms.nodinchan.titanchat.channel.Channel.Range;
+import com.titankingdoms.nodinchan.titanchat.command.CommandBase;
+import com.titankingdoms.nodinchan.titanchat.command.info.*;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -34,572 +28,281 @@ import com.titankingdoms.nodinchan.titanchat.command.CommandInfo;
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
 /**
  * SettingsCommand - Commands for config modification
  * 
  * @author NodinChan
  *
  */
-public class SettingsCommand extends Command {
-
-	private static ChannelManager cm;
+public final class SettingsCommand extends CommandBase {
 	
-	public SettingsCommand() {
-		SettingsCommand.cm = plugin.getChannelManager();
+	private void help(CommandSender sender, Channel channel, String[] args) {
+		if (channel.changeSetting(sender, "help", args))
+			return;
+		
+		sender.sendMessage(ChatColor.AQUA + "=== " + channel.getName() + " ===");
+		sender.sendMessage(ChatColor.AQUA + "CHAT-COLOUR [COLOUR] - Sets the chat display colour of the channel");
+		sender.sendMessage(ChatColor.AQUA + "COLOURING <TRUE/FALSE> - Sets whether the channel colours chat");
+		sender.sendMessage(ChatColor.AQUA + "FORMAT [FORMAT] - Sets the format of the channel");
+		sender.sendMessage(ChatColor.AQUA + "HELP - Shows the help menu");
+		sender.sendMessage(ChatColor.AQUA + "NAME_COLOUR [COLOUR] - Sets the name display colour of the channel");
+		sender.sendMessage(ChatColor.AQUA + "RADIUS [RADIUS] - Sets the radius of the channel");
+		sender.sendMessage(ChatColor.AQUA + "RANGE [RANGE] - Sets the range of the channel");
+		sender.sendMessage(ChatColor.AQUA + "TAG [TAG] - Sets the tag of the channel");
+		sender.sendMessage(ChatColor.AQUA + "TOPIC [TOPIC] - Sets the topic of the channel");
+		sender.sendMessage(ChatColor.AQUA + "WHITELIST <TRUE/FALSE> - Sets whether the channel requires whitelist");
 	}
 	
 	/**
 	 * Set Command - Sets the channel settings
 	 */
-	@CommandID(name = "Set", triggers = "set")
-	@CommandInfo(description = "Sets the channel settings (\"/tc set help\" for more info)", usage = "set [setting] <value> <channel>")
-	public void set(Player player, String[] args) {
+	@Command(channel = true)
+	@Description("Channel settings (\"/titanchat set help\" for more info)")
+	@Usage("set [setting] <arguments>")
+	public void set(CommandSender sender, Channel channel, String[] args) {
 		if (args.length < 1) {
-			plugin.getServer().dispatchCommand(player, "titanchat set help");
+			plugin.getServer().dispatchCommand(sender, "titanchat @" + channel.getName() + " set help");
 			return;
 		}
 		
-		Settings command = Settings.fromTrigger(args[0]);
+		if (args[0].equalsIgnoreCase("chat-colour")) {
+			setChatColour(sender, channel, Arrays.copyOfRange(args, 1, args.length));
+			return;
+		}
 		
-		if (command != null)
-			command.execute(player, Arrays.copyOfRange(args, 1, args.length));
-		else
-			plugin.sendWarning(player, "Invalid setting command");
+		if (args[0].equalsIgnoreCase("colouring")) {
+			setColouring(sender, channel, Arrays.copyOfRange(args, 1, args.length));
+			return;
+		}
+		
+		if (args[0].equalsIgnoreCase("format")) {
+			setFormat(sender, channel, Arrays.copyOfRange(args, 1, args.length));
+			return;
+		}
+		
+		if (args[0].equalsIgnoreCase("help")) {
+			help(sender, channel, Arrays.copyOfRange(args, 1, args.length));
+			return;
+		}
+		
+		if (args[0].equalsIgnoreCase("name-colour")) {
+			setNameColour(sender, channel, Arrays.copyOfRange(args, 1, args.length));
+			return;
+		}
+		
+		if (args[0].equalsIgnoreCase("radius")) {
+			setRadius(sender, channel, Arrays.copyOfRange(args, 1, args.length));
+			return;
+		}
+		
+		if (args[0].equalsIgnoreCase("range")) {
+			setRange(sender, channel, Arrays.copyOfRange(args, 1, args.length));
+			return;
+		}
+		
+		if (args[0].equalsIgnoreCase("tag")) {
+			setTag(sender, channel, Arrays.copyOfRange(args, 1, args.length));
+			return;
+		}
+		
+		if (args[0].equalsIgnoreCase("topic")) {
+			setTopic(sender, channel, Arrays.copyOfRange(args, 1, args.length));
+			return;
+		}
+		
+		if (args[0].equalsIgnoreCase("whitelist")) {
+			setWhitelistOnly(sender, channel, Arrays.copyOfRange(args, 1, args.length));
+			return;
+		}
+		
+		if (!channel.changeSetting(sender, args[0], Arrays.copyOfRange(args, 1, args.length)))
+			plugin.send(MessageLevel.WARNING, sender, "Channel " + channel.getName() + " does not support such setting");
 	}
 	
-	/**
-	 * Settings - Settings available as commands
-	 * 
-	 * @author NodinChan
-	 *
-	 */
-	public enum Settings {
-		CHCOLOUR("ChColour", new String[] { "chcolour", "chcolor" }, "chcolour [colourcode] <channel>") {
-			
-			@Override
-			public void execute(Player player, String[] args) {
-				if (args.length < 1) { invalidArgLength(player); return; }
+	private void setChatColour(CommandSender sender, Channel channel, String[] args) {
+		if (channel.changeSetting(sender, "chat-colour", args))
+			return;
+		
+		try {
+			if (channel.getAdmins().contains(sender.getName()) || !(sender instanceof Player) || plugin.isStaff((Player) sender)) {
+				channel.getInfo().setChatColour(args[0]);
+				plugin.send(MessageLevel.INFO, sender, "You have set the chat colour to " + channel.getInfo().getChatColour());
 				
-				try {
-					if (cm.exists(args[1])) {
-						if (cm.getChannel(args[1]) instanceof CustomChannel) {
-							TitanChat.getInstance().sendInfo(player, "Command does not support Custom Channels");
-							return;
-						}
-						
-						if (cm.getAdmins(cm.getChannel(args[1])).contains(player.getName()) || TitanChat.getInstance().isStaff(player)) {
-							((StandardChannel) cm.getChannel(args[1])).getVariables().setChatColour(args[0]);
-							cm.getChannel(args[1]).save();
-							
-							TitanChat.getInstance().sendInfo(player, "You have changed the colour to " + args[0]);
-							
-						} else { TitanChat.getInstance().sendWarning(player, "You do not have permission"); }
-						
-					} else { TitanChat.getInstance().sendWarning(player, "No such channel"); }
-					
-				} catch (IndexOutOfBoundsException e) {
-					Channel channel = cm.getChannel(player);
-					
-					if (channel == null) {
-						TitanChat.getInstance().sendWarning(player, "Specify a channel or join a channel to use this command");
-						return;
-					}
-					
-					if (channel instanceof CustomChannel) {
-						TitanChat.getInstance().sendInfo(player, "Command does not support Custom Channels");
-						return;
-					}
-					
-					if (cm.getAdmins(channel).contains(player.getName()) || TitanChat.getInstance().isStaff(player)) {
-						((StandardChannel) channel).getVariables().setChatColour(args[0]);
-						channel.save();
-						
-						TitanChat.getInstance().sendInfo(player, "You have changed the colour to " + args[0]);
-						
-					} else { TitanChat.getInstance().sendWarning(player, "You do not have permission"); }
-				}
-			}
-		},
-		CONVERT("Convert", new String[] { "convert" }, "convert <channel>") {
+			} else { plugin.send(MessageLevel.WARNING, sender, "You do not have permission"); }
 			
-			@Override
-			public void execute(Player player, String[] args) {
-				try {
-					if (cm.exists(args[0])) {
-						if (cm.getChannel(args[0]) instanceof CustomChannel) {
-							TitanChat.getInstance().sendInfo(player, "Command does not support Custom Channels");
-							return;
-						}
-						
-						if (TitanChat.getInstance().getPermsBridge().has(player, "TitanChat.convert") || cm.getChannel(args[0]).getAdminList().contains(player.getName())) {
-							((StandardChannel) cm.getChannel(args[0])).getVariables().setConvert((((StandardChannel) cm.getChannel(args[0])).getVariables().convert()) ? false : true);
-							cm.getChannel(args[0]).save();
-							
-							TitanChat.getInstance().sendInfo(player, "The channel now " + ((((StandardChannel) cm.getChannel(args[0])).getVariables().convert()) ? "converts" : "ignores") + " colour codes");
-							
-						} else { TitanChat.getInstance().sendWarning(player, "You do not have permission"); }
-						
-					} else { TitanChat.getInstance().sendWarning(player, "No such channel"); }
-					
-				} catch (IndexOutOfBoundsException e) {
-					Channel channel = cm.getChannel(player);
-					
-					if (channel == null) {
-						TitanChat.getInstance().sendWarning(player, "Specify a channel or join a channel to use this command");
-						return;
-					}
-					
-					if (channel instanceof CustomChannel) {
-						TitanChat.getInstance().sendInfo(player, "Command does not support Custom Channels");
-						return;
-					}
-					
-					if (TitanChat.getInstance().getPermsBridge().has(player, "TitanChat.convert") || cm.getChannel(args[0]).getAdminList().contains(player.getName())) {
-						((StandardChannel) channel).getVariables().setConvert((((StandardChannel) channel).getVariables().convert()) ? false : true);
-						channel.save();
-						
-						TitanChat.getInstance().sendInfo(player, "The channel now " + ((((StandardChannel) channel).getVariables().convert()) ? "converts" : "ignores") + " colour codes");
-						
-					} else { TitanChat.getInstance().sendWarning(player, "You do not have permission"); }
-				}
-			}
-		},
-		HELP("Help", new String[] { "commands", "cmds", "help", "?" }, "help <setting>") {
-			
-			@Override
-			public void execute(Player player, String[] args) {
-				player.sendMessage(ChatColor.AQUA + "=== TitanChat Settings Command List ===");
-				player.sendMessage(ChatColor.AQUA + "chcolour [colourcode] <channel> : Changes the chat display colour of the channel");
-				player.sendMessage(ChatColor.AQUA + "convert <channel> : Toggles colour code converting");
-				player.sendMessage(ChatColor.AQUA + "help : Shows this help");
-				player.sendMessage(ChatColor.AQUA + "ncolour [colourcode] <channel> : Changes the name display colour of the channel");
-				player.sendMessage(ChatColor.AQUA + "password [password] <channel> : Sets the password of the channel");
-				player.sendMessage(ChatColor.AQUA + "tag [tag] <channel> : Sets the tag of the channel");
-				player.sendMessage(ChatColor.AQUA + "type [type] <channel> : Sets the Type of the channel");
-				player.sendMessage(ChatColor.AQUA + "specialtype [specialtype] <channel> : Sets the special Type of the channel");
-			}
-		},
-		NCOLOUR("NColour", new String[] { "ncolour", "ncolor" }, "ncolour [colourcode] <channel>") {
-			
-			@Override
-			public void execute(Player player, String[] args) {
-				if (args.length < 1) { invalidArgLength(player); return; }
+		} catch (IndexOutOfBoundsException e) {
+			plugin.send(MessageLevel.WARNING, sender, "Invalid Argument Length");
+			plugin.send(MessageLevel.INFO, sender, "Usage: /titanchat <@><channel> set chat-colour [colour]");
+		}
+	}
+	
+	private void setColouring(CommandSender sender, Channel channel, String[] args) {
+		if (channel.changeSetting(sender, "colouring", args))
+			return;
+		
+		if (!(sender instanceof Player) || (channel.getAdmins().contains(sender.getName()) && hasPermission(sender, "TitanChat.colouring"))) {
+			try {
+				channel.getInfo().setColouring(Boolean.parseBoolean(args[0]));
 				
-				try {
-					if (cm.exists(args[1])) {
-						if (cm.getChannel(args[1]) instanceof CustomChannel) {
-							TitanChat.getInstance().sendInfo(player, "Command does not support Custom Channels");
-							return;
-						}
-						
-						if (cm.getAdmins(cm.getChannel(args[1])).contains(player.getName()) || TitanChat.getInstance().isStaff(player)) {
-							((StandardChannel) cm.getChannel(args[1])).getVariables().setNameColour(args[0]);
-							cm.getChannel(args[1]).save();
-							
-							TitanChat.getInstance().sendInfo(player, "You have changed the colour to " + args[0]);
-							
-						} else { TitanChat.getInstance().sendWarning(player, "You do not have permission"); }
-						
-					} else { TitanChat.getInstance().sendWarning(player, "No such channel"); }
-					
-				} catch (IndexOutOfBoundsException e) {
-					Channel channel = cm.getChannel(player);
-					
-					if (channel == null) {
-						TitanChat.getInstance().sendWarning(player, "Specify a channel or join a channel to use this command");
-						return;
-					}
-					
-					if (channel instanceof CustomChannel) {
-						TitanChat.getInstance().sendInfo(player, "Command does not support Custom Channels");
-						return;
-					}
-					
-					if (cm.getAdmins(channel).contains(player.getName()) || TitanChat.getInstance().isStaff(player)) {
-						((StandardChannel) channel).getVariables().setNameColour(args[0]);
-						channel.save();
-						
-						TitanChat.getInstance().sendInfo(player, "You have changed the colour to " + args[0]);
-						
-					} else { TitanChat.getInstance().sendWarning(player, "You do not have permission"); }
-				}
+			} catch (IndexOutOfBoundsException e) {
+				channel.getInfo().setColouring(!channel.getInfo().colouring());
 			}
-		},
-		PASSWORD("Password", new String[] { "password" }, "password [password] <channel>") {
 			
-			@Override
-			public void execute(Player player, String[] args) {
-				if (args.length < 1) { invalidArgLength(player); return; }
-				
-				try {
-					if (cm.exists(args[1])) {
-						if (cm.getChannel(args[1]) instanceof CustomChannel) {
-							TitanChat.getInstance().sendInfo(player, "Command does not support Custom Channels");
-							return;
-						}
-						
-						if (cm.getAdmins(cm.getChannel(args[1])).contains(player.getName()) || TitanChat.getInstance().isStaff(player)) {
-							((StandardChannel) cm.getChannel(args[1])).setPassword(args[0]);
-							cm.getChannel(args[1]).save();
-							
-							TitanChat.getInstance().sendInfo(player, "You have changed the password of " + cm.getChannel(args[1]).getName() + " to " + args[0]);
-							
-						} else { TitanChat.getInstance().sendWarning(player, "You do not have permission"); }
-						
-					} else { TitanChat.getInstance().sendWarning(player, "No such channel"); }
-					
-				} catch (IndexOutOfBoundsException e) {
-					Channel channel = cm.getChannel(player);
-					
-					if (channel == null) {
-						TitanChat.getInstance().sendWarning(player, "Specify a channel or join a channel to use this command");
-						return;
-					}
-					
-					if (channel instanceof CustomChannel) {
-						TitanChat.getInstance().sendInfo(player, "Command does not support Custom Channels");
-						return;
-					}
-					
-					if (cm.getAdmins(channel).contains(player.getName()) || TitanChat.getInstance().isStaff(player)) {
-						((StandardChannel) channel).setPassword(args[0]);
-						channel.save();
-						
-						TitanChat.getInstance().sendInfo(player, "You have changed the password of " + channel.getName() + " to " + args[0]);
-						
-					} else { TitanChat.getInstance().sendWarning(player, "You do not have permission"); }
-				}
-			}
-		},
-		TAG("Tag", new String[] { "tag" }, "tag [tag] <channel>") {
+			plugin.send(MessageLevel.INFO, sender, "You have set colouring to " + channel.getInfo().colouring());
 			
-			@Override
-			public void execute(Player player, String[] args) {
-				if (args.length < 1) { invalidArgLength(player); return; }
+		} else { plugin.send(MessageLevel.WARNING, sender, "You do not have permission"); }
+	}
+	
+	private void setFormat(CommandSender sender, Channel channel, String[] args) {
+		if (channel.changeSetting(sender, "format", args))
+			return;
+		
+		if (args.length > 0) {
+			if (!(sender instanceof Player) || plugin.isStaff((Player) sender)) {
+				StringBuilder str = new StringBuilder();
 				
-				try {
-					if (cm.exists(args[1])) {
-						if (cm.getChannel(args[1]) instanceof CustomChannel) {
-							TitanChat.getInstance().sendInfo(player, "Command does not support Custom Channels");
-							return;
-						}
-						
-						if (cm.getAdmins(cm.getChannel(args[1])).contains(player.getName()) || TitanChat.getInstance().isStaff(player)) {
-							((StandardChannel) cm.getChannel(args[1])).getVariables().setTag(args[0]);
-							cm.getChannel(args[1]).save();
-							
-							TitanChat.getInstance().sendInfo(player, "You have changed the settings");
-							
-						} else { TitanChat.getInstance().sendWarning(player, "You do not have permission"); }
-						
-					} else { TitanChat.getInstance().sendWarning(player, "No such channel"); }
+				for (String arg : args) {
+					if (str.length() > 0)
+						str.append(" ");
 					
-				} catch (IndexOutOfBoundsException e) {
-					Channel channel = cm.getChannel(player);
-					
-					if (channel == null) {
-						TitanChat.getInstance().sendWarning(player, "Specify a channel or join a channel to use this command");
-						return;
-					}
-					
-					if (cm.getAdmins(channel).contains(player.getName()) || TitanChat.getInstance().isStaff(player)) {
-						((StandardChannel) channel).getVariables().setTag(args[0]);
-						channel.save();
-						
-						TitanChat.getInstance().sendInfo(player, "You have changed the settings");
-						
-					} else { TitanChat.getInstance().sendWarning(player, "You do not have permission"); }
+					str.append(arg);
 				}
-			}
-		},
-		TYPE("Type", new String[] { "type" }, "type [type] <channel>") {
+				
+				channel.getInfo().setFormat(str.toString());
+				plugin.send(MessageLevel.INFO, sender, "You have changed the format: " + channel.getInfo().getFormat());
+				
+			} else { plugin.send(MessageLevel.WARNING, sender, "You do not have permission"); }
 			
-			@Override
-			public void execute(Player player, String[] args) {
-				if (args.length < 1) { invalidArgLength(player); return; }
+		} else {
+			plugin.send(MessageLevel.WARNING, sender, "Invalid Argument Length");
+			plugin.send(MessageLevel.INFO, sender, "Usage: /titanchat <@><channel> set format [format]");
+		}
+	}
+	
+	private void setNameColour(CommandSender sender, Channel channel, String[] args) {
+		if (channel.changeSetting(sender, "name-colour", args))
+			return;
+		
+		try {
+			if (channel.getAdmins().contains(sender.getName()) || !(sender instanceof Player) || plugin.isStaff((Player) sender)) {
+				channel.getInfo().setChatColour(args[0]);
+				plugin.send(MessageLevel.INFO, sender, "You have set the name colour to " + channel.getInfo().getNameColour());
 				
-				try {
-					if (cm.exists(args[1])) {
-						if (cm.getAdmins(cm.getChannel(args[1])).contains(player.getName()) || TitanChat.getInstance().isStaff(player)) {
-							if (Type.fromName(args[0]) != null) {
-								switch (Type.fromName(args[0])) {
-								
-								case CUSTOM:
-								case DEFAULT:
-								case NONE:
-								case STAFF:
-								case UNKNOWN:
-									TitanChat.getInstance().sendInfo(player, "This Type is not available as a Channel Type");
-									break;
-									
-								case PASSWORD:
-								case PRIVATE:
-								case PUBLIC:
-									cm.getChannel(args[1]).setType(args[0]);
-									cm.getChannel(args[1]).save();
-									
-									TitanChat.getInstance().sendInfo(player, "The channel is now " + Type.fromName(args[0]).getName());
-									break;
-								}
-								
-							} else {
-								TitanChat.getInstance().sendWarning(player, "Type does not exist");
-								
-								StringBuilder str = new StringBuilder();
-								
-								for (Type type : Type.values()) {
-									if (type.isSpecial())
-										continue;
-									
-									if (str.length() > 0)
-										str.append(", ");
-									
-									str.append(type.getName());
-								}
-								
-								TitanChat.getInstance().sendInfo(player, "Available types: " + str.toString());
-							}
-							
-						} else { TitanChat.getInstance().sendWarning(player, "You do not have permission"); }
-						
-					} else { TitanChat.getInstance().sendWarning(player, "No such channel"); }
-					
-				} catch (IndexOutOfBoundsException e) {
-					Channel channel = cm.getChannel(player);
-					
-					if (channel == null) {
-						TitanChat.getInstance().sendWarning(player, "Specify a channel or join a channel to use this command");
-						return;
-					}
-					
-					if (cm.getAdmins(channel).contains(player.getName()) || TitanChat.getInstance().isStaff(player)) {
-						if (Type.fromName(args[0]) != null) {
-							switch (Type.fromName(args[0])) {
-							
-							case CUSTOM:
-							case DEFAULT:
-							case NONE:
-							case STAFF:
-							case UNKNOWN:
-								TitanChat.getInstance().sendInfo(player, "This Type is not available as a channel Type");
-								break;
-								
-							case PASSWORD:
-							case PRIVATE:
-							case PUBLIC:
-								channel.setType(args[0]);
-								channel.save();
-								
-								TitanChat.getInstance().sendInfo(player, "The channel is now " + Type.fromName(args[0]).getName());
-								break;
-							}
-							
-						} else {
-							TitanChat.getInstance().sendWarning(player, "Type does not exist");
-							
-							StringBuilder str = new StringBuilder();
-							
-							for (Type type : Type.values()) {
-								if (type.isSpecial())
-									continue;
-								
-								if (str.length() > 0)
-									str.append(", ");
-								
-								str.append(type.getName());
-							}
-							
-							TitanChat.getInstance().sendInfo(player, "Available types: " + str.toString());
-						}
-						
-					} else { TitanChat.getInstance().sendWarning(player, "You do not have permission"); }
-				}
-			}
-		},
-		SPECIALTYPE("SpecialType", new String[] { "specialtype" }, "specialtype [type] <channel>") {
+			} else { plugin.send(MessageLevel.WARNING, sender, "You do not have permission"); }
 			
-			@Override
-			public void execute(Player player, String[] args) {
-				if (args.length < 1) { invalidArgLength(player); return; }
+		} catch (IndexOutOfBoundsException e) {
+			plugin.send(MessageLevel.WARNING, sender, "Invalid Argument Length");
+			plugin.send(MessageLevel.INFO, sender, "Usage: /titanchat <@><channel> set name-colour [colour]");
+		}
+	}
+	
+	private void setRadius(CommandSender sender, Channel channel, String[] args) {
+		if (channel.changeSetting(sender, "radius", args))
+			return;
+		
+		try {
+			if (channel.getAdmins().contains(sender.getName()) || !(sender instanceof Player) || plugin.isStaff((Player) sender)) {
+				channel.getInfo().setRadius(Integer.parseInt(args[0]));
+				plugin.send(MessageLevel.INFO, sender, "You have set the radius to " + channel.getInfo().radius());
 				
-				try {
-					if (cm.exists(args[1])) {
-						if (TitanChat.getInstance().isStaff(player)) {
-							if (Type.fromName(args[0]) != null) {
-								switch (Type.fromName(args[0])) {
-								
-								case CUSTOM:
-								case PASSWORD:
-								case PRIVATE:
-								case PUBLIC:
-								case UNKNOWN:
-									TitanChat.getInstance().sendInfo(player, "This Type is not available as a Channel Type");
-									break;
-									
-								case DEFAULT:
-								case NONE:
-								case STAFF:
-									cm.getChannel(args[1]).setSpecialType(args[0]);
-									cm.getChannel(args[1]).save();
-									
-									TitanChat.getInstance().sendInfo(player, "The channel is now " + Type.fromName(args[0]).getName());
-									break;
-								}
-								
-							} else {
-								TitanChat.getInstance().sendWarning(player, "Type does not exist");
-								
-								StringBuilder str = new StringBuilder();
-								
-								for (Type type : Type.values()) {
-									if (!type.isSpecial())
-										continue;
-									
-									if (str.length() > 0)
-										str.append(", ");
-									
-									str.append(type.getName());
-								}
-								
-								TitanChat.getInstance().sendInfo(player, "Available types: " + str.toString());
-							}
-							
-						} else { TitanChat.getInstance().sendWarning(player, "You do not have permission"); }
-						
-					} else { TitanChat.getInstance().sendWarning(player, "No such channel"); }
+			} else { plugin.send(MessageLevel.WARNING, sender, "You do not have permission"); }
+			
+		} catch (IndexOutOfBoundsException e) {
+			plugin.send(MessageLevel.WARNING, sender, "Invalid Argument Length");
+			plugin.send(MessageLevel.INFO, sender, "Usage: /titanchat <@><channel> set radius [radius]");
+			
+		} catch (NumberFormatException e) {
+			plugin.send(MessageLevel.WARNING, sender, "Invalid Integer");
+			plugin.send(MessageLevel.INFO, sender, "Usage: /titanchat <@><channel> set radius [radius]");
+		}
+	}
+	
+	private void setRange(CommandSender sender, Channel channel, String[] args) {
+		if (channel.changeSetting(sender, "range", args))
+			return;
+		
+		try {
+			if (!(sender instanceof Player) || plugin.isStaff((Player) sender)) {
+				Range range = Range.fromName(args[0]);
+				
+				if (range != null) {
+					channel.getInfo().setRange(range);
+					plugin.send(MessageLevel.INFO, sender, "You have set the range to " + channel.getInfo().range().getName());
 					
-				} catch (IndexOutOfBoundsException e) {
-					Channel channel = cm.getChannel(player);
+				} else { plugin.send(MessageLevel.WARNING, sender, "Invalid Range (channel, global, local, world)"); }
+				
+			} else { plugin.send(MessageLevel.WARNING, sender, "You do not have permission"); }
+			
+		} catch (IndexOutOfBoundsException e) {
+			plugin.send(MessageLevel.WARNING, sender, "Invalid Argument Length");
+			plugin.send(MessageLevel.INFO, sender, "Usage: /titanchat <@><channel> set range [range]");
+		}
+	}
+	
+	private void setTag(CommandSender sender, Channel channel, String[] args) {
+		if (channel.changeSetting(sender, "tag", args))
+			return;
+		
+		try {
+			if (channel.getAdmins().contains(sender.getName()) || !(sender instanceof Player) || plugin.isStaff((Player) sender)) {
+				channel.getInfo().setTag(args[0]);
+				plugin.send(MessageLevel.INFO, sender, "You have set the tag to " + channel.getInfo().getTag());
+				
+			} else { plugin.send(MessageLevel.WARNING, sender, "You do not have permission"); }
+			
+		} catch (IndexOutOfBoundsException e) {
+			plugin.send(MessageLevel.WARNING, sender, "Invalid Argument Length");
+			plugin.send(MessageLevel.INFO, sender, "Usage: /titanchat <@><channel> set tag [tag]");
+		}
+	}
+	
+	private void setTopic(CommandSender sender, Channel channel, String[] args) {
+		if (channel.changeSetting(sender, "topic", args))
+			return;
+		
+		if (args.length > 0) {
+			if (channel.getAdmins().contains(sender.getName()) || !(sender instanceof Player) || plugin.isStaff((Player) sender)) {
+				channel.getInfo().setTag(args[0]);
+				
+				StringBuilder str = new StringBuilder();
+				
+				for (String arg : args) {
+					if (str.length() > 0)
+						str.append(" ");
 					
-					if (channel == null) {
-						TitanChat.getInstance().sendWarning(player, "Specify a channel or join a channel to use this command");
-						return;
-					}
-					
-					if (TitanChat.getInstance().isStaff(player)) {
-						if (Type.fromName(args[0]) != null) {
-							switch (Type.fromName(args[0])) {
-							
-							case CUSTOM:
-							case PASSWORD:
-							case PRIVATE:
-							case PUBLIC:
-							case UNKNOWN:
-								TitanChat.getInstance().sendInfo(player, "This Type is not available as a channel Type");
-								break;
-								
-							case DEFAULT:
-							case NONE:
-							case STAFF:
-								channel.setType(args[0]);
-								channel.save();
-								
-								TitanChat.getInstance().sendInfo(player, "The channel is now " + Type.fromName(args[0]).getName());
-								break;
-							}
-							
-						} else {
-							TitanChat.getInstance().sendWarning(player, "Type does not exist");
-							
-							StringBuilder str = new StringBuilder();
-							
-							for (Type type : Type.values()) {
-								if (!type.isSpecial())
-									continue;
-								
-								if (str.length() > 0)
-									str.append(", ");
-								
-								str.append(type.getName());
-							}
-							
-							TitanChat.getInstance().sendInfo(player, "Available types: " + str.toString());
-						}
-						
-					} else { TitanChat.getInstance().sendWarning(player, "You do not have permission"); }
+					str.append(arg);
 				}
-			}
-		};
-		
-		private String name;
-		private String[] triggers;
-		private String usage;
-		
-		private static Map<String, Settings> NAME_MAP = new HashMap<String, Settings>();
-		private static Map<String, Settings> TRIGGER_MAP = new HashMap<String, Settings>();
-		
-		private Settings(String name, String[] triggers, String usage) {
-			this.name = name;
-			this.triggers = triggers;
-			this.usage = usage;
-		}
-		
-		static {
-			for (Settings setting : EnumSet.allOf(Settings.class)) {
-				NAME_MAP.put(setting.name.toLowerCase(), setting);
 				
-				for (String trigger : setting.triggers)
-					TRIGGER_MAP.put(trigger.toLowerCase(), setting);
+				channel.getInfo().setTopic(str.toString());
+				
+				if (!channel.isParticipating(sender.getName()))
+					plugin.send(MessageLevel.INFO, sender, "You have changed the topic: " + channel.getInfo().getTopic());
+				
+				plugin.send(MessageLevel.INFO, channel, ((sender instanceof Player) ? ((Player) sender).getDisplayName() : sender.getName()) + " changed the topic: " + channel.getInfo().getTopic());
+				
+			} else { plugin.send(MessageLevel.WARNING, sender, "You do not have permission"); }
+			
+		} else {
+			plugin.send(MessageLevel.WARNING, sender, "Invalid Argument Length");
+			plugin.send(MessageLevel.INFO, sender, "Usage: /titanchat <@><channel> set topic [topic]");
+		}
+	}
+	
+	private void setWhitelistOnly(CommandSender sender, Channel channel, String[] args) {
+		if (channel.changeSetting(sender, "whitelist", args))
+			return;
+		
+		if (channel.getAdmins().contains(sender.getName()) || !(sender instanceof Player) || plugin.isStaff((Player) sender)) {
+			try {
+				channel.getInfo().setWhitelistOnly(Boolean.parseBoolean(args[0]));
+				
+			} catch (IndexOutOfBoundsException e) {
+				channel.getInfo().setWhitelistOnly(!channel.getInfo().whitelistOnly());
 			}
-		}
-		
-		/**
-		 * Executes the command
-		 * 
-		 * @param player The command sender
-		 * 
-		 * @param args The command arguments
-		 */
-		public abstract void execute(Player player, String[] args);
-		
-		/**
-		 * Gets the command from its name
-		 * 
-		 * @param name The name of the command
-		 * 
-		 * @return The command if found, otherwise null
-		 */
-		public static Settings fromName(String name) {
-			return NAME_MAP.get(name.toLowerCase());
-		}
-		
-		/**
-		 * Gets the command from one of its triggers
-		 * 
-		 * @param trigger The trigger of the command
-		 * 
-		 * @return The command if found, otherwise null
-		 */
-		public static Settings fromTrigger(String trigger) {
-			return TRIGGER_MAP.get(trigger.toLowerCase());
-		}
-		
-		/**
-		 * Gets the aliases of the command
-		 * 
-		 * @return The command aliases
-		 */
-		public String[] getAliases() {
-			return triggers;
-		}
-		
-		/**
-		 * Gets the name of the command
-		 * 
-		 * @return The command name
-		 */
-		public String getName() {
-			return name;
-		}
-		
-		/**
-		 * Sends an invalid argument length warning to the Player
-		 * 
-		 * @param player The Player to warn
-		 */
-		public void invalidArgLength(Player player) {
-			player.sendMessage("[TitanChat] " + ChatColor.RED + "Invalid Argument Length");
-			player.sendMessage("[TitanChat] " + ChatColor.GOLD + "Usage: /titanchat set " + usage);
-		}
+			
+			plugin.send(MessageLevel.INFO, sender, "You have set whitelist-only to " + channel.getInfo().whitelistOnly());
+			
+		} else { plugin.send(MessageLevel.WARNING, sender, "You do not have permission"); }
 	}
 }

@@ -1,0 +1,24 @@
+tag: '[L]'
+chat-display-colour: '&2'
+type: 'Standard'
+option: 'none'
+aliases: [l]
+topic: 'Welcome to the local channel || Chat is sent to players within a radius of 15 blocks'
+setting:
+    colouring: true
+    range: 'local'
+    radius: 15
+    whitelist: false
+    messages:
+        join: true
+        leave: true
+password: ''
+format: ''
+command:
+    join: 'l'
+    send: 'ls'
+admins: []
+blacklist: []
+followers: []
+whitelist: []
+participants: []

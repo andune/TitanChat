@@ -1,17 +1,20 @@
 package com.titankingdoms.nodinchan.titanchat.command.commands;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import com.titankingdoms.nodinchan.titanchat.TitanChat.MessageLevel;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
-import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
-import com.titankingdoms.nodinchan.titanchat.command.Command;
-import com.titankingdoms.nodinchan.titanchat.command.CommandID;
-import com.titankingdoms.nodinchan.titanchat.command.CommandInfo;
+import com.titankingdoms.nodinchan.titanchat.command.CommandBase;
+import com.titankingdoms.nodinchan.titanchat.command.info.*;
+import com.titankingdoms.nodinchan.titanchat.event.BroadcastEvent;
+import com.titankingdoms.nodinchan.titanchat.event.EmoteEvent;
+import com.titankingdoms.nodinchan.titanchat.event.WhisperEvent;
+import com.titankingdoms.nodinchan.titanchat.event.util.Message;
+import com.titankingdoms.nodinchan.titanchat.processing.ChatPacket;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -35,174 +38,167 @@ import com.titankingdoms.nodinchan.titanchat.command.CommandInfo;
  * @author NodinChan
  *
  */
-public class ChatCommand extends Command {
-
-	private ChannelManager cm;
-	
-	public ChatCommand() {
-		this.cm = plugin.getChannelManager();
-	}
+public class ChatCommand extends CommandBase {
 	
 	/**
 	 * Broadcast Command - Broadcasts the message globally
 	 */
-	@CommandID(name = "Broadcast", triggers = { "broadcast", "bc" }, requireChannel = false)
-	@CommandInfo(description = "Broadcasts the message globally", usage = "broadcast [message]")
-	public void broadcast(Player player, String[] args) {
-		if (args.length < 1 || !plugin.getPermsBridge().has(player, "TitanChat.broadcast")) { return; }
+	@Command(server = true)
+	@Aliases("bc")
+	@Description("Broadcasts the message globally")
+	@Usage("broadcast [message]")
+	public void broadcast(CommandSender sender, Channel channel, String[] args) {
+		if (args.length < 1) { invalidArgLength(sender, "broadcast"); return; }
 		
-		StringBuilder str = new StringBuilder();
-		
-		for (String word : args) {
-			if (str.length() > 1)
-				str.append(" ");
+		if (hasPermission(sender, "TitanChat.broadcast")) {
+			if (!plugin.getConfig().getBoolean("chat." + ((sender instanceof Player) ? "player" : "server") + ".enable")) {
+				plugin.send(MessageLevel.WARNING, sender, "Broadcast Command Disabled");
+				return;
+			}
 			
-			str.append(word);
-		}
-		
-		String format = plugin.getFormatHandler().broadcastFormat(player);
-		
-		String[] lines = plugin.getFormatHandler().regroup(format, str.toString());
-		
-		for (int line = 0; line < lines.length; line++) {
-			if (line < 1)
-				plugin.getServer().broadcastMessage(format.replace("%message", lines[0]));
-			else
-				plugin.getServer().broadcastMessage(lines[line]);
-		}
+			StringBuilder str = new StringBuilder();
+			
+			for (String word : args) {
+				if (str.length() > 0)
+					str.append(" ");
+				
+				str.append(word);
+			}
+			
+			String format = plugin.getFormatHandler().broadcastFormat(sender);
+			
+			BroadcastEvent event = new BroadcastEvent(sender, new Message(format, str.toString()));
+			plugin.getServer().getPluginManager().callEvent(event);
+			
+			String[] lines = plugin.getFormatHandler().splitAndFormat(event.getFormat(), "%message", event.getMessage());
+			
+			for (String line : lines)
+				plugin.getServer().broadcastMessage(line);
+			
+		} else { plugin.send(WARNING, sender, "You do not have permission"); }
 	}
 	
 	/**
 	 * Emote Command - Action emote shown in channel
 	 */
-	@CommandID(name = "Emote", triggers = { "me", "em" })
-	@CommandInfo(description = "Action emote shown in channel", usage = "me [action]")
-	public void emote(Player player, String[] args) {
-		if (args.length < 1 || !plugin.getPermsBridge().has(player, "TitanChat.me")) { return; }
+	@Command(channel = true, server = true)
+	@Aliases({ "em", "me" })
+	@Description("Sends an action emote to the channel")
+	@Usage("emote [action]")
+	public void emote(CommandSender sender, Channel channel, String[] args) {
+		if (args.length < 1) { invalidArgLength(sender, "emote"); return; }
 		
-		StringBuilder str = new StringBuilder();
-		
-		for (String word : args) {
-			if (str.length() > 1)
-				str.append(" ");
-			
-			str.append(word);
-		}
-		
-		List<Player> recipants = new ArrayList<Player>();
-		
-		if (cm.getChannel(player) == null) {
-			recipants.add(player);
-			
-		} else {
-			for (String name : cm.getChannel(player).getParticipants()) {
-				if (plugin.getPlayer(name) != null && !recipants.contains(plugin.getPlayer(name)))
-					recipants.add(plugin.getPlayer(name));
-			}
-			
-			for (String name : cm.getFollowers(cm.getChannel(player))) {
-				if (plugin.getPlayer(name) != null && !recipants.contains(plugin.getPlayer(name)))
-					recipants.add(plugin.getPlayer(name));
-			}
-		}
-		
-		String format = plugin.getFormatHandler().emoteFormat(player);
-		
-		String[] lines = plugin.getFormatHandler().regroup(format, str.toString());
-		
-		for (Player recipant : recipants) {
-			recipant.sendMessage(format.replace("%action", lines[0]));
-			recipant.sendMessage(Arrays.copyOfRange(lines, 1, lines.length));
-		}
-		
-		for (Player recipant : recipants)
-			recipant.sendMessage(format.replace("%action", str.toString()));
-		
-		if (cm.getChannel(player) == null)
-			player.sendMessage(ChatColor.GOLD + "Nobody hears you...");
-	}
-	
-	/**
-	 * Silence Command - Silences the channel/server
-	 */
-	@CommandID(name = "Silence", triggers = "silence", requireChannel = false)
-	@CommandInfo(description = "Silences the channel/server", usage = "silence [channel]")
-	public void silence(Player player, String[] args) {
-		if (plugin.getPermsBridge().has(player, "TitanChat.silence")) {
-			if (!plugin.enableChannels()) {
-				plugin.setSilenced((plugin.isSilenced()) ? false : true);
-				
-				if (plugin.isSilenced())
-					plugin.getServer().broadcastMessage("[TitanChat] " + ChatColor.RED + "All channels have been silenced");
-				else
-					plugin.getServer().broadcastMessage("[TitanChat] " + ChatColor.GOLD + "Channels are no longer silenced");
-				
+		if (hasPermission(sender, "TitanChat.emote." + channel.getName())) {
+			if (!plugin.getConfig().getBoolean("chat.channel-emote.enable")) {
+				plugin.send(MessageLevel.WARNING, sender, "Emote Command Disabled");
 				return;
 			}
 			
-			try {
-				if (cm.exists(args[0])) {
-					Channel channel = cm.getChannel(args[0]);
-					channel.setSilenced((channel.isSilenced()) ? false : true);
-					
-					for (String participant : cm.getChannel(args[0]).getParticipants()) {
-						if (plugin.getPlayer(participant) != null) {
-							if (channel.isSilenced())
-								plugin.sendWarning(plugin.getPlayer(participant), "The channel has been silenced");
-							else
-								plugin.sendInfo(plugin.getPlayer(participant), "The channel is no longer silenced");
-						}
-					}
-					
-				} else {
-					plugin.sendWarning(player, "No such channel");
-				}
+			StringBuilder str = new StringBuilder();
+			
+			for (String word : args) {
+				if (str.length() > 0)
+					str.append(" ");
 				
-			} catch (IndexOutOfBoundsException e) {
-				if (plugin.getPermsBridge().has(player, "TitanChat.silence.server")) {
-					plugin.setSilenced((plugin.isSilenced()) ? false : true);
-					
-					if (plugin.isSilenced())
-						plugin.getServer().broadcastMessage("[TitanChat] " + ChatColor.RED + "All channels have been silenced");
-					else
-						plugin.getServer().broadcastMessage("[TitanChat] " + ChatColor.GOLD + "Channels are no longer silenced");
-				}
+				str.append(word);
 			}
-		}
+			
+			String format = plugin.getFormatHandler().emoteFormat(sender, channel.getName());
+			
+			EmoteEvent event = new EmoteEvent(sender, new Message(format, str.toString()));
+			plugin.getServer().getPluginManager().callEvent(event);
+			
+			channel.send(event.getFormat().replace("%action", event.getMessage()));
+			
+		} else { plugin.send(WARNING, sender, "You do not have permission"); }
+	}
+	
+	/**
+	 * Send Command - Sends a message to the channel
+	 */
+	@Command(channel = true, server = true)
+	@Aliases("s")
+	@Description("Sends a message to the channel")
+	@Usage("send [message]")
+	public void send(CommandSender sender, Channel channel, String[] args) {
+		if (channel.handleCommand(sender, "send", args))
+			return;
+		
+		if (args.length > 0) {
+			StringBuilder str = new StringBuilder();
+			
+			for (String arg : args) {
+				if (str.length() > 0)
+					str.append(" ");
+				
+				str.append(arg);
+			}
+			
+			if (sender instanceof Player) {
+				channel.sendMessage((Player) sender, str.toString());
+				return;
+			}
+			
+			channel.send(plugin.getFormatHandler().serverToChannelFormat(channel).replace("%message", str.toString()));
+			
+		} else { invalidArgLength(sender, "send"); return; }
 	}
 	
 	/**
 	 * Whisper Command - Whisper messages to players
 	 */
-	@CommandID(name = "whisper", triggers = { "whisper", "w" })
-	@CommandInfo(description = "Whisper messages to players", usage = "whisper [player] [message]")
-	public void whisper(Player player, String[] args) {
-		if (args.length < 2 || !plugin.getPermsBridge().has(player, "TitanChat.whisper")) { return; }
+	@Command(server = true)
+	@Aliases("w")
+	@Description("Whispers the message to the player")
+	@Usage("whisper [player] [message]")
+	public void whisper(CommandSender sender, Channel channel, String[] args) {
+		if (args.length < 2) { invalidArgLength(sender, "whisper"); return; }
 		
-		if (plugin.getPlayer(args[0]) == null) {
-			plugin.sendWarning(player, "Player not online");
-			return;
-		}
-		
-		StringBuilder str = new StringBuilder();
-		
-		for (String word : args) {
-			if (word.equals(args[0]))
-				continue;
+		if (hasPermission(sender, "TitanChat.whisper")) {
+			if (!plugin.getConfig().getBoolean("chat." + ((sender instanceof Player) ? "player" : "server") + ".enable")) {
+				plugin.send(MessageLevel.WARNING, sender, "Whisper Command Disabled");
+				return;
+			}
 			
-			if (str.length() > 1)
-				str.append(" ");
+			CommandSender recipant = null;
 			
-			str.append(word);
-		}
-		
-		String format = plugin.getFormatHandler().whisperFormat(player);
-		
-		String[] lines = plugin.getFormatHandler().regroup(format, str.toString());
-		
-		player.sendMessage(ChatColor.DARK_PURPLE + "[You -> " + plugin.getPlayer(args[0]).getDisplayName() + "] " + format.replace("%message", lines[0]));
-		plugin.getPlayer(args[0]).sendMessage(format.replace("%message", lines[0]));
-		player.sendMessage(Arrays.copyOfRange(lines, 1, lines.length));
-		plugin.getPlayer(args[0]).sendMessage(Arrays.copyOfRange(lines, 1, lines.length));
+			if (!args[0].equalsIgnoreCase("#!")) {
+				if (plugin.getPlayer(args[0]) != null)
+					recipant = plugin.getPlayer(args[0]);
+				else
+					plugin.send(MessageLevel.WARNING, sender, "Player not online");
+				
+			} else { recipant = plugin.getServer().getConsoleSender(); }
+			
+			if (recipant == null)
+				return;
+			
+			StringBuilder str = new StringBuilder();
+			
+			for (int arg = 1; arg < args.length; arg++) {
+				if (str.length() > 0)
+					str.append(" ");
+				
+				str.append(args[arg]);
+			}
+			
+			String format = plugin.getFormatHandler().whisperFormat(sender);
+			String sendFormat = plugin.getFormatHandler().colourise("&5[You -> " + sender.getName() + "] %message");
+			
+			WhisperEvent event = new WhisperEvent(sender, recipant, new Message(format, str.toString()));
+			plugin.getServer().getPluginManager().callEvent(event);
+			
+			String[] lines = plugin.getFormatHandler().splitAndFormat(event.getFormat(), "%message", event.getMessage());
+			String[] sendLines = plugin.getFormatHandler().splitAndFormat(sendFormat, "%message", event.getMessage());
+			
+			Map<String, String[]> chat = new HashMap<String, String[]>();
+			chat.put(event.getRecipant().getName(), lines);
+			
+			ChatPacket packet = new ChatPacket(chat);
+			plugin.getChatProcessor().sendPacket(packet);
+			
+			event.getSender().sendMessage(sendLines);
+			
+		} else { plugin.send(WARNING, sender, "You do not have permission"); }
 	}
 }

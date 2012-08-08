@@ -4,14 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import com.titankingdoms.nodinchan.titanchat.TitanChat.MessageLevel;
+import com.titankingdoms.nodinchan.titanchat.addon.Addon;
 import com.titankingdoms.nodinchan.titanchat.channel.Channel;
 import com.titankingdoms.nodinchan.titanchat.channel.ChannelManager;
-import com.titankingdoms.nodinchan.titanchat.command.Command;
-import com.titankingdoms.nodinchan.titanchat.command.CommandID;
-import com.titankingdoms.nodinchan.titanchat.command.CommandInfo;
+import com.titankingdoms.nodinchan.titanchat.channel.custom.CustomChannel;
+import com.titankingdoms.nodinchan.titanchat.channel.util.Participant;
+import com.titankingdoms.nodinchan.titanchat.command.CommandBase;
 import com.titankingdoms.nodinchan.titanchat.command.CommandManager;
+import com.titankingdoms.nodinchan.titanchat.command.Executor;
+import com.titankingdoms.nodinchan.titanchat.command.info.*;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -35,62 +40,115 @@ import com.titankingdoms.nodinchan.titanchat.command.CommandManager;
  * @author NodinChan
  *
  */
-public class InformationCommand extends Command {
+public class InformationCommand extends CommandBase {
 
 	private ChannelManager cm;
 	
 	public InformationCommand() {
-		this.cm = plugin.getChannelManager();
+		this.cm = plugin.getManager().getChannelManager();
 	}
 	
 	/**
-	 * ColourCodes Command - Lists out avalable colour codes and respective colours
+	 * Addons Command - Lists out all addons
 	 */
-	@CommandID(name = "ColourCodes", triggers = { "colourcodes", "colorcodes", "colours", "colors", "codes" }, requireChannel = false)
-	@CommandInfo(description = "Lists out avalable colour codes and respective colours", usage = "colourcodes")
-	public void colourcodes(Player player, String[] args) {
-		String black = plugin.getFormatHandler().colourise("&0") + "&0";
-		String darkblue = plugin.getFormatHandler().colourise("&1") + "&1";
-		String green = plugin.getFormatHandler().colourise("&2") + "&2";
-		String darkaqua = plugin.getFormatHandler().colourise("&3") + "&3";
-		String red = plugin.getFormatHandler().colourise("&4") + "&4";
-		String purple = plugin.getFormatHandler().colourise("&5") + "&5";
-		String gold = plugin.getFormatHandler().colourise("&6") + "&6";
-		String silver = plugin.getFormatHandler().colourise("&7") + "&7";
-		String grey = plugin.getFormatHandler().colourise("&8") + "&8";
-		String blue = plugin.getFormatHandler().colourise("&9") + "&9";
-		String lightgreen = plugin.getFormatHandler().colourise("&a") + "&a";
-		String aqua = plugin.getFormatHandler().colourise("&b") + "&b";
-		String lightred = plugin.getFormatHandler().colourise("&c") + "&c";
-		String lightpurple = plugin.getFormatHandler().colourise("&d") + "&d";
-		String yellow = plugin.getFormatHandler().colourise("&e") + "&e";
-		String white = plugin.getFormatHandler().colourise("&f") + "&f";
-		String magical = plugin.getFormatHandler().colourise("&kMagical");
-		String bold = plugin.getFormatHandler().colourise("&lBold");
-		String striked = plugin.getFormatHandler().colourise("&mStriked");
-		String underlined = plugin.getFormatHandler().colourise("&nUnderlined");
-		String italic = plugin.getFormatHandler().colourise("&oItalic");
-		String comma = ChatColor.WHITE + ", ";
+	@Command(server = true)
+	@Description("Lists out all addons")
+	@Usage("addons")
+	public void addons(CommandSender sender, Channel channel, String[] args) {
+		StringBuilder addons = new StringBuilder();
 		
-		player.sendMessage(ChatColor.AQUA + "=== Colour Codes ===");
-		player.sendMessage(black + comma + darkblue + comma + green + comma + darkaqua + comma);
-		player.sendMessage(red + comma + purple + comma + gold + comma + silver + comma);
-		player.sendMessage(grey + comma + blue + comma + lightgreen + comma + aqua + comma);
-		player.sendMessage(lightred + comma + lightpurple + comma + yellow + comma + white + comma);
-		player.sendMessage("And also the Magical &k (" + magical + ChatColor.WHITE + ")");
-		player.sendMessage(bold + ChatColor.WHITE + "(&l)");
-		player.sendMessage(striked + ChatColor.WHITE + "(&m)");
-		player.sendMessage(underlined + ChatColor.WHITE + "(&n)");
-		player.sendMessage(italic + ChatColor.WHITE + "(&o)");
+		for (Addon addon : plugin.getManager().getAddonManager().getAddons()) {
+			if (addons.length() > 0)
+				addons.append(", ");
+			
+			addons.append(addon.getName());
+		}
+		
+		String[] addonLines = plugin.getFormatHandler().splitAndFormat("Addons: %", "%", addons.toString());
+		
+		StringBuilder types = new StringBuilder();
+		
+		for (Channel type : cm.getTypes()) {
+			if (type.getType().equals("Standard"))
+				continue;
+			
+			if (types.length() > 0)
+				types.append(", ");
+			
+			types.append(type.getType());
+		}
+		
+		String[] typeLines = plugin.getFormatHandler().splitAndFormat("Custom Types: %", "%", types.toString());
+		
+		StringBuilder channels = new StringBuilder();
+		
+		for (Channel customChannel : cm.getChannels()) {
+			if (!(customChannel instanceof CustomChannel))
+				continue;
+			
+			if (channels.length() > 0)
+				channels.append(", ");
+			
+			channels.append(customChannel.getName());
+		}
+		
+		String[] channelLines = plugin.getFormatHandler().splitAndFormat("Custom Channels: %", "%", channels.toString());
+		
+		sender.sendMessage(addonLines);
+		sender.sendMessage(typeLines);
+		sender.sendMessage(channelLines);
+	}
+	
+	/**
+	 * ColourCodes Command - Lists out available colour codes and respective colours
+	 */
+	@Command(server = true)
+	@Aliases({ "colorcodes", "colours", "colors", "codes" })
+	@Description("Lists out available colour codes and respective colours")
+	@Usage("colourcodes <format>")
+	public void colourcodes(CommandSender sender, Channel channel, String[] args) {
+		try {
+			if (args[0].equals("format")) {
+				sender.sendMessage(ChatColor.AQUA + "=== Special Codes ===");
+				sender.sendMessage(plugin.getFormatHandler().colourise("&kMagic") + ChatColor.WHITE + "(&k)");
+				sender.sendMessage(plugin.getFormatHandler().colourise("&lBold") + ChatColor.WHITE + "(&l)");
+				sender.sendMessage(plugin.getFormatHandler().colourise("&mStrike") + ChatColor.WHITE + "(&m)");
+				sender.sendMessage(plugin.getFormatHandler().colourise("&nUnderline") + ChatColor.WHITE + "(&n)");
+				sender.sendMessage(plugin.getFormatHandler().colourise("&oItalic") + ChatColor.WHITE + "(&o)");
+				sender.sendMessage(plugin.getFormatHandler().colourise("&rReset") + ChatColor.WHITE + "(&r)");
+				return;
+			}
+			
+		} catch (IndexOutOfBoundsException e) {}
+		
+		sender.sendMessage(ChatColor.AQUA + "=== Colour Codes ===");
+		sender.sendMessage(plugin.getFormatHandler().colourise("&0") + "&0");
+		sender.sendMessage(plugin.getFormatHandler().colourise("&1") + "&1");
+		sender.sendMessage(plugin.getFormatHandler().colourise("&2") + "&2");
+		sender.sendMessage(plugin.getFormatHandler().colourise("&3") + "&3");
+		sender.sendMessage(plugin.getFormatHandler().colourise("&4") + "&4");
+		sender.sendMessage(plugin.getFormatHandler().colourise("&5") + "&5");
+		sender.sendMessage(plugin.getFormatHandler().colourise("&6") + "&6");
+		sender.sendMessage(plugin.getFormatHandler().colourise("&7") + "&7");
+		sender.sendMessage(plugin.getFormatHandler().colourise("&8") + "&8");
+		sender.sendMessage(plugin.getFormatHandler().colourise("&9") + "&9");
+		sender.sendMessage(plugin.getFormatHandler().colourise("&a") + "&a");
+		sender.sendMessage(plugin.getFormatHandler().colourise("&b") + "&b");
+		sender.sendMessage(plugin.getFormatHandler().colourise("&c") + "&c");
+		sender.sendMessage(plugin.getFormatHandler().colourise("&d") + "&d");
+		sender.sendMessage(plugin.getFormatHandler().colourise("&e") + "&e");
+		sender.sendMessage(plugin.getFormatHandler().colourise("&f") + "&f");
 	}
 	
 	/**
 	 * Help Command - Shows the command list
 	 */
-	@CommandID(name = "Help", triggers = { "help", "?", "commands", "cmds" }, requireChannel = false)
-	@CommandInfo(description = "Shows the command list", usage = "help <page/command>")
-	public void help(Player player, String[] args) {
-		CommandManager cm = plugin.getCommandManager();
+	@Command(server = true)
+	@Aliases({ "?", "commands", "cmds" })
+	@Description("Shows the command list")
+	@Usage("help <page/command>")
+	public void help(CommandSender sender, Channel channel, String[] args) {
+		CommandManager cm = plugin.getManager().getCommandManager();
 		
 		try {
 			int page = Integer.parseInt(args[0]) - 1;
@@ -105,111 +163,96 @@ public class InformationCommand extends Command {
 				end = cm.getCommandAmount();
 			
 			if (page + 1 > 0 || page + 1 <= numPages) {
-				player.sendMessage(ChatColor.AQUA + "=== TitanChat Command List (" + (page + 1) + "/" + numPages + ") ===");
+				sender.sendMessage(ChatColor.AQUA + "=== TitanChat Command List (" + (page + 1) + "/" + numPages + ") ===");
 				
 				for (int cmdNum = start; cmdNum < end; cmdNum++) {
-					Executor executor = plugin.getCommandManager().getCommandExecutor(cmdNum);
-					
-					String name = executor.getMethod().getAnnotation(CommandID.class).name();
-					String description = "";
-					
-					if (executor.getMethod().getAnnotation(CommandInfo.class) != null)
-						description += " - " + executor.getMethod().getAnnotation(CommandInfo.class).description();
-					
-					player.sendMessage(ChatColor.AQUA + name + description);
+					Executor executor = plugin.getManager().getCommandManager().getCommandExecutor(cmdNum);
+					sender.sendMessage(ChatColor.AQUA + executor.getName() + " - " + executor.getDescription());
 				}
 				
-				plugin.sendInfo(player, "Arguments: [NECESSARY] <OPTIONAL>");
-				plugin.sendInfo(player, "\"/titanchat commands [command]\" for more info");
+				plugin.send(MessageLevel.INFO, sender, "Arguments: [NECESSARY] <OPTIONAL>");
+				plugin.send(MessageLevel.INFO, sender, "\"/titanchat commands [command]\" for more info");
 				
 			} else {
-				player.sendMessage(ChatColor.AQUA + "=== TitanChat Command List ===");
-				player.sendMessage(ChatColor.AQUA + "Command: /titanchat [command] [arguments]");
-				player.sendMessage(ChatColor.AQUA + "Alias: /tc command [arguments]");
-				plugin.sendInfo(player, "\"/titanchat commands [page]\" for command list");
+				sender.sendMessage(ChatColor.AQUA + "=== TitanChat Command List ===");
+				sender.sendMessage(ChatColor.AQUA + "Command: /titanchat [command] [arguments]");
+				sender.sendMessage(ChatColor.AQUA + "Alias: /tc command [arguments]");
+				plugin.send(MessageLevel.INFO, sender, "\"/titanchat commands [page]\" for command list");
 			}
 			
 		} catch (IndexOutOfBoundsException e) {
-			plugin.getServer().dispatchCommand(player, "titanchat commands 1");
+			plugin.getServer().dispatchCommand(sender, "titanchat commands 1");
 		} catch (NumberFormatException e) {
 			Executor executor = cm.getCommandExecutor(args[0]);
 			
 			if (executor == null) {
-				plugin.sendWarning(player, "No info on command");
+				plugin.send(MessageLevel.WARNING, sender, "No info on command");
 				return;
 			}
 			
-			player.sendMessage(ChatColor.AQUA + "=== " + executor.getMethod().getAnnotation(CommandID.class).name() + " Command ===");
-			
-			if (executor.getMethod().getAnnotation(CommandInfo.class) != null)
-				player.sendMessage(ChatColor.AQUA + "Description: " + executor.getMethod().getAnnotation(CommandInfo.class).description());
+			sender.sendMessage(ChatColor.AQUA + "=== " + executor.getName().toUpperCase().toCharArray()[0] + executor.getName().toLowerCase().substring(1) + " Command ===");
+			sender.sendMessage(ChatColor.AQUA + "Description: " + executor.getDescription());
 			
 			StringBuilder str = new StringBuilder();
 			
-			for (String alias : executor.getMethod().getAnnotation(CommandID.class).triggers()) {
+			for (String alias : executor.getAliases()) {
 				if (str.length() > 0)
 					str.append(", ");
 				
 				str.append(alias);
 			}
 			
-			player.sendMessage(ChatColor.AQUA + "Aliases: " + str.toString());
-			
-			if (executor.getMethod().getAnnotation(CommandInfo.class) != null)
-				player.sendMessage(ChatColor.AQUA + "Usage: /titanchat " + executor.getMethod().getAnnotation(CommandInfo.class).usage());
+			sender.sendMessage(ChatColor.AQUA + "Aliases: " + str.toString());
+			sender.sendMessage(ChatColor.AQUA + "Usage: /titanchat " + executor.getUsage());
 		}
 	}
 	
 	/**
 	 * Info Command - Gets the participants and followers of the channel
 	 */
-	@CommandID(name = "Info", triggers = "info")
-	@CommandInfo(description = "Gets the participants and followers of the channel", usage = "info <channel>")
-	public void info(Player player, String[] args) {
-		try {
-			if (cm.exists(args[0])) {
-				Channel channel = cm.getChannel(args[0]);
-				
-				if (channel.canAccess(player)) {
-					player.sendMessage(ChatColor.AQUA + "=== " + channel.getName() + " ===");
-
-					List<String> offline = new ArrayList<String>();
-					List<String> online = new ArrayList<String>();
-					
-					for (String participant : channel.getParticipants()) {
-						if (plugin.getPlayer(participant) != null)
-							online.add(participant);
-						else
-							offline.add(participant);
-					}
-					
-					player.sendMessage(ChatColor.AQUA + "Online participants: " + plugin.createList(online));
-					player.sendMessage(ChatColor.AQUA + "Offline participants: " + plugin.createList(offline));
-					player.sendMessage(ChatColor.AQUA + "Followers: " + plugin.createList(cm.getFollowers(channel)));
-				}
-				
-			} else { plugin.sendWarning(player, "No such channel"); }
-			
-		} catch (IndexOutOfBoundsException e) {
-			Channel channel = cm.getChannel(player);
-			
-			if (channel == null) {
-				plugin.sendWarning(player, "Specify a channel or join a channel to use this command");
-				return;
-			}
-			
-			player.sendMessage(ChatColor.AQUA + "=== " + channel.getName() + " ===");
-			player.sendMessage(ChatColor.AQUA + "Participants: " + plugin.createList(channel.getParticipants()));
-			player.sendMessage(ChatColor.AQUA + "Followers: " + plugin.createList(channel.getFollowerList()));
+	@Command(channel = true, server = true)
+	@Aliases("i")
+	@Description("Gets the participants and followers of the channel")
+	@Usage("info")
+	public void info(CommandSender sender, Channel channel, String[] args) {
+		if (channel.handleCommand(sender, "info", args))
+			return;
+		
+		if (sender instanceof Player && !channel.access((Player) sender)) {
+			channel.deny((Player) sender, "You do not have access");
+			return;
 		}
+		
+		sender.sendMessage(ChatColor.AQUA + "=== " + channel.getName() + " ===");
+		
+		List<String> participants = new ArrayList<String>();
+		
+		for (Participant participant : channel.getParticipants()) {
+			if (participant.getPlayer() != null)
+				participants.add(ChatColor.GREEN + participant.getName());
+			else
+				participants.add(ChatColor.RED + participant.getName());
+		}
+		
+		String[] participantLines = plugin.getFormatHandler().splitAndFormat(ChatColor.AQUA + "Participants: %", "%", plugin.createList(participants));
+		
+		sender.sendMessage(participantLines);
 	}
 	
 	/**
 	 * List Command - Lists all channels you have access to
 	 */
-	@CommandID(name = "List", triggers = "list")
-	@CommandInfo(description = "Lists all channels you have access to", usage = "list")
-	public void list(Player player, String[] args) {
-		player.sendMessage(ChatColor.AQUA + "Channels: " + plugin.createList(cm.getAccessList(player)));
+	@Command
+	@Description("Lists all channels you have access to")
+	@Usage("list")
+	public void list(Player player, Channel channel, String[] args) {
+		List<String> accessList = new ArrayList<String>();
+		
+		for (Channel ch : cm.getChannels()) {
+			if (ch.access(player))
+				accessList.add(ch.getName());
+		}
+		
+		player.sendMessage(ChatColor.AQUA + "Channels: " + plugin.createList(accessList));
 	}
 }

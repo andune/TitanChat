@@ -33,11 +33,7 @@ TitanChat, a chat management and formatting plugin for Bukkit.
 
 === Dependecies
 
-* CraftBukkit 1.2.5-R4.0
-
-==== Optional
-
-* Vault
+* CraftBukkit 1.3.1-R1.0
 
 -----------------------------------------------------------------------------------------------------------------------
 
@@ -51,46 +47,11 @@ TitanChat, a chat management and formatting plugin for Bukkit.
 
 === Changelog
 
-* 10.03.12 - Rewrite begins
-* 11.03.12 - Minor changes in all classes
-* 12.03.12 - Swapped out enums and used annotations
-* 13.03.12 - Proofread code, 99% corrected, 1% unknown
-* 14.03.12 - Welcome, SLiPCoR!: Added debugging
-* 15.03.12 - Documented
-* 16.03.12 - Added permissions for prefixes and suffixes
-* 17.03.12 - Created a Wildcard avoider that checks if a permission node is listed exactly instead of a '*'
-* 18.03.12 - TitanChat v3 officially released
-* 19.03.12 - All channel methods moved into ChannelManager, new whisper command, new channel messaging using '@'
-* 20.03.12 - Fixed PermissionsHook and WildcardNodes
-* 23.03.12 - Added colour codes for bold, underlined, striked and italic
-* 24.03.12 - New Loaders
-* 25.03.12 - New TitanChat.follow.[channel] permission node
-* 27.03.12 - Added TitanPluginStats
-* 28.03.12 - Now able to remove TitanChat.follow.[channel] with /tc unfollow [channel]
-* 11.04.12 - Slowly adding events and channel quick-message prefix is now configurable
-* 15.04.12 - Commands are now shown 10 per page
-* 16.04.12 - Loader now out-built as lib
-* 17.04.12 - Permissions Prefix and Suffix hooks now out-built
-* 19.04.12 - Now uses Metrics, added a new MessageReceiveEvent and regrouped several JAVA Files
-* 20.04.12 - Stop asking PermissionsBukkit for permissions when a Player joins the server cause it breaks itself
-* 21.04.12 - Updated Metrics and did a rewrite on the Listener
-* 22.04.12 - TitanChat v3.3 release
-* 23.04.12 - Added new feature for prefixes and suffixes
-* 24.04.12 - Removed new feature and redid the old way with no dependency on the Bukkit Pull Request
-* 26.04.12 - Fixed Custom Channels and update to FormatHandler
-* 27.04.12 - Updated pom.xml
-* 01.05.12 - Minor changes
-* 13.05.12 - Mail system in progress
-* 14.05.12 - Completed Mail system, changed channel type system and reduced use of listeners
-* 16.05.12 - Fix all the breaks made while coding v3.5
-* 18.05.12 - MailSystem now out-built
-* 19.05.12 - Fix enums
-* 23.05.12 - Added sign colour support
-* 26.05.12 - Updated for R3.0
-* 28.05.12 - Added display name support
-* 29.05.12 - Improving display name support and stopped chat from being cut apart by Minecraft
-* 31.05.12 - Added 3 display name related commands
-* 15.06.12 - Slight changes and update to R4.0
+* 07.07.12 - Started rewrite for v4.0, accepting ideas for improvement
+* 31.07.12 - Rewrote channel management and added basics for future improvements in flexibility
+* 02.08.12 - Changed how commands work, improved the line-regrouper and added in standard commands
+* 03.08.12 - Added CommandHandlers and SettingHandlers in ServerChannel to override standard commands and settings when channels are disabled
+* 08.08.12 - Chat processing is multithreaded and updated for 1.3.1-R1.0
 
 -----------------------------------------------------------------------------------------------------------------------
 
@@ -108,9 +69,9 @@ TitanChat, a chat management and formatting plugin for Bukkit.
 
 ==== Thank you
 
-* Thanks to SLiPCoR for adding the debugger and testing TitanChat with and for me
+* Thanks to SLiPCoR for adding the debugger and testing TitanChat with me
 * Thanks to gwinans for making such a good suggestion
-* Thanks to chrisward for providing me with a Jenkins even though it went wild lately
-* Thanks to all users who are willing to bear with the constant updates
+* Thanks to chrisward for providing me with a Jenkins
+* Thanks to all users who are willing to bear with the occassional bugs
 
 -----------------------------------------------------------------------------------------------------------------------

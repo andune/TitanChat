@@ -1,0 +1,24 @@
+tag: '[W]'
+chat-display-colour: '&9'
+type: 'Standard'
+option: 'none'
+aliases: [w]
+topic: 'Welcome to the world channel || Chat is sent to players in the same world'
+setting:
+    colouring: false
+    range: 'world'
+    radius: 15
+    whitelist: false
+    messages:
+        join: true
+        leave: true
+password: ''
+format: ''
+command:
+    join: 'w'
+    send: 'ws'
+admins: []
+blacklist: []
+followers: []
+whitelist: []
+participants: []

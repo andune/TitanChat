@@ -1,18 +1,20 @@
 package com.titankingdoms.nodinchan.titanchat.util;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
-import com.titankingdoms.nodinchan.titanchat.channel.CustomChannel;
-import com.titankingdoms.nodinchan.titanchat.channel.StandardChannel;
-import com.titankingdoms.nodinchan.titanchat.channel.Variables;
-import com.titankingdoms.nodinchan.titanchat.channel.Channel.Type;
-import com.titankingdoms.nodinchan.titanchat.event.MessageFormatEvent;
-import com.titankingdoms.nodinchan.titanchat.util.variable.Variable.IVariable;
+import com.titankingdoms.nodinchan.titanchat.channel.Channel;
+import com.titankingdoms.nodinchan.titanchat.channel.util.Info;
+import com.titankingdoms.nodinchan.titanchat.event.chat.MessageFormatEvent;
+import com.titankingdoms.nodinchan.titanchat.util.variable.VariableHandler.Variable;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -40,6 +42,10 @@ public final class FormatHandler {
 	
 	private static TitanChat plugin;
 	
+	protected static final Debugger db = new Debugger(5);
+	
+	private final Pattern pattern = Pattern.compile("(?i)(&)([0-9a-fk-or])");
+	
 	public FormatHandler() {
 		FormatHandler.plugin = TitanChat.getInstance();
 	}
@@ -51,11 +57,33 @@ public final class FormatHandler {
 	 * 
 	 * @return The formatted message
 	 */
-	public String broadcastFormat(Player player) {
-		MessageFormatEvent event = new MessageFormatEvent(player, Format.BROADCAST.format(player));
-		plugin.getServer().getPluginManager().callEvent(event);
+	public String broadcastFormat(CommandSender sender) {
+		return Format.BROADCAST.format(sender, "");
+	}
+	
+	/**
+	 * Colourises the message according to the permissions of the sender
+	 * 
+	 * @param sender The message sender
+	 * 
+	 * @param msg The message
+	 * 
+	 * @return The processed text
+	 */
+	public String colour(Player sender, String msg) {
+		StringBuffer str = new StringBuffer();
+		Matcher match = pattern.matcher(msg);
 		
-		return event.getFormat();
+		while (match.find()) {
+			ChatColor colour = ChatColor.getByChar(match.group(2).toLowerCase());
+			
+			if (plugin.getPermissionsHandler().has(sender, "TitanChat.colourstyle.&" + colour.getChar()))
+				match.appendReplacement(str, colour.toString());
+			else
+				match.appendReplacement(str, "");
+		}
+		
+		return match.appendTail(str).toString();
 	}
 	
 	/**
@@ -66,24 +94,7 @@ public final class FormatHandler {
 	 * @return The colourised text
 	 */
 	public String colourise(String text) {
-		return text.replaceAll("(&([a-f0-9A-Fk-oK-OrR]))", "\u00A7$2");
-	}
-	
-	/**
-	 * Check if Channel convert colours
-	 * 
-	 * @param name The Channel name
-	 * 
-	 * @return True if converts
-	 */
-	public boolean colours(String name) {
-		if (plugin.getChannelManager().getChannel(name).getSpecialType().equals(Type.STAFF))
-			return true;
-		
-		if (plugin.getChannelManager().getChannel(name) instanceof CustomChannel)
-			return true;
-		
-		return ((StandardChannel) plugin.getChannelManager().getChannel(name)).getVariables().convert();
+		return text.replaceAll(pattern.toString(), "\u00A7$2");
 	}
 	
 	/**
@@ -94,7 +105,7 @@ public final class FormatHandler {
 	 * @return The decolourised text
 	 */
 	public String decolourise(String message) {
-		return message.replaceAll("(&([a-f0-9A-Fk-oK-OrR]))", "");
+		return message.replaceAll(pattern.toString(), "");
 	}
 	
 	/**
@@ -104,11 +115,8 @@ public final class FormatHandler {
 	 * 
 	 * @return The formatted message
 	 */
-	public String emoteFormat(Player player) {
-		MessageFormatEvent event = new MessageFormatEvent(player, Format.EMOTE.format(player));
-		plugin.getServer().getPluginManager().callEvent(event);
-		
-		return event.getFormat();
+	public String emoteFormat(CommandSender sender, String channel) {
+		return Format.EMOTE.format(sender, channel);
 	}
 	
 	/**
@@ -122,26 +130,18 @@ public final class FormatHandler {
 	 * 
 	 * @return The formatted message
 	 */
-	public String format(Player player, String channel, boolean defaultMc) {
-		if (defaultMc) {
-			MessageFormatEvent event = new MessageFormatEvent(player, Format.DEFAULT.format(player));
-			plugin.getServer().getPluginManager().callEvent(event);
-			
-			return event.getFormat();
-			
-		} else {
-			MessageFormatEvent event = new MessageFormatEvent(player, Format.CHANNEL.format(player, channel));
-			plugin.getServer().getPluginManager().callEvent(event);
-			
-			return event.getFormat();
-		}
+	public String format(Player player, String channel) {
+		MessageFormatEvent event = new MessageFormatEvent(player, Format.CHANNEL.format(player, channel));
+		plugin.getServer().getPluginManager().callEvent(event);
+		
+		return event.getFormat();
 	}
 	
 	/**
 	 * Loads the basic Chat variables
 	 */
 	public void load() {
-		plugin.getVariableManager().register(new IVariable() {
+		plugin.getVariableManager().register(new Variable() {
 			
 			@Override
 			public Class<? extends Event> getEvent() {
@@ -150,7 +150,7 @@ public final class FormatHandler {
 			
 			@Override
 			public String getReplacement(Player sender, Player... recipants) {
-				return colourise(plugin.getPermsBridge().getPlayerPrefix(sender));
+				return colourise(plugin.getPermissionsHandler().getPlayerPrefix(sender));
 			}
 			
 			@Override
@@ -158,7 +158,12 @@ public final class FormatHandler {
 				return "%prefix";
 			}
 			
-		}, new IVariable() {
+			@Override
+			public VarType getVarType() {
+				return VarType.FORMAT;
+			}
+			
+		}, new Variable() {
 			
 			@Override
 			public Class<? extends Event> getEvent() {
@@ -167,7 +172,7 @@ public final class FormatHandler {
 			
 			@Override
 			public String getReplacement(Player sender, Player... recipants) {
-				return colourise(plugin.getPermsBridge().getPlayerSuffix(sender));
+				return colourise(plugin.getPermissionsHandler().getPlayerSuffix(sender));
 			}
 			
 			@Override
@@ -175,7 +180,12 @@ public final class FormatHandler {
 				return "%suffix";
 			}
 			
-		}, new IVariable() {
+			@Override
+			public VarType getVarType() {
+				return VarType.FORMAT;
+			}
+			
+		}, new Variable() {
 			
 			@Override
 			public Class<? extends Event> getEvent() {
@@ -184,7 +194,7 @@ public final class FormatHandler {
 			
 			@Override
 			public String getReplacement(Player sender, Player... recipants) {
-				return colourise(plugin.getPermsBridge().getGroupPrefix(sender));
+				return colourise(plugin.getPermissionsHandler().getGroupPrefix(sender));
 			}
 			
 			@Override
@@ -192,7 +202,12 @@ public final class FormatHandler {
 				return "%gprefix";
 			}
 			
-		}, new IVariable() {
+			@Override
+			public VarType getVarType() {
+				return VarType.FORMAT;
+			}
+			
+		}, new Variable() {
 			
 			@Override
 			public Class<? extends Event> getEvent() {
@@ -201,69 +216,67 @@ public final class FormatHandler {
 			
 			@Override
 			public String getReplacement(Player sender, Player... recipants) {
-				return colourise(plugin.getPermsBridge().getGroupSuffix(sender));
+				return colourise(plugin.getPermissionsHandler().getGroupSuffix(sender));
 			}
 			
 			@Override
 			public String getVariable() {
 				return "%gsuffix";
 			}
+			
+			@Override
+			public VarType getVarType() {
+				return VarType.FORMAT;
+			}
 		});
 	}
 	
+	public String serverToChannelFormat(Channel channel) {
+		return Format.SERVER.format(plugin.getServer().getConsoleSender(), channel.getName());
+	}
+	
 	/**
-	 * Splits a line into lines so that Minecraft does not cut them into a few lines
+	 * Splits the line into lines of max 119 characters each
 	 * 
-	 * @param line The line to split
+	 * @param line The line to process
 	 * 
-	 * @return The splitted line
+	 * @return The processed String array
 	 */
-	public String[] regroup(String format, String line) {
-		List<String> lines = new ArrayList<String>();
+	public String[] split(String line) {
+		List<String> lines = new LinkedList<String>();
 		
 		while (line.length() > 119) {
-			if (lines.size() < 1) {
-				if (format.contains("%message") || format.contains("%action")) {
-					int index = format.indexOf("%message");
-					
-					if (index < 0)
-						index = format.indexOf("%action");
-					
-					if (line.charAt(119 - index) != ' ') {
-						int end = line.lastIndexOf(" ", 119 - index);
-						
-						if (end != -1) {
-							lines.add(line.substring(0, end).trim());
-							line = line.substring(end).trim();
-						}
-						
-					} else {
-						lines.add(line.substring(0, 119 - index).trim());
-						line = line.substring(119 - index).trim();
-					}
-					
-					continue;
-				}
-			}
+			int end = 119;
 			
-			if (line.charAt(119) != ' ') {
-				int end = line.lastIndexOf(" ", 119);
-				
-				if (end != -1) {
-					lines.add(line.substring(0, end).trim());
-					line = line.substring(end).trim();
-				}
-				
-			} else {
-				lines.add(line.substring(0, 119).trim());
-				line = line.substring(119).trim();
-			}
+			if (line.charAt(end) != ' ')
+				end = line.lastIndexOf(' ', 119);
+			
+			if (end == -1)
+				end = 119;
+			
+			lines.add(line.substring(0, end));
+			line = (ChatColor.getLastColors(lines.get(lines.size() - 1)) + line.substring(end)).trim();
 		}
 		
 		if (line.length() > 0)
-			lines.add(line.trim());
+			lines.add(line);
 		
-		return lines.toArray(new String[lines.size()]);
+		return lines.toArray(new String[0]);
+	}
+	
+	/**
+	 * Splits the line into lines of max 119 characters each after formatting
+	 * 
+	 * @param format The format to use
+	 * 
+	 * @param variable The variable to replace with the line
+	 * 
+	 * @param line The line to process
+	 * 
+	 * @return The processed String array
+	 */
+	public String[] splitAndFormat(String format, String variable, String line) {
+		return split(format.replace(variable, line));
 	}
 	
 	/**
@@ -273,11 +286,8 @@ public final class FormatHandler {
 	 * 
 	 * @return The formatted message
 	 */
-	public String whisperFormat(Player player) {
-		MessageFormatEvent event = new MessageFormatEvent(player, Format.WHISPER.format(player));
-		plugin.getServer().getPluginManager().callEvent(event);
-		
-		return event.getFormat();
+	public String whisperFormat(CommandSender sender) {
+		return Format.WHISPER.format(sender, "");
 	}
 	
 	/**
@@ -290,56 +300,33 @@ public final class FormatHandler {
 		BROADCAST {
 			
 			@Override
-			public String format(Object... params) {
-				String format = plugin.getConfig().getString("broadcast.player.format");
-				format = format.replace("%player", ((Player) params[0]).getDisplayName());
+			protected String format(CommandSender sender, String channel) {
+				String format = plugin.getConfig().getString("chat.server.broadcast");
+				
+				if (sender instanceof Player) {
+					format = plugin.getConfig().getString("chat.player.broadcast");
+					format = format.replace("%player", ((Player) sender).getDisplayName());
+					format = format.replace("%name", sender.getName());
+				}
+				
 				return plugin.getFormatHandler().colourise(format);
 			}
 		},
 		CHANNEL {
 			
 			@Override
-			public String format(Object... params) {
-				String format = "";
+			protected String format(CommandSender sender, String channel) {
+				String format = "%tag %prefix%player%suffix&f: %message";
 				
-				if (plugin.getChannelManager().getChannel((String) params[1]) instanceof CustomChannel) {
-					CustomChannel channel = (CustomChannel) plugin.getChannelManager().getChannel((String) params[1]);
-					return channel.format((Player) params[0], channel.getFormat());
-				}
+				Info info = plugin.getManager().getChannelManager().getChannel(channel).getInfo();
 				
-				Variables variables = ((StandardChannel) plugin.getChannelManager().getChannel((String) params[1])).getVariables();
+				if (plugin.getConfig().getBoolean("formatting.use-custom-format"))
+					format = info.getFormat();
 				
-				if (plugin.useDefaultFormat()) {
-					format = "%tag %prefix%player%suffix&f: %message";
-					format = format.replace("%player", variables.getNameColour() + ((Player) params[0]).getDisplayName() + "&f");
-					format = format.replace("%tag", variables.getTag());
-					format = format.replace("%message", variables.getChatColour() + "%message");
-					
-				} else {
-					format = variables.getFormat();
-					format = format.replace("%player", variables.getNameColour() + ((Player) params[0]).getDisplayName() + "&f");
-					format = format.replace("%tag", variables.getTag());
-					format = format.replace("%message", variables.getChatColour() + "%message");
-				}
-				
-				return plugin.getFormatHandler().colourise(format);
-			}
-		},
-		DEFAULT {
-			
-			@Override
-			public String format(Object... params) {
-				String format = "";
-				
-				if (plugin.useDefaultFormat()) {
-					format = "<%prefix%player%suffix&f> %message";
-					
-				} else {
-					format = plugin.getConfig().getString("formatting.format");
-					
-					format = format.replace("%player", ((Player) params[0]).getDisplayName());
-					format = format.replace("%message", plugin.getConfig().getString("channels.chat-display-colour") + "%message");
-				}
+				format = format.replace("%player", ((Player) sender).getDisplayName());
+				format = format.replace("%name", sender.getName());
+				format = format.replace("%tag", info.getTag());
+				format = format.replace("%message", info.getChatColour() + "%message");
 				
 				return plugin.getFormatHandler().colourise(format);
 			}
@@ -347,18 +334,47 @@ public final class FormatHandler {
 		EMOTE {
 			
 			@Override
-			public String format(Object... params) {
-				String format = plugin.getConfig().getString("emote.player.format");
-				format = format.replace("%player", ((Player) params[0]).getDisplayName());
+			protected String format(CommandSender sender, String channel) {
+				String format = plugin.getConfig().getString("chat.server.emote");
+				
+				if (channel != null && !channel.isEmpty())
+					format = plugin.getConfig().getString("chat.channel-emote.format");
+				else if (sender instanceof Player)
+					format = plugin.getConfig().getString("chat.player.emote");
+				
+				if (sender instanceof Player) {
+					format = format.replace("%player", ((Player) sender).getDisplayName());
+					format = format.replace("%name", sender.getName());
+				}
+				
+				return plugin.getFormatHandler().colourise(format);
+			}
+		},
+		SERVER {
+			
+			@Override
+			protected String format(CommandSender sender, String channel) {
+				String format = plugin.getConfig().getString("chat.serverToChannel");
+				
+				Info info = plugin.getManager().getChannelManager().getChannel(channel).getInfo();
+				format = format.replace("%tag", info.getTag());
+				format = format.replace("%message", info.getChatColour() + "%message");
+				
 				return plugin.getFormatHandler().colourise(format);
 			}
 		},
 		WHISPER {
 			
 			@Override
-			public String format(Object... params) {
-				String format = plugin.getConfig().getString("whisper.player.format");
-				format = format.replace("%player", ((Player) params[0]).getDisplayName());
+			protected String format(CommandSender sender, String channel) {
+				String format = plugin.getConfig().getString("chat.server.whisper");
+				
+				if (sender instanceof Player) {
+					format = plugin.getConfig().getString("chat.player.whisper");
+					format = format.replace("%player", ((Player) sender).getDisplayName());
+					format = format.replace("%name", ((Player) sender).getName());
+				}
+				
 				return plugin.getFormatHandler().colourise(format);
 			}
 		};
@@ -370,6 +386,6 @@ public final class FormatHandler {
 		 * 
 		 * @return The format
 		 */
-		public abstract String format(Object... params);
+		protected abstract String format(CommandSender sender, String channel);
 	}
 }
