@@ -432,13 +432,16 @@ public abstract class Channel extends Loadable {
 		MessageReceiveEvent receiveEvent = new MessageReceiveEvent(sender, sendEvent.getRecipants(), new Message(sendEvent.getFormat(), sendEvent.getMessage()));
 		plugin.getServer().getPluginManager().callEvent(receiveEvent);
 		
-		Map<String, Message> chat = new HashMap<String, Message>();
+		Map<String, String[]> chat = new HashMap<String, String[]>();
 		
-		for (Player recipant : receiveEvent.getRecipants())
-			chat.put(recipant.getName(), new Message(receiveEvent.getFormat(recipant), receiveEvent.getMessage(recipant)));
+		for (Player recipant : receiveEvent.getRecipants()) {
+			String chatFormat = receiveEvent.getFormat(recipant);
+			String chatMessage = receiveEvent.getMessage(recipant);
+			chat.put(recipant.getName(), plugin.getFormatHandler().splitAndFormat(chatFormat, "%message", chatMessage));
+		}
 		
 		ChatPacket packet = new ChatPacket(chat);
-		plugin.getChatProcessor().addPacket(packet);
+		plugin.getChatProcessor().sendPacket(packet);
 		
 		MessageConsoleEvent consoleEvent = new MessageConsoleEvent(sender, new Message(sendEvent.getFormat(), sendEvent.getMessage()));
 		plugin.getServer().getPluginManager().callEvent(consoleEvent);

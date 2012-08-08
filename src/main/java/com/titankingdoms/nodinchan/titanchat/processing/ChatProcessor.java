@@ -40,13 +40,19 @@ public final class ChatProcessor extends Thread implements Listener {
 	@Override
 	public void run() {
 		while (true) {
-			while (!chatQueue.isEmpty())
-				chatQueue.poll().chat();
+			while (!chatQueue.isEmpty()) {
+				synchronized (chatQueue) {
+					chatQueue.poll().chat();
+				}
+			}
 		}
 	}
 	
-	public void addPacket(ChatPacket packet) {
-		if (packet != null)
-			chatQueue.offer(packet);
+	public void sendPacket(ChatPacket packet) {
+		if (packet != null) {
+			synchronized (chatQueue) {
+				chatQueue.offer(packet);
+			}
+		}
 	}
 }

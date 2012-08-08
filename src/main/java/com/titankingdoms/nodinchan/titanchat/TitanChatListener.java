@@ -151,7 +151,7 @@ public class TitanChatListener implements Listener {
 		if (updateCheck() <= currentVer || !plugin.getPermissionsHandler().has(player, "TitanChat.update"))
 			return;
 		
-		player.sendMessage(plugin.getFormatHandler().colourise("&6" + newVer + " &5is out! You are running &6" + currentVer));
-		player.sendMessage(plugin.getFormatHandler().colourise("&5Update at &9http://dev.bukkit.org/server-mods/titanchat"));
+		player.sendMessage("\u00A76" + newVer + " &5is out! You are running u00A76" + currentVer);
+		player.sendMessage("\u00A75Update at \u00A79http://dev.bukkit.org/server-mods/titanchat");
 	}
 }

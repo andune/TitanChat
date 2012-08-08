@@ -11,9 +11,9 @@ import com.titankingdoms.nodinchan.titanchat.command.info.*;
 
 public final class Executor {
 	
-	private final Method method;
-	
 	private final CommandBase command;
+	
+	private final Method method;
 	
 	private final String name;
 	private String[] aliases = new String[0];

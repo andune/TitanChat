@@ -89,7 +89,6 @@ public final class ServerChannel extends Channel {
 				new ServerSettingHandlers.UnsupportedSetting("colouring"),
 				new ServerSettingHandlers.UnsupportedSetting("format"),
 				new ServerSettingHandlers.Help(),
-				new ServerSettingHandlers.NameColourSetting(),
 				new ServerSettingHandlers.UnsupportedSetting("radius"),
 				new ServerSettingHandlers.UnsupportedSetting("range"),
 				new ServerSettingHandlers.TagSetting(),
@@ -168,34 +167,8 @@ public final class ServerChannel extends Channel {
 				sender.sendMessage(ChatColor.AQUA + "=== " + channel.getName() + " ===");
 				sender.sendMessage(ChatColor.AQUA + "CHAT-COLOUR [COLOUR] - Sets the chat display colour of the channel");
 				sender.sendMessage(ChatColor.AQUA + "HELP - Shows the help menu");
-				sender.sendMessage(ChatColor.AQUA + "NAME_COLOUR [COLOUR] - Sets the name display colour of the channel");
 				sender.sendMessage(ChatColor.AQUA + "TAG [TAG] - Sets the tag of the channel");
 				sender.sendMessage(ChatColor.AQUA + "TOPIC [TOPIC] - Sets the topic of the channel");
-			}
-		}
-		
-		/**
-		 * NameColourSetting - For setting the name display colour
-		 * 
-		 * @author NodinChan
-		 *
-		 */
-		public static final class NameColourSetting extends SettingHandler {
-			
-			public NameColourSetting() {
-				super(ServerChannel.instance, "name-colour", new HandlerInfo("Sets the name display colour", "name-colour [colour]"));
-			}
-			
-			@Override
-			public void set(CommandSender sender, String[] args) {
-				try {
-					if (!(sender instanceof Player) || plugin.isStaff((Player) sender)) {
-						channel.getInfo().setChatColour(args[0]);
-						plugin.send(MessageLevel.INFO, sender, "You have set the name colour to " + channel.getInfo().getNameColour());
-						
-					} else { plugin.send(MessageLevel.WARNING, sender, "You do not have permission"); }
-					
-				} catch (IndexOutOfBoundsException e) { invalidArgLength(sender); }
 			}
 		}
 		

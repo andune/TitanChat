@@ -1,5 +1,8 @@
 package com.titankingdoms.nodinchan.titanchat.command.commands;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -11,6 +14,7 @@ import com.titankingdoms.nodinchan.titanchat.event.BroadcastEvent;
 import com.titankingdoms.nodinchan.titanchat.event.EmoteEvent;
 import com.titankingdoms.nodinchan.titanchat.event.WhisperEvent;
 import com.titankingdoms.nodinchan.titanchat.event.util.Message;
+import com.titankingdoms.nodinchan.titanchat.processing.ChatPacket;
 
 /*     Copyright (C) 2012  Nodin Chan <nodinchan@live.com>
  * 
@@ -187,8 +191,13 @@ public class ChatCommand extends CommandBase {
 			String[] lines = plugin.getFormatHandler().splitAndFormat(event.getFormat(), "%message", event.getMessage());
 			String[] sendLines = plugin.getFormatHandler().splitAndFormat(sendFormat, "%message", event.getMessage());
 			
+			Map<String, String[]> chat = new HashMap<String, String[]>();
+			chat.put(event.getRecipant().getName(), lines);
+			
+			ChatPacket packet = new ChatPacket(chat);
+			plugin.getChatProcessor().sendPacket(packet);
+			
 			event.getSender().sendMessage(sendLines);
-			event.getRecipant().sendMessage(lines);
 			
 		} else { plugin.send(WARNING, sender, "You do not have permission"); }
 	}

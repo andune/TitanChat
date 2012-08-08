@@ -88,7 +88,7 @@ public final class TitanChat extends JavaPlugin {
 		if (getConfig().getBoolean("logging.colouring"))
 			getServer().getConsoleSender().sendMessage(line);
 		else
-			getServer().getConsoleSender().sendMessage(line.replaceAll("(\u00A7([a-f0-9A-Fk-oK-OrR]))", ""));
+			getServer().getConsoleSender().sendMessage(line.replaceAll("(?i)(\u00A7)([a-f0-9k-or])", ""));
 	}
 	
 	/**
@@ -552,7 +552,8 @@ public final class TitanChat extends JavaPlugin {
 	 */
 	public void send(MessageLevel level, CommandSender sender, String msg) {
 		db.i("@" + sender.getName() + ": " + msg);
-		sender.sendMessage("[" + level.getColour() + "TitanChat" + ChatColor.WHITE + "] " + level.getColour() + msg);
+		String format = "[" + level.getColour() + "TitanChat" + ChatColor.WHITE + "] " + level.getColour() + "%msg";
+		sender.sendMessage(this.format.splitAndFormat(format, "%msg", msg));
 	}
 	
 	public void send(MessageLevel level, Channel channel, String msg) {

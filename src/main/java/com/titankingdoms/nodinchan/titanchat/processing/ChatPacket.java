@@ -7,32 +7,29 @@ import java.util.Map.Entry;
 import org.bukkit.entity.Player;
 
 import com.titankingdoms.nodinchan.titanchat.TitanChat;
-import com.titankingdoms.nodinchan.titanchat.event.util.Message;
 
 public final class ChatPacket {
 	
 	private final TitanChat plugin;
 	
-	private final Map<String, Message> messages;
+	private final Map<String, String[]> messages;
 	
-	public ChatPacket(Map<String, Message> chat) {
+	public ChatPacket(Map<String, String[]> chat) {
 		this.plugin = TitanChat.getInstance();
-		this.messages = new HashMap<String, Message>();
+		this.messages = new HashMap<String, String[]>();
 		
 		if (chat != null)
 			messages.putAll(chat);
 	}
 	
 	public void chat() {
-		for (Entry<String, Message> entry : messages.entrySet()) {
+		for (Entry<String, String[]> entry : messages.entrySet()) {
 			Player recipant = plugin.getPlayer(entry.getKey());
 			
 			if (recipant == null)
 				continue;
 			
-			Message message = entry.getValue();
-			String[] lines = plugin.getFormatHandler().splitAndFormat(message.getFormat(), "%message", message.getMessage());
-			recipant.sendMessage(lines);
+			recipant.sendMessage(entry.getValue());
 		}
 	}
 }
